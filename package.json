@@ -1,0 +1,44 @@
+{
+  "name": "stackk-career",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:web": "turbo -F web dev",
+    "db:push": "turbo -F @stackk-career/db db:push",
+    "db:studio": "turbo -F @stackk-career/db db:studio",
+    "db:generate": "turbo -F @stackk-career/db db:generate",
+    "db:migrate": "turbo -F @stackk-career/db db:migrate",
+    "db:local": "turbo -F @stackk-career/db db:local",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@stackk-career/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.12",
+    "@stackk-career/config": "workspace:*",
+    "@types/node": "catalog:",
+    "husky": "latest",
+    "lint-staged": "latest",
+    "turbo": "^2.8.12",
+    "typescript": "^5",
+    "ultracite": "7.6.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "pnpm dlx ultracite fix"
+    ]
+  },
+  "packageManager": "pnpm@10.33.0"
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@stackk-career/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@stackk-career/db": "workspace:*",
+    "@stackk-career/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@stackk-career/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@stackk-career/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@orpc/client": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "@stackk-career/auth": "workspace:*",
+    "@stackk-career/db": "workspace:*",
+    "@stackk-career/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@stackk-career/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
