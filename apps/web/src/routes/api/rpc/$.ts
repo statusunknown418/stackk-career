@@ -6,11 +6,20 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createContext } from "@stackk-career/api/context";
 import { appRouter } from "@stackk-career/api/routers/index";
 import { createFileRoute } from "@tanstack/react-router";
+import { createError } from "evlog";
+import { getRequestLog, readRequestLog } from "@/lib/request-log";
+
+const toError = (error: unknown): Error =>
+	error instanceof Error ? error : new Error(String(error));
 
 const rpcHandler = new RPCHandler(appRouter, {
 	interceptors: [
 		onError((error) => {
-			console.error(error);
+			readRequestLog()?.error(toError(error), {
+				rpc: {
+					surface: "orpc",
+				},
+			});
 		}),
 	],
 });
@@ -23,29 +32,59 @@ const apiHandler = new OpenAPIHandler(appRouter, {
 	],
 	interceptors: [
 		onError((error) => {
-			console.error(error);
+			readRequestLog()?.error(toError(error), {
+				rpc: {
+					surface: "openapi",
+				},
+			});
 		}),
 	],
 });
 
 async function handle({ request }: { request: Request }) {
+	const log = getRequestLog();
+
+	log.set({
+		rpc: {
+			handler: "orpc",
+			method: request.method,
+		},
+	});
+
 	const rpcResult = await rpcHandler.handle(request, {
 		prefix: "/api/rpc",
-		context: await createContext({ req: request }),
+		context: await createContext({ log, req: request }),
 	});
 	if (rpcResult.response) {
+		log.set({
+			rpc: {
+				handler: "orpc",
+				surface: "rpc",
+			},
+		});
 		return rpcResult.response;
 	}
 
 	const apiResult = await apiHandler.handle(request, {
 		prefix: "/api/rpc/api-reference",
-		context: await createContext({ req: request }),
+		context: await createContext({ log, req: request }),
 	});
 	if (apiResult.response) {
+		log.set({
+			rpc: {
+				handler: "orpc",
+				surface: "openapi-reference",
+			},
+		});
 		return apiResult.response;
 	}
 
-	return new Response("Not found", { status: 404 });
+	throw createError({
+		message: "RPC route not found",
+		status: 404,
+		why: "No oRPC or OpenAPI handler matched request path",
+		fix: "Use /api/rpc/* or /api/rpc/api-reference/* routes",
+	});
 }
 
 export const Route = createFileRoute("/api/rpc/$")({

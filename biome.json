@@ -11,11 +11,20 @@
       "**",
       "!**/.next",
       "!**/dist",
+      "!**/build",
+      "!**/.output",
+      "!**/.cache",
       "!**/.turbo",
       "!**/.nx",
+      "!**/node_modules",
+      "!**/coverage",
       "!**/dev-dist",
       "!**/.zed",
       "!**/.vscode",
+      "!**/.idea",
+      "!**/.vercel",
+      "!**/.netlify",
+      "!**/.tanstack",
       "!**/routeTree.gen.ts",
       "!**/src-tauri",
       "!**/.nuxt",
@@ -26,7 +35,14 @@
       "!**/.svelte-kit",
       "!**/wrangler.jsonc",
       "!**/.source",
-      "!**/convex/_generated"
+      "!**/convex/_generated",
+      "!**/*.min.js",
+      "!**/*.min.css",
+      "!**/pnpm-lock.yaml",
+      "!**/package-lock.json",
+      "!**/yarn.lock",
+      "!**/bun.lockb",
+      "!**/bun.lock"
     ]
   },
   "formatter": {
@@ -45,12 +61,13 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "useExhaustiveDependencies": "info"
+        "useExhaustiveDependencies": "info",
+        "noNestedComponentDefinitions": "off"
       },
       "performance": {
-        "noNamespaceImport": "info",
-        "noReExportAll": "info",
-        "noBarrelFile": "info"
+        "noNamespaceImport": "off",
+        "noReExportAll": "off",
+        "noBarrelFile": "off"
       },
       "nursery": {
         "useSortedClasses": {
@@ -88,17 +105,11 @@
   },
   "overrides": [
     {
-      "includes": [
-        "apps/web/src/components/ui/**",
-        "apps/web/src/hooks/use-media-query.ts"
-      ],
+      "includes": ["apps/web/src/components/**/*.tsx"],
       "linter": {
         "rules": {
-          "correctness": {
-            "noNestedComponentDefinitions": "off"
-          },
           "complexity": {
-            "noExcessiveCognitiveComplexity": "off"
+            "noImportantStyles": "off"
           },
           "a11y": {
             "noSvgWithoutTitle": "off",

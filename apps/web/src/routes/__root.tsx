@@ -7,6 +7,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { createMiddleware } from "@tanstack/react-start";
+import { evlogErrorHandler } from "evlog/nitro/v3";
 import { Toaster } from "sonner";
 import type { orpc } from "@/utils/orpc";
 import Header from "../components/header";
@@ -38,6 +40,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 		],
 	}),
+	server: {
+		middleware: [createMiddleware().server(evlogErrorHandler)],
+	},
 	component: RootDocument,
 });
 
