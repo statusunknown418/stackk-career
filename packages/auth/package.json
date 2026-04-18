@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
-    "typescript": "^5"
+    "typescript": "^6.0.3"
   }
 }

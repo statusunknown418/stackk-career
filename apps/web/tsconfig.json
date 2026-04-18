@@ -6,13 +6,11 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
@@ -23,7 +21,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@stackk-career/ui/*": ["../../packages/ui/src/*"]
+      "@components/ui/*": ["../../packages/ui/src/*"]
     }
   }
 }

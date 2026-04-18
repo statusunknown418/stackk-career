@@ -7,7 +7,7 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **TypeScript** - For type safety and improved developer experience
 - **TanStack Start** - SSR framework with TanStack Router
 - **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
+- **coss UI** - shadcn/ui primitives via the `@coss/style` registry, installed directly in `apps/web`
 - **oRPC** - End-to-end type-safe APIs with OpenAPI integration
 - **Drizzle** - TypeScript-first ORM
 - **SQLite/Turso** - Database engine
@@ -52,29 +52,33 @@ Open [http://localhost:3001](http://localhost:3001) in your browser to see the f
 
 ## UI Customization
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+`apps/web` uses the [coss](https://coss.style) shadcn-compatible registry. Primitives live directly in the app at `apps/web/src/components/ui/*`.
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
+- Change design tokens and global styles in `apps/web/src/index.css`
+- Update primitives in `apps/web/src/components/ui/*`
+- Adjust shadcn aliases or style config in `apps/web/components.json`
 
-### Add more shared components
+### Initialize or re-install the registry
 
-Run this from the project root to add more primitives to the shared UI package:
+Run this from `apps/web` to (re)initialize the coss style and components:
 
 ```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
+pnpm dlx shadcn@latest init @coss/style
 ```
 
-Import shared components like this:
+### Add more components
+
+Run from `apps/web`:
+
+```bash
+pnpm dlx shadcn@latest add accordion dialog popover sheet table
+```
+
+Import components like this:
 
 ```tsx
-import { Button } from "@stackk-career/ui/components/button";
+import { Button } from "@/components/ui/button";
 ```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
 
 ## Git Hooks and Formatting
 
@@ -86,12 +90,14 @@ If you want to add app-specific blocks instead of shared primitives, run the sha
 ```
 stackk-career/
 ├── apps/
-│   └── web/         # Fullstack application (React + TanStack Start)
+│   ├── web/         # Fullstack application (React + TanStack Start, coss UI)
+│   └── fumadocs/    # Documentation site (Next.js + Fumadocs)
 ├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
 │   ├── api/         # API layer / business logic
 │   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
+│   ├── config/      # Shared tsconfig / tooling config
+│   ├── db/          # Database schema & queries
+│   └── env/         # Shared environment variable schemas
 ```
 
 ## Available Scripts

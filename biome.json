@@ -47,6 +47,11 @@
       "correctness": {
         "useExhaustiveDependencies": "info"
       },
+      "performance": {
+        "noNamespaceImport": "info",
+        "noReExportAll": "info",
+        "noBarrelFile": "info"
+      },
       "nursery": {
         "useSortedClasses": {
           "level": "warn",
@@ -66,7 +71,8 @@
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        "noUselessElse": "error",
+        "noExportedImports": "info"
       }
     }
   },
@@ -80,5 +86,46 @@
       "tailwindDirectives": true
     }
   },
+  "overrides": [
+    {
+      "includes": [
+        "apps/web/src/components/ui/**",
+        "apps/web/src/hooks/use-media-query.ts"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNestedComponentDefinitions": "off"
+          },
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
+          },
+          "a11y": {
+            "noSvgWithoutTitle": "off",
+            "useSemanticElements": "off",
+            "noStaticElementInteractions": "off",
+            "noNoninteractiveElementInteractions": "off"
+          },
+          "style": {
+            "useConsistentTypeDefinitions": "off",
+            "noNestedTernary": "off"
+          },
+          "suspicious": {
+            "noEmptyBlockStatements": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/routes/api/**/$.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ],
   "extends": ["ultracite/biome/core", "ultracite/biome/react"]
 }

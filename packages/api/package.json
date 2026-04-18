@@ -19,10 +19,11 @@
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
     "dotenv": "catalog:",
+    "evlog": "^2.13.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
-    "typescript": "^5"
+    "typescript": "^6.0.3"
   }
 }
