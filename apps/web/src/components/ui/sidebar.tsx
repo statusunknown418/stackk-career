@@ -50,15 +50,17 @@ const sidebarMenuButtonVariants = cva(
 	}
 );
 
-export type SidebarContextProps = {
-	state: "expanded" | "collapsed";
-	open: boolean;
-	setOpen: (open: boolean) => void;
-	openMobile: boolean;
-	setOpenMobile: (open: boolean) => void;
+interface NewType {
 	isMobile: boolean;
+	open: boolean;
+	openMobile: boolean;
+	setOpen: (open: boolean) => void;
+	setOpenMobile: (open: boolean) => void;
+	state: "expanded" | "collapsed";
 	toggleSidebar: () => void;
-};
+}
+
+export type SidebarContextProps = NewType;
 
 export const SidebarContext: React.Context<SidebarContextProps | null> =
 	React.createContext<SidebarContextProps | null>(null);

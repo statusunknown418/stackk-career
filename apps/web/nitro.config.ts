@@ -5,6 +5,7 @@ export default defineConfig({
 	experimental: {
 		asyncContext: true,
 	},
+	preset: "vercel",
 	modules: [
 		evlog({
 			env: {

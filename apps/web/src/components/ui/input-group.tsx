@@ -38,7 +38,6 @@ export function InputGroup({
 				className
 			)}
 			data-slot="input-group"
-			role="group"
 			{...props}
 		/>
 	);

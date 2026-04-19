@@ -78,6 +78,13 @@
           }
         }
       },
+      "complexity": {
+        "noImportantStyles": "off"
+      },
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "noNoninteractiveElementInteractions": "off"
+      },
       "style": {
         "noParameterAssign": "error",
         "useAsConstAssertion": "error",
@@ -89,7 +96,7 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error",
-        "noExportedImports": "info"
+        "noExportedImports": "off"
       }
     }
   },
@@ -104,29 +111,6 @@
     }
   },
   "overrides": [
-    {
-      "includes": ["apps/web/src/components/**/*.tsx"],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "noImportantStyles": "off"
-          },
-          "a11y": {
-            "noSvgWithoutTitle": "off",
-            "useSemanticElements": "off",
-            "noStaticElementInteractions": "off",
-            "noNoninteractiveElementInteractions": "off"
-          },
-          "style": {
-            "useConsistentTypeDefinitions": "off",
-            "noNestedTernary": "off"
-          },
-          "suspicious": {
-            "noEmptyBlockStatements": "off"
-          }
-        }
-      }
-    },
     {
       "includes": ["apps/web/src/routes/api/**/$.ts"],
       "linter": {
