@@ -6,6 +6,7 @@ allowBuilds:
   sharp: true
 catalog:
   "@libsql/client": 0.15.15
+  "@orpc/ai-sdk": ^1.13.14
   "@orpc/client": ^1.13.14
   "@orpc/openapi": ^1.13.14
   "@orpc/server": ^1.13.14
@@ -23,3 +24,4 @@ catalog:
   sonner: ^2.0.7
   tailwindcss: ^4.2.2
   zod: ^4.3.6
+  "evlog": "^2.13.0"

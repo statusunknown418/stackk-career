@@ -1,18 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {
-	createRootRouteWithContext,
-	HeadContent,
-	Outlet,
-	Scripts,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
 import { Toaster } from "sonner";
 import type { orpc } from "@/utils/orpc";
-import Header from "../components/header";
 import appCss from "../index.css?url";
+import "streamdown/styles.css?url";
 
 export interface RouterAppContext {
 	orpc: typeof orpc;
@@ -53,8 +48,7 @@ function RootDocument() {
 				<HeadContent />
 			</head>
 			<body>
-				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
+				<div className="grid min-h-svh">
 					<Outlet />
 				</div>
 

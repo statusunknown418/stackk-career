@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@libsql/client": "catalog:",
+    "@paralleldrive/cuid2": "^3.3.0",
     "@stackk-career/env": "workspace:*",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.2",

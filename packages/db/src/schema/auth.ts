@@ -1,13 +1,15 @@
+import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { fileMetadata } from "./file-metadata";
 
 export const user = sqliteTable("user", {
-	id: text("id").primaryKey(),
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => `usr_${createId()}`),
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
-	emailVerified: integer("email_verified", { mode: "boolean" })
-		.default(false)
-		.notNull(),
+	emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
 	image: text("image"),
 	createdAt: integer("created_at", { mode: "timestamp_ms" })
 		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -21,7 +23,9 @@ export const user = sqliteTable("user", {
 export const session = sqliteTable(
 	"session",
 	{
-		id: text("id").primaryKey(),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => `sess_${createId()}`),
 		expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
 		token: text("token").notNull().unique(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -42,7 +46,9 @@ export const session = sqliteTable(
 export const account = sqliteTable(
 	"account",
 	{
-		id: text("id").primaryKey(),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => `acc_${createId()}`),
 		accountId: text("account_id").notNull(),
 		providerId: text("provider_id").notNull(),
 		userId: text("user_id")
@@ -72,7 +78,9 @@ export const account = sqliteTable(
 export const verification = sqliteTable(
 	"verification",
 	{
-		id: text("id").primaryKey(),
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => `ver_${createId()}`),
 		identifier: text("identifier").notNull(),
 		value: text("value").notNull(),
 		expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
@@ -90,6 +98,7 @@ export const verification = sqliteTable(
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
+	files: many(fileMetadata),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({

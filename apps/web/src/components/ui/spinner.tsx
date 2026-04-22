@@ -1,16 +1,14 @@
-import { Loader2Icon } from "lucide-react";
+import { BeachBallIcon } from "@phosphor-icons/react";
 import type React from "react";
 import { cn } from "@/lib/utils";
 
-export function Spinner({
-	className,
-	...props
-}: React.ComponentProps<typeof Loader2Icon>): React.ReactElement {
+export function Spinner({ className, ...props }: React.ComponentProps<typeof Loader2Icon>): React.ReactElement {
 	return (
-		<Loader2Icon
+		<BeachBallIcon
 			aria-label="Loading"
 			className={cn("animate-spin", className)}
 			role="status"
+			weight="duotone"
 			{...props}
 		/>
 	);

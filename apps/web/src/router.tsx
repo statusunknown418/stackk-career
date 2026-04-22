@@ -14,10 +14,9 @@ export const getRouter = () => {
 		context: { orpc, queryClient },
 		defaultPendingComponent: () => <Loader />,
 		defaultNotFoundComponent: () => <div>Not Found</div>,
-		Wrap: ({ children }) => (
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-		),
+		Wrap: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>,
 	});
+
 	return router;
 };
 

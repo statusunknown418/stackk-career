@@ -7,10 +7,9 @@ import { createContext } from "@stackk-career/api/context";
 import { appRouter } from "@stackk-career/api/routers/index";
 import { createFileRoute } from "@tanstack/react-router";
 import { createError } from "evlog";
-import { getRequestLog, readRequestLog } from "@/lib/request-log";
+import { readRequestLog } from "@/lib/request-log";
 
-const toError = (error: unknown): Error =>
-	error instanceof Error ? error : new Error(String(error));
+const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(String(error)));
 
 const rpcHandler = new RPCHandler(appRouter, {
 	interceptors: [
@@ -42,40 +41,21 @@ const apiHandler = new OpenAPIHandler(appRouter, {
 });
 
 async function handle({ request }: { request: Request }) {
-	const log = getRequestLog();
-
-	log.set({
-		rpc: {
-			handler: "orpc",
-			method: request.method,
-		},
-	});
-
 	const rpcResult = await rpcHandler.handle(request, {
 		prefix: "/api/rpc",
-		context: await createContext({ log, req: request }),
+		context: await createContext({ req: request }),
 	});
+
 	if (rpcResult.response) {
-		log.set({
-			rpc: {
-				handler: "orpc",
-				surface: "rpc",
-			},
-		});
 		return rpcResult.response;
 	}
 
 	const apiResult = await apiHandler.handle(request, {
 		prefix: "/api/rpc/api-reference",
-		context: await createContext({ log, req: request }),
+		context: await createContext({ req: request }),
 	});
+
 	if (apiResult.response) {
-		log.set({
-			rpc: {
-				handler: "orpc",
-				surface: "openapi-reference",
-			},
-		});
 		return apiResult.response;
 	}
 

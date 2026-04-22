@@ -14,10 +14,7 @@ const BREAKPOINTS = {
 
 type Breakpoint = keyof typeof BREAKPOINTS;
 
-type BreakpointQuery =
-	| Breakpoint
-	| `max-${Breakpoint}`
-	| `${Breakpoint}:max-${Breakpoint}`;
+type BreakpointQuery = Breakpoint | `max-${Breakpoint}` | `${Breakpoint}:max-${Breakpoint}`;
 
 function resolveMin(value: Breakpoint | number): string {
 	const px = typeof value === "number" ? value : BREAKPOINTS[value];
@@ -72,9 +69,7 @@ function parseStringQuery(query: string): string {
 	return parts.length > 0 ? parts.join(" and ") : query;
 }
 
-function parseQuery(
-	query: BreakpointQuery | MediaQueryInput | (string & {})
-): string {
+function parseQuery(query: BreakpointQuery | MediaQueryInput | (string & {})): string {
 	if (typeof query !== "string") {
 		return parseObjectQuery(query);
 	}
@@ -92,9 +87,7 @@ export interface MediaQueryInput {
 	pointer?: "coarse" | "fine";
 }
 
-export function useMediaQuery(
-	query: BreakpointQuery | MediaQueryInput | (string & {})
-): boolean {
+export function useMediaQuery(query: BreakpointQuery | MediaQueryInput | (string & {})): boolean {
 	const mediaQuery = parseQuery(query);
 
 	const subscribe = useCallback(

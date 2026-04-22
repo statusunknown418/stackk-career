@@ -7,15 +7,12 @@ interface RequestWithLog {
 	};
 }
 
-export const readRequestLog = (): RequestLogger | undefined =>
-	(getNitroRequest() as RequestWithLog).context.log;
+export const readRequestLog = (): RequestLogger | undefined => (getNitroRequest() as RequestWithLog).context.log;
 
 export const getRequestLog = (): RequestLogger => {
 	const log = readRequestLog();
 	if (!log) {
-		throw new Error(
-			"evlog request logger missing. Check Nitro evlog module setup."
-		);
+		throw new Error("evlog request logger missing. Check Nitro evlog module setup.");
 	}
 
 	return log;

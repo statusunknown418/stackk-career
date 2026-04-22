@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-export const Autocomplete: typeof AutocompletePrimitive.Root =
-	AutocompletePrimitive.Root;
+export const Autocomplete: typeof AutocompletePrimitive.Root = AutocompletePrimitive.Root;
 
 export function AutocompleteInput({
 	className,
@@ -165,10 +164,7 @@ export function AutocompleteSeparator({
 	);
 }
 
-export function AutocompleteGroup({
-	className,
-	...props
-}: AutocompletePrimitive.Group.Props): React.ReactElement {
+export function AutocompleteGroup({ className, ...props }: AutocompletePrimitive.Group.Props): React.ReactElement {
 	return (
 		<AutocompletePrimitive.Group
 			className={cn("[[role=group]+&]:mt-1.5", className)}
@@ -184,64 +180,36 @@ export function AutocompleteGroupLabel({
 }: AutocompletePrimitive.GroupLabel.Props): React.ReactElement {
 	return (
 		<AutocompletePrimitive.GroupLabel
-			className={cn(
-				"px-2 py-1.5 font-medium text-muted-foreground text-xs",
-				className
-			)}
+			className={cn("px-2 py-1.5 font-medium text-muted-foreground text-xs", className)}
 			data-slot="autocomplete-group-label"
 			{...props}
 		/>
 	);
 }
 
-export function AutocompleteEmpty({
-	className,
-	...props
-}: AutocompletePrimitive.Empty.Props): React.ReactElement {
+export function AutocompleteEmpty({ className, ...props }: AutocompletePrimitive.Empty.Props): React.ReactElement {
 	return (
 		<AutocompletePrimitive.Empty
-			className={cn(
-				"not-empty:p-2 text-center text-base text-muted-foreground sm:text-sm",
-				className
-			)}
+			className={cn("not-empty:p-2 text-center text-base text-muted-foreground sm:text-sm", className)}
 			data-slot="autocomplete-empty"
 			{...props}
 		/>
 	);
 }
 
-export function AutocompleteRow({
-	className,
-	...props
-}: AutocompletePrimitive.Row.Props): React.ReactElement {
-	return (
-		<AutocompletePrimitive.Row
-			className={className}
-			data-slot="autocomplete-row"
-			{...props}
-		/>
-	);
+export function AutocompleteRow({ className, ...props }: AutocompletePrimitive.Row.Props): React.ReactElement {
+	return <AutocompletePrimitive.Row className={className} data-slot="autocomplete-row" {...props} />;
 }
 
-export function AutocompleteValue({
-	...props
-}: AutocompletePrimitive.Value.Props): React.ReactElement {
-	return (
-		<AutocompletePrimitive.Value data-slot="autocomplete-value" {...props} />
-	);
+export function AutocompleteValue({ ...props }: AutocompletePrimitive.Value.Props): React.ReactElement {
+	return <AutocompletePrimitive.Value data-slot="autocomplete-value" {...props} />;
 }
 
-export function AutocompleteList({
-	className,
-	...props
-}: AutocompletePrimitive.List.Props): React.ReactElement {
+export function AutocompleteList({ className, ...props }: AutocompletePrimitive.List.Props): React.ReactElement {
 	return (
 		<ScrollArea scrollbarGutter scrollFade>
 			<AutocompletePrimitive.List
-				className={cn(
-					"not-empty:scroll-py-1 not-empty:p-1 in-data-has-overflow-y:pe-3",
-					className
-				)}
+				className={cn("not-empty:scroll-py-1 not-empty:p-1 in-data-has-overflow-y:pe-3", className)}
 				data-slot="autocomplete-list"
 				{...props}
 			/>
@@ -249,10 +217,7 @@ export function AutocompleteList({
 	);
 }
 
-export function AutocompleteClear({
-	className,
-	...props
-}: AutocompletePrimitive.Clear.Props): React.ReactElement {
+export function AutocompleteClear({ className, ...props }: AutocompletePrimitive.Clear.Props): React.ReactElement {
 	return (
 		<AutocompletePrimitive.Clear
 			className={cn(
@@ -267,31 +232,18 @@ export function AutocompleteClear({
 	);
 }
 
-export function AutocompleteStatus({
-	className,
-	...props
-}: AutocompletePrimitive.Status.Props): React.ReactElement {
+export function AutocompleteStatus({ className, ...props }: AutocompletePrimitive.Status.Props): React.ReactElement {
 	return (
 		<AutocompletePrimitive.Status
-			className={cn(
-				"px-3 py-2 font-medium text-muted-foreground text-xs empty:m-0 empty:p-0",
-				className
-			)}
+			className={cn("px-3 py-2 font-medium text-muted-foreground text-xs empty:m-0 empty:p-0", className)}
 			data-slot="autocomplete-status"
 			{...props}
 		/>
 	);
 }
 
-export function AutocompleteCollection({
-	...props
-}: AutocompletePrimitive.Collection.Props): React.ReactElement {
-	return (
-		<AutocompletePrimitive.Collection
-			data-slot="autocomplete-collection"
-			{...props}
-		/>
-	);
+export function AutocompleteCollection({ ...props }: AutocompletePrimitive.Collection.Props): React.ReactElement {
+	return <AutocompletePrimitive.Collection data-slot="autocomplete-collection" {...props} />;
 }
 
 export function AutocompleteTrigger({
@@ -300,17 +252,12 @@ export function AutocompleteTrigger({
 	...props
 }: AutocompletePrimitive.Trigger.Props): React.ReactElement {
 	return (
-		<AutocompletePrimitive.Trigger
-			className={className}
-			data-slot="autocomplete-trigger"
-			{...props}
-		>
+		<AutocompletePrimitive.Trigger className={className} data-slot="autocomplete-trigger" {...props}>
 			{children}
 		</AutocompletePrimitive.Trigger>
 	);
 }
 
-export const useAutocompleteFilter: typeof AutocompletePrimitive.useFilter =
-	AutocompletePrimitive.useFilter;
+export const useAutocompleteFilter: typeof AutocompletePrimitive.useFilter = AutocompletePrimitive.useFilter;
 
 export { AutocompletePrimitive };

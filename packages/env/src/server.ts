@@ -9,9 +9,12 @@ export const env = createEnv({
 		BETTER_AUTH_SECRET: z.string().min(32),
 		BETTER_AUTH_URL: z.url(),
 		CORS_ORIGIN: z.url(),
-		NODE_ENV: z
-			.enum(["development", "production", "test"])
-			.default("development"),
+		NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+		GOOGLE_CLIENT_ID: z.string().min(1),
+		GOOGLE_CLIENT_SECRET: z.string().min(1),
+		AI_GATEWAY_API_KEY: z.string().min(1),
+		UPLOADTHING_TOKEN: z.string().min(1),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

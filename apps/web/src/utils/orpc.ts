@@ -9,7 +9,6 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { toast } from "sonner";
-import { readRequestLog } from "@/lib/request-log";
 
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
@@ -29,7 +28,6 @@ const getORPCClient = createIsomorphicFn()
 		createRouterClient(appRouter, {
 			context: async () =>
 				createContext({
-					log: readRequestLog(),
 					req: getRequest(),
 				}),
 		})
