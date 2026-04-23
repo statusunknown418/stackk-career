@@ -3,10 +3,13 @@ import { ORPCError } from "@orpc/server";
 import { fileMetadata } from "@stackk-career/db/schema/file-metadata";
 import { createUIMessageStream, type InferUIMessageChunk, streamText, type UIMessage } from "ai";
 import { and, eq } from "drizzle-orm";
+import { createRequestLogger } from "evlog";
+import { createAILogger } from "evlog/ai";
 import { z } from "zod";
+import { AI_MODEL_PRICING } from "../constants";
 import { protectedProcedure } from "../index";
 
-export type AnalyzePhase = "fetching" | "reading" | "analyzing" | "complete";
+export type AnalyzePhase = "analyzing" | "complete";
 
 export interface AnalyzeStatus {
 	message: string;
@@ -29,7 +32,7 @@ export const aiRouter = {
 				fileId: z.string().nonempty(),
 			})
 		)
-		.handler(async ({ input, context }) => {
+		.handler(async ({ input, context, signal }) => {
 			const userId = context.session.user.id;
 
 			context.log?.set({
@@ -52,27 +55,22 @@ export const aiRouter = {
 
 			const stream = createUIMessageStream<AnalyzeResumeUIMessage>({
 				execute: ({ writer }) => {
-					writer.write({
-						type: "data-status",
-						id: "analyze-status",
-						data: {
-							phase: "fetching",
-							message: "Retrieving resume from storage...",
-						},
+					const bgLog = createRequestLogger({
+						method: "POST",
 					});
+
+					bgLog.set({
+						operation: "analyze_resume_stream",
+						user: { id: userId },
+						file: { id: input.fileId },
+					});
+
+					const ai = createAILogger(bgLog, { cost: AI_MODEL_PRICING });
 
 					writer.write({
 						type: "data-status",
 						id: "analyze-status",
-						data: {
-							phase: "reading",
-							message: "Reading PDF contents...",
-						},
-					});
-
-					writer.write({
-						type: "data-status",
-						id: "analyze-status",
+						transient: true,
 						data: {
 							phase: "analyzing",
 							message: "Analyzing resume and drafting suggestions...",
@@ -80,7 +78,8 @@ export const aiRouter = {
 					});
 
 					const result = streamText({
-						model: "openai/gpt-5-mini",
+						model: ai.wrap("openai/gpt-5-nano"),
+						abortSignal: signal,
 						system: `
 						You are a resume analyst. Your ONLY job is to analyze the attached PDF resume and return specific, actionable suggestions to improve it.
               Hard rules:
@@ -90,6 +89,7 @@ export const aiRouter = {
               - In "Suggestions" and "Rewrite Examples", reference exact bullets or phrases from the PDF.
               - Focus on: clarity, quantified impact, structure, ATS readability, skills relevance, tone.
               - No generic advice. No filler.
+              - Answer using markdown for better organization
 
               System language:
               - Provide ALL answers in SPANISH unless explicitly stated otherwise by system override
@@ -115,11 +115,15 @@ export const aiRouter = {
 							writer.write({
 								type: "data-status",
 								id: "analyze-status",
+								transient: true,
 								data: {
 									phase: "complete",
 									message: "Analysis complete.",
 								},
 							});
+						},
+						onError: ({ error }) => {
+							bgLog.error(error instanceof Error ? error : new Error(String(error)));
 						},
 					});
 

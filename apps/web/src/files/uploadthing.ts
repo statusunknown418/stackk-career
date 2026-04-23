@@ -36,6 +36,7 @@ export const uploadRouter = {
 				{
 					context: createContext({
 						req,
+						log,
 					}),
 				}
 			);

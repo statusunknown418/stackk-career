@@ -41,9 +41,10 @@ const apiHandler = new OpenAPIHandler(appRouter, {
 });
 
 async function handle({ request }: { request: Request }) {
+	const log = readRequestLog();
 	const rpcResult = await rpcHandler.handle(request, {
 		prefix: "/api/rpc",
-		context: await createContext({ req: request }),
+		context: await createContext({ req: request, log }),
 	});
 
 	if (rpcResult.response) {
@@ -52,7 +53,7 @@ async function handle({ request }: { request: Request }) {
 
 	const apiResult = await apiHandler.handle(request, {
 		prefix: "/api/rpc/api-reference",
-		context: await createContext({ req: request }),
+		context: await createContext({ req: request, log }),
 	});
 
 	if (apiResult.response) {
