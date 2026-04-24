@@ -14,8 +14,14 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
+import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
+import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
+import { Route as ProtectedDashResumesRouteImport } from './routes/_protected/dash/resumes'
+import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
+import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -41,6 +47,16 @@ const ProtectedSetupRoute = ProtectedSetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedDashRouteRoute = ProtectedDashRouteRouteImport.update({
+  id: '/dash',
+  path: '/dash',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedDashIndexRoute = ProtectedDashIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
@@ -51,59 +67,113 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
+  id: '/suggested',
+  path: '/suggested',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ProtectedDashResumesRoute = ProtectedDashResumesRouteImport.update({
+  id: '/resumes',
+  path: '/resumes',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
+  id: '/coaches',
+  path: '/coaches',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ProtectedDashAgentsRoute = ProtectedDashAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
+  '/dash/agents': typeof ProtectedDashAgentsRoute
+  '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/resumes': typeof ProtectedDashResumesRoute
+  '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/dash/': typeof ProtectedDashIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/setup': typeof ProtectedSetupRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
+  '/dash/agents': typeof ProtectedDashAgentsRoute
+  '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/resumes': typeof ProtectedDashResumesRoute
+  '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/dash': typeof ProtectedDashIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
+  '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
+  '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/_protected/dash/resumes': typeof ProtectedDashResumesRoute
+  '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/_protected/dash/': typeof ProtectedDashIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
+    | '/dash'
     | '/setup'
     | '/api/uploadthing'
+    | '/dash/agents'
+    | '/dash/coaches'
+    | '/dash/resumes'
+    | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/dash/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/setup'
     | '/api/uploadthing'
+    | '/dash/agents'
+    | '/dash/coaches'
+    | '/dash/resumes'
+    | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/dash'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/login'
+    | '/_protected/dash'
     | '/_protected/setup'
     | '/api/uploadthing'
+    | '/_protected/dash/agents'
+    | '/_protected/dash/coaches'
+    | '/_protected/dash/resumes'
+    | '/_protected/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/_protected/dash/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,6 +222,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedSetupRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/dash': {
+      id: '/_protected/dash'
+      path: '/dash'
+      fullPath: '/dash'
+      preLoaderRoute: typeof ProtectedDashRouteRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/dash/': {
+      id: '/_protected/dash/'
+      path: '/'
+      fullPath: '/dash/'
+      preLoaderRoute: typeof ProtectedDashIndexRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
     '/api/rpc/$': {
       id: '/api/rpc/$'
       path: '/api/rpc/$'
@@ -166,14 +250,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/dash/suggested': {
+      id: '/_protected/dash/suggested'
+      path: '/suggested'
+      fullPath: '/dash/suggested'
+      preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/_protected/dash/resumes': {
+      id: '/_protected/dash/resumes'
+      path: '/resumes'
+      fullPath: '/dash/resumes'
+      preLoaderRoute: typeof ProtectedDashResumesRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/_protected/dash/coaches': {
+      id: '/_protected/dash/coaches'
+      path: '/coaches'
+      fullPath: '/dash/coaches'
+      preLoaderRoute: typeof ProtectedDashCoachesRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/_protected/dash/agents': {
+      id: '/_protected/dash/agents'
+      path: '/agents'
+      fullPath: '/dash/agents'
+      preLoaderRoute: typeof ProtectedDashAgentsRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
   }
 }
 
+interface ProtectedDashRouteRouteChildren {
+  ProtectedDashAgentsRoute: typeof ProtectedDashAgentsRoute
+  ProtectedDashCoachesRoute: typeof ProtectedDashCoachesRoute
+  ProtectedDashResumesRoute: typeof ProtectedDashResumesRoute
+  ProtectedDashSuggestedRoute: typeof ProtectedDashSuggestedRoute
+  ProtectedDashIndexRoute: typeof ProtectedDashIndexRoute
+}
+
+const ProtectedDashRouteRouteChildren: ProtectedDashRouteRouteChildren = {
+  ProtectedDashAgentsRoute: ProtectedDashAgentsRoute,
+  ProtectedDashCoachesRoute: ProtectedDashCoachesRoute,
+  ProtectedDashResumesRoute: ProtectedDashResumesRoute,
+  ProtectedDashSuggestedRoute: ProtectedDashSuggestedRoute,
+  ProtectedDashIndexRoute: ProtectedDashIndexRoute,
+}
+
+const ProtectedDashRouteRouteWithChildren =
+  ProtectedDashRouteRoute._addFileChildren(ProtectedDashRouteRouteChildren)
+
 interface ProtectedRouteChildren {
+  ProtectedDashRouteRoute: typeof ProtectedDashRouteRouteWithChildren
   ProtectedSetupRoute: typeof ProtectedSetupRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedDashRouteRoute: ProtectedDashRouteRouteWithChildren,
   ProtectedSetupRoute: ProtectedSetupRoute,
 }
 

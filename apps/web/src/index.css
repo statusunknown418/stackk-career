@@ -205,7 +205,7 @@
 	--code: var(--color-white);
 	--code-foreground: var(--foreground);
 	--code-highlight: --alpha(var(--color-black) / 4%);
-	--radius: 0.625rem;
+	--radius: 0.6rem;
 	--sidebar: var(--color-neutral-50);
 	--sidebar-accent: --alpha(var(--color-black) / 4%);
 	--sidebar-accent-foreground: var(--color-neutral-800);
@@ -233,7 +233,7 @@
 
 	--background: color-mix(
 		in srgb,
-		var(--color-neutral-950) 97.5%,
+		var(--color-neutral-950) 98%,
 		var(--color-white)
 	);
 	--border: --alpha(var(--color-white) / 6%);
@@ -269,7 +269,7 @@
 	--code-highlight: --alpha(var(--color-white) / 4%);
 	--sidebar: color-mix(
 		in srgb,
-		var(--color-neutral-950) 97%,
+		var(--color-neutral-950) 96.75%,
 		var(--color-white)
 	);
 	--sidebar-accent: --alpha(var(--color-white) / 4%);

@@ -1,7 +1,6 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-
+import { useNavigate } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "./ui/button";
+import { Avatar } from "./ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -11,6 +10,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "./ui/menu";
+import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
 import { Skeleton } from "./ui/skeleton";
 
 export default function UserMenu() {
@@ -18,43 +18,56 @@ export default function UserMenu() {
 	const { data: session, isPending } = authClient.useSession();
 
 	if (isPending) {
-		return <Skeleton className="h-9 w-24" />;
+		return <Skeleton className="h-8 w-full" />;
 	}
 
 	if (!session) {
 		return (
-			<Link to="/login">
-				<Button variant="outline">Sign In</Button>
-			</Link>
+			<SidebarMenuItem>
+				<SidebarMenuButton>
+					<SidebarMenuSkeleton />
+				</SidebarMenuButton>
+			</SidebarMenuItem>
 		);
 	}
 
+	const image = session.user.image;
+
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger render={<Button variant="outline" />}>{session.user.name}</DropdownMenuTrigger>
-			<DropdownMenuContent className="bg-card">
-				<DropdownMenuGroup>
-					<DropdownMenuLabel>My Account</DropdownMenuLabel>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem>{session.user.email}</DropdownMenuItem>
-					<DropdownMenuItem
-						onClick={() => {
-							authClient.signOut({
-								fetchOptions: {
-									onSuccess: () => {
-										navigate({
-											to: "/",
-										});
+		<SidebarMenuItem>
+			<DropdownMenu>
+				<DropdownMenuTrigger render={<SidebarMenuButton />}>
+					{image && (
+						<Avatar className="size-4">
+							<img alt={session.user.name} height={24} src={image} width={24} />
+						</Avatar>
+					)}
+					{session.user.name}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent>
+					<DropdownMenuGroup>
+						<DropdownMenuLabel>Cuenta</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								authClient.signOut({
+									fetchOptions: {
+										onSuccess: () => {
+											navigate({
+												to: "/",
+											});
+										},
 									},
-								},
-							});
-						}}
-						variant="destructive"
-					>
-						Sign Out
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-			</DropdownMenuContent>
-		</DropdownMenu>
+								});
+							}}
+							variant="destructive"
+						>
+							Sign Out
+						</DropdownMenuItem>
+					</DropdownMenuGroup>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</SidebarMenuItem>
 	);
 }

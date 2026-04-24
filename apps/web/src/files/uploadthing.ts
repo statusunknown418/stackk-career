@@ -1,7 +1,7 @@
 import { call } from "@orpc/server";
 import { createContext } from "@stackk-career/api/context";
+import { createStandaloneRequestLog, runWithRequestLog } from "@stackk-career/api/logging";
 import { appRouter } from "@stackk-career/api/routers/index";
-import { createRequestLogger } from "evlog";
 import type { FileRouter } from "uploadthing/server";
 import { createUploadthing, UploadThingError } from "uploadthing/server";
 import { getUser } from "@/functions/get-user";
@@ -24,30 +24,34 @@ export const uploadRouter = {
 
 			return { userId: user.user.id };
 		})
-		.onUploadComplete(async ({ metadata, file, req }) => {
-			const log = createRequestLogger({
+		.onUploadComplete(({ metadata, file, req }) => {
+			const log = createStandaloneRequestLog({
+				request: req,
 				method: "POST",
 				path: "/api/uploadthing",
 			});
 
-			const [insertDb] = await call(
-				appRouter.files.link,
-				{ url: file.ufsUrl, userId: metadata.userId, storageId: file.customId },
-				{
-					context: createContext({
-						req,
-						log,
-					}),
-				}
-			);
-
 			log.set({
-				fileUrl: file.ufsUrl,
-				userId: metadata.userId,
-				internalFileId: insertDb.id,
+				upload: {
+					endpoint: "resumeUploader",
+					provider: "uploadthing",
+				},
 			});
 
-			return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, storedId: insertDb.id };
+			return runWithRequestLog(log, async () => {
+				const [insertDb] = await call(
+					appRouter.files.link,
+					{ url: file.ufsUrl, userId: metadata.userId, storageId: file.customId },
+					{
+						context: createContext({
+							req,
+							log,
+						}),
+					}
+				);
+
+				return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, storedId: insertDb.id };
+			});
 		}),
 } satisfies FileRouter;
 
