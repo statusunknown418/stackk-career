@@ -1,5 +1,6 @@
 "use client";
 
+import { UploadIcon } from "@phosphor-icons/react";
 import { useDropzone } from "@uploadthing/react";
 import { CloudUploadIcon, FileIcon, XIcon } from "lucide-react";
 import * as React from "react";
@@ -131,6 +132,7 @@ export function Dropzone({
 
 			{files.length > 0 && !isUploading && (
 				<Button
+					className="tabular-nums"
 					loading={isUploading}
 					onClick={(e) => {
 						e.stopPropagation();
@@ -139,7 +141,8 @@ export function Dropzone({
 					size="sm"
 					type="button"
 				>
-					Subir {files.length} archivo{files.length > 1 ? "s" : ""}
+					<UploadIcon />
+					Subir archivo{files.length > 1 ? "s" : ""}
 				</Button>
 			)}
 		</div>

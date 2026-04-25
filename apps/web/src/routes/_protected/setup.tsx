@@ -1,4 +1,4 @@
-import { CaretCircleRightIcon, SparkleIcon } from "@phosphor-icons/react";
+import { CaretCircleRightIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { z } from "zod";
 import { OnboardingChat } from "@/components/domains/setup.chat/onboarding-chat";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Matrix, wave } from "@/components/ui/matrix";
 import { orpc } from "@/utils/orpc";
 
 const searchSchema = z.object({
@@ -49,9 +50,13 @@ function RouteComponent() {
 		return (
 			<main className="grid place-items-center p-4">
 				<Frame className="max-w-2xl">
-					<FrameHeader>
-						<FrameTitle className="font-light text-2xl tracking-tight">👋 Hola, empecemos!</FrameTitle>
-						<FrameDescription>v.0.1 Stackk Career</FrameDescription>
+					<FrameHeader className="flex-row gap-2">
+						<Matrix cols={8} frames={wave} loop rows={8} size={4} />
+
+						<div>
+							<FrameTitle className="font-light text-2xl tracking-tight">👋 Hola, empecemos!</FrameTitle>
+							<FrameDescription>v.0.1 Stackk Career</FrameDescription>
+						</div>
 					</FrameHeader>
 
 					<FramePanel className="grid gap-2 text-sm">
@@ -62,8 +67,7 @@ function RouteComponent() {
 							así que empecemos de una vez conociendo un poco más de ti!
 						</p>
 
-						<SparkleIcon className="mt-4 size-8 text-success" weight="duotone" />
-						<p className="text-success italic tracking-tight">The Founders</p>
+						<p className="text-success italic tracking-tight">- The Founders</p>
 					</FramePanel>
 
 					<FrameFooter className="flex justify-end">

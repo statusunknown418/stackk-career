@@ -1,10 +1,11 @@
-import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
+import { CaretUpIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Checkpoint, CheckpointIcon, CheckpointTrigger } from "@/components/ai-elements/checkpoint";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
-import { Message, MessageAction, MessageActions, MessageContent } from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { ResumeAnalysis } from "@/components/domains/setup.analysis/resume-analysis";
 import { Dropzone } from "@/components/ui/dropzone";
@@ -25,17 +26,17 @@ const QUESTIONS: OnboardingQuestion[] = [
 	{
 		id: "experience",
 		prompt: "¿Cuántos años de experiencia tienes en tu campo?",
-		options: ["0 años", "1–3 años", "3–5 años", "5+ años"],
+		options: ["Recién graduado", "1–3 años", "3–5 años", "5+ años"],
 	},
 	{
 		id: "industry",
 		prompt: "¿En qué industria trabajas actualmente?",
-		options: ["Software", "Diseño", "Marketing", "Data", "Otra"],
+		options: ["Software", "Diseño", "Marketing", "Data Science", "Otro"],
 	},
 	{
 		id: "targetRole",
 		prompt: "¿Qué tipo de rol estás buscando?",
-		options: ["IC", "Lead", "Manager", "Founder"],
+		options: ["Trainee", "Analista o similar", "Lead", "Manager"],
 	},
 	{
 		id: "urgency",
@@ -149,14 +150,21 @@ function OnboardingChatInner({ initialAnswers }: { initialAnswers: Answers }) {
 								<p>{question.prompt}</p>
 							</MessageContent>
 						</Message>
+
 						<Message from="user">
 							<MessageContent>{answers[question.id] ?? ""}</MessageContent>
-							<MessageActions className="justify-end opacity-0 transition-opacity group-hover:opacity-100">
-								<MessageAction label="Editar respuesta" onClick={() => handleRestore(index)} tooltip="Editar respuesta">
-									<ArrowCounterClockwiseIcon />
-								</MessageAction>
-							</MessageActions>
 						</Message>
+
+						<Checkpoint>
+							<CheckpointIcon />
+							<CheckpointTrigger
+								onClick={() => handleRestore(index)}
+								tooltip="Volver a responder esta pregunta"
+								variant="ghost-muted"
+							>
+								Restaurar <CaretUpIcon />
+							</CheckpointTrigger>
+						</Checkpoint>
 					</div>
 				))}
 
@@ -176,9 +184,9 @@ function OnboardingChatInner({ initialAnswers }: { initialAnswers: Answers }) {
 						</Message>
 
 						{questionTypewriter.done && (
-							<Suggestions className="pl-1">
+							<Suggestions>
 								{currentQuestion.options.map((option) => (
-									<Suggestion key={option} onClick={handlePick} suggestion={option} />
+									<Suggestion key={option} onClick={handlePick} size="lg" suggestion={option} />
 								))}
 							</Suggestions>
 						)}

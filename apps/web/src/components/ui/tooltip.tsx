@@ -11,7 +11,7 @@ export const TooltipProvider: typeof TooltipPrimitive.Provider = TooltipPrimitiv
 export const Tooltip: typeof TooltipPrimitive.Root = TooltipPrimitive.Root;
 
 export function TooltipTrigger(props: TooltipPrimitive.Trigger.Props): React.ReactElement {
-	return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+	return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" delay={props.delay || 0} {...props} />;
 }
 
 export function TooltipPopup({

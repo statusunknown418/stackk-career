@@ -37,12 +37,8 @@ export const onboardingProfileRouter = {
 		const [row] = await context.db
 			.insert(onboardingProfile)
 			.values({
+				...input,
 				userId,
-				experience: input.experience ?? null,
-				industry: input.industry ?? null,
-				targetRole: input.targetRole ?? null,
-				urgency: input.urgency ?? null,
-				location: input.location ?? null,
 			})
 			.onConflictDoUpdate({
 				target: onboardingProfile.userId,

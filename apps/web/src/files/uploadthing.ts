@@ -39,7 +39,7 @@ export const uploadRouter = {
 			});
 
 			return runWithRequestLog(log, async () => {
-				const [insertDb] = await call(
+				const insertDb = await call(
 					appRouter.files.link,
 					{ url: file.ufsUrl, userId: metadata.userId, storageId: file.customId },
 					{
