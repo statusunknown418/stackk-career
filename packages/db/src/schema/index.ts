@@ -3,3 +3,5 @@ export * from "./file-metadata";
 export * from "./generations";
 export * from "./messages";
 export * from "./onboarding-profile";
+export * from "./resume-blocks";
+export * from "./resumes";

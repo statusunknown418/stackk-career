@@ -20,8 +20,10 @@
     "@libsql/client": "catalog:",
     "@paralleldrive/cuid2": "^3.3.0",
     "@stackk-career/env": "workspace:*",
+    "@upstash/redis": "^1.37.0",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.2",
+    "drizzle-zod": "^0.8.3",
     "libsql": "catalog:",
     "zod": "catalog:"
   },

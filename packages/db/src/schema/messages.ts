@@ -11,12 +11,17 @@ export const messages = sqliteTable("messages", (t) => ({
 	generationId: t.text().references(() => generations.id),
 	parentMessageId: t.text(),
 
+	content: t.blob({ mode: "json" }),
 	text: t.text(),
 	error: t.text(),
 	model: t.text(),
 	order: t.integer(),
+	toolMeta: t.blob({ mode: "json" }).$type<{ toolId: string; toolName: string }>(),
 	isTool: t.integer({ mode: "boolean" }),
 	isAssistant: t.integer({ mode: "boolean" }).notNull().default(false),
+
+	objectType: t.text(),
+	object: t.blob({ mode: "json" }),
 
 	createdAt: t
 		.integer({ mode: "timestamp" })
