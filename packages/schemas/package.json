@@ -1,0 +1,25 @@
+{
+  "name": "@stackk-career/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api/*": "./src/api/*.ts",
+    "./db/*": "./src/db/*.ts",
+    "./jobs/*": "./src/jobs/*.ts",
+    "./resume-analysis": "./src/resume-analysis.ts",
+    "./resume-blocks": "./src/resume-blocks.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@stackk-career/db": "workspace:*",
+    "drizzle-zod": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@stackk-career/config": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}
