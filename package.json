@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "turbo dev",
+    "dev:all": "turbo dev trigger:dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev",
@@ -16,6 +17,10 @@
     "db:generate": "turbo -F @stackk-career/db db:generate",
     "db:migrate": "turbo -F @stackk-career/db db:migrate",
     "db:local": "turbo -F @stackk-career/db db:local",
+    "db:reset": "pnpm -F @stackk-career/db db:reset",
+    "jobs:dev": "turbo -F @stackk-career/jobs trigger:dev",
+    "jobs:deploy": "pnpm -F @stackk-career/jobs trigger:deploy",
+    "jobs:login": "pnpm -F @stackk-career/jobs trigger:login",
     "check": "ultracite check",
     "fix": "ultracite fix",
     "prepare": "husky"
@@ -40,5 +45,5 @@
       "pnpm dlx ultracite fix"
     ]
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.2"
 }

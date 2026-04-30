@@ -1,4 +1,4 @@
-import type { ResumeAnalysis } from "@stackk-career/schemas/resume-analysis";
+import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import { streams } from "@trigger.dev/sdk";
 import type { DeepPartial } from "ai";
 

@@ -33,6 +33,15 @@
     },
     "db:local": {
       "cache": false
+    },
+    "trigger:dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "trigger:deploy": {
+      "cache": false,
+      "dependsOn": ["^build"]
     }
   }
 }

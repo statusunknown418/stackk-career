@@ -1,6 +1,12 @@
-import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createEnv } from "@t3-oss/env-core";
+import { config } from "dotenv";
 import { z } from "zod";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const rootEnv = path.resolve(here, "../../../.env");
+config({ path: rootEnv, quiet: true });
 
 export const env = createEnv({
 	server: {
@@ -18,6 +24,9 @@ export const env = createEnv({
 		GOOGLE_CLIENT_SECRET: z.string().min(1),
 		AI_GATEWAY_API_KEY: z.string().min(1),
 		UPLOADTHING_TOKEN: z.string().min(1),
+
+		TRIGGER_SECRET_KEY: z.string().min(1),
+		TRIGGER_PROJECT_ID: z.string().min(1),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

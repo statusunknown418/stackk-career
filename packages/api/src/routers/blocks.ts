@@ -1,15 +1,11 @@
 import { ORPCError } from "@orpc/client";
-import { insertResumeBlocks, parseBlock, resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
+import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { createBlockApiMutationSchema } from "@stackk-career/schemas/api/blocks";
+import { parseBlock } from "@stackk-career/schemas/resume-blocks";
 import { and, eq } from "drizzle-orm";
-import z from "zod";
 import { protectedProcedure } from "..";
 import { generateLexoKeyBetween } from "../indexing";
-
-export const createBlockApiMutationSchema = insertResumeBlocks.extend({
-	before: z.string().nullable(),
-	after: z.string().nullable(),
-});
 
 export const blocksRouter = {
 	create: protectedProcedure.input(createBlockApiMutationSchema).handler(async ({ context, input }) => {

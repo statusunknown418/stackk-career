@@ -2,6 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { index, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth";
+import { generations } from "./generations";
 
 export const fileMetadata = sqliteTable(
 	"fileMetadata",
@@ -10,14 +11,16 @@ export const fileMetadata = sqliteTable(
 			.text()
 			.primaryKey()
 			.$defaultFn(() => `file_${createId()}`),
-		url: t.text().notNull(),
-		metadata: t.blob({ mode: "json" }),
-		storageId: t.text(),
-
 		userId: t
 			.text()
 			.notNull()
 			.references(() => user.id),
+		generationId: t.text().references(() => generations.id),
+
+		name: t.text(),
+		url: t.text().notNull(),
+		metadata: t.blob({ mode: "json" }),
+		storageId: t.text(),
 
 		createdAt: t.integer({
 			mode: "timestamp",
@@ -30,5 +33,10 @@ export const filesRelations = relations(fileMetadata, ({ one }) => ({
 	owner: one(user, {
 		fields: [fileMetadata.userId],
 		references: [user.id],
+	}),
+
+	generation: one(generations, {
+		fields: [fileMetadata.generationId],
+		references: [generations.id],
 	}),
 }));

@@ -2,7 +2,9 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { index, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth";
+import { fileMetadata } from "./file-metadata";
 import { messages } from "./messages";
+import { resumeAnalyses } from "./resume-analyses";
 
 export const generations = sqliteTable(
 	"generations",
@@ -31,9 +33,14 @@ export const generations = sqliteTable(
 
 export const generationsRelations = relations(generations, ({ one, many }) => ({
 	messages: many(messages),
+	files: many(fileMetadata),
 
 	owner: one(user, {
 		fields: [generations.owner],
 		references: [user.id],
+	}),
+	resumeAnalysis: one(resumeAnalyses, {
+		fields: [generations.id],
+		references: [resumeAnalyses.generationId],
 	}),
 }));

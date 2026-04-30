@@ -1,27 +1,40 @@
-import { CaretCircleRightIcon } from "@phosphor-icons/react";
-import { useMutation } from "@tanstack/react-query";
+import { useChat } from "@ai-sdk/react";
+import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { type DeepPartial, DefaultChatTransport, type UIMessage } from "ai";
+import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ResumeAnalysisPanel } from "@/components/domains/setup.analysis/resume-analysis";
 import { OnboardingChat } from "@/components/domains/setup.chat/onboarding-chat";
+import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Matrix, wave } from "@/components/ui/matrix";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
-const searchSchema = z.object({
+const setupSearchSchema = z.object({
 	step: z.enum(["chat"]).optional(),
-	analysisStatus: z.enum(["idle", "complete"]).optional(),
+	analysisStatus: z.enum(["idle", "complete", "error", "aborted"]).optional(),
 	generationId: z.string().optional(),
 	storeId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_protected/setup")({
 	component: RouteComponent,
-	validateSearch: searchSchema,
-	beforeLoad: ({ search }) => {
+	validateSearch: setupSearchSchema,
+	beforeLoad: async ({ search }) => {
 		if (search.step && !search.generationId) {
 			throw redirect({ to: "/setup", search: {}, replace: true });
+		}
+
+		const genId = search.generationId;
+
+		if (genId) {
+			await orpc.generations.get.call({ id: genId });
 		}
 	},
 });
@@ -44,12 +57,10 @@ function RouteComponent() {
 		})
 	);
 
-	const isWelcome = !(search.step && search.generationId);
-
-	if (isWelcome) {
+	if (!(search.step && search.generationId)) {
 		return (
 			<main className="grid place-items-center p-4">
-				<Frame className="max-w-2xl">
+				<Frame className="min-w-2xl max-w-2xl">
 					<FrameHeader className="flex-row gap-2">
 						<Matrix cols={8} frames={wave} loop rows={8} size={4} />
 
@@ -84,32 +95,110 @@ function RouteComponent() {
 		);
 	}
 
-	if (search.step === "chat" && search.generationId) {
-		return (
-			<main className="grid place-items-center p-4">
-				<section className="w-full max-w-2xl">
-					<Frame>
-						<FrameHeader>
-							<FrameTitle className="font-light text-xl tracking-tight">Conozcámonos</FrameTitle>
-							<FrameDescription>Responde unas preguntas para personalizar tu experiencia.</FrameDescription>
-						</FrameHeader>
+	return <SetupChatView fileId={search.storeId} generationId={search.generationId} />;
+}
 
-						<FramePanel className="p-0">
-							<OnboardingChat />
-						</FramePanel>
+function SetupChatView({ fileId, generationId }: { fileId: string | undefined; generationId: string }) {
+	const search = Route.useSearch();
+	const navigate = Route.useNavigate();
+	const hasStartedRef = useRef(false);
 
-						{search.analysisStatus === "complete" && (
+	const cachedAnalysis = useQuery(
+		orpc.generations.getResumeAnalysis.queryOptions({
+			input: { generationId },
+			staleTime: Number.POSITIVE_INFINITY,
+		})
+	);
+
+	const transport = useMemo(
+		() =>
+			new DefaultChatTransport<UIMessage>({
+				api: "/api/ai/analyze-resume",
+				body: { fileId, generationId },
+			}),
+		[fileId, generationId]
+	);
+
+	const { messages, sendMessage, status, error } = useChat<UIMessage>({
+		transport,
+		onFinish: ({ isAbort, isError, isDisconnect }) => {
+			if (isAbort) {
+				navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "aborted" }) });
+				return;
+			}
+			if (isError || isDisconnect) {
+				navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "error" }) });
+				return;
+			}
+			navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "complete" }) });
+		},
+	});
+
+	const hasCached = Boolean(cachedAnalysis.data);
+
+	useEffect(() => {
+		if (hasStartedRef.current || !(fileId && generationId)) {
+			return;
+		}
+		if (cachedAnalysis.isLoading) {
+			return;
+		}
+		if (hasCached) {
+			hasStartedRef.current = true;
+			return;
+		}
+		hasStartedRef.current = true;
+		sendMessage({ text: "analyze" });
+	}, [fileId, generationId, sendMessage, cachedAnalysis.isLoading, hasCached]);
+
+	const isStreaming = status === "streaming" || status === "submitted";
+	const lastAssistant = messages.at(-1)?.role === "assistant" ? messages.at(-1) : undefined;
+	const showAnalysis = Boolean(fileId);
+
+	const streamedAnalysis = lastAssistant?.parts.find(
+		(part): part is { type: "data-analysis"; id?: string; data: DeepPartial<ResumeAnalysis> } =>
+			part.type === "data-analysis"
+	)?.data;
+	const analysisData: DeepPartial<ResumeAnalysis> | undefined = cachedAnalysis.data ?? streamedAnalysis;
+	const isAnalysisComplete = hasCached || search.analysisStatus === "complete";
+
+	return (
+		<section className="mx-auto grid w-full max-w-6xl grid-rows-[auto_1fr] gap-4 p-4">
+			<nav className="flex justify-between pt-4">
+				<Button render={<Link to="/setup" />} variant="ghost-muted">
+					<CaretCircleLeftIcon /> Volver
+				</Button>
+
+				{isAnalysisComplete && (
+					<BlurFade>
+						<Button render={<Link to="/dash" />} variant="ghost">
+							Ir a la app <CaretCircleRightIcon />
+						</Button>
+					</BlurFade>
+				)}
+			</nav>
+
+			<main className={cn("grid min-h-full min-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
+				<Frame className="max-h-[85svh]">
+					<OnboardingChat assistantMessage={lastAssistant} isAnalysisStreaming={isStreaming} />
+
+					{isAnalysisComplete && (
+						<BlurFade>
 							<FrameFooter className="flex justify-end">
 								<Button render={<Link to="/dash" />}>
 									Ir a la app <CaretCircleRightIcon />
 								</Button>
 							</FrameFooter>
-						)}
-					</Frame>
-				</section>
-			</main>
-		);
-	}
+						</BlurFade>
+					)}
+				</Frame>
 
-	return null;
+				{showAnalysis && (
+					<BlurFade>
+						<ResumeAnalysisPanel analysis={analysisData} error={error} isStreaming={isStreaming && !hasCached} />
+					</BlurFade>
+				)}
+			</main>
+		</section>
+	);
 }

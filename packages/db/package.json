@@ -14,7 +14,8 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:reset": "tsx ./src/scripts/reset.ts"
   },
   "dependencies": {
     "@libsql/client": "catalog:",
@@ -22,14 +23,13 @@
     "@stackk-career/env": "workspace:*",
     "@upstash/redis": "^1.37.0",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.2",
-    "drizzle-zod": "^0.8.3",
-    "libsql": "catalog:",
-    "zod": "catalog:"
+    "drizzle-orm": "catalog:",
+    "libsql": "catalog:"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
     "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   }
 }

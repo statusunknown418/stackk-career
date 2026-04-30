@@ -7,8 +7,7 @@
     "./api/*": "./src/api/*.ts",
     "./db/*": "./src/db/*.ts",
     "./jobs/*": "./src/jobs/*.ts",
-    "./resume-analysis": "./src/resume-analysis.ts",
-    "./resume-blocks": "./src/resume-blocks.ts"
+    "./ai/*": "./src/ai/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

@@ -1,6 +1,6 @@
 import { call } from "@orpc/server";
 import { createContext } from "@stackk-career/api/context";
-import { createStandaloneRequestLog, runWithRequestLog } from "@stackk-career/api/logging";
+import { startRequestLog, withRequestLog } from "@stackk-career/api/logging";
 import { appRouter } from "@stackk-career/api/routers/index";
 import type { FileRouter } from "uploadthing/server";
 import { createUploadthing, UploadThingError } from "uploadthing/server";
@@ -25,7 +25,7 @@ export const uploadRouter = {
 			return { userId: user.user.id };
 		})
 		.onUploadComplete(({ metadata, file, req }) => {
-			const log = createStandaloneRequestLog({
+			const log = startRequestLog({
 				request: req,
 				method: "POST",
 				path: "/api/uploadthing",
@@ -38,7 +38,7 @@ export const uploadRouter = {
 				},
 			});
 
-			return runWithRequestLog(log, async () => {
+			return withRequestLog(log, async () => {
 				const insertDb = await call(
 					appRouter.files.link,
 					{ url: file.ufsUrl, userId: metadata.userId, storageId: file.customId },

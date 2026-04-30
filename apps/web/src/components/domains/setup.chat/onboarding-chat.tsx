@@ -1,13 +1,15 @@
 import { CaretUpIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
+import type { UIMessage } from "ai";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from "@/components/ai-elements/checkpoint";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { ResumeAnalysis } from "@/components/domains/setup.analysis/resume-analysis";
 import { Dropzone } from "@/components/ui/dropzone";
 import { Spinner } from "@/components/ui/spinner";
 import { useTypewriter } from "@/hooks/use-typewriter";
@@ -78,7 +80,12 @@ function nextUnansweredIndex(answers: Answers): number {
 	return idx === -1 ? QUESTIONS.length : idx;
 }
 
-export function OnboardingChat() {
+interface OnboardingChatProps {
+	assistantMessage?: UIMessage;
+	isAnalysisStreaming?: boolean;
+}
+
+export function OnboardingChat({ assistantMessage, isAnalysisStreaming = false }: OnboardingChatProps) {
 	const { data, isLoading } = useQuery(orpc.onboardingProfile.get.queryOptions());
 
 	if (isLoading) {
@@ -89,11 +96,25 @@ export function OnboardingChat() {
 		);
 	}
 
-	return <OnboardingChatInner initialAnswers={pickAnswers(data)} />;
+	return (
+		<OnboardingChatInner
+			assistantMessage={assistantMessage}
+			initialAnswers={pickAnswers(data)}
+			isAnalysisStreaming={isAnalysisStreaming}
+		/>
+	);
 }
 
-function OnboardingChatInner({ initialAnswers }: { initialAnswers: Answers }) {
-	const { storeId: fileId, generationId } = setupRoute.useSearch();
+function OnboardingChatInner({
+	assistantMessage,
+	initialAnswers,
+	isAnalysisStreaming,
+}: {
+	assistantMessage: UIMessage | undefined;
+	initialAnswers: Answers;
+	isAnalysisStreaming: boolean;
+}) {
+	const { storeId: fileId, generationId, analysisStatus } = setupRoute.useSearch();
 	const navigate = setupRoute.useNavigate();
 
 	const [answers, setAnswers] = useState<Answers>(initialAnswers);
@@ -140,9 +161,13 @@ function OnboardingChatInner({ initialAnswers }: { initialAnswers: Answers }) {
 		saveProfile.mutate(wipe);
 	}
 
+	const reasoningParts = assistantMessage?.parts.filter((part) => part.type === "reasoning") ?? [];
+	const reasoningText = reasoningParts.map((part) => part.text).join("\n\n");
+	const isReasoningStreaming = isAnalysisStreaming && reasoningParts.at(-1)?.state !== "done";
+
 	return (
-		<Conversation className="h-[60vh] p-0">
-			<ConversationContent className="flex flex-col gap-6">
+		<Conversation className="p-0">
+			<ConversationContent>
 				{answeredQuestions.map((question, index) => (
 					<div className="flex flex-col gap-2" key={question.id}>
 						<Message from="assistant">
@@ -240,10 +265,29 @@ function OnboardingChatInner({ initialAnswers }: { initialAnswers: Answers }) {
 							</MessageContent>
 						</Message>
 
-						{analyzingTypewriter.done && <ResumeAnalysis />}
+						{analysisStatus !== "complete" && <Shimmer className="text-sm">Processing</Shimmer>}
+
+						{reasoningText && (
+							<Reasoning isStreaming={isReasoningStreaming}>
+								<ReasoningTrigger
+									getThinkingMessage={(streaming, duration) => {
+										if (streaming) {
+											return <Shimmer>Pensando…</Shimmer>;
+										}
+										if (!duration) {
+											return <p>Pensé por unos segundos</p>;
+										}
+										return <p>Pensé por {duration} segundos</p>;
+									}}
+								/>
+
+								<ReasoningContent>{reasoningText}</ReasoningContent>
+							</Reasoning>
+						)}
 					</div>
 				)}
 			</ConversationContent>
+
 			<ConversationScrollButton />
 		</Conversation>
 	);

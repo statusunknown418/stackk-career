@@ -9,21 +9,27 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "node --test --experimental-strip-types src/*.test.mjs"
+  },
   "dependencies": {
     "@orpc/ai-sdk": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
+    "@paralleldrive/cuid2": "^3.3.0",
     "@stackk-career/auth": "workspace:*",
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
-    "ai": "^6.0.168",
+    "@stackk-career/jobs": "workspace:*",
+    "@stackk-career/schemas": "workspace:*",
+    "@trigger.dev/sdk": "catalog:",
+    "@upstash/redis": "^1.37.0",
+    "ai": "catalog:",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.2",
-    "evlog": "catalog:",
-    "zod": "catalog:"
+    "drizzle-orm": "catalog:",
+    "evlog": "catalog:"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",

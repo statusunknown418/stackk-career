@@ -1,4 +1,4 @@
-import { resumeAnalysisSchema } from "@stackk-career/schemas/resume-analysis";
+import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { Output, streamText } from "ai";
 
 export const RESUME_ANALYSIS_MODEL = "google/gemini-3-flash";

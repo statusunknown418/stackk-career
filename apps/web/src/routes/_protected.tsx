@@ -3,19 +3,16 @@ import { getUser } from "@/functions/get-user";
 
 export const Route = createFileRoute("/_protected")({
 	component: () => <Outlet />,
-	beforeLoad: async () => {
+	beforeLoad: async ({ location }) => {
 		const session = await getUser();
 
-		return { session };
-	},
-	loader: ({ context, location }) => {
-		if (!context.session) {
-			redirect({
+		if (!session?.session) {
+			throw redirect({
 				to: "/login",
-				search: {
-					redirect: location,
-				},
+				search: { redirect: location.href },
 			});
 		}
+
+		return { session };
 	},
 });

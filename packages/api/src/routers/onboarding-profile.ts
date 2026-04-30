@@ -1,26 +1,19 @@
 import { onboardingProfile } from "@stackk-career/db/schema/onboarding-profile";
+import {
+	type OnboardingProfileUpsertInput,
+	onboardingProfileUpsertInputSchema,
+} from "@stackk-career/schemas/api/onboarding-profile";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 import { protectedProcedure } from "../index";
 
-const upsertInput = z
-	.object({
-		experience: z.string().nullish(),
-		industry: z.string().nullish(),
-		targetRole: z.string().nullish(),
-		urgency: z.string().nullish(),
-		location: z.string().nullish(),
-	})
-	.partial();
-
-function providedFields(input: z.infer<typeof upsertInput>): string[] {
+function providedFields(input: OnboardingProfileUpsertInput): string[] {
 	return Object.entries(input)
 		.filter(([, value]) => value !== undefined && value !== null)
 		.map(([key]) => key);
 }
 
 export const onboardingProfileRouter = {
-	upsert: protectedProcedure.input(upsertInput).handler(async ({ input, context }) => {
+	upsert: protectedProcedure.input(onboardingProfileUpsertInputSchema).handler(async ({ input, context }) => {
 		const userId = context.session.user.id;
 		const now = new Date();
 		const fields = providedFields(input);

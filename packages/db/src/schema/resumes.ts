@@ -1,9 +1,9 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { index, sqliteTable } from "drizzle-orm/sqlite-core";
-import { createInsertSchema } from "drizzle-zod";
 import { user } from "./auth";
 import { generations } from "./generations";
+import { resumeAnalyses } from "./resume-analyses";
 import { resumeBlocks } from "./resume-blocks";
 
 export const resumeStatusEnum = ["draft", "ready", "archived"] as const;
@@ -42,10 +42,9 @@ export const resumes = sqliteTable(
 	]
 );
 
-export const insertResume = createInsertSchema(resumes);
-
 export const resumeRelations = relations(resumes, ({ one, many }) => ({
 	blocks: many(resumeBlocks),
+	analyses: many(resumeAnalyses),
 
 	generation: one(generations, {
 		fields: [resumes.generationId],
