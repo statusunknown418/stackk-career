@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1777483829798,
+      "tag": "0000_flashy_red_wolf",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1777491496652,
+      "tag": "0001_tan_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777493159545,
+      "tag": "0002_youthful_vector",
+      "breakpoints": true
+    }
+  ]
+}
