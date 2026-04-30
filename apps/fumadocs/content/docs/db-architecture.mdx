@@ -1,0 +1,164 @@
+---
+title: Database Architecture
+description: Current Drizzle and Turso data model for stackk-career
+---
+
+# Database Architecture
+
+This repo uses Drizzle ORM on top of Turso/libSQL.
+
+## Stack
+
+```text
+apps/web + packages/api
+        |
+        v
+packages/db (Drizzle schema + queries)
+        |
+        v
+Turso / libSQL (SQLite dialect)
+        |
+        +--> Better Auth tables
+        +--> Product tables
+        +--> Telemetry tables
+
+Extra read cache:
+packages/db -> Upstash Redis cache via drizzle cache adapter
+```
+
+## Entity Map
+
+```text
+AUTH
+user
+├── session                many per user
+├── account                many per user
+├── onboarding_profile     one per user
+├── fileMetadata           many per user
+├── generations            many per user
+├── resume_analyses        many per user
+└── usage_events           many per user
+
+AI WORKSPACE
+generations
+├── messages               many per generation
+└── resume_analyses        one per generation
+
+RESUME EDITOR
+resumes
+├── resumeBlocks           many per resume
+└── resume_analyses        many per resume
+
+SELF-REFERENTIAL
+resumeBlocks
+├── parentBlockId -> resumeBlocks.id
+└── sourceBlockId -> resumeBlocks.id
+
+messages
+└── parentMessageId        intended thread link
+```
+
+## Main Diagram
+
+```text
+                              +------------------+
+                              |       user       |
+                              | id, email, name  |
+                              +------------------+
+                                | 1->many
+      +-------------------------+--------------------------+--------------------------+----------------------+
+      |                         |                          |                          |                      |
+      v                         v                          v                          v                      v
++-------------+        +---------------+          +------------------+        +---------------+     +------------------+
+|   session   |        |    account    |          | onboarding_prof. |        |  fileMetadata |     |   usage_events   |
+| token, exp  |        | provider auth |          | setup answers    |        | uploads/files |     | token/cost logs  |
++-------------+        +---------------+          +------------------+        +---------------+     +------------------+
+                                                                                  |
+                                                                                  | file picked for AI
+                                                                                  v
+                                                                       +------------------+
+                                                                       |   generations    |
+                                                                       | AI workspace/run |
+                                                                       +------------------+
+                                                                         | 1->many
+                                                                         v
+                                                                  +------------------+
+                                                                  |     messages     |
+                                                                  | chat/tool/object |
+                                                                  +------------------+
+                                                                         ^
+                                                                         | latest assistant object
+                                                                         |
+                                                           +------------------------------+
+                                                           |       resume_analyses        |
+                                                           | status + JSON score object   |
+                                                           +------------------------------+
+                                                             ^                       ^
+                                                             | many->1               | 0..1 per generation
+                                                             |                       |
+                                                      +------------------+           |
+                                                      |     resumes      |-----------+
+                                                      | user resume doc  |
+                                                      +------------------+
+                                                        | 1->many
+                                                        v
+                                                 +------------------+
+                                                 |   resumeBlocks   |
+                                                 | tree/ordered CV  |
+                                                 +------------------+
+                                                   | self parent/source
+                                                   v
+                                             nested block graph
+```
+
+## Table Purpose
+
+- `user`, `session`, `account`, `verification`: Better Auth core tables.
+- `onboarding_profile`: one setup profile per user.
+- `fileMetadata`: uploaded file registry, mainly resume PDFs.
+- `generations`: AI workspace/session owned by user.
+- `messages`: ordered conversation log plus structured assistant outputs.
+- `resume_analyses`: persisted structured resume scoring/result object.
+- `resumes`: canonical resume documents.
+- `resumeBlocks`: normalized resume editor block tree with LexoRank ordering.
+- `usage_events`: model usage and token telemetry.
+
+## Important Relationships
+
+- `generations.owner -> user.id`
+- `messages.generationId -> generations.id`
+- `resume_analyses.generationId -> generations.id` and unique per generation
+- `resume_analyses.resumeId -> resumes.id`
+- `resumeBlocks.resumeId -> resumes.id`
+- `fileMetadata.userId -> user.id`
+- `onboarding_profile.userId -> user.id`
+- `usage_events.userId -> user.id`
+
+## App Flow
+
+```text
+User signs in
+-> auth rows in user/session/account
+
+User uploads resume
+-> fileMetadata row
+
+User starts AI analysis/chat
+-> generations row
+-> messages rows stream in
+-> structured result saved in messages.object
+-> optional normalized result in resume_analyses
+
+User builds/edit resume
+-> resumes row
+-> resumeBlocks tree under resume
+
+System tracks model spend
+-> usage_events rows
+```
+
+## Current Notes
+
+- Diagram reflects current schema code in `packages/db/src/schema/*`.
+- `usage_events` no longer links to `generationId`; latest migration drops that column.
+- `messages` currently stores resume analysis object directly in `messages.object`. That path is actively used by API.
