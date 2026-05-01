@@ -1,14 +1,22 @@
-import { z } from "zod";
+import type { z } from "zod";
+import { insertMessageSchema } from "../db/messages";
 
-export const createMessageInputSchema = z.object({
-	generationId: z.string().nonempty(),
-	text: z.string(),
-	isAssistant: z.boolean(),
-	order: z.number().int().nonnegative(),
-	parentMessageId: z.string().optional(),
-});
+export const createMessageInputSchema = insertMessageSchema
+	.pick({
+		generationId: true,
+		isAssistant: true,
+		order: true,
+		parentMessageId: true,
+		text: true,
+	})
+	.required({
+		generationId: true,
+		isAssistant: true,
+		order: true,
+		text: true,
+	});
 
-export const listMessagesInputSchema = z.object({ generationId: z.string().nonempty() });
+export const listMessagesInputSchema = createMessageInputSchema.pick({ generationId: true });
 
 export type CreateMessageInput = z.infer<typeof createMessageInputSchema>;
 export type ListMessagesInput = z.infer<typeof listMessagesInputSchema>;

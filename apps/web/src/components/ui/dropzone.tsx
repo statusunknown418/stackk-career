@@ -18,23 +18,25 @@ import { cn } from "@/lib/utils";
 
 type DropzoneEndpoint = keyof UploadRouter;
 
-export interface DropzoneProps extends Omit<React.ComponentProps<"div">, "onChange" | "onDrop"> {
+export interface DropzoneProps<T> extends Omit<React.ComponentProps<"div">, "onChange" | "onDrop"> {
 	disabled?: boolean;
 	endpoint: DropzoneEndpoint;
+	input: T;
 	onChange?: (files: File[]) => void;
 	onClientUploadComplete?: (files: ClientUploadedFileData<{ storedId?: string }>[]) => void;
 	onUploadError?: (error: Error) => void;
 }
 
-export function Dropzone({
+export function Dropzone<T extends Record<string, unknown>>({
 	endpoint,
 	onClientUploadComplete,
 	onUploadError,
 	onChange,
 	disabled,
 	className,
+	input,
 	...props
-}: DropzoneProps): React.ReactElement {
+}: DropzoneProps<T>): React.ReactElement {
 	const [files, setFiles] = React.useState<File[]>([]);
 	const [progress, setProgress] = React.useState<number>(0);
 
@@ -136,7 +138,7 @@ export function Dropzone({
 					loading={isUploading}
 					onClick={(e) => {
 						e.stopPropagation();
-						startUpload(files);
+						startUpload(files, input);
 					}}
 					size="sm"
 					type="button"

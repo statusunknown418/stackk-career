@@ -233,8 +233,9 @@ function OnboardingChatInner({
 						</Message>
 
 						{uploadTypewriter.done && (
-							<Dropzone
+							<Dropzone<{ generationId: string | undefined }>
 								endpoint="resumeUploader"
+								input={{ generationId }}
 								onClientUploadComplete={(files) => {
 									const storedId = files.at(0)?.serverData.storedId;
 									if (!storedId) {

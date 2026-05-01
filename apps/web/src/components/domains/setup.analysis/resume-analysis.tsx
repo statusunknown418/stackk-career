@@ -1,10 +1,11 @@
-import { HashStraightIcon, TriangleDashedIcon } from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, HashStraightIcon, TriangleDashedIcon } from "@phosphor-icons/react";
 import type { EditCategory, EditSeverity, ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import type { DeepPartial } from "ai";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
-import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Progress, ProgressIndicator, ProgressLabel, ProgressTrack, ProgressValue } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -42,10 +43,12 @@ export function ResumeAnalysisPanel({
 	analysis,
 	error,
 	isStreaming,
+	onRetry,
 }: {
 	analysis: DeepPartial<ResumeAnalysis> | undefined;
 	error: Error | undefined;
 	isStreaming: boolean;
+	onRetry?: () => void;
 }) {
 	const partial = analysis;
 	const showLoaders = !error && isStreaming;
@@ -145,6 +148,14 @@ export function ResumeAnalysisPanel({
 						<AlertDescription>{error.message}</AlertDescription>
 					</Alert>
 				</FramePanel>
+			)}
+
+			{onRetry && !isStreaming && (partial || error) && (
+				<FrameFooter className="flex justify-end">
+					<Button onClick={onRetry} variant="outline">
+						<ArrowClockwiseIcon /> Reintentar análisis
+					</Button>
+				</FrameFooter>
 			)}
 		</Frame>
 	);

@@ -1,5 +1,6 @@
 import type { BLOCK_TYPES, resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { z } from "zod";
+import { selectResumeBlocksSchema } from "../db/resume-blocks";
 
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
@@ -77,35 +78,18 @@ export const blockPayloadSchema = z.discriminatedUnion("blockType", [
 export type BlockPayload = z.infer<typeof blockPayloadSchema>;
 export type ContentOf<T extends BlockType> = Extract<BlockPayload, { blockType: T }>["content"];
 
-interface BlockMeta {
-	createdAt: Date;
-	deletedAt: Date | null;
-	id: number;
-	parentBlockId: number | null;
-	position: string;
-	resumeId: string;
-	sourceBlockId: string | null;
-	updatedAt: Date;
-	version: number;
-}
-
-export type Block = BlockMeta & BlockPayload;
+export type ResumeBlockGenericType = typeof resumeBlocks.$inferSelect;
+type BlockMeta = Omit<ResumeBlockGenericType, "blockType" | "content">;
 
 const blockRowSchema = z
-	.object({
-		id: z.number(),
-		resumeId: z.string(),
-		parentBlockId: z.number().nullable(),
-		position: z.string(),
-		sourceBlockId: z.string().nullable(),
-		deletedAt: z.coerce.date().nullable(),
-		version: z.number(),
-		createdAt: z.coerce.date(),
-		updatedAt: z.coerce.date(),
+	.object(selectResumeBlocksSchema.shape)
+	.omit({
+		blockType: true,
+		content: true,
 	})
 	.and(blockPayloadSchema);
 
-export type ResumeBlockGenericType = typeof resumeBlocks.$inferSelect;
+export type Block = BlockMeta & BlockPayload;
 
 export function parseBlock(raw: typeof resumeBlocks.$inferSelect): Block {
 	const result = blockRowSchema.safeParse(raw);

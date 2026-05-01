@@ -1,8 +1,8 @@
 import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { parseBlock } from "@stackk-career/schemas/ai/resume-blocks";
 import { createBlockApiMutationSchema } from "@stackk-career/schemas/api/blocks";
-import { parseBlock } from "@stackk-career/schemas/resume-blocks";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { generateLexoKeyBetween } from "../indexing";
@@ -20,7 +20,7 @@ export const blocksRouter = {
 			context.log?.set({ outcome: "resume_not_found" });
 
 			throw new ORPCError("NOT_FOUND", {
-				message: "Resume not found",
+				message: "No se encontró tu CV",
 			});
 		}
 

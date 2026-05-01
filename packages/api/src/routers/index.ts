@@ -2,7 +2,7 @@ import type { RouterClient } from "@orpc/server";
 
 import { publicProcedure } from "../index";
 import { agentsRouter } from "./agents";
-import { filesRelationsRouter } from "./files";
+import { filesMetadataRouter } from "./files-metadata";
 import { generationsRouter } from "./generations";
 import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
@@ -16,7 +16,7 @@ export const appRouter = {
 		return "OK";
 	}),
 	agents: agentsRouter,
-	files: filesRelationsRouter,
+	filesMetadata: filesMetadataRouter,
 	generations: generationsRouter,
 	messages: messagesRouter,
 	onboardingProfile: onboardingProfileRouter,

@@ -3,6 +3,10 @@ import { blockPayloadSchema } from "../ai/resume-blocks";
 import { insertResumeBlocksSchema } from "../db/resume-blocks";
 
 export const createBlockApiMutationSchema = insertResumeBlocksSchema
+	.omit({
+		blockType: true,
+		content: true,
+	})
 	.extend({
 		before: z.string().nullable(),
 		after: z.string().nullable(),

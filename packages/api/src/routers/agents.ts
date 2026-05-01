@@ -4,7 +4,7 @@ import type { resumeAgentTask } from "@stackk-career/jobs";
 import { initiateResumeAnalysisInputSchema } from "@stackk-career/schemas/api/agents";
 import { tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
-import { protectedProcedure } from "../index";
+import { protectedProcedure } from "../";
 
 export const agentsRouter = {
 	initiateResumeAnalysis: protectedProcedure

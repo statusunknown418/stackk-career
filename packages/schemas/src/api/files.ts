@@ -1,9 +1,10 @@
-import { z } from "zod";
+import type { z } from "zod";
+import { insertFileMetadataSchema } from "../db/file-metadata";
 
-export const linkFileInputSchema = z.object({
-	userId: z.string().nonempty(),
-	url: z.string().nonempty(),
-	storageId: z.string().nullable(),
+export const linkFileInputSchema = insertFileMetadataSchema.required({
+	storageId: true,
+	url: true,
+	userId: true,
 });
 
 export type LinkFileInput = z.infer<typeof linkFileInputSchema>;

@@ -1,12 +1,14 @@
 import { z } from "zod";
+import { insertOnboardingProfileSchema } from "../db/onboarding-profile";
 
 export const onboardingProfileUpsertInputSchema = z
-	.object({
-		experience: z.string().nullish(),
-		industry: z.string().nullish(),
-		targetRole: z.string().nullish(),
-		urgency: z.string().nullish(),
-		location: z.string().nullish(),
+	.object(insertOnboardingProfileSchema.shape)
+	.pick({
+		experience: true,
+		industry: true,
+		location: true,
+		targetRole: true,
+		urgency: true,
 	})
 	.partial();
 

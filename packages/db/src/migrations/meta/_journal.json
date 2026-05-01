@@ -22,6 +22,13 @@
       "when": 1777493159545,
       "tag": "0002_youthful_vector",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1777601548647,
+      "tag": "0003_tense_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { Output, streamText } from "ai";
+import { getUserMetadataTool } from "../tools/get-user-metadatats";
 
 export const RESUME_ANALYSIS_MODEL = "google/gemini-3-flash";
 export const RESUME_ANALYSIS_OBJECT_TYPE = "resume-analysis";
@@ -17,8 +18,12 @@ export function runResumeAnalysisAgent({ pdfUrl, signal }: RunResumeAnalysisInpu
 		system: `
 You are an expert resume analyst. Analyze the attached PDF resume and return structured JSON conforming to the provided schema.
 
-Before starting:
+# Guardrails:
 - You should REJECT any file that doesn't look like a resume, anything other than resumes will NOT be processed by you
+- DO NOT attempt to analyze files that do not have a resume-like structure
+
+# User context
+- It would be relevant to get the user data or profile via using the getUserMetadataTool to crosscheck the resume and better tailor suggestions
 
 Hard rules:
 - Ground every score and suggestion strictly in the PDF content. Do not invent experience, skills, or facts.
@@ -51,12 +56,8 @@ Language:
 				],
 			},
 		],
-		providerOptions: {
-			google: {
-				thinkingConfig: {
-					includeThoughts: true,
-				},
-			},
+		tools: {
+			getUserMetadataTool,
 		},
 	});
 }

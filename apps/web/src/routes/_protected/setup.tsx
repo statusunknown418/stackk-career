@@ -1,10 +1,11 @@
-import { useChat } from "@ai-sdk/react";
 import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import type { resumeAgentTask } from "@stackk-career/jobs/trigger/tasks/analyse-resume";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { type DeepPartial, DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useMemo, useRef } from "react";
+import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
+import type { DeepPartial } from "ai";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ResumeAnalysisPanel } from "@/components/domains/setup.analysis/resume-analysis";
@@ -26,15 +27,9 @@ const setupSearchSchema = z.object({
 export const Route = createFileRoute("/_protected/setup")({
 	component: RouteComponent,
 	validateSearch: setupSearchSchema,
-	beforeLoad: async ({ search }) => {
+	beforeLoad: ({ search }) => {
 		if (search.step && !search.generationId) {
 			throw redirect({ to: "/setup", search: {}, replace: true });
-		}
-
-		const genId = search.generationId;
-
-		if (genId) {
-			await orpc.generations.get.call({ id: genId });
 		}
 	},
 });
@@ -98,41 +93,42 @@ function RouteComponent() {
 	return <SetupChatView fileId={search.storeId} generationId={search.generationId} />;
 }
 
+interface ResumeStreams {
+	"resume-analysis": DeepPartial<ResumeAnalysis>;
+}
+
 function SetupChatView({ fileId, generationId }: { fileId: string | undefined; generationId: string }) {
 	const search = Route.useSearch();
 	const navigate = Route.useNavigate();
+	const queryClient = useQueryClient();
 	const hasStartedRef = useRef(false);
+	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string } | null>(null);
 
-	const cachedAnalysis = useQuery(
-		orpc.generations.getResumeAnalysis.queryOptions({
-			input: { generationId },
-			staleTime: Number.POSITIVE_INFINITY,
+	const cachedAnalysisOptions = orpc.generations.getResumeAnalysis.queryOptions({
+		input: { generationId },
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+	const cachedAnalysis = useQuery(cachedAnalysisOptions);
+
+	const initiateAnalysis = useMutation(
+		orpc.agents.initiateResumeAnalysis.mutationOptions({
+			onSuccess: ({ runId, publicAccessToken }) => {
+				setRunHandle({ runId, accessToken: publicAccessToken });
+			},
+			onError: (mutationError) => {
+				toast.error(mutationError.message || "No se pudo iniciar el análisis.");
+				navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "error" }) });
+			},
 		})
 	);
 
-	const transport = useMemo(
-		() =>
-			new DefaultChatTransport<UIMessage>({
-				api: "/api/ai/analyze-resume",
-				body: { fileId, generationId },
-			}),
-		[fileId, generationId]
-	);
-
-	const { messages, sendMessage, status, error } = useChat<UIMessage>({
-		transport,
-		onFinish: ({ isAbort, isError, isDisconnect }) => {
-			if (isAbort) {
-				navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "aborted" }) });
-				return;
-			}
-			if (isError || isDisconnect) {
-				navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "error" }) });
-				return;
-			}
-			navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "complete" }) });
-		},
-	});
+	const handleRetry = () => {
+		setRunHandle(null);
+		hasStartedRef.current = true;
+		queryClient.setQueryData(cachedAnalysisOptions.queryKey, null);
+		navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: undefined }) });
+		initiateAnalysis.mutate({ generationId });
+	};
 
 	const hasCached = Boolean(cachedAnalysis.data);
 
@@ -148,19 +144,51 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 			return;
 		}
 		hasStartedRef.current = true;
-		sendMessage({ text: "analyze" });
-	}, [fileId, generationId, sendMessage, cachedAnalysis.isLoading, hasCached]);
+		initiateAnalysis.mutate({ generationId });
+	}, [fileId, generationId, cachedAnalysis.isLoading, hasCached, initiateAnalysis]);
 
-	const isStreaming = status === "streaming" || status === "submitted";
-	const lastAssistant = messages.at(-1)?.role === "assistant" ? messages.at(-1) : undefined;
-	const showAnalysis = Boolean(fileId);
+	const {
+		run,
+		streams,
+		error: realtimeError,
+	} = useRealtimeRunWithStreams<typeof resumeAgentTask, ResumeStreams>(runHandle?.runId, {
+		accessToken: runHandle?.accessToken,
+		enabled: Boolean(runHandle),
+		onComplete: () => {
+			queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
+		},
+	});
 
-	const streamedAnalysis = lastAssistant?.parts.find(
-		(part): part is { type: "data-analysis"; id?: string; data: DeepPartial<ResumeAnalysis> } =>
-			part.type === "data-analysis"
-	)?.data;
+	const streamedAnalysis = streams["resume-analysis"]?.at(-1);
 	const analysisData: DeepPartial<ResumeAnalysis> | undefined = cachedAnalysis.data ?? streamedAnalysis;
-	const isAnalysisComplete = hasCached || search.analysisStatus === "complete";
+
+	const runStatus = run?.status;
+	const isCompleted = hasCached || runStatus === "COMPLETED";
+	const isFailed =
+		runStatus === "FAILED" ||
+		runStatus === "CANCELED" ||
+		runStatus === "CRASHED" ||
+		runStatus === "SYSTEM_FAILURE" ||
+		runStatus === "TIMED_OUT" ||
+		runStatus === "EXPIRED";
+	const isRunActive = Boolean(runHandle) && runStatus === "EXECUTING";
+	const isStreaming = initiateAnalysis.isPending || isRunActive;
+	const error =
+		realtimeError ??
+		(isFailed ? new Error("Algo ocurrió con el analisis, por favor intenta nuevamente en unos minutos") : undefined);
+
+	useEffect(() => {
+		if (isCompleted && search.analysisStatus !== "complete") {
+			navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "complete" }) });
+			return;
+		}
+		if (isFailed && search.analysisStatus !== "error") {
+			navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: "error" }) });
+		}
+	}, [isCompleted, isFailed, search.analysisStatus, navigate]);
+
+	const showAnalysis = Boolean(fileId);
+	const isAnalysisComplete = isCompleted;
 
 	return (
 		<section className="mx-auto grid w-full max-w-6xl grid-rows-[auto_1fr] gap-4 p-4">
@@ -178,9 +206,9 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 				)}
 			</nav>
 
-			<main className={cn("grid min-h-full min-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
+			<main className={cn("grid min-h-full min-w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
 				<Frame className="max-h-[85svh]">
-					<OnboardingChat assistantMessage={lastAssistant} isAnalysisStreaming={isStreaming} />
+					<OnboardingChat isAnalysisStreaming={isStreaming} />
 
 					{isAnalysisComplete && (
 						<BlurFade>
@@ -195,7 +223,12 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 
 				{showAnalysis && (
 					<BlurFade>
-						<ResumeAnalysisPanel analysis={analysisData} error={error} isStreaming={isStreaming && !hasCached} />
+						<ResumeAnalysisPanel
+							analysis={analysisData}
+							error={error}
+							isStreaming={isStreaming && !hasCached}
+							onRetry={handleRetry}
+						/>
 					</BlurFade>
 				)}
 			</main>

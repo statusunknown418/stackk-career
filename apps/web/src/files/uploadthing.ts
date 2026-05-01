@@ -2,6 +2,7 @@ import { call } from "@orpc/server";
 import { createContext } from "@stackk-career/api/context";
 import { startRequestLog, withRequestLog } from "@stackk-career/api/logging";
 import { appRouter } from "@stackk-career/api/routers/index";
+import { insertFileMetadataSchema } from "@stackk-career/schemas/db/file-metadata";
 import type { FileRouter } from "uploadthing/server";
 import { createUploadthing, UploadThingError } from "uploadthing/server";
 import { getUser } from "@/functions/get-user";
@@ -15,14 +16,15 @@ export const uploadRouter = {
 			maxFileCount: 1,
 		},
 	})
-		.middleware(async () => {
+		.input(insertFileMetadataSchema.pick({ generationId: true }))
+		.middleware(async ({ input }) => {
 			const user = await getUser();
 
 			if (!user) {
 				throw new UploadThingError("Unauthorized");
 			}
 
-			return { userId: user.user.id };
+			return { userId: user.user.id, input };
 		})
 		.onUploadComplete(({ metadata, file, req }) => {
 			const log = startRequestLog({
@@ -40,8 +42,13 @@ export const uploadRouter = {
 
 			return withRequestLog(log, async () => {
 				const insertDb = await call(
-					appRouter.files.link,
-					{ url: file.ufsUrl, userId: metadata.userId, storageId: file.customId },
+					appRouter.filesMetadata.link,
+					{
+						url: file.ufsUrl,
+						userId: metadata.userId,
+						storageId: file.customId,
+						generationId: metadata.input.generationId,
+					},
 					{
 						context: createContext({
 							req,
@@ -50,7 +57,12 @@ export const uploadRouter = {
 					}
 				);
 
-				return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, storedId: insertDb.id };
+				return {
+					uploadedBy: metadata.userId,
+					fileUrl: file.ufsUrl,
+					storedId: insertDb.id,
+					generationId: metadata.input.generationId,
+				};
 			});
 		}),
 } satisfies FileRouter;
