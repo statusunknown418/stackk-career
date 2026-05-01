@@ -1,0 +1,1 @@
+ALTER TABLE `fileMetadata` ADD `name` text;

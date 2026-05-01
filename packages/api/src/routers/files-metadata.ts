@@ -1,0 +1,39 @@
+import { ORPCError } from "@orpc/server";
+import { fileMetadata } from "@stackk-career/db/schema/file-metadata";
+import { linkFileInputSchema } from "@stackk-career/schemas/api/files";
+import { publicProcedure } from "..";
+
+export const filesMetadataRouter = {
+	link: publicProcedure.input(linkFileInputSchema).handler(async ({ context, input }) => {
+		context.log?.set({
+			action: "link_file",
+			file: {
+				...input,
+				storageId: input.storageId,
+				url: input.url,
+				generation: input.generationId,
+			},
+			user: { id: input.userId },
+		});
+
+		const [row] = await context.db.insert(fileMetadata).values(input).returning({ id: fileMetadata.id });
+
+		if (!row) {
+			const error = new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to link file" });
+			context.log?.set({ outcome: "insert_failed" });
+			context.log?.error(error);
+			throw error;
+		}
+
+		context.log?.set({
+			file: {
+				id: row.id,
+				storageId: input.storageId,
+				url: input.url,
+			},
+			outcome: "linked",
+		});
+
+		return row;
+	}),
+};

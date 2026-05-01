@@ -238,6 +238,9 @@ importers:
       '@stackk-career/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@stackk-career/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       '@stackk-career/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
