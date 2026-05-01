@@ -128,13 +128,13 @@ importers:
     dependencies:
       fumadocs-core:
         specifier: 16.7.16
-        version: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6)
+        version: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1)
       fumadocs-mdx:
         specifier: 14.3.0
-        version: 14.3.0(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 14.3.0(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
       fumadocs-ui:
         specifier: 16.7.16
-        version: 16.7.16(@tailwindcss/oxide@4.2.4)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
+        version: 16.7.16(@tailwindcss/oxide@4.2.4)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.5)
@@ -170,8 +170,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       postcss:
-        specifier: ^8.5.12
-        version: 8.5.12
+        specifier: ^8.5.13
+        version: 8.5.13
       tailwindcss:
         specifier: ^4.2.4
         version: 4.2.4
@@ -183,7 +183,7 @@ importers:
     dependencies:
       '@ai-sdk/react':
         specifier: ^3.0.172
-        version: 3.0.172(react@19.2.5)(zod@4.3.6)
+        version: 3.0.172(react@19.2.5)(zod@4.4.1)
       '@base-ui/react':
         specifier: ^1.4.1
         version: 1.4.1(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -201,7 +201,7 @@ importers:
         version: 1.2.2(react@19.2.5)
       '@orpc/ai-sdk':
         specifier: 'catalog:'
-        version: 1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.3.6))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
+        version: 1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.4.1))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
       '@orpc/client':
         specifier: 'catalog:'
         version: 1.14.0(@opentelemetry/api@1.9.0)
@@ -216,7 +216,7 @@ importers:
         version: 1.14.0(@opentelemetry/api@1.9.0)(@orpc/client@1.14.0(@opentelemetry/api@1.9.0))(@tanstack/query-core@5.100.6)
       '@orpc/zod':
         specifier: 'catalog:'
-        version: 1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.3.6)
+        version: 1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.4.1)
       '@paper-design/shaders-react':
         specifier: ^0.0.76
         version: 0.0.76(@types/react@19.2.14)(react@19.2.5)
@@ -288,7 +288,7 @@ importers:
         version: 12.10.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       ai:
         specifier: 'catalog:'
-        version: 6.0.170(zod@4.3.6)
+        version: 6.0.170(zod@4.4.1)
       ansi-to-react:
         specifier: ^6.2.6
         version: 6.2.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -315,7 +315,7 @@ importers:
         version: 8.6.0(react@19.2.5)
       evlog:
         specifier: 'catalog:'
-        version: 2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.3.6))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.4.1))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
       libsql:
         specifier: 'catalog:'
         version: 0.5.22
@@ -421,7 +421,7 @@ importers:
     dependencies:
       '@orpc/ai-sdk':
         specifier: 'catalog:'
-        version: 1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.3.6))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
+        version: 1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.4.1))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
       '@orpc/client':
         specifier: 'catalog:'
         version: 1.14.0(@opentelemetry/api@1.9.0)
@@ -433,7 +433,7 @@ importers:
         version: 1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
       '@orpc/zod':
         specifier: 'catalog:'
-        version: 1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.3.6)
+        version: 1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.4.1)
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -454,13 +454,13 @@ importers:
         version: link:../schemas
       '@trigger.dev/sdk':
         specifier: 'catalog:'
-        version: 4.4.4(ai@6.0.170(zod@4.3.6))(zod@4.3.6)
+        version: 4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)
       '@upstash/redis':
         specifier: ^1.37.0
         version: 1.37.0
       ai:
         specifier: 'catalog:'
-        version: 6.0.170(zod@4.3.6)
+        version: 6.0.170(zod@4.4.1)
       dotenv:
         specifier: 'catalog:'
         version: 17.4.2
@@ -469,7 +469,7 @@ importers:
         version: 0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16)
       evlog:
         specifier: 'catalog:'
-        version: 2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.3.6))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.4.1))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
     devDependencies:
       '@stackk-career/config':
         specifier: workspace:*
@@ -577,10 +577,10 @@ importers:
         version: link:../schemas
       '@trigger.dev/sdk':
         specifier: 'catalog:'
-        version: 4.4.4(ai@6.0.170(zod@4.3.6))(zod@4.3.6)
+        version: 4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)
       ai:
         specifier: 'catalog:'
-        version: 6.0.170(zod@4.3.6)
+        version: 6.0.170(zod@4.4.1)
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16)
@@ -2197,8 +2197,8 @@ packages:
       '@cfworker/json-schema':
         optional: true
 
-  '@mongodb-js/saslprep@1.4.8':
-    resolution: {integrity: sha512-kpjr2jy2w71w0oqAMI8oibBmiF9lXxWkEQs5gMkW4hVE48bsqINGLxnCSYW62ck/NHXJQpQEfA9WlJ1sY0eqBg==}
+  '@mongodb-js/saslprep@1.4.10':
+    resolution: {integrity: sha512-DDb3OAw8ezai9p2i1F7R5wMVmyrMIuT8ixjV56R4Hl4cazCo2tOMTDyPR5rrCUcHiMbWHzCXOdife5OD6H1C8w==}
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3':
     resolution: {integrity: sha512-QZHtlVgbAdy2zAqNA9Gu1UpIuI8Xvsd1v8ic6B2pZmeFnFcMWiPLfWXh7TVw4eGEZ/C9TH281KwhVoeQUKbyjw==}
@@ -6496,8 +6496,8 @@ packages:
   multipasta@0.2.7:
     resolution: {integrity: sha512-KPA58d68KgGil15oDqXjkUBEBYc00XvbPj5/X+dyzeo/lWm9Nc25pQRlf1D+gv4OpK7NM0J1odrbu9JNNGvynA==}
 
-  nanoid@3.3.11:
-    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
+  nanoid@3.3.12:
+    resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -6786,8 +6786,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.12:
-    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
+  postcss@8.5.13:
+    resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
     engines: {node: ^10 || ^12 || >=14}
 
   prettier@3.8.3:
@@ -7663,6 +7663,7 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   vary@1.1.2:
@@ -7912,6 +7913,9 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
+
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
     engines: {node: '>=12.7.0'}
@@ -7932,28 +7936,28 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.105(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.105(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
       '@vercel/oidc': 3.2.0
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@ai-sdk/provider-utils@4.0.24(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.24(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.8
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@ai-sdk/provider@3.0.9':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.172(react@19.2.5)(zod@4.3.6)':
+  '@ai-sdk/react@3.0.172(react@19.2.5)(zod@4.4.1)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
-      ai: 6.0.170(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
+      ai: 6.0.170(zod@4.4.1)
       react: 19.2.5
       swr: 2.4.1(react@19.2.5)
       throttleit: 2.1.0
@@ -8134,7 +8138,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)':
+  '@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)':
     dependencies:
       '@better-auth/utils': 0.3.1
       '@better-fetch/fetch': 1.1.21
@@ -8145,38 +8149,38 @@ snapshots:
       nanostores: 1.3.0
       zod: 4.3.6
 
-  '@better-auth/drizzle-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))':
+  '@better-auth/drizzle-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
     optionalDependencies:
       drizzle-orm: 0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16)
 
-  '@better-auth/kysely-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(kysely@0.28.16)':
+  '@better-auth/kysely-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(kysely@0.28.16)':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
       kysely: 0.28.16
 
-  '@better-auth/memory-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)':
+  '@better-auth/memory-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
 
-  '@better-auth/mongo-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(mongodb@7.1.1)':
+  '@better-auth/mongo-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(mongodb@7.1.1)':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
       mongodb: 7.1.1
 
-  '@better-auth/prisma-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)':
+  '@better-auth/prisma-adapter@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
 
-  '@better-auth/telemetry@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))':
+  '@better-auth/telemetry@1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))':
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
       '@better-auth/utils': 0.3.1
       '@better-fetch/fetch': 1.1.21
 
@@ -9079,7 +9083,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mongodb-js/saslprep@1.4.8':
+  '@mongodb-js/saslprep@1.4.10':
     dependencies:
       sparse-bitfield: 3.0.3
 
@@ -9296,13 +9300,13 @@ snapshots:
 
   '@orama/orama@3.1.18': {}
 
-  '@orpc/ai-sdk@1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.3.6))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)':
+  '@orpc/ai-sdk@1.14.0(@opentelemetry/api@1.9.0)(ai@6.0.170(zod@4.4.1))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)':
     dependencies:
       '@orpc/client': 1.14.0(@opentelemetry/api@1.9.0)
       '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
       '@orpc/server': 1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
       '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
-      ai: 6.0.170(zod@4.3.6)
+      ai: 6.0.170(zod@4.4.1)
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - crossws
@@ -9449,7 +9453,7 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/zod@1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.3.6)':
+  '@orpc/zod@1.14.0(@opentelemetry/api@1.9.0)(@orpc/contract@1.14.0(@opentelemetry/api@1.9.0))(@orpc/server@1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0))(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)(zod@4.4.1)':
     dependencies:
       '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
       '@orpc/json-schema': 1.14.0(@opentelemetry/api@1.9.0)(crossws@0.4.5(srvx@0.11.15))(ws@8.20.0)
@@ -9458,7 +9462,7 @@ snapshots:
       '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
       escape-string-regexp: 5.0.0
       wildcard-match: 5.1.4
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - crossws
@@ -10601,7 +10605,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.4
       '@tailwindcss/oxide': 4.2.4
-      postcss: 8.5.12
+      postcss: 8.5.13
       tailwindcss: 4.2.4
 
   '@tailwindcss/vite@4.2.4(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))':
@@ -10990,7 +10994,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.4(ai@6.0.170(zod@4.3.6))(zod@4.3.6)':
+  '@trigger.dev/sdk@4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -11004,9 +11008,9 @@ snapshots:
       uncrypto: 0.1.3
       uuid: 9.0.1
       ws: 8.20.0
-      zod: 4.3.6
+      zod: 4.4.1
     optionalDependencies:
-      ai: 6.0.170(zod@4.3.6)
+      ai: 6.0.170(zod@4.4.1)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -11309,13 +11313,13 @@ snapshots:
 
   acorn@8.16.0: {}
 
-  ai@6.0.170(zod@4.3.6):
+  ai@6.0.170(zod@4.4.1):
     dependencies:
-      '@ai-sdk/gateway': 3.0.105(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.105(zod@4.4.1)
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   ajv-formats@3.0.1(ajv@8.20.0):
     optionalDependencies:
@@ -11392,13 +11396,13 @@ snapshots:
 
   better-auth@1.5.5(@tanstack/react-start@1.167.52(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(mongodb@7.1.1)(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
-      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
-      '@better-auth/drizzle-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))
-      '@better-auth/kysely-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(kysely@0.28.16)
-      '@better-auth/memory-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)
-      '@better-auth/mongo-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(mongodb@7.1.1)
-      '@better-auth/prisma-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)
-      '@better-auth/telemetry': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.3.6))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))
+      '@better-auth/core': 1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0)
+      '@better-auth/drizzle-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))
+      '@better-auth/kysely-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(kysely@0.28.16)
+      '@better-auth/memory-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)
+      '@better-auth/mongo-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)(mongodb@7.1.1)
+      '@better-auth/prisma-adapter': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))(@better-auth/utils@0.3.1)
+      '@better-auth/telemetry': 1.5.5(@better-auth/core@1.5.5(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(better-call@1.3.2(zod@4.4.1))(jose@6.2.2)(kysely@0.28.16)(nanostores@1.3.0))
       '@better-auth/utils': 0.3.1
       '@better-fetch/fetch': 1.1.21
       '@noble/ciphers': 2.2.0
@@ -12378,10 +12382,10 @@ snapshots:
     dependencies:
       eventsource-parser: 3.0.7
 
-  evlog@2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.3.6))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
+  evlog@2.14.1(@tanstack/start-client-core@1.167.21)(ai@6.0.170(zod@4.4.1))(express@5.2.1)(hono@4.12.15)(nitro@3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(ofetch@2.0.0-alpha.3)(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
     optionalDependencies:
       '@tanstack/start-client-core': 1.167.21
-      ai: 6.0.170(zod@4.3.6)
+      ai: 6.0.170(zod@4.4.1)
       express: 5.2.1(supports-color@10.2.2)
       hono: 4.12.15
       nitro: 3.0.260415-beta(@libsql/client@0.15.15)(@upstash/redis@1.37.0)(chokidar@5.0.0)(dotenv@17.4.2)(drizzle-orm@0.45.2(@libsql/client@0.15.15)(@opentelemetry/api@1.9.0)(@upstash/redis@1.37.0)(kysely@0.28.16))(giget@2.0.0)(jiti@2.6.1)(lru-cache@11.3.5)(mongodb@7.1.1)(uploadthing@7.7.4(express@5.2.1)(tailwindcss@4.2.4))(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -12523,7 +12527,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6):
+  fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1):
     dependencies:
       '@orama/orama': 3.1.18
       '@shikijs/transformers': 4.0.2
@@ -12553,18 +12557,18 @@ snapshots:
       next: 16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-mdx@14.3.0(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
+  fumadocs-mdx@14.3.0(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@standard-schema/spec': 1.1.0
       chokidar: 5.0.0
       esbuild: 0.28.0
       estree-util-value-to-estree: 3.5.0
-      fumadocs-core: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6)
+      fumadocs-core: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1)
       js-yaml: 4.1.1
       mdast-util-mdx: 3.0.0
       mdast-util-to-markdown: 2.1.2
@@ -12587,7 +12591,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-ui@16.7.16(@tailwindcss/oxide@4.2.4)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4):
+  fumadocs-ui@16.7.16(@tailwindcss/oxide@4.2.4)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(fumadocs-core@16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4):
     dependencies:
       '@fumadocs/tailwind': 0.0.5(@tailwindcss/oxide@4.2.4)(tailwindcss@4.2.4)
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -12601,7 +12605,7 @@ snapshots:
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.5)
       '@radix-ui/react-tabs': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       class-variance-authority: 0.7.1
-      fumadocs-core: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.3.6)
+      fumadocs-core: 16.7.16(@mdx-js/mdx@3.1.1)(@tanstack/react-router@1.168.26(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.5))(next@16.2.3(@opentelemetry/api@1.9.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(zod@4.4.1)
       lucide-react: 1.14.0(react@19.2.5)
       motion: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next-themes: 0.4.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -13801,7 +13805,7 @@ snapshots:
 
   mongodb@7.1.1:
     dependencies:
-      '@mongodb-js/saslprep': 1.4.8
+      '@mongodb-js/saslprep': 1.4.10
       bson: 7.2.0
       mongodb-connection-string-url: 7.0.1
 
@@ -13839,7 +13843,7 @@ snapshots:
 
   multipasta@0.2.7: {}
 
-  nanoid@3.3.11: {}
+  nanoid@3.3.12: {}
 
   nanoid@3.3.8: {}
 
@@ -14134,13 +14138,13 @@ snapshots:
 
   postcss@8.4.31:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 3.3.12
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.12:
+  postcss@8.5.13:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 3.3.12
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -15276,7 +15280,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.12
+      postcss: 8.5.13
       rolldown: 1.0.0-rc.17
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -15419,6 +15423,8 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.3.6: {}
+
+  zod@4.4.1: {}
 
   zustand@4.5.7(@types/react@19.2.14)(react@19.2.5):
     dependencies:
