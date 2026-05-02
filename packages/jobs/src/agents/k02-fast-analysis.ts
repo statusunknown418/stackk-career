@@ -2,18 +2,18 @@ import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis"
 import { Output, streamText } from "ai";
 import { createGetUserMetadataTool } from "../tools/get-user-metadata";
 
-export const RESUME_ANALYSIS_MODEL = "google/gemini-3-flash";
-export const RESUME_ANALYSIS_OBJECT_TYPE = "resume-analysis";
+export const K02_FAST_ANALYSIS_MODEL = "google/gemini-3-flash";
+export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis";
 
-export interface RunResumeAnalysisInput {
+export interface RunK02FastAnalysisInput {
 	pdfUrl: string;
 	signal?: AbortSignal;
 	userId: string;
 }
 
-export function runResumeAnalysisAgent({ pdfUrl, userId, signal }: RunResumeAnalysisInput) {
+export function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02FastAnalysisInput) {
 	return streamText({
-		model: RESUME_ANALYSIS_MODEL,
+		model: K02_FAST_ANALYSIS_MODEL,
 		output: Output.object({ schema: resumeAnalysisSchema }),
 		abortSignal: signal,
 		system: `
