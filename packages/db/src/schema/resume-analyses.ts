@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
-import { index, sqliteTable } from "drizzle-orm/sqlite-core";
+import { type AnySQLiteColumn, index, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth";
 import { generations } from "./generations";
 import { resumes } from "./resumes";
@@ -18,13 +18,13 @@ export const resumeAnalyses = sqliteTable(
 		generationId: t
 			.text()
 			.notNull()
-			.unique()
 			.references(() => generations.id, { onDelete: "cascade" }),
 		userId: t
 			.text()
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
 		resumeId: t.text().references(() => resumes.id, { onDelete: "set null" }),
+		parentAnalysisId: t.text().references((): AnySQLiteColumn => resumeAnalyses.id, { onDelete: "set null" }),
 
 		status: t.text({ enum: resumeAnalysisStatusEnum }).notNull().default("pending"),
 
@@ -41,10 +41,14 @@ export const resumeAnalyses = sqliteTable(
 			.notNull()
 			.$onUpdateFn(() => new Date()),
 	}),
-	(t) => [index("ra_status_idx").on(t.status), index("ra_resume_idx").on(t.resumeId)]
+	(t) => [
+		index("ra_resume_idx").on(t.resumeId),
+		index("ra_gen_idx").on(t.generationId),
+		index("ra_parent_idx").on(t.parentAnalysisId),
+	]
 );
 
-export const resumeAnalysesRelations = relations(resumeAnalyses, ({ one }) => ({
+export const resumeAnalysesRelations = relations(resumeAnalyses, ({ one, many }) => ({
 	generation: one(generations, {
 		fields: [resumeAnalyses.generationId],
 		references: [generations.id],
@@ -57,4 +61,10 @@ export const resumeAnalysesRelations = relations(resumeAnalyses, ({ one }) => ({
 		fields: [resumeAnalyses.resumeId],
 		references: [resumes.id],
 	}),
+	parent: one(resumeAnalyses, {
+		fields: [resumeAnalyses.parentAnalysisId],
+		references: [resumeAnalyses.id],
+		relationName: "parent_analysis",
+	}),
+	children: many(resumeAnalyses, { relationName: "parent_analysis" }),
 }));

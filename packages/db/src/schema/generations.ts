@@ -39,8 +39,5 @@ export const generationsRelations = relations(generations, ({ one, many }) => ({
 		fields: [generations.owner],
 		references: [user.id],
 	}),
-	resumeAnalysis: one(resumeAnalyses, {
-		fields: [generations.id],
-		references: [resumeAnalyses.generationId],
-	}),
+	resumeAnalysis: many(resumeAnalyses),
 }));
