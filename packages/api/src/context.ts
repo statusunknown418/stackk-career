@@ -13,7 +13,6 @@ export async function createContext({ req, log }: CreateContextOptions) {
 	});
 
 	return {
-		auth: null,
 		session,
 		db,
 		log,

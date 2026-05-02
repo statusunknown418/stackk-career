@@ -5,7 +5,7 @@ allowBuilds:
   esbuild: true
   sharp: true
 catalog:
-  ai: ^6.0.170
+  ai: ^6.0.174
   "@libsql/client": 0.15.15
   "@orpc/ai-sdk": ^1.14.0
   "@orpc/client": ^1.14.0
@@ -24,10 +24,10 @@ catalog:
   react-dom: ^19.2.5
   sonner: ^2.0.7
   tailwindcss: ^4.2.4
-  zod: ^4.3.6
-  "evlog": "^2.14.0"
-  "@trigger.dev/sdk": ^4.4.4
-  "@trigger.dev/react-hooks": ^4.4.4
-  "trigger.dev": ^4.4.4
+  zod: ^4.4.2
+  "evlog": "^2.14.1"
+  "@trigger.dev/sdk": ^4.4.5
+  "@trigger.dev/react-hooks": ^4.4.5
+  "trigger.dev": ^4.4.5
   drizzle-orm: ^0.45.2
   drizzle-zod: ^0.8.3

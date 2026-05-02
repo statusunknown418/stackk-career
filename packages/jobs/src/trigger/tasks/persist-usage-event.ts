@@ -24,7 +24,7 @@ export const persistUsageEventTask = schemaTask({
 			provider: payload.provider,
 			model: payload.model,
 			totalTokens: payload.totalTokens,
-			metadat: payload.metadata,
+			metadata: payload.metadata,
 		});
 
 		return { id: row?.id ?? null };

@@ -1,6 +1,6 @@
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { Output, streamText } from "ai";
-import { getUserMetadataTool } from "../tools/get-user-metadatats";
+import { createGetUserMetadataTool } from "../tools/get-user-metadata";
 
 export const RESUME_ANALYSIS_MODEL = "google/gemini-3-flash";
 export const RESUME_ANALYSIS_OBJECT_TYPE = "resume-analysis";
@@ -8,9 +8,10 @@ export const RESUME_ANALYSIS_OBJECT_TYPE = "resume-analysis";
 export interface RunResumeAnalysisInput {
 	pdfUrl: string;
 	signal?: AbortSignal;
+	userId: string;
 }
 
-export function runResumeAnalysisAgent({ pdfUrl, signal }: RunResumeAnalysisInput) {
+export function runResumeAnalysisAgent({ pdfUrl, userId, signal }: RunResumeAnalysisInput) {
 	return streamText({
 		model: RESUME_ANALYSIS_MODEL,
 		output: Output.object({ schema: resumeAnalysisSchema }),
@@ -24,6 +25,7 @@ You are an expert resume analyst. Analyze the attached PDF resume and return str
 
 # User context
 - It would be relevant to get the user data or profile via using the getUserMetadataTool to crosscheck the resume and better tailor suggestions
+- The tool resolves the current user automatically; do not pass any arguments
 
 Hard rules:
 - Ground every score and suggestion strictly in the PDF content. Do not invent experience, skills, or facts.
@@ -57,7 +59,7 @@ Language:
 			},
 		],
 		tools: {
-			getUserMetadataTool,
+			getUserMetadataTool: createGetUserMetadataTool(userId),
 		},
 	});
 }

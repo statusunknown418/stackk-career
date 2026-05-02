@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { generations } from "@stackk-career/db/schema/generations";
 import type { resumeAgentTask } from "@stackk-career/jobs";
 import { initiateResumeAnalysisInputSchema } from "@stackk-career/schemas/api/agents";
-import { tasks } from "@trigger.dev/sdk";
+import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "../";
 
@@ -31,11 +31,15 @@ export const agentsRouter = {
 			}
 
 			try {
+				const idempotencyKey = await idempotencyKeys.create(`resume-${input.generationId}`);
+
 				const handle = await tasks.trigger<typeof resumeAgentTask>(
 					"resume-agent-task",
 					{ generationId: input.generationId, userId },
 					{
 						concurrencyKey: userId,
+						idempotencyKey,
+						idempotencyKeyTTL: "24h",
 						tags: [`user:${userId}`, `gen:${input.generationId}`],
 					}
 				);
