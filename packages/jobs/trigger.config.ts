@@ -9,7 +9,7 @@ config({ path: path.resolve(here, "../../.env"), quiet: true });
 const projectRef = process.env.TRIGGER_PROJECT_ID;
 
 if (!projectRef) {
-	throw new Error("TRIGGER_PROJECT_ID missing in root .env");
+	throw new Error("TRIGGER_PROJECT_ID missing in root/cloud .env");
 }
 
 export default defineConfig({
@@ -26,6 +26,6 @@ export default defineConfig({
 		},
 	},
 	build: {
-		extensions: [],
+		external: ["@libsql/client"],
 	},
 });

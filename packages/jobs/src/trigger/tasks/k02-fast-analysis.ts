@@ -1,4 +1,4 @@
-import { db } from "@stackk-career/db";
+import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { k02FastAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-fast-analysis";
@@ -20,6 +20,8 @@ export const k02FastAnalysisTask = schemaTask({
 	schema: k02FastAnalysisInputSchema,
 	maxDuration: 300,
 	run: async ({ analysisId, generationId, userId, pdfUrl }, { ctx, signal }) => {
+		const db = getTriggerDb();
+
 		logger.info("k02-fast-analysis = start", {
 			analysisId,
 			generationId,
@@ -96,6 +98,7 @@ export const k02FastAnalysisTask = schemaTask({
 	},
 
 	onFailure: async ({ payload, error, ctx }) => {
+		const db = getTriggerDb();
 		const message = error instanceof Error ? error.message : String(error);
 
 		logger.error("k02-fast-analysis = failed", {

@@ -8,6 +8,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const rootEnv = path.resolve(here, "../../../.env");
 config({ path: rootEnv, quiet: true });
 
+const skipValidation = process.env.SKIP_ENV_VALIDATION === "true" || process.env.TRIGGER_INDEXING === "1";
+
 export const env = createEnv({
 	server: {
 		DATABASE_URL: z.string().min(1),
@@ -32,5 +34,6 @@ export const env = createEnv({
 		AXIOM_DATASET: z.string().nonempty(),
 	},
 	runtimeEnv: process.env,
+	skipValidation,
 	emptyStringAsUndefined: true,
 });

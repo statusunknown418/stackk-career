@@ -10,7 +10,7 @@
   },
   "scripts": {
     "trigger:dev": "trigger dev",
-    "trigger:deploy": "trigger deploy",
+    "trigger:deploy": "SKIP_ENV_VALIDATION=true trigger deploy",
     "trigger:login": "trigger login",
     "check-types": "tsc --noEmit"
   },

@@ -5,6 +5,9 @@ import { drizzle } from "drizzle-orm/libsql";
 
 import * as schema from "./schema";
 
+/**
+ * @description Main DB connection setup - used on the api and anywhere else OUTSIDE of the `packages/job`
+ */
 export function createDb() {
 	const client = createClient({
 		url: env.DATABASE_URL,

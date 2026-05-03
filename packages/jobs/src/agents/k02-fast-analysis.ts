@@ -1,4 +1,4 @@
-import { db } from "@stackk-career/db";
+import { getTriggerDb } from "@stackk-career/db/http";
 import { user } from "@stackk-career/db/schema/auth";
 import { onboardingProfile } from "@stackk-career/db/schema/onboarding-profile";
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
@@ -6,7 +6,7 @@ import { Output, streamText } from "ai";
 import { eq } from "drizzle-orm";
 
 export const K02_FAST_ANALYSIS_MODEL = "google/gemini-3-flash";
-export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis";
+export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis-fast";
 
 export interface RunK02FastAnalysisInput {
 	pdfUrl: string;
@@ -26,6 +26,8 @@ interface UserMetadata {
 }
 
 async function getUserMetadata(userId: string): Promise<UserMetadata | null> {
+	const db = getTriggerDb();
+
 	const [row] = await db
 		.select()
 		.from(user)
