@@ -6,15 +6,18 @@ export function LandingFooter() {
 		<footer className="mx-auto max-w-[1200px] border-foreground/10 border-t px-6 pt-20 pb-10">
 			<div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
 				<div className="col-span-2 md:col-span-1">
-					<div className="flex items-baseline gap-1.5 font-display text-2xl text-foreground tracking-tight">
-						<span aria-hidden="true" className="font-display-italic text-3xl text-oxblood leading-none">
-							s
+					<div className="flex items-center gap-2">
+						<span
+							aria-hidden="true"
+							className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-oxblood to-marigold font-display font-extrabold text-[15px] text-white leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_12px_-2px_oklch(0.61_0.13_162_/_0.4)]"
+						>
+							i
 						</span>
-						<span className="font-medium">stackcv</span>
-						<span aria-hidden="true" className="ml-0.5 size-1.5 translate-y-[-3px] rounded-full bg-oxblood" />
+						<span className="font-bold font-display text-2xl text-foreground tracking-[-0.02em]">IMPULSA</span>
 					</div>
-					<p className="mt-4 max-w-[280px] font-serif text-base text-foreground/65 italic leading-relaxed">
-						Mentorías 1:1 de CV, LinkedIn y estrategia para recién graduados de LatAm.
+					<p className="mt-4 max-w-[280px] text-[14px] text-foreground/70 leading-[1.55]">
+						Plataforma de empleo con IA + coaching humano. Hecho en Perú, para todo LATAM. Tu carrera, sin techo de
+						cristal.
 					</p>
 				</div>
 
@@ -24,10 +27,7 @@ export function LandingFooter() {
 						<ul className="flex flex-col gap-2.5">
 							{col.links.map((link) => (
 								<li key={link.label}>
-									<a
-										className="font-serif text-base text-foreground/75 transition-colors hover:text-oxblood hover:italic"
-										href={link.href}
-									>
+									<a className="text-[14px] text-foreground/75 transition-colors hover:text-oxblood" href={link.href}>
 										{link.label}
 									</a>
 								</li>
@@ -39,11 +39,11 @@ export function LandingFooter() {
 
 			<div className="mt-16 grid items-end gap-6 border-foreground/10 border-t pt-8 md:grid-cols-3">
 				<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">
-					© 2026 stackcv · Buenos Aires · Bogotá
+					© 2026 IMPULSA · Lima · Bogotá · CDMX
 				</p>
 
 				<p className="text-center font-display-italic text-base text-foreground/55">
-					hecho a mano, una sesión a la vez.
+					Tu carrera, sin techo de cristal.
 				</p>
 
 				<div className="flex justify-end gap-2">
@@ -66,7 +66,7 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
 	return (
 		<a
 			aria-label={label}
-			className="grid size-9 place-items-center rounded-sm border border-foreground/15 text-foreground/60 transition hover:-translate-y-0.5 hover:border-oxblood hover:bg-oxblood hover:text-background"
+			className="grid size-9 place-items-center rounded-lg border border-foreground/15 text-foreground/60 transition hover:-translate-y-0.5 hover:border-oxblood hover:bg-oxblood hover:text-white"
 			href={href}
 		>
 			{children}

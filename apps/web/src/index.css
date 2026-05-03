@@ -15,14 +15,11 @@
 	--animate-toast-error-even: toast-error-even 0.28s
 		cubic-bezier(0.5, 1, 0.89, 1);
 
-	--font-heading:
-		"Fraunces", "Iowan Old Style", "Apple Garamond", Georgia, serif;
-	--font-display:
-		"Fraunces", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+	--font-heading: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
+	--font-display: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
 	--font-mono: "JetBrains Mono", "Geist Mono Variable", ui-monospace, monospace;
-	--font-sans: "Geist Variable", -apple-system, sans-serif;
-	--font-serif:
-		"Instrument Serif", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+	--font-sans: "Inter", "Plus Jakarta Sans", -apple-system, sans-serif;
+	--font-serif: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
 
 	--color-aurora-1: var(--aurora-1);
 	--color-aurora-2: var(--aurora-2);
@@ -289,23 +286,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.18 0.02 40);
-	--background: oklch(0.972 0.014 78);
-	--border: oklch(0.18 0.02 40 / 10%);
-	--card: oklch(0.985 0.01 78);
-	--card-foreground: oklch(0.18 0.02 40);
+	--accent-foreground: oklch(0.22 0.03 175);
+	--background: oklch(0.985 0.008 165);
+	--border: oklch(0.22 0.03 175 / 10%);
+	--card: oklch(0.995 0.005 165);
+	--card-foreground: oklch(0.22 0.03 175);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.18 0.02 40);
-	--input: oklch(0.18 0.02 40 / 12%);
-	--muted: oklch(0.18 0.02 40 / 5%);
-	--muted-foreground: oklch(0.42 0.025 50);
-	--popover: oklch(0.985 0.01 78);
-	--popover-foreground: oklch(0.18 0.02 40);
-	--primary: oklch(0.18 0.02 40);
-	--primary-foreground: oklch(0.98 0.012 78);
-	--ring: oklch(0.5 0.18 18);
-	--secondary: oklch(0.18 0.02 40 / 5%);
-	--secondary-foreground: oklch(0.18 0.02 40);
+	--foreground: oklch(0.22 0.03 175);
+	--input: oklch(0.22 0.03 175 / 12%);
+	--muted: oklch(0.22 0.03 175 / 5%);
+	--muted-foreground: oklch(0.42 0.04 175);
+	--popover: oklch(0.995 0.005 165);
+	--popover-foreground: oklch(0.22 0.03 175);
+	--primary: oklch(0.22 0.03 175);
+	--primary-foreground: oklch(0.985 0.008 165);
+	--ring: oklch(0.61 0.13 162);
+	--secondary: oklch(0.22 0.03 175 / 5%);
+	--secondary-foreground: oklch(0.22 0.03 175);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -330,25 +327,25 @@
 }
 
 :root {
-	--ink: oklch(0.18 0.02 40);
-	--paper: oklch(0.972 0.014 78);
-	--oxblood: oklch(0.46 0.18 22);
-	--marigold: oklch(0.78 0.16 65);
-	--rule: oklch(0.18 0.02 40 / 10%);
-	--aurora-1: oklch(0.82 0.14 65);
-	--aurora-2: oklch(0.46 0.18 22);
-	--aurora-3: oklch(0.62 0.18 30);
+	--ink: oklch(0.22 0.03 175);
+	--paper: oklch(0.985 0.008 165);
+	--oxblood: oklch(0.61 0.13 162);
+	--marigold: oklch(0.5 0.18 285);
+	--rule: oklch(0.22 0.03 175 / 10%);
+	--aurora-1: oklch(0.78 0.14 162);
+	--aurora-2: oklch(0.5 0.18 285);
+	--aurora-3: oklch(0.68 0.15 200);
 }
 
 .dark {
-	--ink: oklch(0.94 0.01 78);
-	--paper: oklch(0.16 0.018 30);
-	--oxblood: oklch(0.62 0.2 22);
-	--marigold: oklch(0.84 0.16 70);
-	--rule: oklch(0.94 0.01 78 / 12%);
-	--aurora-1: oklch(0.78 0.15 65);
-	--aurora-2: oklch(0.55 0.2 22);
-	--aurora-3: oklch(0.68 0.18 30);
+	--ink: oklch(0.96 0.012 165);
+	--paper: oklch(0.16 0.022 175);
+	--oxblood: oklch(0.72 0.16 162);
+	--marigold: oklch(0.7 0.18 285);
+	--rule: oklch(0.96 0.012 165 / 12%);
+	--aurora-1: oklch(0.78 0.15 162);
+	--aurora-2: oklch(0.62 0.2 285);
+	--aurora-3: oklch(0.7 0.16 200);
 }
 
 .dark {
@@ -362,10 +359,10 @@
 	--accent: --alpha(var(--color-white) / 4%);
 	--accent-foreground: oklch(0.94 0.01 78);
 
-	--background: oklch(0.16 0.018 30);
-	--border: oklch(0.94 0.01 78 / 8%);
-	--card: oklch(0.2 0.02 30);
-	--card-foreground: oklch(0.94 0.01 78);
+	--background: oklch(0.16 0.022 175);
+	--border: oklch(0.96 0.012 165 / 8%);
+	--card: oklch(0.2 0.024 175);
+	--card-foreground: oklch(0.96 0.012 165);
 	--destructive: color-mix(
 		in srgb,
 		var(--color-red-500) 90%,
@@ -431,21 +428,15 @@
 
 	.font-display {
 		font-family: var(--font-display);
-		font-variation-settings:
-			"opsz" 144,
-			"SOFT" 30,
-			"WONK" 0;
-		letter-spacing: -0.04em;
+		font-weight: 700;
+		letter-spacing: -0.025em;
 	}
 
 	.font-display-italic {
 		font-family: var(--font-display);
-		font-variation-settings:
-			"opsz" 144,
-			"SOFT" 100,
-			"WONK" 1;
 		font-style: italic;
-		letter-spacing: -0.025em;
+		font-weight: 500;
+		letter-spacing: -0.015em;
 	}
 
 	code,

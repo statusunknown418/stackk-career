@@ -30,22 +30,18 @@ export function TestimonialsCarousel() {
 			<div className="mx-auto mb-16 grid max-w-[1200px] gap-6 md:grid-cols-12">
 				<div className="md:col-span-8">
 					<div className="flex items-center gap-3">
-						<span className="font-display-italic text-2xl text-oxblood leading-none">§06</span>
+						<span className="font-mono text-[11px] text-oxblood uppercase tabular-nums tracking-[0.22em]">§06</span>
 						<span className="h-px max-w-[80px] flex-1 bg-foreground/20" />
-						<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.22em]">
-							Cartas a la redacción
-						</span>
+						<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.22em]">Casos reales</span>
 					</div>
-					<h2 className="mt-5 font-display font-medium text-[clamp(2.2rem,4.4vw,3.6rem)] leading-[0.98] tracking-[-0.04em]">
-						<span className="font-display-italic font-light text-oxblood">“</span>No me vendieron un curso.
-						<br />
-						Me cambiaron la carrera.
-						<span className="font-display-italic font-light text-oxblood">”</span>
+					<h2 className="mt-5 font-bold font-display text-[clamp(2.2rem,4.4vw,3.6rem)] leading-[1] tracking-[-0.035em]">
+						2.400+ CVs scoreados.{" "}
+						<span className="font-display-italic font-semibold text-oxblood">Cientos de ofertas</span> después.
 					</h2>
 				</div>
 				<div className="flex items-end md:col-span-3 md:col-start-10">
-					<p className="font-serif text-base text-foreground/70 italic leading-[1.5]">
-						380 testimonios verificados. Acá, una selección curada por nuestros editores.
+					<p className="text-[15px] text-foreground/70 leading-[1.55]">
+						380 reseñas verificadas con score 4.9/5. Una selección de Lima, Bogotá, CDMX, Buenos Aires y más.
 					</p>
 				</div>
 			</div>
@@ -103,13 +99,11 @@ function TestimonialCard({ testimonial, tilt }: { testimonial: Testimonial; tilt
 				</span>
 			</div>
 
-			<span aria-hidden="true" className="font-display font-medium text-5xl text-oxblood/70 leading-[0.4]">
+			<span aria-hidden="true" className="font-bold font-display text-5xl text-oxblood/60 leading-[0.4]">
 				“
 			</span>
 
-			<blockquote className="-mt-1 flex-1 font-display text-[1rem] text-foreground leading-[1.4] tracking-[-0.01em]">
-				{testimonial.quote}
-			</blockquote>
+			<blockquote className="-mt-1 flex-1 text-[14.5px] text-foreground leading-[1.5]">{testimonial.quote}</blockquote>
 
 			<footer className="flex items-center gap-3 border-foreground/10 border-t pt-4">
 				<span

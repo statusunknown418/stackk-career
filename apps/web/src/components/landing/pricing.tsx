@@ -1,7 +1,7 @@
 import { ArrowRightIcon, CheckIcon } from "@phosphor-icons/react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PLANS, type Plan } from "./data";
+import { PLANS, type Plan, SINGLE_SESSION } from "./data";
 
 export function Pricing() {
 	return (
@@ -9,33 +9,32 @@ export function Pricing() {
 			<div className="mx-auto mb-16 grid max-w-[1200px] gap-6 md:grid-cols-12">
 				<div className="md:col-span-7">
 					<div className="flex items-center gap-3">
-						<span className="font-display-italic text-2xl text-oxblood leading-none">§04</span>
+						<span className="font-mono text-[11px] text-oxblood uppercase tabular-nums tracking-[0.22em]">§04</span>
 						<span className="h-px max-w-[80px] flex-1 bg-foreground/20" />
 						<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.22em]">
-							Suscripciones · ninguna
+							Precios en soles · sin sorpresas
 						</span>
 					</div>
-					<h2 className="mt-5 font-display font-medium text-[clamp(2.2rem,4.4vw,3.6rem)] leading-[0.98] tracking-[-0.04em]">
-						Pagás <span className="font-display-italic font-light text-oxblood">una vez.</span> Mantenés el aprendizaje.
+					<h2 className="mt-5 font-bold font-display text-[clamp(2.2rem,4.4vw,3.6rem)] leading-[1] tracking-[-0.035em]">
+						Suscripciones simples. <span className="font-display-italic font-semibold text-oxblood">Cancelás</span>{" "}
+						cuando quieras.
 					</h2>
 				</div>
 				<div className="flex items-end md:col-span-4 md:col-start-9">
-					<p className="font-serif text-foreground/75 text-lg leading-[1.5]">
-						Sin suscripciones, sin sorpresas. El diagnóstico siempre es{" "}
-						<span className="font-medium font-sans text-foreground not-italic">gratis</span>.
+					<p className="text-[15px] text-foreground/75 leading-[1.55]">
+						Score CV <span className="font-semibold text-foreground">gratis para siempre</span>. Pro desde S/79/mes.
+						Premium para el camino completo de CV a oferta laboral.
 					</p>
 				</div>
 			</div>
 
-			<div className="mx-auto grid max-w-[1140px] grid-cols-1 gap-4 md:grid-cols-3">
+			<div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-4 md:grid-cols-3">
 				{PLANS.map((plan, idx) => (
 					<PriceCard key={plan.id} plan={plan} position={idx} />
 				))}
 			</div>
 
-			<p className="mx-auto mt-10 max-w-[600px] text-center font-serif text-base text-foreground/65 italic">
-				¿Dudas? El diagnóstico de 20 minutos es gratis. Si después no querés seguir, te vas con feedback útil.
-			</p>
+			<SingleSessionCard />
 		</section>
 	);
 }
@@ -43,14 +42,15 @@ export function Pricing() {
 function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 	const featured = plan.featured ?? false;
 	const planNumber = String(position + 1).padStart(2, "0");
+	const isFree = plan.priceSoles === 0;
 
 	return (
 		<div
 			className={cn(
-				"group relative flex flex-col overflow-hidden rounded-sm border p-9 transition",
+				"group relative flex flex-col overflow-hidden rounded-2xl border p-9 transition",
 				featured
-					? "scale-[1.02] border-transparent bg-foreground text-background shadow-[0_30px_70px_-20px_oklch(0.46_0.18_22_/_0.5)] hover:scale-[1.025]"
-					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-oxblood/30 hover:shadow-[0_24px_50px_-16px_oklch(0.18_0.02_40_/_0.25)]"
+					? "scale-[1.02] border-transparent bg-foreground text-background shadow-[0_30px_70px_-20px_oklch(0.61_0.13_162_/_0.5)] hover:scale-[1.025]"
+					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-oxblood/30 hover:shadow-[0_24px_50px_-16px_oklch(0.22_0.03_175_/_0.2)]"
 			)}
 		>
 			{featured && (
@@ -77,35 +77,35 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 						Plan Nº {planNumber}
 					</span>
 					{featured && (
-						<span className="rounded-full bg-marigold px-3 py-1 font-display-italic font-medium text-[11px] text-foreground">
-							el más elegido
+						<span className="rounded-full bg-marigold px-3 py-1 font-bold font-display text-[10px] text-white uppercase tracking-[0.14em]">
+							Más popular
 						</span>
 					)}
 				</div>
 
 				<h3
 					className={cn(
-						"mt-4 font-display font-medium text-[2.2rem] leading-none tracking-[-0.03em]",
+						"mt-4 font-bold font-display text-[2rem] leading-none tracking-[-0.025em]",
 						featured ? "text-background" : "text-foreground"
 					)}
 				>
 					{plan.name}
 				</h3>
-				<p className={cn("mt-2 font-serif text-base italic", featured ? "text-background/75" : "text-foreground/65")}>
+				<p className={cn("mt-2 text-[14px] leading-[1.5]", featured ? "text-background/75" : "text-foreground/65")}>
 					{plan.tagline}
 				</p>
 
-				<div className="mt-8 flex items-baseline gap-1.5">
+				<div className="mt-7 flex items-baseline gap-1.5">
 					<span
 						className={cn(
-							"font-display-italic font-light text-[1.6rem] leading-none",
+							"font-bold font-display text-[1.4rem] leading-none",
 							featured ? "text-marigold" : "text-oxblood"
 						)}
 					>
-						$
+						S/
 					</span>
-					<span className="numeral font-display font-medium text-[3.6rem] leading-[0.85] tracking-[-0.045em]">
-						{plan.priceUsd}
+					<span className="numeral font-display font-extrabold text-[3.4rem] leading-[0.85] tracking-[-0.04em]">
+						{plan.priceSoles}
 					</span>
 					<span
 						className={cn(
@@ -113,17 +113,29 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 							featured ? "text-background/60" : "text-foreground/55"
 						)}
 					>
-						usd
+						{isFree ? "" : "/ mes"}
 					</span>
 				</div>
-				<p
-					className={cn(
-						"mt-2 font-mono text-[10px] uppercase tracking-[0.16em]",
-						featured ? "text-background/55" : "text-foreground/50"
-					)}
-				>
-					{plan.per}
-				</p>
+				{!isFree && (
+					<p
+						className={cn(
+							"mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em]",
+							featured ? "text-background/55" : "text-foreground/50"
+						)}
+					>
+						≈ ${plan.priceUsd} usd · {plan.per}
+					</p>
+				)}
+				{isFree && (
+					<p
+						className={cn(
+							"mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em]",
+							featured ? "text-background/55" : "text-foreground/50"
+						)}
+					>
+						{plan.per}
+					</p>
+				)}
 
 				<div
 					className={cn(
@@ -134,11 +146,11 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 
 				<ul className="flex flex-1 flex-col gap-3">
 					{plan.features.map((feat) => (
-						<li className="flex items-start gap-2.5 text-sm leading-snug" key={feat}>
+						<li className="flex items-start gap-2.5 text-[14px] leading-snug" key={feat}>
 							<span
 								className={cn(
 									"mt-0.5 grid size-5 shrink-0 place-items-center rounded-full",
-									featured ? "bg-marigold/25 text-marigold" : "bg-oxblood/12 text-oxblood"
+									featured ? "bg-marigold/30 text-marigold" : "bg-oxblood/12 text-oxblood"
 								)}
 							>
 								<CheckIcon size={11} weight="bold" />
@@ -152,7 +164,7 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 					className={cn(
 						buttonVariants({ size: "lg", variant: featured ? "secondary" : "outline" }),
 						"mt-9 w-full",
-						featured && "border-marigold bg-marigold text-foreground hover:bg-marigold/90"
+						featured && "border-marigold bg-marigold text-white hover:bg-marigold/90"
 					)}
 					href="#planes"
 				>
@@ -161,5 +173,47 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 				</a>
 			</div>
 		</div>
+	);
+}
+
+function SingleSessionCard() {
+	return (
+		<aside
+			className="mx-auto mt-6 max-w-[1180px] overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-marigold/15 via-card to-card"
+			id="sesion-unica"
+		>
+			<div className="grid items-center gap-6 p-7 md:grid-cols-12">
+				<div className="md:col-span-7">
+					<div className="flex items-center gap-2">
+						<span className="rounded-full bg-marigold px-2.5 py-0.5 font-bold font-display text-[10px] text-white uppercase tracking-[0.14em]">
+							Sin suscripción
+						</span>
+						<span className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.16em]">¿Probás antes?</span>
+					</div>
+					<h3 className="mt-3 font-bold font-display text-[1.5rem] text-foreground leading-[1.1] tracking-[-0.02em]">
+						Sesión única — {SINGLE_SESSION.tagline}
+					</h3>
+					<p className="mt-2 max-w-[560px] text-[14px] text-foreground/70 leading-relaxed">{SINGLE_SESSION.body}</p>
+				</div>
+
+				<div className="flex items-center justify-between gap-4 md:col-span-4 md:col-start-9 md:flex-col md:items-end">
+					<div className="text-right">
+						<p className="flex items-baseline gap-1">
+							<span className="font-bold font-display text-[1rem] text-oxblood leading-none">S/</span>
+							<span className="numeral font-display font-extrabold text-[2.6rem] text-foreground leading-[0.85] tracking-[-0.04em]">
+								{SINGLE_SESSION.priceSoles}
+							</span>
+						</p>
+						<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.14em]">
+							≈ ${SINGLE_SESSION.priceUsd} usd · {SINGLE_SESSION.duration}
+						</p>
+					</div>
+					<a className={cn(buttonVariants({ size: "default" }), "shrink-0")} href="#planes">
+						{SINGLE_SESSION.cta}
+						<ArrowRightIcon weight="bold" />
+					</a>
+				</div>
+			</div>
+		</aside>
 	);
 }

@@ -15,12 +15,12 @@ export const Route = createFileRoute("/")({
 	head: () => ({
 		meta: [
 			{
-				title: "STACKCV — Tu CV merece una conversación",
+				title: "IMPULSA — Tu carrera, sin techo de cristal",
 			},
 			{
 				name: "description",
 				content:
-					"Mentorías 1:1 de CV, LinkedIn y estrategia de carrera para recién graduados de LatAm. Diagnóstico gratis, sin tarjeta.",
+					"Plataforma de empleo con IA + Coaching humano para LATAM. Score tu CV, optimizá tu LinkedIn, hablá con un coach peruano senior. Score gratis, sin tarjeta.",
 			},
 		],
 		links: [
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
 			},
 			{
 				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500&display=swap",
 			},
 		],
 	}),
