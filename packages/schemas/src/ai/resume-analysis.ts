@@ -7,6 +7,7 @@ export const editSeverityEnum = z.enum(["top-win", "missing", "soft-signal"]);
 export type EditSeverity = z.infer<typeof editSeverityEnum>;
 
 const scoreField = z.number().int().min(0).max(100);
+export const resumeAnalysisScoreBreakdownKeys = ["impact", "keywords", "clarity", "formatting", "length"] as const;
 
 export const resumeAnalysisSchema = z.object({
 	scoreOverall: scoreField,

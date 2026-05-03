@@ -16,7 +16,7 @@ export const messagesRouter = {
 			message: {
 				isAssistant: input.isAssistant,
 				order: input.order,
-				textLength: input.text.length,
+				textLength: input.text?.length,
 			},
 		});
 
@@ -48,7 +48,7 @@ export const messagesRouter = {
 				id: row.id,
 				isAssistant: input.isAssistant,
 				order: input.order,
-				textLength: input.text.length,
+				textLength: input.text?.length,
 			},
 		});
 

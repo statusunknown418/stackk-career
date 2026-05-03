@@ -1,5 +1,5 @@
 import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
-import type { resumeAgentTask } from "@stackk-career/jobs/trigger/tasks/analyse-resume";
+import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
@@ -151,7 +151,7 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 		run,
 		streams,
 		error: realtimeError,
-	} = useRealtimeRunWithStreams<typeof resumeAgentTask, ResumeStreams>(runHandle?.runId, {
+	} = useRealtimeRunWithStreams<typeof k02FastAnalysisTask, ResumeStreams>(runHandle?.runId, {
 		accessToken: runHandle?.accessToken,
 		enabled: Boolean(runHandle),
 		onComplete: () => {

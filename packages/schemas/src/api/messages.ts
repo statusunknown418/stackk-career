@@ -1,20 +1,12 @@
 import type { z } from "zod";
 import { insertMessageSchema } from "../db/messages";
 
-export const createMessageInputSchema = insertMessageSchema
-	.pick({
-		generationId: true,
-		isAssistant: true,
-		order: true,
-		parentMessageId: true,
-		text: true,
-	})
-	.required({
-		generationId: true,
-		isAssistant: true,
-		order: true,
-		text: true,
-	});
+export const createMessageInputSchema = insertMessageSchema.required({
+	generationId: true,
+	isAssistant: true,
+	order: true,
+	text: true,
+});
 
 export const listMessagesInputSchema = createMessageInputSchema.pick({ generationId: true });
 

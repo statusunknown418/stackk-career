@@ -31,3 +31,4 @@ catalog:
   "trigger.dev": ^4.4.5
   drizzle-orm: ^0.45.2
   drizzle-zod: ^0.8.3
+  date-fns: ^4.1.0

@@ -1,4 +1,5 @@
-import { BriefcaseIcon, ChatsIcon, GearIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import { BriefcaseIcon, ChatsIcon, GearIcon, PaperPlaneIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,16 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import UserMenu from "@/components/user-menu";
+import { orpc, queryClient } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
 	component: DashLayout,
+	beforeLoad: async () => queryClient.ensureQueryData(orpc.generations.list.queryOptions()),
 });
 
 function DashLayout() {
 	const matchRoute = useLocation();
+	const { data } = useSuspenseQuery(orpc.generations.list.queryOptions());
 
 	return (
 		<SidebarProvider>
@@ -38,6 +42,23 @@ function DashLayout() {
 				</SidebarHeader>
 
 				<SidebarContent>
+					<SidebarGroup>
+						<SidebarGroupLabel>Generaciones</SidebarGroupLabel>
+
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{data.map((gen) => (
+									<SidebarMenuItem key={gen.id}>
+										<SidebarMenuButton>
+											<PaperPlaneIcon />
+											{gen.title}
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+
 					<SidebarGroup>
 						<SidebarGroupLabel>Navegación</SidebarGroupLabel>
 

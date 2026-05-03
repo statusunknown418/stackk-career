@@ -1,6 +1,7 @@
 import { ArrowClockwiseIcon, HashStraightIcon, TriangleDashedIcon } from "@phosphor-icons/react";
 import type { EditCategory, EditSeverity, ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import type { DeepPartial } from "ai";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,7 @@ export function ResumeAnalysisPanel({
 				<FrameTitle className="font-light text-xl tracking-tight">Análisis de tu CV</FrameTitle>
 				<FrameDescription>
 					{error && "Error"}
-					{!error && isStreaming && "Analizando…"}
+					{!error && isStreaming && <Shimmer>Analizando…</Shimmer>}
 					{!(error || isStreaming) && partial && "Listo"}
 					{!(error || isStreaming || partial) && "Esperando CV"}
 				</FrameDescription>

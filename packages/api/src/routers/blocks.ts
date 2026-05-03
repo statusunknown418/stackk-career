@@ -28,7 +28,7 @@ export const blocksRouter = {
 
 		if (parentId) {
 			const [parent] = await context.db
-				.select()
+				.select({ deletedAt: resumeBlocks.deletedAt, id: resumeBlocks.id })
 				.from(resumeBlocks)
 				.where(and(eq(resumeBlocks.id, parentId), eq(resumeBlocks.resumeId, input.resumeId)))
 				.limit(1)
