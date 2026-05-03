@@ -49,8 +49,8 @@ function PriceCard({ plan, position }: { plan: Plan; position: number }) {
 			className={cn(
 				"group relative flex flex-col overflow-hidden rounded-2xl border p-9 transition",
 				featured
-					? "scale-[1.02] border-transparent bg-foreground text-background shadow-[0_30px_70px_-20px_oklch(0.61_0.13_162_/_0.5)] hover:scale-[1.025]"
-					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-oxblood/30 hover:shadow-[0_24px_50px_-16px_oklch(0.22_0.03_175_/_0.2)]"
+					? "scale-[1.02] border-transparent bg-foreground text-background shadow-[var(--shadow-featured)] hover:scale-[1.025]"
+					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-oxblood/30 hover:shadow-[var(--shadow-card-hover)]"
 			)}
 		>
 			{featured && (

@@ -9,7 +9,7 @@ export function LandingFooter() {
 					<div className="flex items-center gap-2">
 						<span
 							aria-hidden="true"
-							className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-oxblood to-marigold font-display font-extrabold text-[15px] text-white leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_12px_-2px_oklch(0.61_0.13_162_/_0.4)]"
+							className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-oxblood to-marigold font-display font-extrabold text-[15px] text-white leading-none shadow-[var(--shadow-logo)]"
 						>
 							i
 						</span>

@@ -50,7 +50,7 @@ export function HeroVisual() {
 			<div className="absolute -bottom-4 -left-4 hidden size-16 rounded-full bg-marigold/30 blur-2xl lg:block" />
 
 			<div
-				className="relative rounded-sm border border-foreground/10 bg-gradient-to-b from-oxblood/8 to-transparent p-px shadow-[0_50px_100px_-20px_oklch(0.46_0.18_22_/_0.35),0_30px_60px_-30px_oklch(0.18_0.02_40_/_0.5)]"
+				className="relative rounded-sm border border-foreground/10 bg-gradient-to-b from-oxblood/8 to-transparent p-px shadow-[var(--shadow-pillar)]"
 				style={{
 					transform: "rotateX(6deg)",
 					transformStyle: "preserve-3d",
@@ -198,7 +198,7 @@ function FloatingCard({
 	return (
 		<div
 			className={cn(
-				"absolute z-10 items-center gap-3 rounded-sm border border-foreground/15 bg-card/85 px-4 py-2.5 shadow-[0_12px_32px_-6px_oklch(0.18_0.02_40_/_0.35)] backdrop-blur-md",
+				"absolute z-10 items-center gap-3 rounded-sm border border-foreground/15 bg-card/85 px-4 py-2.5 shadow-[var(--shadow-floating)] backdrop-blur-md",
 				className
 			)}
 			style={style}

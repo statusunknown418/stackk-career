@@ -122,7 +122,7 @@ function ScoreCard() {
 		<div className="relative ml-auto max-w-[400px]">
 			<div className="absolute -top-3 -right-3 hidden size-20 rounded-full border-2 border-oxblood/30 border-dashed lg:block" />
 
-			<div className="relative rounded-2xl border border-foreground/10 bg-card p-7 shadow-[0_2px_0_var(--rule),0_24px_60px_-24px_oklch(0.22_0.03_175_/_0.35)]">
+			<div className="relative rounded-2xl border border-foreground/10 bg-card p-7 shadow-[var(--shadow-card-soft)]">
 				<div className="flex items-center justify-between">
 					<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.18em]">Tu score CV</span>
 					<span className="rounded-full bg-oxblood/12 px-2 py-0.5 font-mono text-[9px] text-oxblood uppercase tracking-[0.16em]">

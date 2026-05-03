@@ -88,7 +88,7 @@ function BentoCellHero() {
 						<div
 							className={cn(
 								"flex-1 rounded-t-[2px] transition-[height]",
-								bar.high ? "bg-oxblood shadow-[0_0_24px_oklch(0.61_0.13_162_/_0.5)]" : "bg-oxblood/25"
+								bar.high ? "bg-oxblood shadow-[var(--shadow-glow-emerald)]" : "bg-oxblood/25"
 							)}
 							key={`bar-${bar.heightPct}-${String(bar.high)}`}
 							style={{ height: `${bar.heightPct}%` }}
@@ -107,7 +107,7 @@ function BentoCellHero() {
 
 function BentoCellLinkedIn() {
 	return (
-		<div className="group relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[0_24px_48px_-16px_oklch(0.22_0.03_175_/_0.2)] md:col-span-3">
+		<div className="group relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[var(--shadow-card-hover)] md:col-span-3">
 			<span className="absolute top-4 right-4 font-mono text-[10px] text-foreground/40 uppercase tracking-[0.16em]">
 				04
 			</span>
@@ -141,7 +141,7 @@ function BentoCellLinkedIn() {
 
 function BentoCellNetwork() {
 	return (
-		<div className="group relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[0_24px_48px_-16px_oklch(0.22_0.03_175_/_0.2)] md:col-span-3">
+		<div className="group relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[var(--shadow-card-hover)] md:col-span-3">
 			<span className="absolute top-4 right-4 font-mono text-[10px] text-foreground/40 uppercase tracking-[0.16em]">
 				05
 			</span>
@@ -247,7 +247,7 @@ function BentoCellPlain({
 	return (
 		<div
 			className={cn(
-				"group relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[0_24px_48px_-16px_oklch(0.22_0.03_175_/_0.2)]",
+				"group relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition hover:-translate-y-0.5 hover:border-oxblood/30 hover:shadow-[var(--shadow-card-hover)]",
 				className
 			)}
 		>

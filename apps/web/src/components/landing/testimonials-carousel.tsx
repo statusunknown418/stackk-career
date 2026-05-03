@@ -84,7 +84,7 @@ function TestimonialCard({ testimonial, tilt }: { testimonial: Testimonial; tilt
 	return (
 		<article
 			className={cn(
-				"flex w-[340px] shrink-0 flex-col gap-3 rounded-sm border border-foreground/10 bg-card p-6 shadow-[0_2px_0_var(--rule),0_18px_40px_-20px_oklch(0.18_0.02_40_/_0.25)] transition-transform hover:rotate-0 sm:w-[380px]",
+				"flex w-[340px] shrink-0 flex-col gap-3 rounded-sm border border-foreground/10 bg-card p-6 shadow-[var(--shadow-card-soft)] transition-transform hover:rotate-0 sm:w-[380px]",
 				tilt
 			)}
 		>
