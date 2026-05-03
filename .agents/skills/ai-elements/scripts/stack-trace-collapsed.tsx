@@ -1,16 +1,16 @@
 "use client";
 
 import {
-  StackTrace,
-  StackTraceActions,
-  StackTraceContent,
-  StackTraceCopyButton,
-  StackTraceError,
-  StackTraceErrorMessage,
-  StackTraceErrorType,
-  StackTraceExpandButton,
-  StackTraceFrames,
-  StackTraceHeader,
+	StackTrace,
+	StackTraceActions,
+	StackTraceContent,
+	StackTraceCopyButton,
+	StackTraceError,
+	StackTraceErrorMessage,
+	StackTraceErrorType,
+	StackTraceExpandButton,
+	StackTraceFrames,
+	StackTraceHeader,
 } from "@/components/ai-elements/stack-trace";
 
 const errorString = `TypeError: Cannot read properties of undefined (reading 'map')
@@ -19,21 +19,21 @@ const errorString = `TypeError: Cannot read properties of undefined (reading 'ma
     at mountIndeterminateComponent (node_modules/react-dom/cjs/react-dom.development.js:17811:13)`;
 
 const Example = () => (
-  <StackTrace defaultOpen={false} trace={errorString}>
-    <StackTraceHeader>
-      <StackTraceError>
-        <StackTraceErrorType />
-        <StackTraceErrorMessage />
-      </StackTraceError>
-      <StackTraceActions>
-        <StackTraceCopyButton />
-        <StackTraceExpandButton />
-      </StackTraceActions>
-    </StackTraceHeader>
-    <StackTraceContent>
-      <StackTraceFrames />
-    </StackTraceContent>
-  </StackTrace>
+	<StackTrace defaultOpen={false} trace={errorString}>
+		<StackTraceHeader>
+			<StackTraceError>
+				<StackTraceErrorType />
+				<StackTraceErrorMessage />
+			</StackTraceError>
+			<StackTraceActions>
+				<StackTraceCopyButton />
+				<StackTraceExpandButton />
+			</StackTraceActions>
+		</StackTraceHeader>
+		<StackTraceContent>
+			<StackTraceFrames />
+		</StackTraceContent>
+	</StackTrace>
 );
 
 export default Example;
