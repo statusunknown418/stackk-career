@@ -11,7 +11,10 @@ export const messages = sqliteTable(
 			.text()
 			.primaryKey()
 			.$defaultFn(() => `msg_${createId()}`),
-		generationId: t.text().references(() => generations.id),
+		generationId: t
+			.text()
+			.notNull()
+			.references(() => generations.id),
 		parentMessageId: t.text(),
 		analysisId: t.text().references(() => resumeAnalyses.id, { onDelete: "set null" }),
 
@@ -32,15 +35,12 @@ export const messages = sqliteTable(
 			.$defaultFn(() => new Date())
 			.notNull(),
 	}),
-	(t) => [
-		index("messages_gen_created_idx").on(t.generationId, t.createdAt),
-		index("messages_analysis_idx").on(t.analysisId),
-	]
+	(t) => [index("messages_gen_idx").on(t.generationId), index("messages_analysis_idx").on(t.analysisId)]
 );
 
 export const messagesRelations = relations(messages, ({ one }) => ({
 	parentMessage: one(messages, {
-		fields: [messages.id],
+		fields: [messages.parentMessageId],
 		references: [messages.id],
 		relationName: "parent_message",
 	}),
