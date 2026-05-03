@@ -6,6 +6,7 @@ import { filesMetadataRouter } from "./files-metadata";
 import { generationsRouter } from "./generations";
 import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
+import { viewerRouter } from "./viewer";
 
 export const appRouter = {
 	healthCheck: publicProcedure.handler(({ context }) => {
@@ -20,6 +21,7 @@ export const appRouter = {
 	generations: generationsRouter,
 	messages: messagesRouter,
 	onboardingProfile: onboardingProfileRouter,
+	viewer: viewerRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

@@ -27,6 +27,7 @@
     "@trigger.dev/sdk": "catalog:",
     "@upstash/redis": "^1.37.0",
     "ai": "catalog:",
+    "date-fns": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "evlog": "catalog:"
