@@ -69,7 +69,7 @@ export function Guarantee() {
 						</div>
 					</div>
 
-					<div className="relative flex flex-col justify-between border-foreground/10 border-t bg-foreground p-10 text-background md:border-t-0 md:border-l">
+					<div className="relative flex flex-col justify-between border-foreground/10 border-t bg-[oklch(0.18_0.02_40)] p-10 text-[oklch(0.94_0.01_78)] md:border-t-0 md:border-l">
 						<span
 							aria-hidden="true"
 							className="pointer-events-none absolute -top-1/3 -right-1/3 size-[120%] rounded-full bg-[radial-gradient(circle,_var(--oxblood)_0%,_transparent_55%)] opacity-50 mix-blend-screen"
@@ -81,23 +81,23 @@ export function Guarantee() {
 
 						<div className="relative">
 							<div className="flex items-baseline justify-between">
-								<span className="font-mono text-[10px] text-marigold uppercase tracking-[0.22em]">Cláusulas</span>
-								<span className="font-mono text-[10px] text-background/45 uppercase tracking-[0.18em]">
-									Plan Signature
+								<span className="font-mono text-[10px] text-[oklch(0.78_0.16_65)] uppercase tracking-[0.22em]">
+									Cláusulas
 								</span>
+								<span className="font-mono text-[10px] text-white/45 uppercase tracking-[0.18em]">Plan Signature</span>
 							</div>
 
 							<ul className="mt-6 flex flex-col">
 								{TERMS.map((term, idx) => (
 									<li
-										className="flex items-start gap-3 border-background/12 border-b py-3.5 text-[0.95rem] leading-snug last:border-b-0"
+										className="flex items-start gap-3 border-white/10 border-b py-3.5 text-[0.95rem] leading-snug last:border-b-0"
 										key={term}
 									>
-										<span className="mt-0.5 font-mono text-[10px] text-marigold uppercase tabular-nums tracking-[0.14em]">
+										<span className="mt-0.5 font-mono text-[10px] text-[oklch(0.78_0.16_65)] uppercase tabular-nums tracking-[0.14em]">
 											{String(idx + 1).padStart(2, "0")}
 										</span>
-										<CheckIcon className="mt-0.5 shrink-0 text-marigold" size={14} weight="bold" />
-										<span className="text-background/90">{term}</span>
+										<CheckIcon className="mt-0.5 shrink-0 text-[oklch(0.78_0.16_65)]" size={14} weight="bold" />
+										<span className="text-white/90">{term}</span>
 									</li>
 								))}
 							</ul>
@@ -105,15 +105,20 @@ export function Guarantee() {
 
 						<div className="relative mt-10 flex items-end justify-between gap-6">
 							<div>
-								<p className="font-display-italic font-light text-2xl text-marigold leading-[1.1]">
+								<p className="font-display-italic font-light text-2xl text-[oklch(0.78_0.16_65)] leading-[1.1]">
 									— el equipo stackcv
 								</p>
-								<p className="mt-2 font-mono text-[10px] text-background/50 uppercase tracking-[0.2em]">
+								<p className="mt-2 font-mono text-[10px] text-white/45 uppercase tracking-[0.2em]">
 									Buenos Aires · Bogotá · 2026
 								</p>
 							</div>
 
-							<svg aria-hidden="true" className="size-24 shrink-0 text-marigold" fill="none" viewBox="0 0 120 120">
+							<svg
+								aria-hidden="true"
+								className="size-24 shrink-0 text-[oklch(0.78_0.16_65)]"
+								fill="none"
+								viewBox="0 0 120 120"
+							>
 								<title>seal</title>
 								<path
 									d="M60 8 L 71 26 L 92 22 L 90 42 L 110 50 L 96 66 L 108 84 L 88 86 L 86 106 L 68 96 L 50 104 L 46 84 L 26 80 L 34 64 L 18 50 L 36 38 L 34 18 L 54 22 Z"
