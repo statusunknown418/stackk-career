@@ -27,6 +27,9 @@ export const env = createEnv({
 
 		TRIGGER_SECRET_KEY: z.string().min(1),
 		TRIGGER_PROJECT_ID: z.string().min(1),
+
+		AXIOM_API_TOKEN: z.string().nonempty(),
+		AXIOM_DATASET: z.string().nonempty(),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,
