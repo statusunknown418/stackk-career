@@ -10,23 +10,9 @@ import {
 	runK02FastAnalysisAgent,
 } from "../../agents/k02-fast-analysis";
 import { emitUsageEvent } from "../../axiom/emit";
+import { assertPdfHostAllowed } from "../lib/utils";
 import { agentQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
-
-const ALLOWED_PDF_HOST_SUFFIXES = [".utfs.io", ".ufs.sh", "utfs.io"];
-
-function assertPdfHostAllowed(pdfUrl: string): URL {
-	const url = new URL(pdfUrl);
-	if (url.protocol !== "https:") {
-		throw new Error(`Resume PDF must be https. Got: ${url.protocol}`);
-	}
-	const host = url.hostname.toLowerCase();
-	const allowed = ALLOWED_PDF_HOST_SUFFIXES.some((suffix) => host === suffix || host.endsWith(suffix));
-	if (!allowed) {
-		throw new Error(`Resume PDF host not allowed: ${host}`);
-	}
-	return url;
-}
 
 export const k02FastAnalysisTask = schemaTask({
 	id: "k02-fast-analysis",
@@ -43,9 +29,14 @@ export const k02FastAnalysisTask = schemaTask({
 
 		const pdfUrlObj = assertPdfHostAllowed(pdfUrl);
 
+		await db
+			.update(resumeAnalyses)
+			.set({ status: "running" })
+			.where(and(eq(resumeAnalyses.id, analysisId), eq(resumeAnalyses.status, "pending")));
+
 		metadata.set("step", "analyzing");
 
-		const result = runK02FastAnalysisAgent({ pdfUrl: pdfUrlObj.toString(), userId, signal });
+		const result = await runK02FastAnalysisAgent({ pdfUrl: pdfUrlObj.toString(), userId, signal });
 
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
@@ -80,7 +71,6 @@ export const k02FastAnalysisTask = schemaTask({
 				isAssistant: true,
 				order: 0,
 				model: K02_FAST_ANALYSIS_MODEL,
-				object,
 				objectType: K02_FAST_ANALYSIS_OBJECT_TYPE,
 			}),
 		]);
