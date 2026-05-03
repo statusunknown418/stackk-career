@@ -7,7 +7,7 @@ export function Faq() {
 			<div className="mx-auto mb-14 grid max-w-[1100px] gap-12 md:grid-cols-12">
 				<div className="md:col-span-5">
 					<div className="flex items-center gap-3">
-						<span className="font-mono text-[11px] text-oxblood uppercase tabular-nums tracking-[0.22em]">§07</span>
+						<span className="font-mono text-[11px] text-oxblood uppercase tabular-nums tracking-[0.22em]">§06</span>
 						<span className="h-px max-w-[80px] flex-1 bg-foreground/20" />
 						<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.22em]">FAQ</span>
 					</div>

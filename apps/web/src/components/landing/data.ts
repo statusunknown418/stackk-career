@@ -54,8 +54,8 @@ export interface FooterColumn {
 
 export const NAV_LINKS: readonly NavLink[] = [
 	{ href: "#features", label: "Features" },
-	{ href: "#planes", label: "Precios" },
 	{ href: "#camino", label: "Cómo funciona" },
+	{ href: "#planes", label: "Precios" },
 	{ href: "#casos", label: "Casos" },
 	{ href: "#faq", label: "FAQ" },
 ];
