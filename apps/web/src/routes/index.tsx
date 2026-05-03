@@ -1,52 +1,58 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-
-import { orpc } from "@/utils/orpc";
+import { BentoGrid } from "@/components/landing/bento-grid";
+import { Faq } from "@/components/landing/faq";
+import { FinalCta } from "@/components/landing/final-cta";
+import { LandingFooter } from "@/components/landing/footer";
+import { Guarantee } from "@/components/landing/guarantee";
+import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { LandingNav } from "@/components/landing/nav";
+import { Pricing } from "@/components/landing/pricing";
+import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 
 export const Route = createFileRoute("/")({
-	component: HomeComponent,
+	component: LandingPage,
+	head: () => ({
+		meta: [
+			{
+				title: "STACKCV — Tu CV merece una conversación",
+			},
+			{
+				name: "description",
+				content:
+					"Mentorías 1:1 de CV, LinkedIn y estrategia de carrera para recién graduados de LatAm. Diagnóstico gratis, sin tarjeta.",
+			},
+		],
+		links: [
+			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			{
+				rel: "preconnect",
+				href: "https://fonts.gstatic.com",
+				crossOrigin: "anonymous",
+			},
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap",
+			},
+		],
+	}),
 });
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
-
-function getStatusLabel(isLoading: boolean, isConnected: boolean): string {
-	if (isLoading) {
-		return "Checking...";
-	}
-	return isConnected ? "Connected" : "Disconnected";
-}
-
-function HomeComponent() {
-	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
-	const isConnected = Boolean(healthCheck.data);
-	const statusLabel = getStatusLabel(healthCheck.isLoading, isConnected);
-
+function LandingPage() {
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-			<div className="grid gap-6">
-				<section className="rounded-lg border p-4">
-					<h2 className="mb-2 font-medium">API Status</h2>
-					<div className="flex items-center gap-2">
-						<div className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
-						<span className="text-muted-foreground text-sm">{statusLabel}</span>
-					</div>
-				</section>
-			</div>
+		<div className="relative">
+			<LandingNav />
+			<main>
+				<Hero />
+				<BentoGrid />
+				<HowItWorks />
+				<Pricing />
+				<Guarantee />
+				<TestimonialsCarousel />
+				<Faq />
+				<FinalCta />
+			</main>
+			<LandingFooter />
 		</div>
 	);
 }
