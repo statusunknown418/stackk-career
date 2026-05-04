@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import type { LanguageModel } from "ai";
 import { relations } from "drizzle-orm";
 import { type AnySQLiteColumn, index, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth";
@@ -28,7 +29,7 @@ export const resumeAnalyses = sqliteTable(
 
 		status: t.text({ enum: resumeAnalysisStatusEnum }).notNull().default("pending"),
 
-		model: t.text(),
+		model: t.text().$type<string & LanguageModel>(),
 		object: t.blob({ mode: "json" }),
 		error: t.text(),
 

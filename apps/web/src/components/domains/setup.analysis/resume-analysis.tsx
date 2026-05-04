@@ -2,6 +2,7 @@ import { ArrowClockwiseIcon, HashStraightIcon, TriangleDashedIcon } from "@phosp
 import type { EditCategory, EditSeverity, ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import type { DeepPartial } from "ai";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { Gauge } from "@/components/gauge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ export function ResumeAnalysisPanel({
 
 			{(partial || showLoaders) && (
 				<FramePanel className="flex gap-4">
-					<ScoreGauge value={partial?.scoreOverall} />
+					<Gauge value={partial?.scoreOverall ?? 0} />
 
 					<div className="flex w-full flex-col gap-3">
 						{SCORE_ROWS.map((row) => {
@@ -159,46 +160,5 @@ export function ResumeAnalysisPanel({
 				</FrameFooter>
 			)}
 		</Frame>
-	);
-}
-
-function ScoreGauge({ value }: { value: number | undefined }) {
-	const hasValue = typeof value === "number";
-	const clamped = hasValue ? Math.max(0, Math.min(100, value)) : 0;
-	const radius = 52;
-	const circumference = 2 * Math.PI * radius;
-	const offset = hasValue ? circumference * (1 - clamped / 100) : circumference;
-
-	return (
-		<div className="relative flex size-32 shrink-0 items-center justify-center">
-			<svg
-				aria-hidden
-				className="size-32 -rotate-90"
-				role="img"
-				viewBox="0 0 120 120"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<title>Puntuación general del CV</title>
-				<circle cx="60" cy="60" fill="none" r={radius} strokeWidth="10" style={{ stroke: "var(--color-muted)" }} />
-				<circle
-					cx="60"
-					cy="60"
-					fill="none"
-					r={radius}
-					strokeDasharray={circumference}
-					strokeDashoffset={offset}
-					strokeLinecap="round"
-					strokeWidth="10"
-					style={{
-						stroke: "var(--color-success)",
-						transition: "stroke-dashoffset 500ms ease-out",
-					}}
-				/>
-			</svg>
-			<div className="absolute flex flex-col items-center">
-				<span className="font-light text-3xl tabular-nums">{hasValue ? clamped : "—"}</span>
-				<span className="text-muted-foreground text-xs">/ 100</span>
-			</div>
-		</div>
 	);
 }

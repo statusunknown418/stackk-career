@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import type { LanguageModel } from "ai";
 import { relations } from "drizzle-orm";
 import { index, sqliteTable } from "drizzle-orm/sqlite-core";
 import { generations } from "./generations";
@@ -21,7 +22,7 @@ export const messages = sqliteTable(
 		content: t.text({ mode: "json" }),
 		text: t.text(),
 		error: t.text(),
-		model: t.text(),
+		model: t.text().$type<string & LanguageModel>(),
 		order: t.integer(),
 		toolMeta: t.blob({ mode: "json" }).$type<{ toolId: string; toolName: string }>(),
 		isTool: t.integer({ mode: "boolean" }),

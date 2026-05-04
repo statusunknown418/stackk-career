@@ -114,7 +114,7 @@ function useAnimation(
 		setIsPlaying(options.autoplay);
 		lastTimeRef.current = 0;
 		accumulatorRef.current = 0;
-	}, [frames, options.autoplay]);
+	}, [options.autoplay]);
 
 	return { frameIndex, isPlaying };
 }
