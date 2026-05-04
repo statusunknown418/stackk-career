@@ -1,5 +1,8 @@
 import { ArrowRightIcon, StarIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { GradientBars } from "../gradient-bars";
+import { LogoCarousel } from "../ui/logo-carousel";
 import { TRUST_LOGOS } from "./data";
 import { HeroVisual } from "./hero-visual";
 
@@ -13,7 +16,8 @@ const AVATAR_GRADIENTS = [
 export function Hero() {
 	return (
 		<section className="paper-grain relative overflow-hidden px-6 pt-16 pb-20" id="top">
-			<HeroBackground />
+			<HeroBackground className="hidden" />
+			<GradientBars />
 
 			<div className="relative z-10 mx-auto max-w-[1200px]">
 				<TopBar />
@@ -75,6 +79,7 @@ export function Hero() {
 					<HeroVisual />
 				</div>
 
+				<LogoCarousel />
 				<TrustStrip />
 			</div>
 		</section>
@@ -227,9 +232,9 @@ function HeroStats() {
 	);
 }
 
-function HeroBackground() {
+function HeroBackground({ className }: { className?: string }) {
 	return (
-		<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+		<div aria-hidden="true" className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
 			<div className="absolute -top-[20vw] -left-[10vw] size-[55vw] animate-aurora-1 rounded-full bg-oxblood opacity-20 blur-[140px]" />
 			<div className="absolute top-[5vw] -right-[20vw] size-[55vw] animate-aurora-2 rounded-full bg-marigold opacity-15 blur-[140px]" />
 			<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,transparent_0%,var(--background)_75%)]" />
