@@ -42,7 +42,10 @@
       "!**/package-lock.json",
       "!**/yarn.lock",
       "!**/bun.lockb",
-      "!**/bun.lock"
+      "!**/bun.lock",
+      "!**/.agents",
+      "!**/.claude",
+      "!**/.zencoder"
     ]
   },
   "formatter": {
