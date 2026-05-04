@@ -182,7 +182,7 @@ export function DiaTextReveal({
 			return;
 		}
 		setMeasuredWidths(measureWidths(el, texts));
-	}, [Array.isArray(text) ? text.join("\0") : text]);
+	}, [texts, isMulti]);
 
 	playRef.current = () => {
 		const { duration, delay, repeat, repeatDelay, texts } = optsRef.current;
