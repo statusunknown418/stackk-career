@@ -79,7 +79,10 @@ export function Hero() {
 					<HeroVisual />
 				</div>
 
-				<LogoCarousel />
+				<section className="mt-24 grid place-items-center">
+					<LogoCarousel />
+				</section>
+
 				<TrustStrip />
 			</div>
 		</section>
