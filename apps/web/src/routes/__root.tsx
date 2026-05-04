@@ -1,13 +1,30 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
+import { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
 import type { orpc } from "@/utils/orpc";
 import appCss from "../index.css?url";
 import "streamdown/styles.css?url";
+
+const Devtools =
+	import.meta.env.DEV &&
+	lazy(async () => {
+		const [{ ReactQueryDevtools }, { TanStackRouterDevtools }] = await Promise.all([
+			import("@tanstack/react-query-devtools"),
+			import("@tanstack/react-router-devtools"),
+		]);
+
+		return {
+			default: () => (
+				<>
+					<TanStackRouterDevtools position="bottom-left" />
+					<ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
+				</>
+			),
+		};
+	});
 
 export interface RouterAppContext {
 	orpc: typeof orpc;
@@ -43,10 +60,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
 	return (
-		<html className="dark" lang="en">
+		<html lang="en">
 			<head>
 				<HeadContent />
 			</head>
+
 			<body>
 				<div className="grid min-h-svh">
 					<Outlet />
@@ -54,8 +72,11 @@ function RootDocument() {
 
 				<Toaster richColors />
 
-				<TanStackRouterDevtools position="bottom-left" />
-				<ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
+				{Devtools && (
+					<Suspense>
+						<Devtools />
+					</Suspense>
+				)}
 				<Scripts />
 			</body>
 		</html>
