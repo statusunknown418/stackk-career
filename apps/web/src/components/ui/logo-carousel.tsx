@@ -5,10 +5,14 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { type ComponentType, type SVGProps, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { GithubWordmarkDark } from "./svgs/github-wordmark-dark";
 import { GithubWordmarkLight } from "./svgs/github-wordmark-light";
+import { SanityWordmarkDark } from "./svgs/sanity-wordmark-dark";
 import { SanityWordmarkLight } from "./svgs/sanity-wordmark-light";
+import { SupabaseWordmarkDark } from "./svgs/supabase-wordmark-dark";
 import { SupabaseWordmarkLight } from "./svgs/supabase-wordmark-light";
 import { VercelWordmark } from "./svgs/vercel-wordmark";
+import { VercelWordmarkDark } from "./svgs/vercel-wordmark-dark";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -23,18 +27,6 @@ export interface LogoDef {
 
 // ── Logo data ───────────────────────────────────────────────────────
 
-export const LOGOS: LogoDef[] = [
-	{ name: "Lantern", src: "/brands/lantern.svg", url: "https://withlantern.com", width: 186, height: 40 },
-	{ name: "Sim", src: "/brands/sim.svg", url: "https://sim.ai", width: 84, height: 41 },
-	{ name: "Langbase", src: "/brands/langbase.svg", url: "https://langbase.com", width: 202, height: 40 },
-	{ name: "AgentMail", src: "/brands/agentmail.svg", url: "https://agentmail.to", width: 219, height: 40 },
-	{ name: "Dot", src: "/brands/dot.svg", url: "https://bydot.studio", width: 114, height: 40 },
-	{ name: "Fontface", src: "/brands/fontface.svg", url: "https://fontface.ai", width: 169, height: 40 },
-	{ name: "Tesseract", src: "/brands/tesseract.svg", url: "https://x.com/usetesseract", width: 180, height: 50 },
-	{ name: "Someone", src: "/brands/someone.svg", url: "https://someo.ne", width: 176, height: 30 },
-	{ name: "Parrychain", src: "/brands/parrychain.svg", url: "https://parrychain.ai", width: 211, height: 25 },
-];
-
 const WORDMARK_HEIGHT = 32;
 
 export const WORDMARK_LOGOS: LogoDef[] = [
@@ -42,14 +34,24 @@ export const WORDMARK_LOGOS: LogoDef[] = [
 	{ name: "Vercel", Icon: VercelWordmark, url: "https://vercel.com", width: 161, height: WORDMARK_HEIGHT },
 	{ name: "Sanity", Icon: SanityWordmarkLight, url: "https://sanity.io", width: 90, height: WORDMARK_HEIGHT },
 	{ name: "Supabase", Icon: SupabaseWordmarkLight, url: "https://supabase.com", width: 165, height: WORDMARK_HEIGHT },
+	{ name: "GitHub Dark", Icon: GithubWordmarkDark, url: "https://github.com", width: 118, height: WORDMARK_HEIGHT },
+	{ name: "Vercel Dark", Icon: VercelWordmarkDark, url: "https://vercel.com", width: 161, height: WORDMARK_HEIGHT },
+	{ name: "Sanity Dark", Icon: SanityWordmarkDark, url: "https://sanity.io", width: 90, height: WORDMARK_HEIGHT },
+	{
+		name: "Supabase Dark",
+		Icon: SupabaseWordmarkDark,
+		url: "https://supabase.com",
+		width: 165,
+		height: WORDMARK_HEIGHT,
+	},
 ];
 
 // ── Constants ───────────────────────────────────────────────────────
 
 const SLOT_WIDTH = 240;
-const INITIAL_DELAY = 2500;
+const INITIAL_DELAY = 1500;
 const SLOT_STAGGER = 150;
-const CYCLE_INTERVAL = 3000;
+const CYCLE_INTERVAL = 1500;
 
 // ── Hooks ───────────────────────────────────────────────────────────
 
@@ -271,7 +273,7 @@ function LogoSlot({
 export function LogoCarousel({
 	className,
 	disableLinks,
-	logos = LOGOS,
+	logos = WORDMARK_LOGOS,
 	variant = "muted",
 }: {
 	className?: string;
