@@ -3,22 +3,27 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { type ComponentType, type SVGProps, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { GithubWordmarkLight } from "./svgs/github-wordmark-light";
+import { SanityWordmarkLight } from "./svgs/sanity-wordmark-light";
+import { SupabaseWordmarkLight } from "./svgs/supabase-wordmark-light";
+import { VercelWordmark } from "./svgs/vercel-wordmark";
 
 // ── Types ───────────────────────────────────────────────────────────
 
-interface LogoDef {
+export interface LogoDef {
 	height: number;
+	Icon?: ComponentType<SVGProps<SVGSVGElement>>;
 	name: string;
-	src: string;
-	url: string;
+	src?: string;
+	url?: string;
 	width: number;
 }
 
 // ── Logo data ───────────────────────────────────────────────────────
 
-const LOGOS: LogoDef[] = [
+export const LOGOS: LogoDef[] = [
 	{ name: "Lantern", src: "/brands/lantern.svg", url: "https://withlantern.com", width: 186, height: 40 },
 	{ name: "Sim", src: "/brands/sim.svg", url: "https://sim.ai", width: 84, height: 41 },
 	{ name: "Langbase", src: "/brands/langbase.svg", url: "https://langbase.com", width: 202, height: 40 },
@@ -30,15 +35,21 @@ const LOGOS: LogoDef[] = [
 	{ name: "Parrychain", src: "/brands/parrychain.svg", url: "https://parrychain.ai", width: 211, height: 25 },
 ];
 
+const WORDMARK_HEIGHT = 32;
+
+export const WORDMARK_LOGOS: LogoDef[] = [
+	{ name: "GitHub", Icon: GithubWordmarkLight, url: "https://github.com", width: 118, height: WORDMARK_HEIGHT },
+	{ name: "Vercel", Icon: VercelWordmark, url: "https://vercel.com", width: 161, height: WORDMARK_HEIGHT },
+	{ name: "Sanity", Icon: SanityWordmarkLight, url: "https://sanity.io", width: 90, height: WORDMARK_HEIGHT },
+	{ name: "Supabase", Icon: SupabaseWordmarkLight, url: "https://supabase.com", width: 165, height: WORDMARK_HEIGHT },
+];
+
 // ── Constants ───────────────────────────────────────────────────────
 
 const SLOT_WIDTH = 240;
-const SLOT_HEIGHT = Math.max(...LOGOS.map((l) => l.height));
 const INITIAL_DELAY = 2500;
 const SLOT_STAGGER = 150;
 const CYCLE_INTERVAL = 3000;
-
-const LOGO_SRCS = LOGOS.map((l) => l.src);
 
 // ── Hooks ───────────────────────────────────────────────────────────
 
@@ -177,12 +188,14 @@ const variantStyles: Record<CarouselVariant, { base: string; interactive: string
 function LogoSlot({
 	logos,
 	slotIndex,
+	slotHeight,
 	enabled,
 	disableLinks,
 	variant = "muted",
 }: {
 	logos: LogoDef[];
 	slotIndex: number;
+	slotHeight: number;
 	enabled: boolean;
 	disableLinks?: boolean;
 	variant?: CarouselVariant;
@@ -191,10 +204,19 @@ function LogoSlot({
 	const { current: logo, hasCycled } = useLogoCycle(logos, INITIAL_DELAY + slotIndex * SLOT_STAGGER, enabled);
 
 	const styles = variantStyles[variant];
-	const imgEl = (
+	const className = cn(styles.base, !disableLinks && styles.interactive);
+	const visualEl = logo.Icon ? (
+		<logo.Icon
+			aria-label={disableLinks ? logo.name : undefined}
+			className={className}
+			height={logo.height}
+			role="img"
+			width={logo.width}
+		/>
+	) : (
 		<img
 			alt={disableLinks ? logo.name : ""}
-			className={cn(styles.base, !disableLinks && styles.interactive)}
+			className={className}
 			height={logo.height}
 			src={logo.src}
 			width={logo.width}
@@ -213,7 +235,7 @@ function LogoSlot({
 			className="flex items-center justify-center overflow-hidden"
 			style={{
 				width: SLOT_WIDTH,
-				height: SLOT_HEIGHT + 40,
+				height: slotHeight + 40,
 				marginBlock: -20,
 			}}
 		>
@@ -226,8 +248,8 @@ function LogoSlot({
 					key={logo.name}
 					transition={{ duration: 0.5, ease: "easeInOut" }}
 				>
-					{disableLinks ? (
-						imgEl
+					{disableLinks || !logo.url ? (
+						visualEl
 					) : (
 						<Link
 							aria-label={`${logo.name} (opens in new tab)`}
@@ -235,7 +257,7 @@ function LogoSlot({
 							rel="noopener noreferrer"
 							target="_blank"
 						>
-							{imgEl}
+							{visualEl}
 						</Link>
 					)}
 				</motion.div>
@@ -249,18 +271,22 @@ function LogoSlot({
 export function LogoCarousel({
 	className,
 	disableLinks,
+	logos = LOGOS,
 	variant = "muted",
 }: {
 	className?: string;
 	disableLinks?: boolean;
+	logos?: LogoDef[];
 	variant?: CarouselVariant;
 }) {
-	const allLoaded = useImagesPreloaded(LOGO_SRCS);
+	const srcs = useMemo(() => logos.map((l) => l.src).filter((s): s is string => Boolean(s)), [logos]);
+	const allLoaded = useImagesPreloaded(srcs);
 	const slotCount = useSlotCount();
+	const slotHeight = useMemo(() => Math.max(...logos.map((l) => l.height)), [logos]);
 
 	const slotLogos = useMemo(
-		() => Array.from({ length: slotCount }, (_, slot) => LOGOS.filter((_, i) => i % slotCount === slot)),
-		[slotCount]
+		() => Array.from({ length: slotCount }, (_, slot) => logos.filter((_, i) => i % slotCount === slot)),
+		[slotCount, logos]
 	);
 
 	return (
@@ -273,12 +299,13 @@ export function LogoCarousel({
 			role="region"
 			transition={{ duration: 0.4, ease: "easeOut" }}
 		>
-			{slotLogos.map((logos, i) => (
+			{slotLogos.map((slotItems, i) => (
 				<LogoSlot
 					disableLinks={disableLinks}
 					enabled={allLoaded}
 					key={i.toString()}
-					logos={logos}
+					logos={slotItems}
+					slotHeight={slotHeight}
 					slotIndex={i}
 					variant={variant}
 				/>

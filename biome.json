@@ -45,7 +45,8 @@
       "!**/bun.lock",
       "!**/.agents",
       "!**/.claude",
-      "!**/.zencoder"
+      "!**/.zencoder",
+      "!**/.trigger"
     ]
   },
   "formatter": {
@@ -70,7 +71,8 @@
       "performance": {
         "noNamespaceImport": "off",
         "noReExportAll": "off",
-        "noBarrelFile": "off"
+        "noBarrelFile": "off",
+        "noImgElement": "off"
       },
       "nursery": {
         "useSortedClasses": {
@@ -99,7 +101,8 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error",
-        "noExportedImports": "off"
+        "noExportedImports": "off",
+        "noHeadElement": "off"
       }
     }
   },
