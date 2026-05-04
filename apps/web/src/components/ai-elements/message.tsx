@@ -1,9 +1,5 @@
 "use client";
 
-import { cjk } from "@streamdown/cjk";
-import { code } from "@streamdown/code";
-import { math } from "@streamdown/math";
-import { mermaid } from "@streamdown/mermaid";
 import type { UIMessage } from "ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
@@ -13,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useCodePlugin } from "./use-code-plugin";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 	from: UIMessage["role"];
@@ -77,7 +74,7 @@ export const MessageAction = ({
 		return (
 			<TooltipProvider>
 				<Tooltip>
-					<TooltipTrigger asChild>{button}</TooltipTrigger>
+					<TooltipTrigger render={button} />
 					<TooltipContent>
 						<p>{tooltip}</p>
 					</TooltipContent>
@@ -256,16 +253,20 @@ export const MessageBranchPage = ({ className, ...props }: MessageBranchPageProp
 
 export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
-const streamdownPlugins = { cjk, code, math, mermaid };
+const EMPTY_PLUGINS = {} as const;
 
 export const MessageResponse = memo(
-	({ className, ...props }: MessageResponseProps) => (
-		<Streamdown
-			className={cn("size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}
-			plugins={streamdownPlugins}
-			{...props}
-		/>
-	),
+	({ className, ...props }: MessageResponseProps) => {
+		const code = useCodePlugin();
+		const plugins = useMemo(() => (code ? { code } : EMPTY_PLUGINS), [code]);
+		return (
+			<Streamdown
+				className={cn("size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}
+				plugins={plugins}
+				{...props}
+			/>
+		);
+	},
 	(prevProps, nextProps) => prevProps.children === nextProps.children && nextProps.isAnimating === prevProps.isAnimating
 );
 
