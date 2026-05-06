@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/")({
@@ -46,6 +47,10 @@ function HomeComponent() {
 					</div>
 				</section>
 			</div>
+
+			<section>
+				<Button render={<Link to="/login" />}>Login</Button>
+			</section>
 		</div>
 	);
 }

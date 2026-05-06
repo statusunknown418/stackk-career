@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import type { orpc } from "@/utils/orpc";
 import appCss from "../index.css?url";
 import "streamdown/styles.css?url";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const Devtools =
 	import.meta.env.DEV &&
@@ -60,24 +61,27 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 
 			<body>
-				<div className="grid min-h-svh">
-					<Outlet />
-				</div>
+				<ThemeProvider defaultTheme="system" storageKey="theme">
+					<div className="grid min-h-svh">
+						<Outlet />
+					</div>
+				</ThemeProvider>
 
 				<Toaster richColors />
+
+				<Scripts />
 
 				{Devtools && (
 					<Suspense>
 						<Devtools />
 					</Suspense>
 				)}
-				<Scripts />
 			</body>
 		</html>
 	);

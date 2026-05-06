@@ -1,9 +1,11 @@
-import { useSearch } from "@tanstack/react-router";
+import { CaretCircleLeftIcon } from "@phosphor-icons/react";
+import { Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { AnimatedThemeToggler } from "./ui/animated-theme-toggler";
 import { Frame, FramePanel } from "./ui/frame";
 import { Spinner } from "./ui/spinner";
 
@@ -13,6 +15,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
 	return (
 		<div className={cn("flex w-full max-w-2xl flex-col gap-6", className)} {...props}>
+			<section className="flex items-center justify-between">
+				<Button render={<Link to="/" />} variant="ghost-muted">
+					<CaretCircleLeftIcon />
+					Volver
+				</Button>
+
+				<AnimatedThemeToggler className="text-muted-foreground hover:text-foreground [&_svg]:size-5" />
+			</section>
+
 			<Frame className="p-0">
 				<FramePanel className="grid p-0 md:grid-cols-2">
 					<form className="p-6 md:p-8">
