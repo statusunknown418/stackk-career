@@ -2,7 +2,10 @@ packages:
   - apps/*
   - packages/*
 allowBuilds:
+  '@depot/cli': true
   esbuild: true
+  msgpackr-extract: true
+  protobufjs: true
   sharp: true
 catalog:
   ai: ^6.0.175
