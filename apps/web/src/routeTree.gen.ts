@@ -22,7 +22,7 @@ import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
-import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resume-id'
+import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -91,8 +91,8 @@ const ProtectedDashResumesIndexRoute =
   } as any)
 const ProtectedDashResumesResumeIdRoute =
   ProtectedDashResumesResumeIdRouteImport.update({
-    id: '/resumes/$resume-id',
-    path: '/resumes/$resume-id',
+    id: '/resumes/$resumeId',
+    path: '/resumes/$resumeId',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
 
@@ -108,7 +108,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash/': typeof ProtectedDashIndexRoute
-  '/dash/resumes/$resume-id': typeof ProtectedDashResumesResumeIdRoute
+  '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -122,7 +122,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash': typeof ProtectedDashIndexRoute
-  '/dash/resumes/$resume-id': typeof ProtectedDashResumesResumeIdRoute
+  '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/dash/resumes': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesById {
@@ -139,7 +139,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
-  '/_protected/dash/resumes/$resume-id': typeof ProtectedDashResumesResumeIdRoute
+  '/_protected/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/_protected/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,7 +156,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash/'
-    | '/dash/resumes/$resume-id'
+    | '/dash/resumes/$resumeId'
     | '/dash/resumes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,7 +170,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash'
-    | '/dash/resumes/$resume-id'
+    | '/dash/resumes/$resumeId'
     | '/dash/resumes'
   id:
     | '__root__'
@@ -186,7 +186,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/_protected/dash/'
-    | '/_protected/dash/resumes/$resume-id'
+    | '/_protected/dash/resumes/$resumeId'
     | '/_protected/dash/resumes/'
   fileRoutesById: FileRoutesById
 }
@@ -292,10 +292,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashResumesIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
-    '/_protected/dash/resumes/$resume-id': {
-      id: '/_protected/dash/resumes/$resume-id'
-      path: '/resumes/$resume-id'
-      fullPath: '/dash/resumes/$resume-id'
+    '/_protected/dash/resumes/$resumeId': {
+      id: '/_protected/dash/resumes/$resumeId'
+      path: '/resumes/$resumeId'
+      fullPath: '/dash/resumes/$resumeId'
       preLoaderRoute: typeof ProtectedDashResumesResumeIdRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
