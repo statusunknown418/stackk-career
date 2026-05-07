@@ -140,8 +140,8 @@ export function Gauge({
 		switch (gaugeType) {
 			case "half":
 				return {
-					startAngle: -90,
-					endAngle: 90,
+					startAngle: 180,
+					endAngle: 360,
 					circumferenceFactor: 0.5,
 					viewBox: `0 25 ${circleSize} 50`,
 				};
@@ -168,6 +168,8 @@ export function Gauge({
 	const gaugeConfig = getGaugeConfig();
 	const adjustedCircumference = circumference * gaugeConfig.circumferenceFactor;
 	const adjustedPercentToPx = adjustedCircumference / 100;
+	const valueY = gaugeType === "half" ? circleSize * 0.43 : circleSize / 2;
+	const labelY = gaugeType === "half" ? valueY + 16 : circleSize / 2 + 20;
 
 	const primaryStrokeDasharray = () => {
 		if (offsetFactor > 0 && strokePercent > 100 - gapPercent * 2 * offsetFactor) {
@@ -188,21 +190,23 @@ export function Gauge({
 	};
 
 	const primaryTransform = () => {
+		const baseRotation = gaugeType === "half" ? 180 : -90;
 		if (offsetFactor > 0 && strokePercent > 100 - gapPercent * 2 * offsetFactor) {
 			const add = 0.5 * (-strokePercent + 100);
-			return `rotate(${-90 + add * percentToDegree}deg)`;
+			return `rotate(${baseRotation + add * percentToDegree}deg)`;
 		}
 		const add = gapPercent * offsetFactor;
-		return `rotate(${-90 + add * percentToDegree}deg)`;
+		return `rotate(${baseRotation + add * percentToDegree}deg)`;
 	};
 
 	const secondaryTransform = () => {
+		const baseRotation = gaugeType === "half" ? 0 : 270;
 		if (offsetFactorSecondary < 1 && strokePercent < gapPercent * 2 * offsetFactorSecondary) {
 			const subtract = 0.5 * strokePercent;
-			return `rotate(${360 - 90 - subtract * percentToDegree}deg) scaleY(-1)`;
+			return `rotate(${baseRotation - subtract * percentToDegree}deg) scaleY(-1)`;
 		}
 		const subtract = gapPercent * offsetFactorSecondary;
-		return `rotate(${360 - 90 - subtract * percentToDegree}deg) scaleY(-1)`;
+		return `rotate(${baseRotation - subtract * percentToDegree}deg) scaleY(-1)`;
 	};
 
 	const getColor = (colorProp: typeof primary, isSecondary = false) => {
@@ -400,7 +404,7 @@ export function Gauge({
 							style={{ userSelect: "none" }}
 							textAnchor="middle"
 							x={circleSize / 2}
-							y={circleSize / 2}
+							y={valueY}
 						>
 							{animatedValue}
 							{showPercentage && unit}
@@ -416,7 +420,7 @@ export function Gauge({
 						style={{ userSelect: "none" }}
 						textAnchor="middle"
 						x={circleSize / 2}
-						y={circleSize / 2 + 20}
+						y={labelY}
 					>
 						{label}
 					</text>

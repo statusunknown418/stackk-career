@@ -2,6 +2,7 @@ import { BriefcaseIcon, ChatsIcon, GearIcon, SidebarSimpleIcon } from "@phosphor
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
+import { Kbd } from "@/components/ui/kbd";
 import {
 	Sidebar,
 	SidebarContent,
@@ -18,6 +19,7 @@ import {
 	SidebarRail,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
 import { orpc, queryClient } from "@/utils/orpc";
@@ -35,11 +37,11 @@ function DashLayout() {
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
-			<Sidebar className="pl-0.5" collapsible="icon" variant="inset">
+			<Sidebar className="py-1 pl-0.5" collapsible="icon" variant="inset">
 				<SidebarHeader>
-					<SidebarMenuButton size="md">
+					<SidebarMenuButton>
 						<BriefcaseIcon />
-						STK Career
+						<span className="text-nowrap">STK Career</span>
 					</SidebarMenuButton>
 				</SidebarHeader>
 
@@ -85,24 +87,37 @@ function DashLayout() {
 
 			<SidebarInset className="grid grid-rows-[auto_1fr] rounded-sm border">
 				<nav className="flex justify-between border-b px-2 py-1">
-					<SidebarTrigger size="sm" variant="ghost-muted">
-						<SidebarSimpleIcon weight="duotone" />
-						Nav
-					</SidebarTrigger>
+					<Tooltip>
+						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
+							<SidebarSimpleIcon weight="duotone" />
+							Nav
+						</SidebarTrigger>
 
-					<SidebarTrigger side="right" size="sm" variant="ghost-muted">
-						<ChatsIcon weight="duotone" />
-						Chats
-					</SidebarTrigger>
+						<TooltipContent>
+							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
+						<SidebarTrigger render={<TooltipTrigger />} side="right" size="sm" variant="ghost-muted">
+							<ChatsIcon weight="duotone" />
+							Chats
+						</SidebarTrigger>
+
+						<TooltipContent>
+							Abrir/cerrar panel derecho <Kbd>⌘ + J</Kbd>
+						</TooltipContent>
+					</Tooltip>
 				</nav>
 
 				<Outlet />
 			</SidebarInset>
 
-			<Sidebar className="px-0" collapsible="offcanvas" side="right" variant="inset">
+			<Sidebar className="py-3 pl-0" collapsible="offcanvas" side="right" variant="inset">
 				<SidebarContent>
-					<SidebarGroup>
-						<SidebarGroupLabel>Generaciones</SidebarGroupLabel>
+					<SidebarGroup className="p-0">
+						<SidebarGroupLabel>Recientes</SidebarGroupLabel>
+
 						<SidebarGroupContent>
 							<SidebarMenu className="gap-0">
 								{data.length === 0 ? (
@@ -110,7 +125,7 @@ function DashLayout() {
 								) : (
 									data.map((gen) => (
 										<SidebarMenuItem key={gen.id}>
-											<SidebarMenuButton tooltip={gen.summary ?? gen.title ?? "Sin titulo"}>
+											<SidebarMenuButton className="gap-1.5" tooltip={gen.summary ?? gen.title ?? "Sin titulo"}>
 												<span className="truncate">{gen.title ?? "Sin título"}</span>
 											</SidebarMenuButton>
 										</SidebarMenuItem>

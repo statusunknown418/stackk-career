@@ -36,7 +36,7 @@
     "@types/node": "catalog:",
     "husky": "latest",
     "lint-staged": "latest",
-    "turbo": "^2.9.7",
+    "turbo": "^2.9.9",
     "typescript": "^6.0.3",
     "ultracite": "7.6.0"
   },
@@ -45,5 +45,5 @@
       "pnpm dlx ultracite fix"
     ]
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@10.33.4"
 }

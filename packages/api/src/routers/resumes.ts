@@ -1,6 +1,8 @@
+import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { parseBlock } from "@stackk-career/schemas/ai/resume-blocks";
+import { formatDate } from "date-fns";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { protectedProcedure } from "..";
 
@@ -62,5 +64,41 @@ export const resumesRouter = {
 			...res,
 			contact: mappedResumeWithRightBlock.get(res.id),
 		}));
+	}),
+
+	create: protectedProcedure.handler(async ({ context }) => {
+		const userId = context.session.user.id;
+
+		const now = new Date();
+
+		const [newResume] = await context.db
+			.insert(resumes)
+			.values({
+				userId,
+				title: `Nuevo CV - ${formatDate(now, "PPP")}`,
+			})
+			.returning({
+				id: resumes.id,
+			});
+
+		if (!newResume) {
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "Algo ocurrió al crear tu CV",
+				cause: "malformed_data_or_unknown",
+			});
+		}
+
+		context.log?.set({
+			outcome: "success",
+			action: "create_resume",
+			data: {
+				newResume,
+			},
+		});
+
+		return {
+			success: true,
+			resumeId: newResume.id,
+		};
 	}),
 };
