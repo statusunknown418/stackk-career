@@ -7,6 +7,7 @@ import {
 	getGenerationInputSchema,
 	getResumeAnalysisHistoryInputSchema,
 	getResumeAnalysisInputSchema,
+	listGenerationsInputSchema,
 	type ResumeAnalysisHistoryItem,
 } from "@stackk-career/schemas/api/generations";
 import { and, asc, count, desc, eq } from "drizzle-orm";
@@ -85,15 +86,21 @@ export const generationsRouter = {
 		return row;
 	}),
 
-	list: protectedProcedure.handler(async ({ context }) => {
+	list: protectedProcedure.input(listGenerationsInputSchema).handler(async ({ context, input }) => {
 		const userId = context.session.user.id;
 
 		context.log?.set({
 			action: "list_generations",
 			user: { id: userId },
+			pagination: { limit: input.limit, offset: input.offset },
 		});
 
-		const rows = await context.db.select().from(generations).where(eq(generations.owner, userId));
+		const rows = await context.db
+			.select()
+			.from(generations)
+			.where(eq(generations.owner, userId))
+			.limit(input.limit)
+			.offset(input.offset);
 
 		if (!rows) {
 			throw new ORPCError("INTERNAL_SERVER_ERROR", {

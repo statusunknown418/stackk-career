@@ -1,3 +1,4 @@
+import { env } from "@stackk-career/env/server";
 import { logger } from "@trigger.dev/sdk";
 import type { LanguageModelUsage } from "ai";
 
@@ -63,8 +64,8 @@ export async function emitUsageEvent(input: EmitUsageEventInput): Promise<void> 
 		return;
 	}
 
-	const token = process.env.AXIOM_TOKEN;
-	const dataset = process.env.AXIOM_DATASET;
+	const token = env.AXIOM_API_TOKEN;
+	const dataset = env.AXIOM_DATASET;
 
 	if (!(token && dataset)) {
 		logger.info("usage-event = recorded_local", { ...payload });

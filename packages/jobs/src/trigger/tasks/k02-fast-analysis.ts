@@ -19,6 +19,12 @@ export const k02FastAnalysisTask = schemaTask({
 	queue: agentQueue,
 	schema: k02FastAnalysisInputSchema,
 	maxDuration: 300,
+	retry: {
+		maxAttempts: 3,
+		factor: 2,
+		minTimeoutInMs: 1000,
+		maxTimeoutInMs: 30_000,
+	},
 	run: async ({ analysisId, generationId, userId, pdfUrl }, { ctx, signal }) => {
 		const db = getTriggerDb();
 

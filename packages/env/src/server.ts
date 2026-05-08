@@ -8,7 +8,9 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const rootEnv = path.resolve(here, "../../../.env");
 config({ path: rootEnv, quiet: true });
 
-const skipValidation = process.env.SKIP_ENV_VALIDATION === "true" || process.env.TRIGGER_INDEXING === "1";
+const skipValidation =
+	process.env.NODE_ENV !== "production" &&
+	(process.env.SKIP_ENV_VALIDATION === "true" || process.env.TRIGGER_INDEXING === "1");
 
 export const env = createEnv({
 	server: {
@@ -30,8 +32,10 @@ export const env = createEnv({
 		TRIGGER_SECRET_KEY: z.string().min(1),
 		TRIGGER_PROJECT_ID: z.string().min(1),
 
-		AXIOM_API_TOKEN: z.string().nonempty(),
-		AXIOM_DATASET: z.string().nonempty(),
+		AXIOM_API_TOKEN: z.string().optional(),
+		AXIOM_DATASET: z.string().optional(),
+
+		AGENT_QUEUE_CONCURRENCY: z.coerce.number().default(10),
 	},
 	runtimeEnv: process.env,
 	skipValidation,

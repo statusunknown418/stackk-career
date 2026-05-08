@@ -1,14 +1,21 @@
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { parseBlock } from "@stackk-career/schemas/ai/resume-blocks";
+import { listResumesInputSchema } from "@stackk-career/schemas/api/resumes";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { protectedProcedure } from "..";
 
 export const resumesRouter = {
-	list: protectedProcedure.handler(async ({ context }) => {
+	list: protectedProcedure.input(listResumesInputSchema).handler(async ({ context, input }) => {
 		const userId = context.session.user.id;
 
-		const userResumes = await context.db.select().from(resumes).where(eq(resumes.userId, userId)).$withCache();
+		const userResumes = await context.db
+			.select()
+			.from(resumes)
+			.where(eq(resumes.userId, userId))
+			.limit(input.limit)
+			.offset(input.offset)
+			.$withCache();
 
 		context.log?.set({
 			action: "get_resumes",
