@@ -1,7 +1,15 @@
-import { BriefcaseIcon, ChatsIcon, GearIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import {
+	ArrowCircleLeftIcon,
+	ArrowCircleRightIcon,
+	BriefcaseIcon,
+	ChatsIcon,
+	GearIcon,
+	SidebarSimpleIcon,
+} from "@phosphor-icons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
+import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
 	Sidebar,
@@ -32,8 +40,10 @@ export const Route = createFileRoute("/_protected/dash")({
 
 function DashLayout() {
 	const matchRoute = useLocation();
-	const { data } = useSuspenseQuery(orpc.generations.list.queryOptions());
 	const sidebarState = Route.useLoaderData();
+	const router = useRouter();
+
+	const { data } = useSuspenseQuery(orpc.generations.list.queryOptions());
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
@@ -85,8 +95,22 @@ function DashLayout() {
 				<SidebarRail />
 			</Sidebar>
 
-			<SidebarInset className="grid grid-rows-[auto_1fr] rounded-sm border">
-				<nav className="flex justify-between border-b px-2 py-1">
+			<SidebarInset className="grid h-[calc(100svh-1rem)] grid-rows-[auto_1fr] overflow-hidden rounded-sm border">
+				<nav className="flex border-b px-2 py-1">
+					<Tooltip>
+						<Button
+							disabled={!router.history.canGoBack()}
+							onClick={() => router.history.back()}
+							render={<TooltipTrigger />}
+							size="icon-sm"
+							variant="ghost-muted"
+						>
+							<ArrowCircleLeftIcon />
+						</Button>
+
+						<TooltipContent>Regresar</TooltipContent>
+					</Tooltip>
+
 					<Tooltip>
 						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
 							<SidebarSimpleIcon weight="duotone" />
@@ -108,9 +132,25 @@ function DashLayout() {
 							Abrir/cerrar panel derecho <Kbd>⌘ + J</Kbd>
 						</TooltipContent>
 					</Tooltip>
+
+					<Tooltip>
+						<Button
+							className="ml-auto"
+							onClick={() => router.history.forward()}
+							render={<TooltipTrigger />}
+							size="icon-sm"
+							variant="ghost-muted"
+						>
+							<ArrowCircleRightIcon />
+						</Button>
+
+						<TooltipContent>Avanzar</TooltipContent>
+					</Tooltip>
 				</nav>
 
-				<Outlet />
+				<div className="min-h-0 overflow-y-auto">
+					<Outlet />
+				</div>
 			</SidebarInset>
 
 			<Sidebar className="py-3 pl-0" collapsible="offcanvas" side="right" variant="inset">

@@ -78,18 +78,19 @@ export function SheetPopup({
 }): React.ReactElement {
 	return (
 		<SheetPortal {...portalProps}>
-			<SheetBackdrop />
+			<SheetBackdrop className={cn(variant === "inset" && "bg-black/16 backdrop-blur-none")} />
 			<SheetViewport side={side} variant={variant}>
 				<SheetPrimitive.Popup
 					className={cn(
 						"relative flex max-h-full min-h-0 w-full min-w-0 flex-col bg-popover not-dark:bg-clip-padding text-popover-foreground shadow-lg/5 transition-[opacity,translate] duration-200 ease-in-out will-change-transform before:pointer-events-none before:absolute before:inset-0 before:shadow-[0_1px_--theme(--color-black/4%)] data-ending-style:opacity-0 data-starting-style:opacity-0 max-sm:before:hidden dark:before:shadow-[0_-1px_--theme(--color-white/6%)]",
 						side === "bottom" &&
-							"row-start-2 border-t data-ending-style:translate-y-8 data-starting-style:translate-y-8",
-						side === "top" && "border-b data-ending-style:-translate-y-8 data-starting-style:-translate-y-8",
+							"row-start-2 rounded-t-3xl border-t data-ending-style:translate-y-8 data-starting-style:translate-y-8",
+						side === "top" &&
+							"rounded-b-3xl border-b data-ending-style:-translate-y-8 data-starting-style:-translate-y-8",
 						side === "left" &&
-							"w-[calc(100%-(--spacing(12)))] max-w-md border-e data-ending-style:-translate-x-8 data-starting-style:-translate-x-8",
+							"w-[calc(100%-(--spacing(12)))] max-w-md rounded-r-xl border-e data-ending-style:-translate-x-8 data-starting-style:-translate-x-8",
 						side === "right" &&
-							"col-start-2 w-[calc(100%-(--spacing(12)))] max-w-md border-s data-ending-style:translate-x-8 data-starting-style:translate-x-8",
+							"col-start-2 w-[calc(100%-(--spacing(12)))] max-w-md rounded-l-xl border-s data-ending-style:translate-x-8 data-starting-style:translate-x-8",
 						variant === "inset" &&
 							"before:hidden sm:rounded-2xl sm:border sm:before:rounded-[calc(var(--radius-2xl)-1px)] sm:**:data-[slot=sheet-footer]:rounded-b-[calc(var(--radius-2xl)-1px)]",
 						className
@@ -158,7 +159,7 @@ export function SheetFooter({
 export function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props): React.ReactElement {
 	return (
 		<SheetPrimitive.Title
-			className={cn("font-heading font-semibold text-xl leading-none", className)}
+			className={cn("font-heading text-xl leading-none", className)}
 			data-slot="sheet-title"
 			{...props}
 		/>
