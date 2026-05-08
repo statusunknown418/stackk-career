@@ -5,6 +5,15 @@ import { resumes } from "./resumes";
 export const BLOCK_TYPES = ["contact", "section", "entry", "bullet", "paragraph", "skill_line", "skill_item"] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
+interface BlockWithContent {
+	blockType: string;
+	content: unknown;
+}
+
+interface BlockWithId {
+	id: number;
+}
+
 export const resumeBlocks = sqliteTable(
 	"resumeBlocks",
 	(t) => ({
@@ -55,3 +64,39 @@ export const resumeBlocksRelations = relations(resumeBlocks, ({ one }) => ({
 		relationName: "block_source",
 	}),
 }));
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null && !Array.isArray(value);
+
+export const areBlockContentsEqual = (left: unknown, right: unknown): boolean => {
+	if (Object.is(left, right)) {
+		return true;
+	}
+
+	if (Array.isArray(left) && Array.isArray(right)) {
+		return left.length === right.length && left.every((value, index) => areBlockContentsEqual(value, right[index]));
+	}
+
+	if (isRecord(left) && isRecord(right)) {
+		const leftKeys = Object.keys(left);
+		const rightKeys = Object.keys(right);
+
+		return (
+			leftKeys.length === rightKeys.length &&
+			leftKeys.every((key) => Object.hasOwn(right, key) && areBlockContentsEqual(left[key], right[key]))
+		);
+	}
+
+	return false;
+};
+
+export const findBlockById = <T extends BlockWithId>(blocks: T[], blockId: number) =>
+	blocks.find((block) => block.id === blockId);
+
+export const hasBlockChanged = <T extends BlockWithContent>(currentBlock: T, savedBlock?: T) =>
+	!savedBlock ||
+	currentBlock.blockType !== savedBlock.blockType ||
+	!areBlockContentsEqual(currentBlock.content, savedBlock.content);
+
+export const replaceBlockById = <T extends BlockWithId>(blocks: T[], next: T) =>
+	blocks.map((block) => (block.id === next.id ? next : block));

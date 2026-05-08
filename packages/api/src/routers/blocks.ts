@@ -76,6 +76,10 @@ export const blocksRouter = {
 		}
 
 		const position = generateLexoKeyBetween(input.before, input.after);
+		const sanitizedContent = sanitizeBlockContent({
+			blockType: input.blockType,
+			content: input.content as Record<string, unknown>,
+		});
 
 		const newBlock = await context.db.transaction(async (tx) => {
 			const [createdBlock] = await tx
@@ -84,7 +88,7 @@ export const blocksRouter = {
 					resumeId: input.resumeId,
 					parentBlockId: input.parentBlockId,
 					blockType: input.blockType,
-					content: input.content,
+					content: sanitizedContent,
 					position,
 				})
 				.returning();

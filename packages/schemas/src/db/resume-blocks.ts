@@ -88,6 +88,15 @@ export type ContentOf<T extends BlockType> = Extract<BlockPayload, { blockType: 
 export type ResumeBlockGenericType = typeof resumeBlocks.$inferSelect;
 type BlockMeta = Omit<ResumeBlockGenericType, "blockType" | "content">;
 
+interface BlockWithContent {
+	blockType: string;
+	content: unknown;
+}
+
+interface BlockWithId {
+	id: number;
+}
+
 export const blockRowSchema = z
 	.object(selectResumeBlocksSchema.shape)
 	.omit({
@@ -118,6 +127,7 @@ const allowedResumeHtmlTags = new Set(["p", "ul", "ol", "li", "strong", "em", "b
 const scriptTagPattern = /<\s*(script|style)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi;
 const htmlCommentPattern = /<!--[\s\S]*?-->/g;
 const htmlTagPattern = /<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi;
+const paragraphBreakPattern = /\n{2,}/;
 
 export const escapeHtml = (value: string): string =>
 	value
@@ -135,7 +145,7 @@ export const plainTextToHtml = (value: string): string => {
 	}
 
 	return trimmed
-		.split(/\n{2,}/)
+		.split(paragraphBreakPattern)
 		.map((chunk) => `<p>${escapeHtml(chunk).replaceAll("\n", "<br>")}</p>`)
 		.join("");
 };
@@ -205,6 +215,42 @@ export function buildBlockTree(blocks: ResumeBlockGenericType[]): BlockNode[] {
 
 	return roots;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null && !Array.isArray(value);
+
+export const areBlockContentsEqual = (left: unknown, right: unknown): boolean => {
+	if (Object.is(left, right)) {
+		return true;
+	}
+
+	if (Array.isArray(left) && Array.isArray(right)) {
+		return left.length === right.length && left.every((value, index) => areBlockContentsEqual(value, right[index]));
+	}
+
+	if (isRecord(left) && isRecord(right)) {
+		const leftKeys = Object.keys(left);
+		const rightKeys = Object.keys(right);
+
+		return (
+			leftKeys.length === rightKeys.length &&
+			leftKeys.every((key) => Object.hasOwn(right, key) && areBlockContentsEqual(left[key], right[key]))
+		);
+	}
+
+	return false;
+};
+
+export const findBlockById = <T extends BlockWithId>(blocks: T[], blockId: number) =>
+	blocks.find((block) => block.id === blockId);
+
+export const hasBlockChanged = <T extends BlockWithContent>(currentBlock: T, savedBlock?: T) =>
+	!savedBlock ||
+	currentBlock.blockType !== savedBlock.blockType ||
+	!areBlockContentsEqual(currentBlock.content, savedBlock.content);
+
+export const replaceBlockById = <T extends BlockWithId>(blocks: T[], next: T) =>
+	blocks.map((block) => (block.id === next.id ? next : block));
 
 export function formatDateRange(startDate?: string, endDate?: string | null, isCurrent?: boolean): string | null {
 	if (!(startDate || endDate || isCurrent)) {

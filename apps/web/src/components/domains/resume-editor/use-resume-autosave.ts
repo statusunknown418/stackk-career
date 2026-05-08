@@ -1,20 +1,34 @@
 "use client";
 
 import type { ResumeDocumentWrapperForm } from "@stackk-career/schemas/api/resumes";
+import { findBlockById, hasBlockChanged, replaceBlockById } from "@stackk-career/schemas/db/resume-blocks";
+import { AsyncDebouncer, useAsyncDebouncer, useAsyncQueuer } from "@tanstack/react-pacer";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { orpc, queryClient } from "@/utils/orpc";
 
 export type SaveStatus = "error" | "idle" | "saved" | "saving";
 
 type ResumeBlock = ResumeDocumentWrapperForm["blocks"][number];
+type BlockSaveFn = (blockId: number) => Promise<void>;
+type SaveJob = { blockId: number; kind: "block" } | { kind: "title"; title: string };
+type SaveJobOutcome = "error" | "saved" | "skipped";
 
 const SAVE_DEBOUNCE_MS = 800;
 const SAVED_DISPLAY_MS = 1600;
 
-const replaceBlockById = (blocks: ResumeBlock[], next: ResumeBlock) =>
-	blocks.map((block) => (block.id === next.id ? next : block));
+const isSameSaveJob = (left: SaveJob, right: SaveJob) => {
+	if (left.kind !== right.kind) {
+		return false;
+	}
+
+	if (left.kind === "block") {
+		return right.kind === "block" && left.blockId === right.blockId;
+	}
+
+	return right.kind === "title" && left.title === right.title;
+};
 
 const updateListResumeTitle = (resumeId: string, title: string, updatedAt: Date) => {
 	const listQuery = orpc.resumes.list.queryOptions();
@@ -34,28 +48,12 @@ interface UseResumeAutosaveArgs {
 
 export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle }: UseResumeAutosaveArgs) {
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-	const pendingSavesRef = useRef(0);
-	const saveStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const blockSaveTimeoutsRef = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+	const blockSaveDebouncersRef = useRef(new Map<number, AsyncDebouncer<BlockSaveFn>>());
 	const lastSavedRef = useRef<ResumeDocumentWrapperForm>(initialValues);
 	const mountedRef = useRef(true);
 
 	const titleMutation = useMutation(orpc.resumes.updateTitle.mutationOptions());
 	const blockMutation = useMutation(orpc.blocks.update.mutationOptions());
-
-	useEffect(
-		() => () => {
-			mountedRef.current = false;
-			if (saveStatusTimeoutRef.current) {
-				clearTimeout(saveStatusTimeoutRef.current);
-			}
-			for (const timeout of blockSaveTimeoutsRef.current.values()) {
-				clearTimeout(timeout);
-			}
-			blockSaveTimeoutsRef.current.clear();
-		},
-		[]
-	);
 
 	const safeSetSaveStatus = (status: SaveStatus) => {
 		if (mountedRef.current) {
@@ -63,48 +61,101 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 		}
 	};
 
-	const beginSave = () => {
-		if (saveStatusTimeoutRef.current) {
-			clearTimeout(saveStatusTimeoutRef.current);
-			saveStatusTimeoutRef.current = null;
+	const disposeBlockSaveDebouncer = (blockId: number) => {
+		const debouncer = blockSaveDebouncersRef.current.get(blockId);
+
+		if (!debouncer) {
+			return;
 		}
-		pendingSavesRef.current += 1;
+
+		debouncer.cancel();
+		debouncer.abort();
+		blockSaveDebouncersRef.current.delete(blockId);
+	};
+
+	const clearBlockSaveDebouncers = () => {
+		for (const blockId of blockSaveDebouncersRef.current.keys()) {
+			disposeBlockSaveDebouncer(blockId);
+		}
+	};
+
+	const pruneBlockSaveDebouncers = (blocks: ResumeBlock[]) => {
+		const validBlockIds = new Set(blocks.map((block) => block.id));
+
+		for (const blockId of blockSaveDebouncersRef.current.keys()) {
+			if (!validBlockIds.has(blockId)) {
+				disposeBlockSaveDebouncer(blockId);
+			}
+		}
+	};
+
+	const getResumeQuery = () => orpc.resumes.get.queryOptions({ input: { id: resumeId } });
+
+	const saveStatusResetDebouncer = useAsyncDebouncer(
+		() => {
+			safeSetSaveStatus("idle");
+			return Promise.resolve();
+		},
+		{ wait: SAVED_DISPLAY_MS }
+	);
+
+	const beginSave = () => {
+		saveStatusResetDebouncer.cancel();
 		safeSetSaveStatus("saving");
 	};
 
-	const finishSave = (status: Exclude<SaveStatus, "saving">) => {
-		pendingSavesRef.current = Math.max(0, pendingSavesRef.current - 1);
-
-		if (status === "error") {
+	const settleSaveStatus = (outcome: SaveJobOutcome, pendingJobCount: number) => {
+		if (outcome === "error") {
 			safeSetSaveStatus("error");
 			return;
 		}
 
-		if (pendingSavesRef.current > 0) {
+		if (pendingJobCount > 0) {
 			return;
 		}
 
 		safeSetSaveStatus("saved");
-		saveStatusTimeoutRef.current = setTimeout(() => {
-			safeSetSaveStatus("idle");
-		}, SAVED_DISPLAY_MS);
+		saveStatusResetDebouncer.maybeExecute().catch(() => undefined);
 	};
 
-	const saveTitle = async () => {
-		const current = getValues().title;
-		const trimmed = current.trim();
-		const previous = lastSavedRef.current.title.trim();
-
-		if (!trimmed) {
+	const enqueueSaveJob = (job: SaveJob) => {
+		if (job.kind === "block" && !findBlockById(getValues().blocks, job.blockId)) {
+			disposeBlockSaveDebouncer(job.blockId);
 			return;
 		}
 
-		if (trimmed !== current) {
-			setTitle(trimmed);
+		const hasEquivalentPendingJob = saveQueue.peekPendingItems().some((pendingJob) => isSameSaveJob(pendingJob, job));
+
+		if (hasEquivalentPendingJob) {
+			return;
 		}
 
-		if (trimmed === previous) {
-			return;
+		saveQueue.addItem(job);
+	};
+
+	const updateCachedTitle = (title: string, updatedAt: Date) => {
+		const resumeQuery = getResumeQuery();
+		queryClient.setQueryData(resumeQuery.queryKey, (previous) =>
+			previous ? { ...previous, title, updatedAt } : previous
+		);
+		updateListResumeTitle(resumeId, title, updatedAt);
+	};
+
+	const updateCachedBlock = (updatedBlock: ResumeBlock) => {
+		const resumeQuery = getResumeQuery();
+		queryClient.setQueryData(resumeQuery.queryKey, (previous) =>
+			previous
+				? {
+						...previous,
+						blocks: replaceBlockById(previous.blocks as ResumeBlock[], updatedBlock),
+					}
+				: previous
+		);
+	};
+
+	const persistTitle = async (title: string) => {
+		if (title === lastSavedRef.current.title.trim()) {
+			return "skipped" as const;
 		}
 
 		beginSave();
@@ -112,31 +163,32 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 		try {
 			const updatedResume = await titleMutation.mutateAsync({
 				id: resumeId,
-				title: trimmed,
+				title,
 			});
 
 			lastSavedRef.current = {
 				...lastSavedRef.current,
 				title: updatedResume.title,
 			};
-
-			const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: resumeId } });
-			queryClient.setQueryData(resumeQuery.queryKey, (previous_) =>
-				previous_ ? { ...previous_, title: updatedResume.title, updatedAt: updatedResume.updatedAt } : previous_
-			);
-			updateListResumeTitle(updatedResume.id, updatedResume.title, updatedResume.updatedAt);
-			finishSave("saved");
+			updateCachedTitle(updatedResume.title, updatedResume.updatedAt);
+			return "saved" as const;
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "No se pudo guardar el título");
-			finishSave("error");
+			return "error" as const;
 		}
 	};
 
-	const saveBlock = async (blockId: number) => {
-		const currentBlock = getValues().blocks.find((block) => block.id === blockId);
+	const persistBlock = async (blockId: number) => {
+		const currentBlock = findBlockById(getValues().blocks, blockId);
+		const savedBlock = findBlockById(lastSavedRef.current.blocks, blockId);
 
 		if (!currentBlock) {
-			return;
+			disposeBlockSaveDebouncer(blockId);
+			return "skipped" as const;
+		}
+
+		if (!(currentBlock && hasBlockChanged(currentBlock, savedBlock))) {
+			return "skipped" as const;
 		}
 
 		beginSave();
@@ -159,50 +211,100 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 			// Intentionally NOT calling form.setFieldValue('blocks[i]', updatedBlock).
 			// Doing so would clobber any keystrokes that arrived during the in-flight save
 			// (lost-update race). The form is the source of truth for the user's edits.
-			const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: resumeId } });
-			queryClient.setQueryData(resumeQuery.queryKey, (previous) =>
-				previous
-					? {
-							...previous,
-							blocks: replaceBlockById(previous.blocks as ResumeBlock[], updatedBlock),
-						}
-					: previous
-			);
-			finishSave("saved");
+			updateCachedBlock(updatedBlock);
+			return "saved" as const;
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "No se pudo guardar bloque");
-			finishSave("error");
+			return "error" as const;
 		}
+	};
+
+	const saveQueue = useAsyncQueuer(
+		(job: SaveJob) => {
+			if (job.kind === "title") {
+				return persistTitle(job.title);
+			}
+
+			return persistBlock(job.blockId);
+		},
+		{
+			concurrency: 1,
+			onSettled: (_job, queuer) => {
+				settleSaveStatus(
+					(queuer.store.state.lastResult as SaveJobOutcome | null) ?? "skipped",
+					queuer.store.state.activeItems.length + queuer.store.state.size
+				);
+			},
+			onUnmount: (queuer) => {
+				mountedRef.current = false;
+				queuer.stop();
+				queuer.abort();
+				clearBlockSaveDebouncers();
+			},
+		}
+	);
+
+	const saveTitle = () => {
+		const current = getValues().title;
+		const trimmed = current.trim();
+		const previous = lastSavedRef.current.title.trim();
+
+		if (!trimmed) {
+			return;
+		}
+
+		if (trimmed !== current) {
+			setTitle(trimmed);
+		}
+
+		if (trimmed === previous) {
+			return;
+		}
+
+		enqueueSaveJob({ kind: "title", title: trimmed });
+	};
+
+	const getBlockSaveDebouncer = (blockId: number) => {
+		pruneBlockSaveDebouncers(getValues().blocks);
+
+		const existingDebouncer = blockSaveDebouncersRef.current.get(blockId);
+
+		if (existingDebouncer) {
+			return existingDebouncer;
+		}
+
+		const debouncer = new AsyncDebouncer(
+			(nextBlockId: number) => {
+				enqueueSaveJob({ blockId: nextBlockId, kind: "block" });
+				return Promise.resolve();
+			},
+			{ wait: SAVE_DEBOUNCE_MS }
+		);
+
+		blockSaveDebouncersRef.current.set(blockId, debouncer);
+		return debouncer;
 	};
 
 	const queueBlockSave = (blockId: number) => {
-		const previous = blockSaveTimeoutsRef.current.get(blockId);
-
-		if (previous) {
-			clearTimeout(previous);
-		}
-
-		const timeout = setTimeout(() => {
-			blockSaveTimeoutsRef.current.delete(blockId);
-			saveBlock(blockId).catch(() => undefined);
-		}, SAVE_DEBOUNCE_MS);
-
-		blockSaveTimeoutsRef.current.set(blockId, timeout);
+		getBlockSaveDebouncer(blockId)
+			.maybeExecute(blockId)
+			.catch(() => undefined);
 	};
 
 	const flushBlockSave = (blockId: number) => {
-		const timeout = blockSaveTimeoutsRef.current.get(blockId);
+		const debouncer = getBlockSaveDebouncer(blockId);
 
-		if (timeout) {
-			clearTimeout(timeout);
-			blockSaveTimeoutsRef.current.delete(blockId);
+		if (debouncer.store.state.isPending) {
+			debouncer.flush().catch(() => undefined);
+			return;
 		}
 
-		saveBlock(blockId).catch(() => undefined);
+		enqueueSaveJob({ blockId, kind: "block" });
 	};
 
 	const hydrateSaved = (values: ResumeDocumentWrapperForm) => {
 		lastSavedRef.current = values;
+		pruneBlockSaveDebouncers(values.blocks);
 	};
 
 	return { flushBlockSave, hydrateSaved, queueBlockSave, saveStatus, saveTitle };
