@@ -1,21 +1,15 @@
-import { createId } from "@paralleldrive/cuid2";
 import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
-import type { ResumeListItem } from "@stackk-career/schemas/api/resumes";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { constructNow, formatDate } from "date-fns";
-import { es } from "date-fns/locale";
 import { RouteIcon } from "lucide-react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { ResumeCard } from "@/components/domains/resumes/resume-card";
+import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
 import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/components/ui/meter";
 import { orpc, queryClient } from "@/utils/orpc";
-
-const optimisticResumeId = () => `optimistic_${createId()}`;
 
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
@@ -30,31 +24,6 @@ function RouteComponent() {
 
 	const { mutateAsync, isPending } = useMutation(
 		orpc.resumes.create.mutationOptions({
-			onMutate: async () => {
-				await queryClient.cancelQueries({ queryKey: listQuery.queryKey });
-
-				const previousResumes = queryClient.getQueryData<ResumeListItem[]>(listQuery.queryKey) ?? [];
-				const now = constructNow();
-				const optimisticResume: ResumeListItem = {
-					id: optimisticResumeId(),
-					userId: "",
-					templateId: null,
-					generationId: null,
-					targetedCompanyIdentifier: null,
-					isPrimary: false,
-					aiMetadata: null,
-					status: "draft",
-					displayName: "Nuevo CV",
-					title: `Nuevo CV - ${formatDate(now, "P", { locale: es })}`,
-					createdAt: now,
-					updatedAt: now,
-					contact: null,
-				};
-
-				queryClient.setQueryData<ResumeListItem[]>(listQuery.queryKey, [optimisticResume, ...previousResumes]);
-
-				return { previousResumes };
-			},
 			onSuccess(data) {
 				navigate({
 					to: "/dash/resumes/$resumeId",
@@ -63,16 +32,13 @@ function RouteComponent() {
 					},
 				});
 			},
-			onError(_error, _variables, context) {
-				if (context?.previousResumes) {
-					queryClient.setQueryData(listQuery.queryKey, context.previousResumes);
-				}
-			},
 			onSettled() {
 				queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
 			},
 		})
 	);
+
+	const hasResumeContent = data.length > 0 || isPending;
 
 	return (
 		<section className="space-y-4">
@@ -85,8 +51,8 @@ function RouteComponent() {
 					</FrameDescription>
 
 					<Button className="mt-4 max-w-max" disabled={isPending || data.length >= 5} onClick={() => mutateAsync({})}>
-						{isPending ? <Loader /> : <PlusCircleIcon />}
-						Crear CV
+						{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
+						Crear nuevo
 					</Button>
 				</article>
 
@@ -106,7 +72,16 @@ function RouteComponent() {
 			</section>
 
 			<section aria-labelledby="resumes-list-heading" className="px-11 py-2">
-				{data.length === 0 ? (
+				{hasResumeContent ? (
+					<article className="flex flex-col gap-4">
+						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							{data.map((resume) => (
+								<ResumeCard key={resume.id} resume={resume} />
+							))}
+							{isPending && <ResumeCardSkeleton />}
+						</ul>
+					</article>
+				) : (
 					<Empty className="rounded-xl border">
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
@@ -121,19 +96,11 @@ function RouteComponent() {
 
 						<EmptyContent>
 							<Button disabled={isPending} onClick={() => mutateAsync({})} size="sm">
-								{isPending ? <Loader /> : <PlusCircleIcon />}
+								{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
 								Crear CV
 							</Button>
 						</EmptyContent>
 					</Empty>
-				) : (
-					<article className="flex flex-col gap-4">
-						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
-							{data.map((resume) => (
-								<ResumeCard key={resume.id} resume={resume} />
-							))}
-						</ul>
-					</article>
 				)}
 			</section>
 		</section>
