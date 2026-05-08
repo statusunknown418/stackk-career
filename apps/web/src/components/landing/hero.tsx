@@ -10,7 +10,10 @@ export function Hero() {
 		<>
 			<section className="relative flex min-h-[88vh] items-center overflow-hidden px-6 pt-28 pb-16" id="top">
 				<AuroraBackground />
-				<div className="absolute inset-0 opacity-[0.14] mix-blend-multiply">
+				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.11]">
+					<PixelGridShader amplitude={0.2} colorFg="#3a0a5e" frequency={0.7} pxSize={5} shape="noise" speed={0.06} />
+				</div>
+				<div className="absolute inset-0 opacity-[0.18]">
 					<PixelGridShader
 						amplitude={0.3}
 						colorFg="#3a0a5e"
@@ -24,7 +27,7 @@ export function Hero() {
 						speed={0.25}
 					/>
 				</div>
-				<div className="relative z-10 mx-auto w-full max-w-[1200px]">
+				<div className="pointer-events-none relative z-10 mx-auto w-full max-w-[1200px]">
 					<h1 className="font-bold font-display text-[clamp(3rem,9vw,8.5rem)] text-foreground leading-[0.95] tracking-[-0.04em]">
 						Garantizamos tu próxima entrevista
 						<br />
@@ -36,7 +39,7 @@ export function Hero() {
 						devolvemos el 100%. Hecho para LATAM.
 					</p>
 
-					<div className="mt-12 flex flex-wrap items-center gap-3">
+					<div className="pointer-events-auto mt-12 flex flex-wrap items-center gap-3">
 						<a className={buttonVariants({ size: "lg" })} href="#planes">
 							<UploadSimpleIcon weight="bold" />
 							Analiza mi CV gratis
