@@ -6,6 +6,7 @@ import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STATUS_LABEL: Record<ResumeStatus, string> = {
 	draft: "Borrador",
@@ -100,6 +101,43 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 						{score}/100
 					</span>
 				)}
+			</FrameFooter>
+		</Frame>
+	);
+}
+
+export function ResumeCardSkeleton() {
+	return (
+		<Frame aria-hidden="true">
+			<FrameHeader>
+				<div className="flex items-center gap-2">
+					<Skeleton className="h-5 w-20 rounded-full" />
+					<Skeleton className="h-5 w-14 rounded-full" />
+				</div>
+
+				<div className="flex items-start justify-between gap-3">
+					<Skeleton className="h-6 w-40 rounded-md" />
+					<Skeleton className="size-4 rounded-sm" />
+				</div>
+
+				<Skeleton className="h-4 w-3/4 rounded-md" />
+			</FrameHeader>
+
+			<FramePanel className="grid grid-cols-2 gap-3 text-sm">
+				<div className="flex min-w-0 flex-col gap-1">
+					<Skeleton className="h-3 w-16 rounded-md" />
+					<Skeleton className="h-4 w-24 rounded-md" />
+				</div>
+
+				<div className="flex min-w-0 flex-col gap-1">
+					<Skeleton className="h-3 w-16 rounded-md" />
+					<Skeleton className="h-4 w-28 rounded-md" />
+				</div>
+			</FramePanel>
+
+			<FrameFooter className="flex items-center justify-between gap-2">
+				<Skeleton className="h-4 w-28 rounded-md" />
+				<Skeleton className="h-6 w-14 rounded-full" />
 			</FrameFooter>
 		</Frame>
 	);

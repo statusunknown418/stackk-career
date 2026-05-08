@@ -11,9 +11,10 @@ import {
 	TranslateIcon,
 	WrenchIcon,
 } from "@phosphor-icons/react";
-import { mapParseBlocks } from "@stackk-career/schemas/ai/resume-blocks";
 import type { CreateBlockApiMutationInput } from "@stackk-career/schemas/api/blocks";
 import { blankResumeSections } from "@stackk-career/schemas/api/resumes";
+import { mapParseBlocks } from "@stackk-career/schemas/db/resume-blocks";
+import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { constructNow } from "date-fns";
 import type { ComponentType } from "react";
@@ -229,9 +230,10 @@ export const NewSectionSheet = () => {
 	const usedTitles = new Set(
 		parsedBlocks.filter((block) => block.blockType === "section").map((block) => normalize(block.content.title))
 	);
-	const topLevelBlocks = parsedBlocks
-		.filter((block) => block.parentBlockId === null)
-		.sort((left, right) => left.position.localeCompare(right.position));
+	const topLevelBlocks = sortLexoPositions(
+		parsedBlocks.filter((block) => block.parentBlockId === null),
+		(block) => block.position
+	);
 	const lastTopLevelBlock = topLevelBlocks.at(-1) ?? null;
 
 	const handleCreateSection = async (option: SectionOption) => {
