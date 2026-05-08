@@ -121,8 +121,8 @@ const createStarterChildContent = (layout: SectionLayout) => {
 			return {
 				blockType: "paragraph" as const,
 				content: {
-					text: "Escribe aqui el contenido principal de esta seccion.",
-					format: "plain" as const,
+					text: "<p>Escribe aquí el contenido principal de esta sección.</p>",
+					format: "html" as const,
 					aiSuggested: false,
 				},
 			};
@@ -140,7 +140,8 @@ const createStarterChildContent = (layout: SectionLayout) => {
 				content: {
 					title: "Nuevo elemento",
 					subtitle: "Agrega puesto, institucion o proyecto",
-					descriptor: "Edita este elemento para añadir fechas, ubicacion e impacto.",
+					descriptor: "<p>Edita este elemento para añadir fechas, ubicación e impacto.</p>",
+					descriptorFormat: "html" as const,
 					entryStyle: "standard" as const,
 					isCurrent: false,
 				},

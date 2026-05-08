@@ -52,3 +52,11 @@ export const resumeDocumentWrapperFormSchema = z.object({
 	title: z.string().min(1),
 	blocks: z.array(blockRowSchema),
 });
+
+export const updateResumeTitleSchema = z.object({
+	id: z.string(),
+	title: z.string().min(1),
+});
+
+export type ResumeDocumentWrapperForm = z.infer<typeof resumeDocumentWrapperFormSchema>;
+export type UpdateResumeTitleInput = z.infer<typeof updateResumeTitleSchema>;

@@ -37,11 +37,13 @@ export const entryContentSchema = z.object({
 	endDate: z.string().nullable().optional(),
 	isCurrent: z.boolean().default(false),
 	descriptor: z.string().optional(),
+	descriptorFormat: z.enum(["plain", "html"]).default("html"),
 	entryStyle: z.enum(["standard", "condensed", "publication"]).default("standard"),
 });
 
 export const bulletContentSchema = z.object({
 	text: z.string().min(1).max(600),
+	format: z.enum(["plain", "html"]).default("html"),
 	metrics: z.array(z.string()).optional(),
 	aiSuggested: z.boolean().default(false),
 	openingVerb: z.string().optional(),
@@ -50,7 +52,7 @@ export const bulletContentSchema = z.object({
 
 export const paragraphContentSchema = z.object({
 	text: z.string().min(1).max(2000),
-	format: z.enum(["plain", "markdown"]).default("plain"),
+	format: z.enum(["plain", "html"]).default("html"),
 	aiSuggested: z.boolean().default(false),
 	originalText: z.string().optional(),
 });
@@ -111,6 +113,60 @@ export function mapParseBlocks(raw: (typeof resumeBlocks.$inferSelect)[]): Block
 }
 
 export type BlockNode = Block & { children: BlockNode[] };
+
+const allowedResumeHtmlTags = new Set(["p", "ul", "ol", "li", "strong", "em", "b", "i", "br"]);
+const scriptTagPattern = /<\s*(script|style)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi;
+const htmlCommentPattern = /<!--[\s\S]*?-->/g;
+const htmlTagPattern = /<\/?([a-z0-9-]+)(?:\s[^>]*)?>/gi;
+
+export const escapeHtml = (value: string): string =>
+	value
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#39;");
+
+export const plainTextToHtml = (value: string): string => {
+	const trimmed = value.trim();
+
+	if (!trimmed) {
+		return "<p></p>";
+	}
+
+	return trimmed
+		.split(/\n{2,}/)
+		.map((chunk) => `<p>${escapeHtml(chunk).replaceAll("\n", "<br>")}</p>`)
+		.join("");
+};
+
+export const sanitizeResumeRichTextHtml = (value: string): string => {
+	const withoutUnsafeBlocks = value.replace(scriptTagPattern, "").replace(htmlCommentPattern, "");
+
+	return withoutUnsafeBlocks.replace(htmlTagPattern, (tag, rawTagName: string) => {
+		const tagName = rawTagName.toLowerCase();
+
+		if (!allowedResumeHtmlTags.has(tagName)) {
+			return "";
+		}
+
+		if (tag.startsWith("</")) {
+			return `</${tagName}>`;
+		}
+
+		return tagName === "br" ? "<br>" : `<${tagName}>`;
+	});
+};
+
+export const proseContentToHtml = (value: string | null | undefined, format: "plain" | "html" | undefined): string => {
+	const normalizedValue = value ?? "";
+
+	if (format === "html") {
+		return sanitizeResumeRichTextHtml(normalizedValue);
+	}
+
+	return plainTextToHtml(normalizedValue);
+};
 
 export function buildBlockTree(blocks: ResumeBlockGenericType[]): BlockNode[] {
 	const parsedBlocks = sortLexoPositions(mapParseBlocks(blocks), (block) => block.position);

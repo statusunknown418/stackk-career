@@ -10,10 +10,12 @@ import { ButtonGroup, GroupSeparator } from "@/components/ui/group";
 import { cn } from "@/lib/utils";
 
 interface ResumeRichTextEditorProps {
-	initialContent: string;
+	onBlur?: () => void;
 	onChange?: (value: string) => void;
 	placeholder?: string;
 	readOnly?: boolean;
+	toolbar?: "prose" | "short";
+	value: string;
 }
 
 interface ToolbarButtonProps {
@@ -51,15 +53,17 @@ const ToolbarButton = ({
 );
 
 export const ResumeRichTextEditor = ({
-	initialContent,
+	onBlur,
 	onChange,
 	placeholder,
 	readOnly = false,
+	toolbar = "prose",
+	value,
 }: ResumeRichTextEditorProps) => {
 	const [isFocused, setIsFocused] = useState(false);
 
 	const editor = useEditor({
-		content: initialContent,
+		content: value,
 		editable: !readOnly,
 		editorProps: {
 			attributes: {
@@ -92,7 +96,10 @@ export const ResumeRichTextEditor = ({
 			}),
 		],
 		immediatelyRender: false,
-		onBlur: () => setIsFocused(false),
+		onBlur: () => {
+			setIsFocused(false);
+			onBlur?.();
+		},
 		onFocus: () => setIsFocused(true),
 		onUpdate: ({ editor: currentEditor }) => {
 			onChange?.(currentEditor.getHTML());
@@ -158,27 +165,31 @@ export const ResumeRichTextEditor = ({
 
 								<GroupSeparator />
 
-								<ToolbarButton
-									ariaLabel="Alternar lista con viñetas"
-									editor={editor}
-									icon={<ListBulletsIcon />}
-									isActive={editor.isActive("bulletList")}
-									onClick={() => {
-										editor.chain().focus().toggleBulletList().run();
-									}}
-								/>
+								{toolbar === "prose" ? (
+									<>
+										<ToolbarButton
+											ariaLabel="Alternar lista con viñetas"
+											editor={editor}
+											icon={<ListBulletsIcon />}
+											isActive={editor.isActive("bulletList")}
+											onClick={() => {
+												editor.chain().focus().toggleBulletList().run();
+											}}
+										/>
 
-								<GroupSeparator />
+										<GroupSeparator />
 
-								<ToolbarButton
-									ariaLabel="Alternar lista numerada"
-									editor={editor}
-									icon={<ListNumbersIcon />}
-									isActive={editor.isActive("orderedList")}
-									onClick={() => {
-										editor.chain().focus().toggleOrderedList().run();
-									}}
-								/>
+										<ToolbarButton
+											ariaLabel="Alternar lista numerada"
+											editor={editor}
+											icon={<ListNumbersIcon />}
+											isActive={editor.isActive("orderedList")}
+											onClick={() => {
+												editor.chain().focus().toggleOrderedList().run();
+											}}
+										/>
+									</>
+								) : null}
 							</ButtonGroup>
 						</div>
 					</motion.div>
