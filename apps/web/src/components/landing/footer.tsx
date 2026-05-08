@@ -1,33 +1,35 @@
-import { InstagramLogoIcon, LinkedinLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
 import { FOOTER_COLUMNS } from "./data";
 
 export function LandingFooter() {
 	return (
 		<footer className="mx-auto max-w-[1200px] border-foreground/10 border-t px-6 pt-20 pb-10">
-			<div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
+			<div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-[2fr_1fr_1fr_1fr]">
 				<div className="col-span-2 md:col-span-1">
 					<div className="flex items-center gap-2">
 						<span
 							aria-hidden="true"
-							className="grid size-9 place-items-center rounded-lg bg-gradient-to-br from-oxblood to-marigold font-display font-extrabold text-[15px] text-white leading-none shadow-[var(--shadow-logo)]"
+							className="grid size-9 place-items-center rounded-lg bg-foreground font-bold font-display text-[15px] text-background leading-none"
 						>
 							i
 						</span>
 						<span className="font-bold font-display text-2xl text-foreground tracking-[-0.02em]">IMPULSA</span>
 					</div>
 					<p className="mt-4 max-w-[280px] text-[14px] text-foreground/70 leading-[1.55]">
-						Plataforma de empleo con IA + coaching humano. Hecho en Perú, para todo LATAM. Tu carrera, sin techo de
-						cristal.
+						Plataforma de empleo con IA + coaching humano. Hecho en Perú, para todo LATAM. Garantizamos tu próxima
+						entrevista en menos de 3 meses.
 					</p>
 				</div>
 
 				{FOOTER_COLUMNS.map((col) => (
 					<div key={col.heading}>
-						<h5 className="mb-5 font-mono text-[10px] text-oxblood uppercase tracking-[0.22em]">— {col.heading}</h5>
+						<h5 className="mb-5 font-medium text-[13px] text-foreground/55">{col.heading}</h5>
 						<ul className="flex flex-col gap-2.5">
 							{col.links.map((link) => (
 								<li key={link.label}>
-									<a className="text-[14px] text-foreground/75 transition-colors hover:text-oxblood" href={link.href}>
+									<a
+										className="text-[14px] text-foreground/75 transition-colors hover:text-foreground"
+										href={link.href}
+									>
 										{link.label}
 									</a>
 								</li>
@@ -37,39 +39,9 @@ export function LandingFooter() {
 				))}
 			</div>
 
-			<div className="mt-16 grid items-end gap-6 border-foreground/10 border-t pt-8 md:grid-cols-3">
-				<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">
-					© 2026 IMPULSA · Lima · Bogotá · CDMX
-				</p>
-
-				<p className="text-center font-display-italic text-base text-foreground/55">
-					Tu carrera, sin techo de cristal.
-				</p>
-
-				<div className="flex justify-end gap-2">
-					<SocialLink href="#" label="Instagram">
-						<InstagramLogoIcon size={16} weight="bold" />
-					</SocialLink>
-					<SocialLink href="#" label="LinkedIn">
-						<LinkedinLogoIcon size={16} weight="bold" />
-					</SocialLink>
-					<SocialLink href="#" label="TikTok">
-						<TiktokLogoIcon size={16} weight="bold" />
-					</SocialLink>
-				</div>
+			<div className="mt-16 flex flex-col items-start justify-between gap-4 border-foreground/10 border-t pt-8 md:flex-row md:items-center">
+				<p className="text-foreground/55 text-sm">© 2026 IMPULSA · Lima · Bogotá · CDMX</p>
 			</div>
 		</footer>
-	);
-}
-
-function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
-	return (
-		<a
-			aria-label={label}
-			className="grid size-9 place-items-center rounded-lg border border-foreground/15 text-foreground/60 transition hover:-translate-y-0.5 hover:border-oxblood hover:bg-oxblood hover:text-white"
-			href={href}
-		>
-			{children}
-		</a>
 	);
 }

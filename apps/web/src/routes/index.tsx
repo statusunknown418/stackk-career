@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BentoGrid } from "@/components/landing/bento-grid";
+import { FAQ_ITEMS, PLANS } from "@/components/landing/data";
 import { Faq } from "@/components/landing/faq";
 import { FinalCta } from "@/components/landing/final-cta";
 import { LandingFooter } from "@/components/landing/footer";
@@ -8,21 +9,106 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
+import { WhyImpulsa } from "@/components/landing/why-impulsa";
+
+const SITE_URL = "https://impulsa.com";
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+const SITE_NAME = "IMPULSA";
+const TITLE = "IMPULSA — Garantizamos tu próxima entrevista en menos de 3 meses";
+const DESCRIPTION =
+	"Garantizamos tu próxima entrevista en menos de 3 meses, o te devolvemos el 100%. IA que arregla tu CV en segundos + coach senior que te acompaña paso a paso. Score gratis, sin tarjeta. Hecho para LATAM.";
+
+const structuredData = {
+	"@context": "https://schema.org",
+	"@graph": [
+		{
+			"@type": "Organization",
+			"@id": `${SITE_URL}#organization`,
+			name: SITE_NAME,
+			url: SITE_URL,
+			logo: `${SITE_URL}/logo.png`,
+			description: "Plataforma de empleo con IA + coaching humano para LATAM.",
+			areaServed: ["PE", "CO", "MX", "AR", "CL", "UY", "EC", "ES"],
+			foundingLocation: { "@type": "Place", name: "Lima, Perú" },
+		},
+		{
+			"@type": "WebSite",
+			"@id": `${SITE_URL}#website`,
+			url: SITE_URL,
+			name: SITE_NAME,
+			description: DESCRIPTION,
+			inLanguage: "es",
+			publisher: { "@id": `${SITE_URL}#organization` },
+		},
+		{
+			"@type": "Service",
+			"@id": `${SITE_URL}#service`,
+			name: "IMPULSA — Coaching de carrera con IA",
+			provider: { "@id": `${SITE_URL}#organization` },
+			areaServed: "LATAM",
+			serviceType: "Career coaching, CV optimization, LinkedIn optimization, interview preparation",
+			aggregateRating: {
+				"@type": "AggregateRating",
+				ratingValue: "4.9",
+				reviewCount: "380",
+				bestRating: "5",
+				worstRating: "1",
+			},
+			offers: PLANS.map((plan) => ({
+				"@type": "Offer",
+				name: `IMPULSA ${plan.name}`,
+				description: plan.tagline,
+				price: plan.priceSoles.toFixed(2),
+				priceCurrency: "PEN",
+				availability: "https://schema.org/InStock",
+				url: `${SITE_URL}/#planes`,
+			})),
+		},
+		{
+			"@type": "FAQPage",
+			"@id": `${SITE_URL}#faq`,
+			mainEntity: FAQ_ITEMS.map((item) => ({
+				"@type": "Question",
+				name: item.q,
+				acceptedAnswer: {
+					"@type": "Answer",
+					text: item.a,
+				},
+			})),
+		},
+	],
+};
 
 export const Route = createFileRoute("/")({
 	component: LandingPage,
 	head: () => ({
 		meta: [
-			{
-				title: "IMPULSA — Tu carrera, sin techo de cristal",
-			},
-			{
-				name: "description",
-				content:
-					"Plataforma de empleo con IA + Coaching humano para LATAM. Score tu CV, optimizá tu LinkedIn, hablá con un coach peruano senior. Score gratis, sin tarjeta.",
-			},
+			{ title: TITLE },
+			{ name: "description", content: DESCRIPTION },
+			{ name: "robots", content: "index, follow" },
+			{ name: "author", content: SITE_NAME },
+			{ property: "og:type", content: "website" },
+			{ property: "og:site_name", content: SITE_NAME },
+			{ property: "og:title", content: TITLE },
+			{ property: "og:description", content: DESCRIPTION },
+			{ property: "og:url", content: SITE_URL },
+			{ property: "og:image", content: OG_IMAGE_URL },
+			{ property: "og:image:width", content: "1200" },
+			{ property: "og:image:height", content: "630" },
+			{ property: "og:image:alt", content: TITLE },
+			{ property: "og:locale", content: "es_PE" },
+			{ property: "og:locale:alternate", content: "es_MX" },
+			{ property: "og:locale:alternate", content: "es_AR" },
+			{ property: "og:locale:alternate", content: "es_CO" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:title", content: TITLE },
+			{ name: "twitter:description", content: DESCRIPTION },
+			{ name: "twitter:image", content: OG_IMAGE_URL },
+			{ name: "twitter:image:alt", content: TITLE },
+			{ name: "theme-color", content: "#0a0a0a" },
 		],
 		links: [
+			{ rel: "canonical", href: SITE_URL },
 			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
 			{
 				rel: "preconnect",
@@ -34,6 +120,12 @@ export const Route = createFileRoute("/")({
 				href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500&display=swap",
 			},
 		],
+		scripts: [
+			{
+				type: "application/ld+json",
+				children: JSON.stringify(structuredData),
+			},
+		],
 	}),
 });
 
@@ -43,10 +135,11 @@ function LandingPage() {
 			<LandingNav />
 			<main>
 				<Hero />
+				<WhyImpulsa />
 				<BentoGrid />
 				<HowItWorks />
-				<Pricing />
 				<TestimonialsCarousel />
+				<Pricing />
 				<Faq />
 				<FinalCta />
 			</main>

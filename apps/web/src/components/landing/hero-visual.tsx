@@ -18,6 +18,16 @@ interface SidebarItem {
 	label: string;
 }
 
+const PERSPECTIVE_STYLE: React.CSSProperties = { perspective: "2000px" };
+
+const TILT_STYLE: React.CSSProperties = {
+	transform: "rotateX(6deg)",
+	transformStyle: "preserve-3d",
+};
+
+const FLOAT_DELAY_1S: React.CSSProperties = { animationDelay: "-1s" };
+const FLOAT_DELAY_3S: React.CSSProperties = { animationDelay: "-3s" };
+
 const SIDEBAR_ITEMS: SidebarItem[] = [
 	{
 		icon: <BriefcaseIcon size={14} weight="duotone" />,
@@ -45,16 +55,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 
 export function HeroVisual() {
 	return (
-		<div className="relative" style={{ perspective: "2000px" }}>
+		<div className="relative" style={PERSPECTIVE_STYLE}>
 			<div className="absolute -top-3 -right-3 hidden size-24 rounded-full border-2 border-foreground/15 border-dashed lg:block" />
 			<div className="absolute -bottom-4 -left-4 hidden size-16 rounded-full bg-marigold/30 blur-2xl lg:block" />
 
 			<div
 				className="relative rounded-sm border border-foreground/10 bg-gradient-to-b from-oxblood/8 to-transparent p-px shadow-[var(--shadow-pillar)]"
-				style={{
-					transform: "rotateX(6deg)",
-					transformStyle: "preserve-3d",
-				}}
+				style={TILT_STYLE}
 			>
 				<div className="grid min-h-[480px] grid-cols-1 overflow-hidden rounded-[1px] bg-card md:grid-cols-[280px_1fr]">
 					<MockSidebar />
@@ -64,7 +71,7 @@ export function HeroVisual() {
 			<FloatingCard
 				className="top-14 -right-3 hidden animate-float-slow lg:flex"
 				icon={<CheckIcon size={16} weight="bold" />}
-				style={{ animationDelay: "-1s" }}
+				style={FLOAT_DELAY_1S}
 				subtitle="Score: 94/100"
 				title="CV pasó el ATS"
 			/>
@@ -72,7 +79,7 @@ export function HeroVisual() {
 				className="bottom-16 -left-4 hidden animate-float-slow lg:flex"
 				icon={<SparkleIcon size={16} weight="fill" />}
 				iconClassName="bg-gradient-to-br from-marigold to-orange-600"
-				style={{ animationDelay: "-3s" }}
+				style={FLOAT_DELAY_3S}
 				subtitle="Mercado Libre · Vie 14:00"
 				title="Entrevista agendada"
 			/>

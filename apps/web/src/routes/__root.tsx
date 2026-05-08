@@ -60,7 +60,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
 	return (
-		<html lang="en">
+		<html lang="es">
 			<head>
 				<HeadContent />
 			</head>

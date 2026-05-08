@@ -47,16 +47,25 @@ export interface HowStep {
 	title: string;
 }
 
+export interface WhyReason {
+	body: string;
+	emphasis: string;
+	number: string;
+	receipt: { label: string; value: string };
+	title: string;
+}
+
 export interface FooterColumn {
 	heading: string;
 	links: readonly { label: string; href: string }[];
 }
 
 export const NAV_LINKS: readonly NavLink[] = [
-	{ href: "#features", label: "Features" },
+	{ href: "#por-que", label: "Por qué" },
+	{ href: "#features", label: "Producto" },
 	{ href: "#camino", label: "Cómo funciona" },
 	{ href: "#planes", label: "Precios" },
-	{ href: "#casos", label: "Casos" },
+	{ href: "#casos", label: "Resultados" },
 	{ href: "#faq", label: "FAQ" },
 ];
 
@@ -81,35 +90,66 @@ export const HERO_CHART: readonly BentoChartBar[] = [
 	{ heightPct: 96, high: true },
 ];
 
-export const HOW_STEPS: readonly HowStep[] = [
+export const WHY_REASONS: readonly WhyReason[] = [
 	{
-		title: "Onboarding IA",
-		body: "Subí tu CV. Score inmediato 0–100 + lista de qué arreglar. El momento ‘wow’.",
-		tag: "Free / Pro / Premium",
+		number: "01",
+		title: "IA + coach humano,",
+		emphasis: "en un mismo plan.",
+		body: "3 a 5 coaches senior en planilla — no freelancers de plataforma. Revisan tu camino paso a paso. Las herramientas IA hacen el trabajo de fondo.",
+		receipt: { label: "Coaching aparte vs. incluido", value: "Wonsulting US$699+ · IMPULSA Pro S/79" },
 	},
 	{
-		title: "Sesión 1 — Revisión e intro",
-		body: "45 min con tu coach. CV + LinkedIn en vivo. Plan de acción, roles y empresas target.",
+		number: "02",
+		title: "Una sola",
+		emphasis: "suscripción.",
+		body: "Lo que Wonsulting, ResumAI, CoverLetterAI y NetworkAI te cobran por separado, junto y en español. Sin paquetes inflados, sin onboarding eterno.",
+		receipt: { label: "Herramientas integradas", value: "6 herramientas · 1 plan · 0 sorpresas" },
+	},
+	{
+		number: "03",
+		title: "Hecho para",
+		emphasis: "LATAM.",
+		body: "Español neutro, soles peruanos, contexto del mercado regional. Coaches que entrevistaron en BCP, Yape, Rappi y Belcorp. No es Wonsulting traducido.",
+		receipt: { label: "Cobertura regional", value: "8 países · 100% español" },
+	},
+	{
+		number: "04",
+		title: "Resultados",
+		emphasis: "medibles.",
+		body: "Score 0–100 antes y después del rewrite. Casos reales como 41 → 84 en una semana. Ofertas concretas en semanas, no meses tirando CVs al vacío.",
+		receipt: { label: "Score promedio", value: "47 → 81 sobre 2.400 mentees" },
+	},
+];
+
+export const HOW_STEPS: readonly HowStep[] = [
+	{
+		title: "Diagnóstico instantáneo",
+		body: "Sube tu CV. Score 0–100 + lista exacta de qué mejorar. Tu primer aha-moment.",
+		tag: "Gratuito / Pro / Premium",
+	},
+	{
+		title: "Mapea tu próximo trabajo (Sesión 1)",
+		body: "45 min con tu coach. CV + LinkedIn en vivo. Plan de acción, roles y empresas objetivo.",
 		tag: "Premium",
 	},
 	{
-		title: "Herramientas IA",
-		body: "Score vs. oferta, cartas, outreach, optimización LinkedIn. Ejecutás el plan del coach.",
+		title: "Ejecuta con IA",
+		body: "Score vs. oferta, cartas, outreach, optimización LinkedIn. Ejecutas el plan del coach.",
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Sesión 2 — Pre-entrevista",
-		body: "45 min. Mock para el puesto específico. Feedback + tips de lenguaje corporal.",
+		title: "Domina la entrevista (Sesión 2)",
+		body: "45 min. Simulacro para el puesto específico. Feedback + consejos de lenguaje corporal.",
 		tag: "Premium",
 	},
 	{
-		title: "Sesión 3 — Seguimiento",
-		body: "30 min post-entrevista. Estrategia de follow-up. Negociación de oferta.",
+		title: "Cierra y negocia (Sesión 3)",
+		body: "30 min post-entrevista. Plan para cerrar el proceso. Negociación de oferta.",
 		tag: "Premium",
 	},
 	{
-		title: "Oferta laboral",
-		body: "Conseguiste el trabajo. Caso de éxito. Boca a boca.",
+		title: "Tu nueva oferta",
+		body: "Conseguiste el trabajo. Cierras el ciclo. Tu coach celebra contigo.",
 		tag: "★ Resultado",
 	},
 ];
@@ -118,7 +158,7 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "gratuito",
 		name: "Gratuito",
-		tagline: "Empezá. Score gratis para siempre.",
+		tagline: "Tu score gratis, para siempre.",
 		priceSoles: 0,
 		priceUsd: 0,
 		per: "Gratis · sin tarjeta",
@@ -138,7 +178,7 @@ export const PLANS: readonly Plan[] = [
 		tagline: "IA ilimitada + 1 sesión de coaching al mes.",
 		priceSoles: 79,
 		priceUsd: 21,
-		per: "/ mes · cancelás cuando quieras",
+		per: "/ mes · cancela cuando quieras",
 		features: [
 			"Score CV ilimitado + vs. oferta laboral",
 			"Arreglo automático IA de secciones",
@@ -146,7 +186,7 @@ export const PLANS: readonly Plan[] = [
 			"Cartas de presentación ilimitadas",
 			"Optimizador LinkedIn completo",
 			"Mensajes de outreach ilimitados",
-			"1 sesión coaching 1:1 (30 min) / mes",
+			"1 sesión 1:1 con coach (30 min) / mes — temas a tu elección",
 		],
 		cta: "Empezar Pro",
 		featured: true,
@@ -154,15 +194,15 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "premium",
 		name: "Premium",
-		tagline: "El camino completo: 3 sesiones + WhatsApp con tu coach.",
+		tagline: "El camino completo: 3 sesiones + WhatsApp. 5× más coaching que Pro.",
 		priceSoles: 179,
 		priceUsd: 47,
 		per: "/ mes · camino completo",
 		features: [
 			"Todo lo del plan Pro",
-			"Sesión 1 — Revisión e intro (45 min)",
-			"Sesión 2 — Pre-entrevista (45 min)",
-			"Sesión 3 — Seguimiento (30 min)",
+			"Sesión 1 — Mapea tu próximo trabajo (45 min)",
+			"Sesión 2 — Domina la entrevista (45 min)",
+			"Sesión 3 — Cierra y negocia (30 min)",
 			"Revisión humana de CV + LinkedIn",
 			"WhatsApp con coach (24h respuesta)",
 		],
@@ -174,8 +214,8 @@ export const SINGLE_SESSION = {
 	priceSoles: 40,
 	priceUsd: 11,
 	duration: "45 min",
-	tagline: "Probá el coaching sin suscribirte.",
-	body: "Para cuando todavía no querés comprometerte. Cualquier coach del equipo, 45 minutos de revisión real. Sirve como prueba del servicio Premium.",
+	tagline: "Prueba el coaching sin suscribirte.",
+	body: "Para cuando todavía no quieres comprometerte. Cualquier coach del equipo, 45 minutos de revisión real. Sirve como prueba del servicio Premium.",
 	cta: "Reservar sesión única",
 } as const;
 
@@ -188,7 +228,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Analista en Yape",
 		location: "Lima",
 		quote:
-			"Subí mi CV y el score me dio 41. Después del rewrite con la IA y la sesión 1, salté a 84. Tres semanas después tenía dos entrevistas.",
+			"Subí mi CV y el score me dio 41. Después del rewrite con la IA y la sesión 1, salté a 84. Tres semanas después ya tenía dos entrevistas agendadas.",
 		chip: "41 → 84",
 	},
 	{
@@ -295,27 +335,43 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 export const FAQ_ITEMS: readonly FaqItem[] = [
 	{
 		q: "¿Cómo funciona el Score CV?",
-		a: "Subís tu CV y registrás el rol al que apuntás. La IA analiza estructura, logros vs. tareas, keywords del sector y compatibilidad ATS. En menos de 30 segundos te devuelve un puntaje 0–100 y la lista de qué arreglar. En el plan Free, 1 análisis por mes; en Pro, ilimitado.",
+		a: "Subes tu CV y registras el rol al que apuntas. La IA analiza estructura, logros vs. tareas, keywords del sector y compatibilidad ATS. En menos de 30 segundos te devuelve un puntaje 0–100 y la lista de qué mejorar. En el plan Gratuito, 1 análisis por mes; en Pro, ilimitado.",
 	},
 	{
 		q: "¿Quiénes son los coaches?",
-		a: "Un equipo chico de 3 a 5 coaches senior peruanos con experiencia haciendo hiring para tech, producto, datos y consultoría en empresas de la región. No son freelancers de plataforma: están en planilla con IMPULSA y los entrevistamos uno por uno.",
+		a: "Un equipo chico de 3 a 5 coaches senior con experiencia haciendo hiring para tech, producto, datos y consultoría en empresas de la región. No son freelancers de plataforma: están en planilla con IMPULSA y los entrevistamos uno por uno.",
 	},
 	{
 		q: "¿Cuál es la diferencia con Wonsulting o ResumAI?",
-		a: "Wonsulting cobra el coaching humano aparte (entre $699 y $2.299 USD). Acá las herramientas IA y el coaching vienen en el mismo plan. Pro te da 1 sesión al mes por S/79; Premium te da 3 sesiones más WhatsApp por S/179. Sin paquetes inflados.",
+		a: "Wonsulting cobra el coaching humano aparte (entre US$699 y US$2.299). Acá las herramientas IA y el coaching vienen en el mismo plan. Pro te da 1 sesión 1:1 al mes (30 min, formato libre) por S/79; Premium te da el camino completo de 3 sesiones estructuradas + WhatsApp con tu coach por S/179. Sin paquetes inflados.",
 	},
 	{
 		q: "¿Puedo probar sin suscribirme?",
-		a: "Sí. El Score CV y el constructor son gratis para siempre (con límite de 1/mes). Y si querés probar el coaching humano antes de suscribirte, tenés la sesión única de S/40 por 45 minutos — sin compromiso, con cualquier coach del equipo.",
+		a: "Sí. El Score CV y el constructor son gratis para siempre (con límite de 1/mes). Y si quieres probar el coaching humano antes de suscribirte, tienes la sesión única de S/40 por 45 minutos — sin compromiso, con cualquier coach del equipo.",
 	},
 	{
 		q: "¿En qué países funciona?",
-		a: "Estamos enfocados en LATAM. Los coaches son peruanos pero trabajamos con mentees en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal es soles peruanos (con equivalencias en USD).",
+		a: "Estamos enfocados en LATAM. Trabajamos con mentees en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal es soles peruanos (con equivalencias en USD).",
 	},
 	{
 		q: "¿Cancelo cuando quiero?",
-		a: "Sí. Pro y Premium son mensuales sin permanencia. Cancelás desde el dashboard, sin llamadas, sin retención agresiva. Si cancelás antes del próximo cobro, mantenés el acceso hasta el final del periodo pagado.",
+		a: "Sí. Pro y Premium son mensuales sin permanencia. Cancelas desde el dashboard, sin llamadas y sin retención agresiva. Si cancelas antes del próximo cobro, mantienes el acceso hasta el final del periodo pagado.",
+	},
+	{
+		q: "¿Y si no consigo entrevistas?",
+		a: "Garantía Premium: si haces 3 meses seguidos de Premium completando el camino (3 sesiones de coaching + uso activo de las herramientas) y no conseguiste al menos 1 entrevista real, te devolvemos el 100% de lo pagado. Sin letra chica, sin retención agresiva. Solicítalo escribiéndole directo a tu coach.",
+	},
+	{
+		q: "¿En cuánto tiempo veo resultados?",
+		a: "Score y CV mejorado: el mismo día. Primera entrevista real: entre 2 y 4 semanas en Pro o Premium, según tu nivel y rol. Oferta firmada: el promedio del último año fue 36 días en Premium.",
+	},
+	{
+		q: "¿Funciona si no soy de tech?",
+		a: "Sí. Tenemos casos en marketing, comunicaciones, project management, customer success, diseño y consultoría. Los coaches han hecho hiring para BCP, Belcorp, Globant y agencias regionales — no solo para tech.",
+	},
+	{
+		q: "¿Mis datos están seguros?",
+		a: "Tu CV no entrena modelos abiertos. Procesamos tus datos en proveedores con contratos de confidencialidad y puedes borrar todo desde tu dashboard cuando quieras. Cumplimos con la ley peruana de protección de datos personales.",
 	},
 ];
 
@@ -334,25 +390,15 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
 		heading: "Empresa",
 		links: [
 			{ label: "Cómo funciona", href: "#camino" },
-			{ label: "Casos", href: "#casos" },
-			{ label: "Coaches", href: "#" },
-			{ label: "Blog", href: "#" },
-		],
-	},
-	{
-		heading: "Recursos",
-		links: [
-			{ label: "Plantillas CV", href: "#" },
-			{ label: "Guías por rol", href: "#" },
+			{ label: "Resultados", href: "#casos" },
 			{ label: "FAQ", href: "#faq" },
-			{ label: "Comunidad", href: "#" },
 		],
 	},
 	{
 		heading: "Cuenta",
 		links: [
 			{ label: "Iniciar sesión", href: "/login" },
-			{ label: "Crear cuenta", href: "/login" },
+			{ label: "Crear cuenta", href: "/register" },
 			{ label: "Score gratis", href: "#planes" },
 			{ label: "Sesión única", href: "#sesion-unica" },
 		],

@@ -15,10 +15,12 @@
 	--animate-toast-error-even: toast-error-even 0.28s
 		cubic-bezier(0.5, 1, 0.89, 1);
 
-	--font-heading: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-	--font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+	--font-heading:
+		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
+	--font-display:
+		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
 	--font-mono: "JetBrains Mono", "Geist Mono Variable", ui-monospace, monospace;
-	--font-sans: "Inter", -apple-system, sans-serif;
+	--font-sans: "Inter Variable", "Inter", -apple-system, sans-serif;
 	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
 	--color-aurora-1: var(--aurora-1);
@@ -294,23 +296,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.22 0.03 175);
-	--background: oklch(0.985 0.008 165);
-	--border: oklch(0.22 0.03 175 / 10%);
-	--card: oklch(0.995 0.005 165);
-	--card-foreground: oklch(0.22 0.03 175);
+	--accent-foreground: oklch(0.16 0.04 280);
+	--background: oklch(0.98 0.005 280);
+	--border: oklch(0.16 0.04 280 / 10%);
+	--card: oklch(0.995 0.003 280);
+	--card-foreground: oklch(0.16 0.04 280);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.22 0.03 175);
-	--input: oklch(0.22 0.03 175 / 12%);
-	--muted: oklch(0.22 0.03 175 / 5%);
-	--muted-foreground: oklch(0.42 0.04 175);
-	--popover: oklch(0.995 0.005 165);
-	--popover-foreground: oklch(0.22 0.03 175);
-	--primary: oklch(0.22 0.03 175);
-	--primary-foreground: oklch(0.985 0.008 165);
-	--ring: oklch(0.61 0.13 162);
-	--secondary: oklch(0.22 0.03 175 / 5%);
-	--secondary-foreground: oklch(0.22 0.03 175);
+	--foreground: oklch(0.16 0.04 280);
+	--input: oklch(0.16 0.04 280 / 12%);
+	--muted: oklch(0.16 0.04 280 / 5%);
+	--muted-foreground: oklch(0.45 0.05 280);
+	--popover: oklch(0.995 0.003 280);
+	--popover-foreground: oklch(0.16 0.04 280);
+	--primary: oklch(0.5 0.24 290);
+	--primary-foreground: oklch(0.99 0 0);
+	--ring: oklch(0.5 0.24 290);
+	--secondary: oklch(0.16 0.04 280 / 5%);
+	--secondary-foreground: oklch(0.16 0.04 280);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -335,14 +337,14 @@
 }
 
 :root {
-	--ink: oklch(0.22 0.03 175);
-	--paper: oklch(0.985 0.008 165);
-	--oxblood: oklch(0.61 0.13 162);
-	--marigold: oklch(0.5 0.18 285);
-	--rule: oklch(0.22 0.03 175 / 10%);
-	--aurora-1: oklch(0.78 0.14 162);
-	--aurora-2: oklch(0.5 0.18 285);
-	--aurora-3: oklch(0.68 0.15 200);
+	--ink: oklch(0.16 0.04 280);
+	--paper: oklch(0.98 0.005 280);
+	--oxblood: oklch(0.5 0.24 290);
+	--marigold: oklch(0.5 0.24 290);
+	--rule: oklch(0.16 0.04 280 / 8%);
+	--aurora-1: oklch(0.65 0.24 290);
+	--aurora-2: oklch(0.5 0.24 290);
+	--aurora-3: oklch(0.55 0.22 295);
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
@@ -482,6 +484,11 @@
 		@apply font-sans overscroll-y-none;
 		scroll-behavior: smooth;
 		scroll-padding-top: 100px;
+	}
+
+	::selection {
+		color: oklch(0.99 0 0);
+		background: var(--oxblood);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

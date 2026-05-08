@@ -2,17 +2,8 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import Link from "next/link";
 import { type ComponentType, type SVGProps, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { GithubWordmarkDark } from "./svgs/github-wordmark-dark";
-import { GithubWordmarkLight } from "./svgs/github-wordmark-light";
-import { SanityWordmarkDark } from "./svgs/sanity-wordmark-dark";
-import { SanityWordmarkLight } from "./svgs/sanity-wordmark-light";
-import { SupabaseWordmarkDark } from "./svgs/supabase-wordmark-dark";
-import { SupabaseWordmarkLight } from "./svgs/supabase-wordmark-light";
-import { VercelWordmark } from "./svgs/vercel-wordmark";
-import { VercelWordmarkDark } from "./svgs/vercel-wordmark-dark";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -23,26 +14,99 @@ export interface LogoDef {
 	src?: string;
 	url?: string;
 	width: number;
+	wordmark?: string;
+	wordmarkClassName?: string;
 }
 
 // ── Logo data ───────────────────────────────────────────────────────
 
 const WORDMARK_HEIGHT = 32;
+const WORDMARK_WIDTH = 200;
 
 export const WORDMARK_LOGOS: LogoDef[] = [
-	{ name: "GitHub", Icon: GithubWordmarkLight, url: "https://github.com", width: 118, height: WORDMARK_HEIGHT },
-	{ name: "Vercel", Icon: VercelWordmark, url: "https://vercel.com", width: 161, height: WORDMARK_HEIGHT },
-	{ name: "Sanity", Icon: SanityWordmarkLight, url: "https://sanity.io", width: 90, height: WORDMARK_HEIGHT },
-	{ name: "Supabase", Icon: SupabaseWordmarkLight, url: "https://supabase.com", width: 165, height: WORDMARK_HEIGHT },
-	{ name: "GitHub Dark", Icon: GithubWordmarkDark, url: "https://github.com", width: 118, height: WORDMARK_HEIGHT },
-	{ name: "Vercel Dark", Icon: VercelWordmarkDark, url: "https://vercel.com", width: 161, height: WORDMARK_HEIGHT },
-	{ name: "Sanity Dark", Icon: SanityWordmarkDark, url: "https://sanity.io", width: 90, height: WORDMARK_HEIGHT },
 	{
-		name: "Supabase Dark",
-		Icon: SupabaseWordmarkDark,
-		url: "https://supabase.com",
-		width: 165,
+		name: "BCP",
+		wordmark: "BCP",
+		wordmarkClassName: "font-bold tracking-tight",
 		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Yape",
+		wordmark: "Yape",
+		wordmarkClassName: "font-bold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Rappi",
+		wordmark: "Rappi",
+		wordmarkClassName: "font-bold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Interbank",
+		wordmark: "Interbank",
+		wordmarkClassName: "font-semibold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Crehana",
+		wordmark: "crehana",
+		wordmarkClassName: "font-medium italic tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Belcorp",
+		wordmark: "Belcorp",
+		wordmarkClassName: "font-semibold tracking-wide",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Niubiz",
+		wordmark: "Niubiz",
+		wordmarkClassName: "font-bold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Kushki",
+		wordmark: "Kushki",
+		wordmarkClassName: "font-medium tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Joinnus",
+		wordmark: "Joinnus",
+		wordmarkClassName: "font-semibold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Globant",
+		wordmark: "globant",
+		wordmarkClassName: "font-light italic tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "PedidosYa",
+		wordmark: "PedidosYa",
+		wordmarkClassName: "font-bold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
+	},
+	{
+		name: "Cabify",
+		wordmark: "Cabify",
+		wordmarkClassName: "font-semibold tracking-tight",
+		height: WORDMARK_HEIGHT,
+		width: WORDMARK_WIDTH,
 	},
 ];
 
@@ -176,14 +240,16 @@ function useLogoCycle(logos: LogoDef[], initialDelay: number, enabled: boolean) 
 
 type CarouselVariant = "muted" | "dark";
 
-const variantStyles: Record<CarouselVariant, { base: string; interactive: string }> = {
+const variantStyles: Record<CarouselVariant, { base: string; interactive: string; text: string }> = {
 	muted: {
 		base: "brightness-0 opacity-40 dark:invert",
 		interactive: "transition-opacity duration-200 hover:opacity-60",
+		text: "text-foreground/45",
 	},
 	dark: {
 		base: "brightness-0 dark:invert",
 		interactive: "transition-opacity duration-200 opacity-80 hover:opacity-100",
+		text: "text-foreground/85",
 	},
 };
 
@@ -207,23 +273,35 @@ function LogoSlot({
 
 	const styles = variantStyles[variant];
 	const className = cn(styles.base, !disableLinks && styles.interactive);
-	const visualEl = logo.Icon ? (
-		<logo.Icon
-			aria-label={disableLinks ? logo.name : undefined}
-			className={className}
-			height={logo.height}
-			role="img"
-			width={logo.width}
-		/>
-	) : (
-		<img
-			alt={disableLinks ? logo.name : ""}
-			className={className}
-			height={logo.height}
-			src={logo.src}
-			width={logo.width}
-		/>
-	);
+
+	let visualEl: React.ReactNode;
+	if (logo.Icon) {
+		visualEl = (
+			<logo.Icon
+				aria-label={disableLinks ? logo.name : undefined}
+				className={className}
+				height={logo.height}
+				role="img"
+				width={logo.width}
+			/>
+		);
+	} else if (logo.wordmark) {
+		visualEl = (
+			<span
+				className={cn(
+					"select-none whitespace-nowrap font-display text-[26px] leading-none transition-colors duration-200",
+					styles.text,
+					!disableLinks && "hover:text-foreground",
+					logo.wordmarkClassName
+				)}
+				style={{ height: logo.height, lineHeight: `${logo.height}px` }}
+			>
+				{logo.wordmark}
+			</span>
+		);
+	} else {
+		visualEl = <img alt={logo.name} className={className} height={logo.height} src={logo.src} width={logo.width} />;
+	}
 
 	const getInitialAnimation = () => {
 		if (hasCycled) {
@@ -253,14 +331,14 @@ function LogoSlot({
 					{disableLinks || !logo.url ? (
 						visualEl
 					) : (
-						<Link
+						<a
 							aria-label={`${logo.name} (opens in new tab)`}
 							href={`${logo.url}?ref=arc`}
 							rel="noopener noreferrer"
 							target="_blank"
 						>
 							{visualEl}
-						</Link>
+						</a>
 					)}
 				</motion.div>
 			</AnimatePresence>
