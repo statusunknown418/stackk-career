@@ -1,5 +1,5 @@
-import type { z } from "zod";
-import { contactContentSchema, sectionContentSchema } from "../ai/resume-blocks";
+import { z } from "zod";
+import { blockRowSchema, contactContentSchema, sectionContentSchema } from "../db/resume-blocks";
 import { selectResumeSchema } from "../db/resumes";
 
 export const resumeListContactSchema = contactContentSchema.pick({
@@ -43,3 +43,12 @@ export const blankResumeSections = [
 export type ResumeListContact = z.infer<typeof resumeListContactSchema>;
 export type ResumeListItem = z.infer<typeof resumeListItemSchema>;
 export type BlankResumeSection = z.infer<typeof blankResumeSectionSchema>;
+
+/**
+ * @description use this for the $resumeId.tsx form
+ */
+export const resumeDocumentWrapperFormSchema = z.object({
+	id: z.string(),
+	title: z.string().min(1),
+	blocks: z.array(blockRowSchema),
+});

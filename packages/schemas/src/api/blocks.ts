@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { blockPayloadSchema } from "../ai/resume-blocks";
-import { insertResumeBlocksSchema } from "../db/resume-blocks";
+import { blockPayloadSchema, insertResumeBlocksSchema } from "../db/resume-blocks";
 
 export const createBlockApiMutationSchema = insertResumeBlocksSchema
 	.omit({

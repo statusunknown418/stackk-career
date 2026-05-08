@@ -1,14 +1,14 @@
 import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { parseBlock } from "@stackk-career/schemas/ai/resume-blocks";
 import { blankResumeSections } from "@stackk-career/schemas/api/resumes";
+import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
+import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
 import { constructNow, formatDate } from "date-fns";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
-import { generateLexoKeyBetween } from "../indexing";
-import { createContactSeedBlock, createStarterChildPayload } from "./resume-block-starters";
+import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
 
 export const resumesRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {

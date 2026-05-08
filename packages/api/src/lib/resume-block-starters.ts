@@ -1,5 +1,5 @@
-import type { ContentOf } from "@stackk-career/schemas/ai/resume-blocks";
 import type { BlankResumeSection } from "@stackk-career/schemas/api/resumes";
+import type { ContentOf } from "@stackk-career/schemas/db/resume-blocks";
 
 export type StarterChildPayload =
 	| {
