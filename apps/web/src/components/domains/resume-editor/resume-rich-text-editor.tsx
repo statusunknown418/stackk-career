@@ -4,7 +4,7 @@ import { ListBulletsIcon, ListNumbersIcon, TextBolderIcon, TextItalicIcon } from
 import { EditorContent, type Editor as TiptapEditor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { AnimatePresence, motion } from "motion/react";
-import { type MouseEvent, type ReactNode, useState } from "react";
+import { type MouseEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, GroupSeparator } from "@/components/ui/group";
 import { cn } from "@/lib/utils";
@@ -105,6 +105,22 @@ export const ResumeRichTextEditor = ({
 			onChange?.(currentEditor.getHTML());
 		},
 	});
+
+	// Sync external value changes into the editor without remounting. Skip when
+	// the editor is focused so we never clobber active typing, and skip when the
+	// HTML already matches to avoid setContent loops.
+	useEffect(() => {
+		if (!editor) {
+			return;
+		}
+		if (editor.isFocused) {
+			return;
+		}
+		if (editor.getHTML() === value) {
+			return;
+		}
+		editor.commands.setContent(value, { emitUpdate: false });
+	}, [editor, value]);
 
 	if (!editor) {
 		return (
