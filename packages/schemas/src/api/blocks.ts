@@ -6,6 +6,7 @@ export const createBlockApiMutationSchema = insertResumeBlocksSchema
 	.omit({
 		blockType: true,
 		content: true,
+		position: true,
 	})
 	.extend({
 		before: z.string().nullable(),

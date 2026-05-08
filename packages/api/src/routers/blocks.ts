@@ -6,6 +6,7 @@ import { createBlockApiMutationSchema } from "@stackk-career/schemas/api/blocks"
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { generateLexoKeyBetween } from "../indexing";
+import { createStarterChildPayload } from "./resume-block-starters";
 
 export const blocksRouter = {
 	create: protectedProcedure.input(createBlockApiMutationSchema).handler(async ({ context, input }) => {
@@ -47,16 +48,36 @@ export const blocksRouter = {
 
 		const position = generateLexoKeyBetween(input.before, input.after);
 
-		const [newBlock] = await context.db
-			.insert(resumeBlocks)
-			.values({
-				resumeId: input.resumeId,
-				parentBlockId: input.parentBlockId,
-				blockType: input.blockType,
-				content: input.content,
-				position,
-			})
-			.returning();
+		const newBlock = await context.db.transaction(async (tx) => {
+			const [createdBlock] = await tx
+				.insert(resumeBlocks)
+				.values({
+					resumeId: input.resumeId,
+					parentBlockId: input.parentBlockId,
+					blockType: input.blockType,
+					content: input.content,
+					position,
+				})
+				.returning();
+
+			if (!createdBlock) {
+				return null;
+			}
+
+			if (input.blockType === "section") {
+				const starterChild = createStarterChildPayload(input.content.layout);
+
+				await tx.insert(resumeBlocks).values({
+					resumeId: input.resumeId,
+					parentBlockId: createdBlock.id,
+					blockType: starterChild.blockType,
+					content: starterChild.content,
+					position: generateLexoKeyBetween(null, null),
+				});
+			}
+
+			return createdBlock;
+		});
 
 		if (!newBlock) {
 			context.log?.error({

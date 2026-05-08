@@ -14,7 +14,7 @@ export const resumes = sqliteTable(
 		id: t
 			.text()
 			.primaryKey()
-			.$defaultFn(() => `resume_${createId}`),
+			.$defaultFn(() => `resume_${createId()}`),
 		templateId: t.text(),
 		generationId: t.text(),
 		userId: t.text().notNull(),

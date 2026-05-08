@@ -16,6 +16,7 @@ export const resumeBlocks = sqliteTable(
 		parentBlockId: t.integer(),
 		sourceBlockId: t.text(),
 
+		isHidden: t.integer({ mode: "boolean" }).notNull().default(false),
 		version: t.integer().notNull().default(1),
 		blockType: t.text({ enum: BLOCK_TYPES }).notNull().default("section"),
 		position: t.text().notNull(),
