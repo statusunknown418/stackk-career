@@ -31,6 +31,7 @@ export const entryContentSchema = z.object({
 	title: z.string(),
 	subtitle: z.string().optional(),
 	location: z.string().optional(),
+	isRemote: z.boolean().default(false),
 	startDate: z.string().optional(),
 	endDate: z.string().nullable().optional(),
 	isCurrent: z.boolean().default(false),
@@ -55,16 +56,34 @@ export const paragraphContentSchema = z.object({
 	originalText: z.string().optional(),
 });
 
+export const skillCategorySchema = z.enum([
+	"technical",
+	"languages",
+	"laboratory",
+	"interests",
+	"certifications",
+	"other",
+]);
+
+export const skillProficiencySchema = z.enum([
+	"basic",
+	"conversational",
+	"fluent",
+	"native",
+	"beginner",
+	"intermediate",
+	"advanced",
+	"expert",
+]);
+
 export const skillLineContentSchema = z.object({
 	label: z.string(),
-	category: z.enum(["technical", "languages", "laboratory", "interests", "certifications", "other"]).default("other"),
+	category: skillCategorySchema.default("other"),
 });
 
 export const skillItemContentSchema = z.object({
 	value: z.string(),
-	proficiency: z
-		.enum(["basic", "conversational", "fluent", "native", "beginner", "intermediate", "advanced", "expert"])
-		.optional(),
+	proficiency: skillProficiencySchema.optional(),
 	skillKind: z
 		.enum(["language_prog", "framework", "tool", "spoken_lang", "lab_technique", "interest", "certification", "other"])
 		.optional(),
@@ -264,15 +283,48 @@ export function formatDateRange(startDate?: string, endDate?: string | null, isC
 	return startDate ?? (endLabel || null);
 }
 
-const CONTACT_ITEM_LABELS: Record<string, string> = {
+export const contactItemKindSchema = contactContentSchema.shape.items.element.shape.kind;
+export type ContactItemKind = z.infer<typeof contactItemKindSchema>;
+export const CONTACT_ITEM_KINDS = contactItemKindSchema.options;
+
+export const CONTACT_ITEM_LABELS = {
 	address: "Dirección",
 	email: "Email",
 	linkedin: "LinkedIn",
 	other: "Otro",
 	phone: "Teléfono",
 	website: "Web",
-};
+} as const satisfies Record<ContactItemKind, string>;
 
-export function getContactItemLabel(kind: string, label?: string): string {
+export function getContactItemLabel(kind: ContactItemKind, label?: string): string {
 	return label ?? CONTACT_ITEM_LABELS[kind] ?? kind;
 }
+
+export type SkillCategory = z.infer<typeof skillCategorySchema>;
+export const SKILL_CATEGORIES = skillCategorySchema.options;
+export const SKILL_CATEGORY_LABELS = {
+	technical: "Técnicas",
+	languages: "Idiomas",
+	laboratory: "Laboratorio",
+	interests: "Intereses",
+	certifications: "Certificaciones",
+	other: "Otro",
+} as const satisfies Record<SkillCategory, string>;
+
+export type SkillProficiency = z.infer<typeof skillProficiencySchema>;
+export const SKILL_PROFICIENCIES = skillProficiencySchema.options;
+export const SKILL_PROFICIENCY_LABELS = {
+	basic: "Básico",
+	conversational: "Conversacional",
+	fluent: "Fluido",
+	native: "Nativo",
+	beginner: "Principiante",
+	intermediate: "Intermedio",
+	advanced: "Avanzado",
+	expert: "Experto",
+} as const satisfies Record<SkillProficiency, string>;
+
+export const buildLabeledOptions = <K extends string>(
+	values: readonly K[],
+	labels: Record<K, string>
+): readonly { label: string; value: K }[] => values.map((value) => ({ value, label: labels[value] }));

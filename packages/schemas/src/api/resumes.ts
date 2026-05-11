@@ -17,28 +17,128 @@ export const blankResumeSectionSchema = sectionContentSchema.pick({
 	title: true,
 });
 
-export const blankResumeSections = [
+export const SECTION_KINDS = [
+	"summary",
+	"experience",
+	"education",
+	"skills",
+	"languages",
+	"certifications",
+	"projects",
+	"volunteering",
+	"custom",
+] as const;
+export const sectionKindSchema = z.enum(SECTION_KINDS);
+export type SectionKind = z.infer<typeof sectionKindSchema>;
+
+type SectionLayout = z.infer<typeof sectionContentSchema>["layout"];
+type DefinedSectionKind = Exclude<SectionKind, "custom">;
+
+interface SectionDefinition {
+	description: string;
+	isUnique: boolean;
+	kind: DefinedSectionKind;
+	layout: SectionLayout;
+	title: string;
+}
+
+export const SECTION_DEFINITIONS = [
 	{
+		kind: "summary",
 		title: "Resumen profesional",
 		layout: "freeform",
-		isCustom: false,
+		isUnique: true,
+		description: "Párrafo breve con tu propuesta de valor y experiencia clave.",
 	},
 	{
-		title: "Experiencia laboral",
+		kind: "experience",
+		title: "Experiencia profesional",
 		layout: "entries",
-		isCustom: false,
+		isUnique: true,
+		description: "Cargos, empresas y logros cuantificados con verbos de acción.",
 	},
 	{
+		kind: "education",
 		title: "Educación",
 		layout: "entries",
-		isCustom: false,
+		isUnique: true,
+		description: "Títulos, instituciones y fechas de tus estudios formales.",
 	},
 	{
+		kind: "skills",
 		title: "Habilidades",
 		layout: "skills",
-		isCustom: false,
+		isUnique: true,
+		description: "Stack técnico y competencias agrupadas por categoría.",
 	},
-] satisfies readonly z.infer<typeof blankResumeSectionSchema>[];
+	{
+		kind: "languages",
+		title: "Idiomas",
+		layout: "skills",
+		isUnique: true,
+		description: "Idiomas que dominas con su nivel de proficiencia.",
+	},
+	{
+		kind: "certifications",
+		title: "Certificaciones",
+		layout: "entries",
+		isUnique: true,
+		description: "Credenciales y certificados profesionales relevantes.",
+	},
+	{
+		kind: "projects",
+		title: "Proyectos",
+		layout: "entries",
+		isUnique: true,
+		description: "Trabajos personales o profesionales que muestran tu impacto.",
+	},
+	{
+		kind: "volunteering",
+		title: "Voluntariado",
+		layout: "entries",
+		isUnique: true,
+		description: "Actividades sin fines de lucro y compromiso comunitario.",
+	},
+] as const satisfies readonly SectionDefinition[];
+
+const normalizeSectionTitle = (value: string) => value.trim().toLowerCase();
+
+export const getSectionKind = (section: z.infer<typeof sectionContentSchema>): SectionKind => {
+	if (section.isCustom) {
+		return "custom";
+	}
+	const target = normalizeSectionTitle(section.title);
+	const match = SECTION_DEFINITIONS.find((definition) => normalizeSectionTitle(definition.title) === target);
+	return match?.kind ?? "custom";
+};
+
+interface EntryLabels {
+	addCta: string;
+	subtitle: string;
+	title: string;
+}
+
+export const ENTRY_LABELS = {
+	experience: { title: "Cargo", subtitle: "Empresa", addCta: "Agregar experiencia" },
+	education: { title: "Título", subtitle: "Institución", addCta: "Agregar formación" },
+	certifications: { title: "Certificación", subtitle: "Emisor", addCta: "Agregar certificación" },
+	projects: { title: "Proyecto", subtitle: "Stack o cliente", addCta: "Agregar proyecto" },
+	volunteering: { title: "Rol", subtitle: "Organización", addCta: "Agregar voluntariado" },
+	summary: { title: "Título", subtitle: "Subtítulo", addCta: "Agregar entrada" },
+	skills: { title: "Título", subtitle: "Subtítulo", addCta: "Agregar entrada" },
+	languages: { title: "Título", subtitle: "Subtítulo", addCta: "Agregar entrada" },
+	custom: { title: "Título", subtitle: "Subtítulo", addCta: "Agregar entrada" },
+} as const satisfies Record<SectionKind, EntryLabels>;
+
+const DEFAULT_SECTION_KINDS: readonly DefinedSectionKind[] = ["summary", "experience", "education", "skills"];
+
+export const blankResumeSections = SECTION_DEFINITIONS.filter((definition) =>
+	(DEFAULT_SECTION_KINDS as readonly string[]).includes(definition.kind)
+).map((definition) => ({
+	title: definition.title,
+	layout: definition.layout,
+	isCustom: false,
+})) satisfies readonly z.infer<typeof blankResumeSectionSchema>[];
 
 export type ResumeListContact = z.infer<typeof resumeListContactSchema>;
 export type ResumeListItem = z.infer<typeof resumeListItemSchema>;

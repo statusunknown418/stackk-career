@@ -44,6 +44,7 @@ export const resumeBlocks = sqliteTable(
 	(t) => [
 		index("blocks_resumeId_idx").on(t.resumeId),
 		index("blocks_parentId_idx").on(t.parentBlockId),
+		index("blocks_resume_parent_deleted_idx").on(t.resumeId, t.parentBlockId, t.deletedAt),
 		index("blocks_sourceId_idx").on(t.sourceBlockId),
 	]
 );

@@ -23,3 +23,10 @@ export const updateBlockApiMutationSchema = z
 	.and(blockPayloadSchema);
 
 export type UpdateBlockApiMutationInput = z.infer<typeof updateBlockApiMutationSchema>;
+
+export const deleteBlockApiMutationSchema = z.object({
+	id: z.number().int(),
+	resumeId: z.string(),
+});
+
+export type DeleteBlockApiMutationInput = z.infer<typeof deleteBlockApiMutationSchema>;
