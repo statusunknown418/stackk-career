@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
+import { WordReveal } from "@/components/ui/word-reveal";
 import { cn } from "@/lib/utils";
 import { HERO_CHART } from "./data";
 
@@ -13,13 +14,12 @@ export function BentoGrid() {
 		<section className="px-6 py-32" id="features">
 			<Reveal>
 				<header className="mx-auto mb-20 max-w-[1200px]">
-					<span className="text-foreground/55 text-sm">Producto</span>
+					<span className="font-mono text-[11px] text-foreground/55 uppercase tracking-[0.18em]">— Producto</span>
 					<h2 className="mt-4 max-w-[900px] font-bold font-display text-[clamp(2.4rem,5.6vw,4.5rem)] text-foreground leading-[0.98] tracking-[-0.04em]">
-						Seis herramientas. Una sola suscripción.
+						<WordReveal>Seis herramientas. Una sola suscripción.</WordReveal>
 					</h2>
 					<p className="mt-6 max-w-[620px] text-[1.05rem] text-foreground/65 leading-[1.55]">
-						Todo lo que ofrecen Wonsulting, ResumAI, CoverLetterAI y NetworkAI — más coaching humano — en un solo plan,
-						en español.
+						Score CV, rewrite con IA, cartas, LinkedIn y outreach — más coaching humano — en un solo plan, en español.
 					</p>
 				</header>
 			</Reveal>
@@ -61,7 +61,7 @@ function BentoCellHero() {
 			<h3 className="relative z-10 font-bold font-display text-[clamp(1.9rem,3vw,2.6rem)] text-background leading-[1.05] tracking-[-0.03em]">
 				Score CV con IA.
 				<br />
-				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={81} /> promedio.
+				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> promedio.
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
 				Subes tu CV. La IA lo evalúa en estructura, logros con métricas, keywords del sector y compatibilidad con
@@ -153,15 +153,15 @@ function BentoCellCoaching() {
 						Coaching 1:1 humano. No lo pagas aparte.
 					</h3>
 					<p className="mt-4 max-w-[560px] text-[15px] text-foreground/65 leading-[1.55]">
-						3 a 5 coaches senior en planilla — no freelancers. Wonsulting cobra entre US$699 y US$2.299 por algo
-						parecido. Aquí viene en Pro (1 sesión/mes) o Premium (3 sesiones + WhatsApp con tu coach).
+						3 a 5 coaches senior en planilla — no freelancers de plataforma. Sesión 1:1 en Pro (1/mes) o el camino
+						completo en Premium (3 sesiones + WhatsApp con tu coach).
 					</p>
 				</div>
 
 				<div className="md:col-span-4 md:col-start-9">
 					<div className="rounded-xl border border-foreground/10 bg-background/40 p-5">
 						<div className="flex items-center justify-between border-foreground/10 border-b pb-3">
-							<span className="text-foreground/60 text-sm">Wonsulting</span>
+							<span className="text-foreground/60 text-sm">Otros servicios</span>
 							<span className="text-foreground/40 line-through">US$699+</span>
 						</div>
 						<div className="flex items-center justify-between pt-3">

@@ -1,17 +1,43 @@
-import { ArrowRightIcon, CheckIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
+import { WordReveal } from "@/components/ui/word-reveal";
 import { cn } from "@/lib/utils";
 import { PLANS, type Plan, SINGLE_SESSION } from "./data";
+
+const HEADLINE_FEATURE_COUNT = 4;
+
+function featureDotColor(feature: string, featured: boolean): string {
+	const f = feature.toLowerCase();
+	if (f.includes("whatsapp")) {
+		return featured ? "bg-emerald-400" : "bg-emerald-500";
+	}
+	if (
+		f.includes("sesión") ||
+		f.includes("coach") ||
+		f.includes("revisión humana") ||
+		f.includes("mapea") ||
+		f.includes("domina") ||
+		f.includes("cierra")
+	) {
+		return "bg-marigold";
+	}
+	if (f.includes("todo lo del plan")) {
+		return featured ? "bg-background/40" : "bg-foreground/30";
+	}
+	return featured ? "bg-oxblood/90" : "bg-oxblood";
+}
 
 export function Pricing() {
 	return (
 		<section className="px-6 py-32" id="planes">
 			<Reveal>
 				<header className="mx-auto mb-20 max-w-[1200px]">
-					<span className="text-foreground/55 text-sm">Precios en soles</span>
+					<span className="font-mono text-[11px] text-foreground/55 uppercase tracking-[0.18em]">
+						— Precios en soles
+					</span>
 					<h2 className="mt-4 max-w-[900px] font-bold font-display text-[clamp(2.4rem,5.6vw,4.5rem)] text-foreground leading-[0.98] tracking-[-0.04em]">
-						Plan mensual o sesión única. Cancela cuando quieras.
+						<WordReveal>Plan mensual o sesión única. Cancela cuando quieras.</WordReveal>
 					</h2>
 					<p className="mt-6 max-w-[620px] text-[1.05rem] text-foreground/65 leading-[1.55]">
 						Score CV gratis para siempre. Pro desde S/79. Premium si quieres acompañamiento hasta firmar.
@@ -19,9 +45,9 @@ export function Pricing() {
 				</header>
 			</Reveal>
 
-			<div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-4 md:grid-cols-3">
+			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 md:grid-cols-3">
 				{PLANS.map((plan, idx) => (
-					<Reveal delay={idx * 0.08} key={plan.id}>
+					<Reveal className="h-full" delay={idx * 0.08} key={plan.id}>
 						<PriceCard plan={plan} />
 					</Reveal>
 				))}
@@ -39,7 +65,7 @@ function PriceCard({ plan }: { plan: Plan }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col rounded-2xl border p-9 transition-transform duration-300 ease-out",
+				"flex h-full flex-col rounded-2xl border p-9 transition-transform duration-300 ease-out",
 				featured
 					? "border-transparent bg-foreground text-background hover:-translate-y-1.5 hover:scale-[1.02]"
 					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-foreground/25"
@@ -72,23 +98,42 @@ function PriceCard({ plan }: { plan: Plan }) {
 
 			<div className={cn("my-7 h-px", featured ? "bg-background/15" : "bg-foreground/10")} />
 
-			<ul className="flex flex-1 flex-col gap-3">
-				{plan.features.map((feat) => (
-					<li className="flex items-start gap-3 text-[14px] leading-[1.5]" key={feat}>
-						<CheckIcon
-							className={cn("mt-0.5 shrink-0", featured ? "text-background/80" : "text-foreground/65")}
-							size={16}
-							weight="bold"
-						/>
-						<span className={cn(featured ? "text-background/90" : "text-foreground/85")}>{feat}</span>
-					</li>
-				))}
-			</ul>
+			<div className="flex flex-1 flex-col">
+				<ul className="flex flex-col gap-3">
+					{plan.features.slice(0, HEADLINE_FEATURE_COUNT).map((feat) => (
+						<FeatureItem feature={feat} featured={featured} key={feat} />
+					))}
+				</ul>
+
+				{plan.features.length > HEADLINE_FEATURE_COUNT && (
+					<details className="group/expand mt-3">
+						<summary
+							className={cn(
+								"flex cursor-pointer list-none items-center gap-1.5 font-medium text-[12.5px] transition-colors",
+								featured ? "text-background/60 hover:text-background/90" : "text-foreground/55 hover:text-foreground"
+							)}
+						>
+							<CaretDownIcon
+								className="transition-transform duration-200 group-open/expand:rotate-180"
+								size={12}
+								weight="bold"
+							/>
+							<span className="group-open/expand:hidden">+ {plan.features.length - HEADLINE_FEATURE_COUNT} más</span>
+							<span className="hidden group-open/expand:inline">Ocultar</span>
+						</summary>
+						<ul className="mt-3 flex flex-col gap-3">
+							{plan.features.slice(HEADLINE_FEATURE_COUNT).map((feat) => (
+								<FeatureItem feature={feat} featured={featured} key={feat} />
+							))}
+						</ul>
+					</details>
+				)}
+			</div>
 
 			<a
 				className={cn(
 					buttonVariants({ size: "lg" }),
-					"mt-10 w-full",
+					"mt-8 w-full",
 					featured && "bg-background text-foreground hover:bg-background/90"
 				)}
 				href="#planes"
@@ -97,6 +142,18 @@ function PriceCard({ plan }: { plan: Plan }) {
 				<ArrowRightIcon weight="bold" />
 			</a>
 		</div>
+	);
+}
+
+function FeatureItem({ feature, featured }: { feature: string; featured: boolean }) {
+	return (
+		<li className="flex items-start gap-3 text-[14px] leading-[1.5]">
+			<span
+				aria-hidden="true"
+				className={cn("mt-[7px] block size-1.5 shrink-0 rounded-full", featureDotColor(feature, featured))}
+			/>
+			<span className={cn(featured ? "text-background/90" : "text-foreground/85")}>{feature}</span>
+		</li>
 	);
 }
 

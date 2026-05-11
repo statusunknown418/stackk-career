@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRightIcon } from "@phosphor-icons/react";
-import { motion, useScroll } from "motion/react";
+import { AnimatePresence, motion, useScroll } from "motion/react";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,17 @@ const SECTION_IDS = NAV_LINKS.map((link) => link.href.replace("#", ""));
 
 export function LandingNav() {
 	const [activeId, setActiveId] = useState<string | null>(null);
+	const [showCta, setShowCta] = useState(false);
 	const { scrollYProgress } = useScroll();
+
+	useEffect(() => {
+		const onScroll = () => {
+			setShowCta(window.scrollY > window.innerHeight * 0.6);
+		};
+		onScroll();
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
 
 	useEffect(() => {
 		const elements = SECTION_IDS.map((id) => document.getElementById(id)).filter(
@@ -78,12 +88,6 @@ export function LandingNav() {
 										href={link.href}
 									>
 										{link.label}
-										{isActive && (
-											<span
-												aria-hidden="true"
-												className="absolute bottom-[2px] left-1/2 h-[3px] w-[3px] -translate-x-1/2 rounded-full bg-oxblood"
-											/>
-										)}
 									</a>
 								</li>
 							);
@@ -99,10 +103,21 @@ export function LandingNav() {
 						>
 							Iniciar sesión
 						</a>
-						<a className={buttonVariants({ size: "sm" })} href="#planes">
-							Analiza mi CV gratis
-							<ArrowRightIcon weight="bold" />
-						</a>
+						<AnimatePresence initial={false}>
+							{showCta && (
+								<motion.a
+									animate={{ opacity: 1, scale: 1, width: "auto" }}
+									className={cn(buttonVariants({ size: "sm" }), "overflow-hidden")}
+									exit={{ opacity: 0, scale: 0.85, width: 0 }}
+									href="/setup"
+									initial={{ opacity: 0, scale: 0.85, width: 0 }}
+									transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+								>
+									Analiza mi CV gratis
+									<ArrowRightIcon weight="bold" />
+								</motion.a>
+							)}
+						</AnimatePresence>
 					</div>
 				</nav>
 			</header>

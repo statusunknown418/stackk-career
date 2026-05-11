@@ -8,6 +8,7 @@ import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
+import { StatsAccumulation } from "@/components/landing/stats-accumulation";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 import { WhyImpulsa } from "@/components/landing/why-impulsa";
 
@@ -135,6 +136,7 @@ function LandingPage() {
 			<LandingNav />
 			<main>
 				<Hero />
+				<StatsAccumulation />
 				<WhyImpulsa />
 				<BentoGrid />
 				<HowItWorks />

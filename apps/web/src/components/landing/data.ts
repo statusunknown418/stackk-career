@@ -64,8 +64,8 @@ export const NAV_LINKS: readonly NavLink[] = [
 	{ href: "#por-que", label: "Por qué" },
 	{ href: "#features", label: "Producto" },
 	{ href: "#camino", label: "Cómo funciona" },
-	{ href: "#planes", label: "Precios" },
 	{ href: "#casos", label: "Resultados" },
+	{ href: "#planes", label: "Precios" },
 	{ href: "#faq", label: "FAQ" },
 ];
 
@@ -93,44 +93,44 @@ export const HERO_CHART: readonly BentoChartBar[] = [
 export const WHY_REASONS: readonly WhyReason[] = [
 	{
 		number: "01",
-		title: "IA + coach humano,",
-		emphasis: "en un mismo plan.",
-		body: "3 a 5 coaches senior en planilla — no freelancers de plataforma. Revisan tu camino paso a paso. Las herramientas IA hacen el trabajo de fondo.",
-		receipt: { label: "Coaching aparte vs. incluido", value: "Wonsulting US$699+ · IMPULSA Pro S/79" },
+		title: "Tu coach humano,",
+		emphasis: "no un chatbot solo.",
+		body: "Un coach senior con tu CV en mano — no freelancers que entran y salen. La IA hace el trabajo pesado en segundos, tu coach te dice qué decir en la entrevista del lunes.",
+		receipt: { label: "Equipo de coaches", value: "3–5 senior · planilla · LATAM" },
 	},
 	{
 		number: "02",
-		title: "Una sola",
-		emphasis: "suscripción.",
-		body: "Lo que Wonsulting, ResumAI, CoverLetterAI y NetworkAI te cobran por separado, junto y en español. Sin paquetes inflados, sin onboarding eterno.",
-		receipt: { label: "Herramientas integradas", value: "6 herramientas · 1 plan · 0 sorpresas" },
+		title: "Todo en un",
+		emphasis: "solo plan.",
+		body: "CV, carta, LinkedIn, outreach y score — afuera te los cobran por separado. Acá vienen juntos, en español. Cero paquetes inflados, cero onboarding eterno.",
+		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin sorpresas en el checkout" },
 	},
 	{
 		number: "03",
-		title: "Hecho para",
-		emphasis: "LATAM.",
-		body: "Español neutro, soles peruanos, contexto del mercado regional. Coaches que entrevistaron en BCP, Yape, Rappi y Belcorp. No es Wonsulting traducido.",
+		title: "Hablamos tu",
+		emphasis: "mercado.",
+		body: "Tu coach ya entrevistó en BCP, Yape, Rappi o Belcorp. Sabe exactamente qué busca un recruiter LATAM — no fórmulas gringas traducidas con Google Translate.",
 		receipt: { label: "Cobertura regional", value: "8 países · 100% español" },
 	},
 	{
 		number: "04",
-		title: "Resultados",
-		emphasis: "medibles.",
-		body: "Score 0–100 antes y después del rewrite. Casos reales como 41 → 84 en una semana. Ofertas concretas en semanas, no meses tirando CVs al vacío.",
-		receipt: { label: "Score promedio", value: "47 → 81 sobre 2.400 mentees" },
+		title: "Velocidad medible.",
+		emphasis: "Semanas, no meses.",
+		body: "Primer aha-moment en 30 segundos. Entrevistas concretas en 2–4 semanas. Oferta firmada en promedio 36 días (Premium). Mientras otros revisan tu CV en 2 semanas, acá ya estás aplicando.",
+		receipt: { label: "Tiempo promedio a oferta", value: "36 días en Premium" },
 	},
 ];
 
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Sube tu CV. Score 0–100 + lista exacta de qué mejorar. Tu primer aha-moment.",
+		body: "Sube tu CV. Score 0–100 + lista exacta de qué arreglar. Tu primer aha-moment, gratis.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
 		title: "Mapea tu próximo trabajo (Sesión 1)",
 		body: "45 min con tu coach. CV + LinkedIn en vivo. Plan de acción, roles y empresas objetivo.",
-		tag: "Premium",
+		tag: "Pro / Premium",
 	},
 	{
 		title: "Ejecuta con IA",
@@ -140,12 +140,12 @@ export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Domina la entrevista (Sesión 2)",
 		body: "45 min. Simulacro para el puesto específico. Feedback + consejos de lenguaje corporal.",
-		tag: "Premium",
+		tag: "Pro / Premium",
 	},
 	{
 		title: "Cierra y negocia (Sesión 3)",
 		body: "30 min post-entrevista. Plan para cerrar el proceso. Negociación de oferta.",
-		tag: "Premium",
+		tag: "Pro / Premium",
 	},
 	{
 		title: "Tu nueva oferta",
@@ -228,8 +228,8 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Analista en Yape",
 		location: "Lima",
 		quote:
-			"Subí mi CV y el score me dio 41. Después del rewrite con la IA y la sesión 1, salté a 84. Tres semanas después ya tenía dos entrevistas agendadas.",
-		chip: "41 → 84",
+			"Subí mi CV y el score me dio 41. Después del rewrite con la IA y la sesión 1, salté a 95. Tres semanas después ya tenía dos entrevistas agendadas.",
+		chip: "41 → 95",
 	},
 	{
 		id: "tomas",
@@ -351,7 +351,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿En qué países funciona?",
-		a: "Estamos enfocados en LATAM. Trabajamos con mentees en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal es soles peruanos (con equivalencias en USD).",
+		a: "Estamos enfocados en LATAM. Trabajamos con talentos en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal es soles peruanos (con equivalencias en USD).",
 	},
 	{
 		q: "¿Cancelo cuando quiero?",
