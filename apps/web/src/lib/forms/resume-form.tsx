@@ -21,6 +21,26 @@ export const { useAppForm, withForm } = createFormHook({
 	formContext,
 });
 
+// Narrow structural alias of the methods we mutate from outside the form
+// owner. TanStack Form's concrete API exposes a much wider field-name union;
+// listing only the paths we actually write keeps consumers decoupled from the
+// deep generics while remaining assignable from the real form (parameters are
+// contravariant — a wider source union can satisfy this narrower target).
+export interface ResumeFormApi {
+	pushFieldValue(field: "blocks", value: ResumeDocumentWrapperForm["blocks"][number]): void;
+	removeFieldValue(field: "blocks", index: number): Promise<void> | void;
+	setFieldValue(
+		field:
+			| `blocks[${number}].id`
+			| `blocks[${number}].position`
+			| `blocks[${number}].createdAt`
+			| `blocks[${number}].updatedAt`
+			| `blocks[${number}].parentBlockId`,
+		value: unknown
+	): void;
+	state: { values: ResumeDocumentWrapperForm };
+}
+
 export const resumeFormDefaults: ResumeDocumentWrapperForm = {
 	blocks: [],
 	id: "",

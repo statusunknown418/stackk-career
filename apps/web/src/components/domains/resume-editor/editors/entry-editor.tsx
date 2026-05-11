@@ -1,9 +1,17 @@
 "use client";
 
-import type { BlockNode } from "@stackk-career/schemas/db/resume-blocks";
+import { TrashIcon } from "@phosphor-icons/react";
+import { ENTRY_LABELS, getSectionKind, type SectionKind } from "@stackk-career/schemas/api/resumes";
+import { type BlockNode, sectionContentSchema } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
+import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
+import { orpc } from "@/utils/orpc";
 import { RichTextField } from "../fields/rich-text-field";
+import { useDeleteBlock } from "../use-block-mutations";
 import { BulletEditor } from "./bullet-editor";
 import { ParagraphEditor } from "./paragraph-editor";
 
@@ -14,9 +22,35 @@ export const EntryEditor = withForm({
 	props: {
 		block: propType<EntryBlock>(),
 		blockIndex: 0,
-		blockIndexById: propType<Map<number, number>>(),
 	},
-	render: ({ form, block, blockIndex, blockIndexById }) => {
+	render: ({ form, block, blockIndex }) => {
+		const params = Route.useParams();
+		const { data } = useSuspenseQuery(orpc.resumes.get.queryOptions({ input: { id: params.resumeId } }));
+
+		const blockIndexById = useMemo(
+			() => new Map(data.blocks.map((entry, idx) => [entry.id, idx] as const)),
+			[data.blocks]
+		);
+
+		const deleteBlock = useDeleteBlock({ form });
+
+		const sectionKind: SectionKind = useMemo(() => {
+			if (block.parentBlockId === null) {
+				return "custom";
+			}
+
+			const parent = data.blocks.find((candidate) => candidate.id === block.parentBlockId);
+			if (!parent || parent.blockType !== "section") {
+				return "custom";
+			}
+
+			const parsed = sectionContentSchema.safeParse(parent.content);
+
+			return parsed.success ? getSectionKind(parsed.data) : "custom";
+		}, [block.parentBlockId, data.blocks]);
+
+		const labels = ENTRY_LABELS[sectionKind];
+
 		const bullets = sortLexoPositions(
 			block.children.filter((child) => child.blockType === "bullet"),
 			(child) => child.position
@@ -26,21 +60,49 @@ export const EntryEditor = withForm({
 			(child) => child.position
 		);
 
+		const handleRemove = () => {
+			deleteBlock.mutate({ id: block.id, resumeId: params.resumeId });
+		};
+
 		return (
-			<li className="space-y-4">
+			<li className="group relative space-y-4">
+				<Button
+					aria-label="Eliminar entrada"
+					className="absolute -top-2 -right-2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+					onClick={handleRemove}
+					size="icon-sm"
+					type="button"
+					variant="destructive-outline"
+				>
+					<TrashIcon />
+				</Button>
+
 				<div className="grid gap-3 md:grid-cols-2">
 					<form.AppField name={`blocks[${blockIndex}].content.title` as const}>
-						{(field) => <field.TextField className="px-0 font-semibold text-base" label="Título" />}
+						{(field) => <field.TextField label={labels.title} />}
 					</form.AppField>
 					<form.AppField name={`blocks[${blockIndex}].content.subtitle` as const}>
-						{(field) => <field.TextField className="px-0 text-muted-foreground" label="Subtítulo" />}
+						{(field) => <field.TextField label={labels.subtitle} />}
 					</form.AppField>
 				</div>
 
-				<div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+				<div
+					className={
+						sectionKind === "experience"
+							? "grid gap-3 md:grid-cols-[1fr_auto_1fr_1fr_auto]"
+							: "grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]"
+					}
+				>
 					<form.AppField name={`blocks[${blockIndex}].content.location` as const}>
 						{(field) => <field.TextField label="Ubicación" />}
 					</form.AppField>
+					{sectionKind === "experience" && (
+						<div className="flex items-end pb-1.5">
+							<form.AppField name={`blocks[${blockIndex}].content.isRemote` as const}>
+								{(field) => <field.CheckboxField label="Remoto" />}
+							</form.AppField>
+						</div>
+					)}
 					<form.AppField name={`blocks[${blockIndex}].content.startDate` as const}>
 						{(field) => <field.MonthField label="Inicio" />}
 					</form.AppField>

@@ -17,7 +17,7 @@ export const ResumeDocumentEditor = withForm({
 		const sectionBlocks = rootBlocks.filter((block) => block.blockType === "section");
 
 		return (
-			<section className="flex w-full max-w-4xl flex-col gap-8 px-6 md:px-8">
+			<section className="flex w-full max-w-4xl flex-col gap-8 px-6 pb-10 md:px-8">
 				{contactBlock && contactBlock.blockType === "contact" && contactIndex !== undefined && (
 					<ContactEditor block={contactBlock} blockIndex={contactIndex} form={form} />
 				)}
@@ -28,19 +28,7 @@ export const ResumeDocumentEditor = withForm({
 							if (section.blockType !== "section") {
 								return null;
 							}
-							const sectionIndex = blockIndexById.get(section.id);
-							if (sectionIndex === undefined) {
-								return null;
-							}
-							return (
-								<SectionEditor
-									block={section}
-									blockIndex={sectionIndex}
-									blockIndexById={blockIndexById}
-									form={form}
-									key={section.id}
-								/>
-							);
+							return <SectionEditor block={section} form={form} key={section.id} />;
 						})}
 					</article>
 				) : (

@@ -1,6 +1,6 @@
-import { CopyIcon, ExportIcon, ListIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CopyIcon, ExportIcon, ListIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { type ResumeDocumentWrapperForm, resumeDocumentWrapperFormSchema } from "@stackk-career/schemas/api/resumes";
-import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
+import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -35,7 +35,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { useAppForm } from "@/lib/forms/resume-form";
+import { type ResumeFormApi, useAppForm } from "@/lib/forms/resume-form";
 import { orpc, queryClient } from "@/utils/orpc";
 
 const SAVE_STATUS_LABELS: Record<SaveStatus, string | null> = {
@@ -64,6 +64,56 @@ const buildHydrationKey = (data: {
 }) => [data.id, ...data.blocks.map((block) => `${block.id}:${block.parentBlockId ?? ""}:${block.position}`)].join("|");
 
 const BLOCK_FIELD_PATH_RE = /^blocks\[(\d+)\]/;
+
+type FormBlock = ResumeDocumentWrapperForm["blocks"][number];
+
+const removeMissingBlocks = async (form: ResumeFormApi, keepIds: Set<number>) => {
+	const formBlocks = form.state.values.blocks;
+	for (let index = formBlocks.length - 1; index >= 0; index--) {
+		const formBlock = formBlocks[index];
+		if (formBlock && !keepIds.has(formBlock.id)) {
+			await form.removeFieldValue("blocks", index);
+		}
+	}
+};
+
+const patchSurvivorBlockMetadata = (form: ResumeFormApi, nextById: Map<number, FormBlock>): Set<number> => {
+	const survivors = form.state.values.blocks;
+	const survivorIds = new Set<number>();
+	for (let index = 0; index < survivors.length; index++) {
+		const formBlock = survivors[index];
+		if (!formBlock) {
+			continue;
+		}
+		survivorIds.add(formBlock.id);
+		const next = nextById.get(formBlock.id);
+		if (!next) {
+			continue;
+		}
+		if (next.position !== formBlock.position) {
+			form.setFieldValue(`blocks[${index}].position`, next.position);
+		}
+		if ((next.parentBlockId ?? null) !== (formBlock.parentBlockId ?? null)) {
+			form.setFieldValue(`blocks[${index}].parentBlockId`, next.parentBlockId);
+		}
+		if ((next as Block).updatedAt !== formBlock.updatedAt) {
+			form.setFieldValue(`blocks[${index}].updatedAt`, next.updatedAt);
+		}
+	}
+	return survivorIds;
+};
+
+const reconcileBlocks = async (form: ResumeFormApi, nextBlocks: FormBlock[]) => {
+	const nextById = new Map<number, FormBlock>(nextBlocks.map((block) => [block.id, block]));
+	const keepIds = new Set<number>(nextBlocks.map((block) => block.id));
+	await removeMissingBlocks(form, keepIds);
+	const survivorIds = patchSurvivorBlockMetadata(form, nextById);
+	for (const next of nextBlocks) {
+		if (!survivorIds.has(next.id)) {
+			form.pushFieldValue("blocks", next);
+		}
+	}
+};
 
 const blockIdFromFieldName = (name: string, values: ResumeDocumentWrapperForm): number | null => {
 	const match = BLOCK_FIELD_PATH_RE.exec(name);
@@ -155,7 +205,12 @@ function RouteComponent() {
 		}
 		const nextValues = buildDocumentFormValues(data);
 		autosave.hydrateSaved(nextValues);
-		form.reset(nextValues);
+
+		// Reconcile surgically: preserve any keystrokes in matching blocks; add new
+		// blocks; remove blocks that no longer exist; patch metadata (position,
+		// parentBlockId) when it changes. A blanket `form.reset` here would wipe
+		// any in-progress edits whenever a sibling block is added or deleted.
+		reconcileBlocks(form, nextValues.blocks).catch(() => undefined);
 	}, [nextHydrationKey, data, form, autosave]);
 
 	// Subscribe only to a tree-shape projection so the route re-renders when blocks
@@ -190,8 +245,8 @@ function RouteComponent() {
 	const saveStatusLabel = SAVE_STATUS_LABELS[autosave.saveStatus];
 
 	return (
-		<section className="flex flex-col gap-8">
-			<header className="flex flex-col items-start gap-4 border-b px-8 py-6 md:flex-row md:justify-between">
+		<section className="relative flex flex-col gap-8">
+			<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 px-8 py-6 backdrop-blur-md md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -231,7 +286,12 @@ function RouteComponent() {
 
 				<article className="flex items-center gap-2">
 					<Group>
-						<NewSectionSheet />
+						<Button>
+							<SparkleIcon />
+							Casey
+						</Button>
+
+						<NewSectionSheet form={form} />
 
 						<GroupSeparator />
 
