@@ -6,11 +6,12 @@ import { useFieldContext } from "@/lib/forms/resume-form";
 
 interface MonthFieldProps {
 	className?: string;
+	disabled?: boolean;
 	emptyAsNull?: boolean;
 	label: string;
 }
 
-export function MonthField({ className, emptyAsNull = false, label }: MonthFieldProps) {
+export function MonthField({ className, disabled = false, emptyAsNull = false, label }: MonthFieldProps) {
 	const field = useFieldContext<string | null | undefined>();
 	const id = useId();
 
@@ -19,6 +20,7 @@ export function MonthField({ className, emptyAsNull = false, label }: MonthField
 			<span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</span>
 			<Input
 				className={className}
+				disabled={disabled}
 				id={id}
 				nativeInput
 				onBlur={field.handleBlur}

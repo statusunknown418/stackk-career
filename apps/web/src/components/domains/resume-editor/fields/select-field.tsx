@@ -1,34 +1,53 @@
 "use client";
 
+import { useId } from "react";
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFieldContext } from "@/lib/forms/resume-form";
+
+type SelectFieldOption = string | { label: string; value: string };
 
 interface SelectFieldProps {
 	emptyAsUndefined?: boolean;
 	label: string;
-	options: readonly string[];
+	options: readonly SelectFieldOption[];
+	placeholder?: string;
 }
 
-export function SelectField({ emptyAsUndefined = false, label, options }: SelectFieldProps) {
+const normalizeOption = (option: SelectFieldOption) =>
+	typeof option === "string" ? { label: option, value: option } : option;
+
+export function SelectField({ emptyAsUndefined = false, label, options, placeholder }: SelectFieldProps) {
 	const field = useFieldContext<string | undefined>();
+	const id = useId();
+	const normalized = options.map(normalizeOption);
 
 	return (
-		<label className="flex min-w-0 flex-col gap-1">
-			<span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</span>
-			<select
-				className="min-h-8 rounded-lg border border-transparent bg-transparent px-2 text-sm outline-none hover:border-input focus:border-ring focus:ring-[3px] focus:ring-ring/24"
-				onBlur={field.handleBlur}
-				onChange={(event) => {
-					const next = event.currentTarget.value;
-					field.handleChange(emptyAsUndefined && next === "" ? undefined : next);
+		<div className="flex min-w-0 flex-col gap-1">
+			<label className="font-medium text-muted-foreground text-xs uppercase tracking-wide" htmlFor={id}>
+				{label}
+			</label>
+			<Select
+				items={normalized}
+				onValueChange={(next) => {
+					if (next === null || next === "") {
+						field.handleChange(emptyAsUndefined ? undefined : "");
+						return;
+					}
+					field.handleChange(next);
 				}}
 				value={field.state.value ?? ""}
 			>
-				{options.map((option) => (
-					<option key={option} value={option}>
-						{option}
-					</option>
-				))}
-			</select>
-		</label>
+				<SelectTrigger id={id} onBlur={field.handleBlur} size="sm">
+					<SelectValue placeholder={placeholder ?? `Selecciona ${label.toLowerCase()}`} />
+				</SelectTrigger>
+				<SelectPopup>
+					{normalized.map((option) => (
+						<SelectItem key={option.value} value={option.value}>
+							{option.label}
+						</SelectItem>
+					))}
+				</SelectPopup>
+			</Select>
+		</div>
 	);
 }

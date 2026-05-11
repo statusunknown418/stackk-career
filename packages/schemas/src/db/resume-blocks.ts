@@ -10,27 +10,25 @@ export const updateResumeBlocksSchema = createUpdateSchema(resumeBlocks);
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export const contactContentSchema = z.object({
-	firstName: z.string().min(1),
-	lastName: z.string().min(1),
-	items: z
-		.array(
-			z.object({
-				kind: z.enum(["address", "email", "phone", "linkedin", "website", "other"]),
-				value: z.string().min(1),
-				label: z.string().optional(),
-			})
-		)
-		.min(1),
+	firstName: z.string(),
+	lastName: z.string(),
+	items: z.array(
+		z.object({
+			kind: z.enum(["address", "email", "phone", "linkedin", "website", "other"]),
+			value: z.string(),
+			label: z.string().optional(),
+		})
+	),
 });
 
 export const sectionContentSchema = z.object({
-	title: z.string().min(1),
+	title: z.string(),
 	layout: z.enum(["entries", "skills", "freeform"]).default("entries"),
 	isCustom: z.boolean().default(false),
 });
 
 export const entryContentSchema = z.object({
-	title: z.string().min(1),
+	title: z.string(),
 	subtitle: z.string().optional(),
 	location: z.string().optional(),
 	startDate: z.string().optional(),
@@ -42,7 +40,7 @@ export const entryContentSchema = z.object({
 });
 
 export const bulletContentSchema = z.object({
-	text: z.string().min(1).max(600),
+	text: z.string().max(600),
 	format: z.enum(["plain", "html"]).default("html"),
 	metrics: z.array(z.string()).optional(),
 	aiSuggested: z.boolean().default(false),
@@ -51,19 +49,19 @@ export const bulletContentSchema = z.object({
 });
 
 export const paragraphContentSchema = z.object({
-	text: z.string().min(1).max(2000),
+	text: z.string().max(2000),
 	format: z.enum(["plain", "html"]).default("html"),
 	aiSuggested: z.boolean().default(false),
 	originalText: z.string().optional(),
 });
 
 export const skillLineContentSchema = z.object({
-	label: z.string().min(1),
+	label: z.string(),
 	category: z.enum(["technical", "languages", "laboratory", "interests", "certifications", "other"]).default("other"),
 });
 
 export const skillItemContentSchema = z.object({
-	value: z.string().min(1),
+	value: z.string(),
 	proficiency: z
 		.enum(["basic", "conversational", "fluent", "native", "beginner", "intermediate", "advanced", "expert"])
 		.optional(),

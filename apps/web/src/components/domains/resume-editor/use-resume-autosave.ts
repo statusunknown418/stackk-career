@@ -50,16 +50,9 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 	const blockSaveDebouncersRef = useRef(new Map<number, AsyncDebouncer<BlockSaveFn>>());
 	const lastSavedRef = useRef<ResumeDocumentWrapperForm>(initialValues);
-	const mountedRef = useRef(true);
 
 	const titleMutation = useMutation(orpc.resumes.updateTitle.mutationOptions());
 	const blockMutation = useMutation(orpc.blocks.update.mutationOptions());
-
-	const safeSetSaveStatus = (status: SaveStatus) => {
-		if (mountedRef.current) {
-			setSaveStatus(status);
-		}
-	};
 
 	const disposeBlockSaveDebouncer = (blockId: number) => {
 		const debouncer = blockSaveDebouncersRef.current.get(blockId);
@@ -93,7 +86,7 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 
 	const saveStatusResetDebouncer = useAsyncDebouncer(
 		() => {
-			safeSetSaveStatus("idle");
+			setSaveStatus("idle");
 			return Promise.resolve();
 		},
 		{ wait: SAVED_DISPLAY_MS }
@@ -101,12 +94,12 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 
 	const beginSave = () => {
 		saveStatusResetDebouncer.cancel();
-		safeSetSaveStatus("saving");
+		setSaveStatus("saving");
 	};
 
 	const settleSaveStatus = (outcome: SaveJobOutcome, pendingJobCount: number) => {
 		if (outcome === "error") {
-			safeSetSaveStatus("error");
+			setSaveStatus("error");
 			return;
 		}
 
@@ -114,7 +107,7 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 			return;
 		}
 
-		safeSetSaveStatus("saved");
+		setSaveStatus("saved");
 		saveStatusResetDebouncer.maybeExecute().catch(() => undefined);
 	};
 
@@ -128,6 +121,13 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 
 		if (hasEquivalentPendingJob) {
 			return;
+		}
+
+		// React StrictMode dev double-mount fires the unmount cleanup once after the
+		// first mount, which would leave the (reused) queuer instance permanently
+		// stopped. Restart it defensively so processing resumes after remount.
+		if (!saveQueue.store.state.isRunning) {
+			saveQueue.start();
 		}
 
 		saveQueue.addItem(job);
@@ -235,10 +235,12 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 					queuer.store.state.activeItems.length + queuer.store.state.size
 				);
 			},
-			onUnmount: (queuer) => {
-				mountedRef.current = false;
-				queuer.stop();
-				queuer.abort();
+			onUnmount: () => {
+				// Do NOT stop/abort the queuer here. React StrictMode dev fires this
+				// cleanup after the first mount, but the SAME queuer instance is reused
+				// on the second mount — stopping it would leave it permanently stopped.
+				// React 19 silently ignores setState on unmounted components, so any
+				// in-flight mutation that resolves after a real unmount is a no-op.
 				clearBlockSaveDebouncers();
 			},
 		}
@@ -278,7 +280,7 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 				enqueueSaveJob({ blockId: nextBlockId, kind: "block" });
 				return Promise.resolve();
 			},
-			{ wait: SAVE_DEBOUNCE_MS }
+			{ wait: SAVE_DEBOUNCE_MS, key: "resume_form_debouncer" }
 		);
 
 		blockSaveDebouncersRef.current.set(blockId, debouncer);

@@ -9,7 +9,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
 import { ResumeDocumentEditor } from "@/components/domains/resume-editor/resume-document-editor";
-import { type SaveStatus, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
+import {
+	type ResumeAutosave,
+	type SaveStatus,
+	useResumeAutosave,
+} from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";
 import {
 	AlertDialog,
@@ -48,18 +52,27 @@ const buildDocumentFormValues = (data: { blocks: unknown[]; id: string; title: s
 		blocks: data.blocks,
 	});
 
+// Hydration key is intentionally shape-only (id + parent + position). Content
+// updates (title, block content, updatedAt) flow into the cache via our own
+// mutations and must NOT trigger a `form.reset` — that would clobber any
+// keystrokes that arrived between request dispatch and response. Add/remove/
+// reorder operations DO change the shape and rightly cause a reset so the form
+// picks up the new field paths.
 const buildHydrationKey = (data: {
-	blocks: { id: number; updatedAt: Date }[];
+	blocks: { id: number; parentBlockId: number | null; position: string }[];
 	id: string;
-	title: string;
-	updatedAt: Date;
-}) =>
-	[
-		data.id,
-		data.title,
-		new Date(data.updatedAt).getTime(),
-		...data.blocks.map((block) => `${block.id}:${new Date(block.updatedAt).getTime()}`),
-	].join("|");
+}) => [data.id, ...data.blocks.map((block) => `${block.id}:${block.parentBlockId ?? ""}:${block.position}`)].join("|");
+
+const BLOCK_FIELD_PATH_RE = /^blocks\[(\d+)\]/;
+
+const blockIdFromFieldName = (name: string, values: ResumeDocumentWrapperForm): number | null => {
+	const match = BLOCK_FIELD_PATH_RE.exec(name);
+	if (!match) {
+		return null;
+	}
+	const block = values.blocks[Number(match[1])];
+	return block?.id ?? null;
+};
 
 export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 	component: RouteComponent,
@@ -79,8 +92,40 @@ function RouteComponent() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
 	const initialValues = useMemo(() => buildDocumentFormValues(data), [data]);
+
+	// Form-level listeners are the single source of autosave dispatch. They read
+	// the (always-current) autosaveRef and derive the target blockId from the
+	// fired field's path, which keeps editors free of per-field listener wiring.
+	const autosaveRef = useRef<ResumeAutosave | null>(null);
+
 	const form = useAppForm({
 		defaultValues: initialValues,
+		listeners: {
+			onChange: ({ fieldApi, formApi }) => {
+				const autosave = autosaveRef.current;
+				if (!autosave || fieldApi.name === "title") {
+					return;
+				}
+				const blockId = blockIdFromFieldName(fieldApi.name, formApi.state.values);
+				if (blockId !== null) {
+					autosave.queueBlockSave(blockId);
+				}
+			},
+			onBlur: ({ fieldApi, formApi }) => {
+				const autosave = autosaveRef.current;
+				if (!autosave) {
+					return;
+				}
+				if (fieldApi.name === "title") {
+					autosave.saveTitle();
+					return;
+				}
+				const blockId = blockIdFromFieldName(fieldApi.name, formApi.state.values);
+				if (blockId !== null) {
+					autosave.flushBlockSave(blockId);
+				}
+			},
+		},
 	});
 
 	const autosave = useResumeAutosave({
@@ -89,6 +134,7 @@ function RouteComponent() {
 		resumeId: params.resumeId,
 		setTitle: (title) => form.setFieldValue("title", title),
 	});
+	autosaveRef.current = autosave;
 
 	// Re-hydrate the form when the underlying resume snapshot changes (e.g. after
 	// adding a section, deleting blocks, or any external mutation that invalidates
@@ -153,7 +199,8 @@ function RouteComponent() {
 							{" - "}
 							<span>{formatDate(data.createdAt, "HH:mm")}</span>
 						</p>
-						{saveStatusLabel ? (
+
+						{saveStatusLabel && (
 							<span
 								className={
 									autosave.saveStatus === "error" ? "text-destructive text-xs" : "text-muted-foreground text-xs"
@@ -161,10 +208,10 @@ function RouteComponent() {
 							>
 								{saveStatusLabel}
 							</span>
-						) : null}
+						)}
 					</div>
 
-					<form.AppField listeners={{ onBlur: () => autosave.saveTitle() }} name="title">
+					<form.AppField name="title">
 						{(field) => (
 							<InputGroup className="px-0" variant="ghost">
 								<Input
@@ -222,7 +269,7 @@ function RouteComponent() {
 				</article>
 			</header>
 
-			<ResumeDocumentEditor autosave={autosave} blockIndexById={blockIndexById} form={form} rootBlocks={rootBlocks} />
+			<ResumeDocumentEditor blockIndexById={blockIndexById} form={form} rootBlocks={rootBlocks} />
 
 			<AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
 				<AlertDialogPopup>

@@ -170,6 +170,7 @@ export const NewSectionSheet = () => {
 
 				const starterChild =
 					input.blockType === "section" ? createStarterChildContent(input.content.layout || "freeform") : null;
+
 				const optimisticBlock: (typeof previousResume.blocks)[number] = {
 					id: optimisticBlockId(),
 					resumeId: input.resumeId,
@@ -184,6 +185,7 @@ export const NewSectionSheet = () => {
 					updatedAt: now,
 					deletedAt: null,
 				};
+
 				const optimisticChild = starterChild
 					? ({
 							id: optimisticBlockId(),
@@ -270,44 +272,46 @@ export const NewSectionSheet = () => {
 					<SheetDescription>Escoge entre las secciones disponibles optimizadas para ATS</SheetDescription>
 				</SheetHeader>
 
-				<ItemGroup className="gap-2 px-4 pb-4">
-					{SECTION_OPTIONS.map((option) => {
-						const Icon = option.icon;
-						const isDisabled = option.isUnique && usedTitles.has(normalize(option.title));
+				<section className="overflow-y-scroll">
+					<ItemGroup className="gap-2 px-4 pb-4">
+						{SECTION_OPTIONS.map((option) => {
+							const Icon = option.icon;
+							const isDisabled = option.isUnique && usedTitles.has(normalize(option.title));
 
-						return (
-							<Item asChild key={option.id} size="sm" variant="outline">
-								<button
-									aria-disabled={isDisabled}
-									className={
-										isDisabled
-											? "pointer-events-none text-left opacity-50"
-											: "cursor-pointer text-left hover:bg-accent/50"
-									}
-									data-disabled={isDisabled}
-									disabled={isDisabled || createSection.isPending}
-									onClick={async () => {
-										await handleCreateSection(option);
-									}}
-									type="button"
-								>
-									<ItemMedia variant="icon">
-										<Icon className="size-4" />
-									</ItemMedia>
-									<ItemContent>
-										<ItemTitle>{option.title}</ItemTitle>
-										<ItemDescription>{option.description}</ItemDescription>
-									</ItemContent>
-									{isDisabled && (
-										<ItemActions>
-											<CheckCircleIcon className="size-5 text-success" weight="fill" />
-										</ItemActions>
-									)}
-								</button>
-							</Item>
-						);
-					})}
-				</ItemGroup>
+							return (
+								<Item asChild key={option.id} size="sm" variant="outline">
+									<button
+										aria-disabled={isDisabled}
+										className={
+											isDisabled
+												? "pointer-events-none text-left opacity-50"
+												: "cursor-pointer text-left hover:bg-accent/50"
+										}
+										data-disabled={isDisabled}
+										disabled={isDisabled || createSection.isPending}
+										onClick={async () => {
+											await handleCreateSection(option);
+										}}
+										type="button"
+									>
+										<ItemMedia variant="icon">
+											<Icon className="size-4" />
+										</ItemMedia>
+										<ItemContent>
+											<ItemTitle>{option.title}</ItemTitle>
+											<ItemDescription>{option.description}</ItemDescription>
+										</ItemContent>
+										{isDisabled && (
+											<ItemActions>
+												<CheckCircleIcon className="size-5 text-success" weight="fill" />
+											</ItemActions>
+										)}
+									</button>
+								</Item>
+							);
+						})}
+					</ItemGroup>
+				</section>
 			</SheetContent>
 		</Sheet>
 	);

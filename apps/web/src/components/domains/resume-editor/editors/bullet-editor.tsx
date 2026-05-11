@@ -3,26 +3,18 @@
 import type { BlockNode } from "@stackk-career/schemas/db/resume-blocks";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { RichTextField } from "../fields/rich-text-field";
-import type { ResumeAutosave } from "../use-resume-autosave";
 
 type BulletBlock = Extract<BlockNode, { blockType: "bullet" }>;
 
 export const BulletEditor = withForm({
 	defaultValues: resumeFormDefaults,
 	props: {
-		autosave: propType<ResumeAutosave>(),
 		block: propType<BulletBlock>(),
 		blockIndex: 0,
 	},
-	render: ({ form, autosave, block, blockIndex }) => (
+	render: ({ form, block, blockIndex }) => (
 		<li className="pl-1">
-			<form.AppField
-				listeners={{
-					onBlur: () => autosave.flushBlockSave(block.id),
-					onChange: () => autosave.queueBlockSave(block.id),
-				}}
-				name={`blocks[${blockIndex}].content.text` as const}
-			>
+			<form.AppField name={`blocks[${blockIndex}].content.text` as const}>
 				{(textField) => (
 					<form.AppField name={`blocks[${blockIndex}].content.format` as const}>
 						{(formatField) => (
