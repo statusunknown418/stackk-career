@@ -44,6 +44,7 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 					descriptorFormat: "html",
 					entryStyle: "standard",
 					isCurrent: false,
+					isRemote: false,
 				},
 			};
 	}

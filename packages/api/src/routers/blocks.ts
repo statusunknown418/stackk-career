@@ -1,10 +1,14 @@
 import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { createBlockApiMutationSchema, updateBlockApiMutationSchema } from "@stackk-career/schemas/api/blocks";
+import {
+	createBlockApiMutationSchema,
+	deleteBlockApiMutationSchema,
+	updateBlockApiMutationSchema,
+} from "@stackk-career/schemas/api/blocks";
 import { parseBlock, sanitizeResumeRichTextHtml } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { createStarterChildPayload } from "../lib/resume-block-starters";
 
@@ -188,5 +192,41 @@ export const blocksRouter = {
 		}
 
 		return parseBlock(updatedBlock);
+	}),
+
+	delete: protectedProcedure.input(deleteBlockApiMutationSchema).handler(async ({ context, input }) => {
+		const deletedAt = new Date();
+		const deleteResult = await context.db.run(sql`
+			WITH RECURSIVE subtree(id) AS (
+				SELECT block.id
+				FROM ${resumeBlocks} AS block
+				INNER JOIN ${resumes} AS resume
+					ON resume.id = block.resumeId
+				WHERE block.id = ${input.id}
+					AND block.resumeId = ${input.resumeId}
+					AND resume.userId = ${context.session.session.userId}
+					AND block.deletedAt IS NULL
+
+				UNION ALL
+
+				SELECT child.id
+				FROM ${resumeBlocks} AS child
+				INNER JOIN subtree
+					ON child.parentBlockId = subtree.id
+				WHERE child.resumeId = ${input.resumeId}
+					AND child.deletedAt IS NULL
+			)
+			UPDATE ${resumeBlocks}
+			SET deletedAt = ${deletedAt}
+			WHERE resumeId = ${input.resumeId}
+				AND id IN (SELECT id FROM subtree)
+		`);
+
+		if ((deleteResult.rowsAffected ?? 0) === 0) {
+			context.log?.set({ outcome: "block_not_found" });
+			throw new ORPCError("NOT_FOUND", { message: "No se encontró bloque" });
+		}
+
+		return { id: input.id };
 	}),
 };
