@@ -199,7 +199,7 @@ export const proseContentToHtml = (value: string | null | undefined, format: "pl
 
 interface TimelineSortable {
 	content: unknown;
-	position: string;
+	id: number;
 }
 
 const readEntryTimelineFields = (content: unknown) => {
@@ -228,9 +228,10 @@ const compareDescString = (a: string | undefined, b: string | undefined): number
 };
 
 // Sort entries newest-first for timeline-style sections (experience / education).
-// Order: isCurrent desc → startDate desc → endDate desc (isCurrent treated as
-// "9999-12") → position desc as stable tiebreak. Zero-padded YYYY-MM compares
-// lexicographically. Malformed content falls to the bottom via safeParse.
+// Data is the source of truth: isCurrent desc → startDate desc → endDate desc
+// (isCurrent treated as "9999-12") → id desc as stable tiebreak (later-created
+// row wins). Zero-padded YYYY-MM compares lexicographically. Malformed content
+// falls to the bottom via safeParse.
 export function sortEntriesByTimeline<T extends TimelineSortable>(entries: readonly T[]): T[] {
 	return [...entries].sort((a, b) => {
 		const aFields = readEntryTimelineFields(a.content);
@@ -252,7 +253,7 @@ export function sortEntriesByTimeline<T extends TimelineSortable>(entries: reado
 			return endCmp;
 		}
 
-		return b.position.localeCompare(a.position);
+		return b.id - a.id;
 	});
 }
 
