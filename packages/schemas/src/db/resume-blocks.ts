@@ -139,6 +139,8 @@ export function mapParseBlocks(raw: (typeof resumeBlocks.$inferSelect)[]): Block
 }
 
 export type BlockNode = Block & { children: BlockNode[] };
+export type SectionBlockNode = Extract<BlockNode, { blockType: "section" }>;
+export type EntryBlockNode = Extract<BlockNode, { blockType: "entry" }>;
 
 const allowedResumeHtmlTags = new Set(["p", "ul", "ol", "li", "strong", "em", "b", "i", "br"]);
 const scriptTagPattern = /<\s*(script|style)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi;
@@ -194,6 +196,65 @@ export const proseContentToHtml = (value: string | null | undefined, format: "pl
 
 	return plainTextToHtml(normalizedValue);
 };
+
+interface TimelineSortable {
+	content: unknown;
+	position: string;
+}
+
+const readEntryTimelineFields = (content: unknown) => {
+	const parsed = entryContentSchema.safeParse(content);
+	if (!parsed.success) {
+		return { startDate: undefined, endDate: undefined, isCurrent: false };
+	}
+	return {
+		startDate: parsed.data.startDate,
+		endDate: parsed.data.endDate ?? undefined,
+		isCurrent: parsed.data.isCurrent,
+	};
+};
+
+const compareDescString = (a: string | undefined, b: string | undefined): number => {
+	if (a === b) {
+		return 0;
+	}
+	if (!a) {
+		return 1;
+	}
+	if (!b) {
+		return -1;
+	}
+	return b.localeCompare(a);
+};
+
+// Sort entries newest-first for timeline-style sections (experience / education).
+// Order: isCurrent desc → startDate desc → endDate desc (isCurrent treated as
+// "9999-12") → position desc as stable tiebreak. Zero-padded YYYY-MM compares
+// lexicographically. Malformed content falls to the bottom via safeParse.
+export function sortEntriesByTimeline<T extends TimelineSortable>(entries: readonly T[]): T[] {
+	return [...entries].sort((a, b) => {
+		const aFields = readEntryTimelineFields(a.content);
+		const bFields = readEntryTimelineFields(b.content);
+
+		if (aFields.isCurrent !== bFields.isCurrent) {
+			return aFields.isCurrent ? -1 : 1;
+		}
+
+		const startCmp = compareDescString(aFields.startDate, bFields.startDate);
+		if (startCmp !== 0) {
+			return startCmp;
+		}
+
+		const aEnd = aFields.isCurrent ? "9999-12" : aFields.endDate;
+		const bEnd = bFields.isCurrent ? "9999-12" : bFields.endDate;
+		const endCmp = compareDescString(aEnd, bEnd);
+		if (endCmp !== 0) {
+			return endCmp;
+		}
+
+		return b.position.localeCompare(a.position);
+	});
+}
 
 export function buildBlockTree(blocks: ResumeBlockGenericType[]): BlockNode[] {
 	const parsedBlocks = sortLexoPositions(mapParseBlocks(blocks), (block) => block.position);

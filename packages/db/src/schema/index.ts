@@ -1,4 +1,5 @@
 export * from "./auth";
+export * from "./coaching-sessions";
 export * from "./file-metadata";
 export * from "./generations";
 export * from "./messages";

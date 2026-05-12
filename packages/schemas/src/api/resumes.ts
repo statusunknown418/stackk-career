@@ -130,6 +130,25 @@ export const ENTRY_LABELS = {
 	custom: { title: "Título", subtitle: "Subtítulo", addCta: "Agregar entrada" },
 } as const satisfies Record<SectionKind, EntryLabels>;
 
+interface EntryNoun {
+	plural: string;
+	singular: string;
+}
+
+export const ENTRY_NOUNS = {
+	experience: { singular: "entrada", plural: "entradas" },
+	education: { singular: "entrada", plural: "entradas" },
+	certifications: { singular: "certificación", plural: "certificaciones" },
+	projects: { singular: "proyecto", plural: "proyectos" },
+	volunteering: { singular: "rol", plural: "roles" },
+	summary: { singular: "párrafo", plural: "párrafos" },
+	skills: { singular: "habilidad", plural: "habilidades" },
+	languages: { singular: "idioma", plural: "idiomas" },
+	custom: { singular: "entrada", plural: "entradas" },
+} as const satisfies Record<SectionKind, EntryNoun>;
+
+export const isTimelineSectionKind = (kind: SectionKind): boolean => kind === "experience" || kind === "education";
+
 const DEFAULT_SECTION_KINDS: readonly DefinedSectionKind[] = ["summary", "experience", "education", "skills"];
 
 export const blankResumeSections = SECTION_DEFINITIONS.filter((definition) =>
