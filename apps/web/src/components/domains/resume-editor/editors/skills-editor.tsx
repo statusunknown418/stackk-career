@@ -15,6 +15,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { log } from "evlog";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Frame, FrameFooter, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
@@ -150,106 +151,128 @@ export const SkillsEditor = withForm({
 		}
 
 		return (
-			<div className="space-y-4">
-				{lines.map((line) => {
-					if (line.blockType !== "skill_line") {
-						return null;
-					}
+			<div className="space-y-6">
+				<div className="space-y-3">
+					{lines.map((line) => {
+						if (line.blockType !== "skill_line") {
+							return null;
+						}
 
-					const lineIndex = blockIndexById.get(line.id);
-					if (lineIndex === undefined) {
-						return null;
-					}
+						const lineIndex = blockIndexById.get(line.id);
+						if (lineIndex === undefined) {
+							return null;
+						}
 
-					const items = sortLexoPositions(
-						line.children.filter((child) => child.blockType === "skill_item"),
-						(child) => child.position
-					);
+						const items = sortLexoPositions(
+							line.children.filter((child) => child.blockType === "skill_item"),
+							(child) => child.position
+						);
 
-					const handleAddItem = () => {
-						createBlock
-							.enqueue({
-								resumeId: params.resumeId,
-								parentBlockId: line.id,
-								before: items.at(-1)?.position ?? null,
-								after: null,
-								blockType: "skill_item",
-								content: {
-									value: "",
-								},
-							})
-							.catch(() => undefined);
-					};
+						const handleAddItem = () => {
+							createBlock
+								.enqueue({
+									resumeId: params.resumeId,
+									parentBlockId: line.id,
+									before: items.at(-1)?.position ?? null,
+									after: null,
+									blockType: "skill_item",
+									content: {
+										value: "",
+									},
+								})
+								.catch((error) =>
+									log.error({ scope: "resume_editor", message: "Something happened creating a skill", error })
+								);
+						};
 
-					return (
-						<div className="group/line space-y-3" key={line.id}>
-							<div className="flex items-end gap-2">
-								<div className="grid flex-1 gap-3 md:grid-cols-2">
-									<form.AppField name={`blocks[${lineIndex}].content.category` as const}>
-										{(field) => <field.SelectField label="Categoría" options={categoryOptions} />}
-									</form.AppField>
-								</div>
+						return (
+							<Frame className="group/line" key={line.id}>
+								<FrameHeader className="flex-row items-end gap-2">
+									<div className="grid flex-1 gap-3 md:grid-cols-2">
+										<form.AppField name={`blocks[${lineIndex}].content.category` as const}>
+											{(field) => <field.SelectField options={categoryOptions} />}
+										</form.AppField>
+									</div>
 
-								<Button
-									aria-label="Eliminar categoría"
-									className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100"
-									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
-									size="icon-sm"
-									type="button"
-									variant="ghost"
-								>
-									<TrashIcon />
-								</Button>
-							</div>
+									<Button
+										aria-label="Eliminar categoría"
+										className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100"
+										onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
+										size="icon-sm"
+										type="button"
+										variant="ghost"
+									>
+										<TrashIcon />
+									</Button>
+								</FrameHeader>
 
-							<div className="grid gap-2 md:grid-cols-2">
-								{items.map((item) => {
-									if (item.blockType !== "skill_item") {
-										return null;
-									}
+								<FramePanel>
+									<div className="grid gap-2 md:grid-cols-2">
+										{items.map((item) => {
+											if (item.blockType !== "skill_item") {
+												return null;
+											}
 
-									const itemIndex = blockIndexById.get(item.id);
-									if (itemIndex === undefined) {
-										return null;
-									}
+											const itemIndex = blockIndexById.get(item.id);
+											if (itemIndex === undefined) {
+												return null;
+											}
 
-									return (
-										<div
-											className="group/item relative grid gap-2 rounded-lg bg-muted/40 px-3 py-2 md:grid-cols-[1fr_160px_auto]"
-											key={item.id}
-										>
-											<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
-												{(field) => <field.TextField label={itemLabel} />}
-											</form.AppField>
-											<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
-												{(field) => <field.SelectField emptyAsUndefined label="Nivel" options={proficiencyOptions} />}
-											</form.AppField>
-											<div className="flex items-end pb-1.5">
-												<Button
-													aria-label="Eliminar habilidad"
-													className="opacity-0 transition-opacity group-focus-within/item:opacity-100 group-hover/item:opacity-100"
-													onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-													size="icon-sm"
-													type="button"
-													variant="ghost"
+											return (
+												<div
+													className="group/item relative grid gap-2 rounded-lg bg-muted/40 px-3 py-2 md:grid-cols-[1fr_160px_auto]"
+													key={item.id}
 												>
-													<TrashIcon />
-												</Button>
-											</div>
-										</div>
-									);
-								})}
-							</div>
+													<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
+														{(field) => <field.TextField label={itemLabel} />}
+													</form.AppField>
+													<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
+														{(field) => (
+															<field.SelectField emptyAsUndefined label="Nivel" options={proficiencyOptions} />
+														)}
+													</form.AppField>
+													<div className="flex items-end pb-1.5">
+														<Button
+															aria-label="Eliminar habilidad"
+															className="opacity-0 transition-opacity group-focus-within/item:opacity-100 group-hover/item:opacity-100"
+															onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
+															size="icon-sm"
+															type="button"
+															variant="ghost"
+														>
+															<TrashIcon />
+														</Button>
+													</div>
+												</div>
+											);
+										})}
+									</div>
+								</FramePanel>
 
-							<Button disabled={createBlock.isPending} onClick={handleAddItem} size="sm" type="button" variant="ghost">
-								<PlusIcon />
-								{addItemLabel}
-							</Button>
-						</div>
-					);
-				})}
+								<FrameFooter>
+									<Button
+										disabled={createBlock.isPending}
+										onClick={handleAddItem}
+										size="sm"
+										type="button"
+										variant="ghost-muted"
+									>
+										<PlusIcon />
+										{addItemLabel}
+									</Button>
+								</FrameFooter>
+							</Frame>
+						);
+					})}
+				</div>
 
-				<Button disabled={createBlock.isPending} onClick={handleAddCategory} size="sm" type="button" variant="ghost">
+				<Button
+					className="w-max"
+					disabled={createBlock.isPending}
+					onClick={handleAddCategory}
+					type="button"
+					variant="ghost"
+				>
 					<PlusIcon />
 					Agregar categoría
 				</Button>

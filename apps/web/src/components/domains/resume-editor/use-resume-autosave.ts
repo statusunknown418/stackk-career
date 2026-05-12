@@ -187,6 +187,14 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 			return "skipped" as const;
 		}
 
+		// Optimistic blocks carry a negative placeholder id until the create mutation
+		// resolves. Saving with that id would 404 on the server. Skip here; the id
+		// swap in `useCreateBlock.onSuccess` triggers an onChange that re-queues this
+		// save under the real id, picking up any keystrokes typed during creation.
+		if (currentBlock.id < 0) {
+			return "skipped" as const;
+		}
+
 		if (!(currentBlock && hasBlockChanged(currentBlock, savedBlock))) {
 			return "skipped" as const;
 		}

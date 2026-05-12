@@ -12,6 +12,7 @@ import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
@@ -86,32 +87,17 @@ export const EntryEditor = withForm({
 		};
 
 		return (
-			<article
-				className="group relative rounded-md transition-colors duration-150 focus-within:bg-muted/30 [@media(hover:hover)]:hover:bg-muted/20"
-				data-current={isCurrent}
-				ref={rootRef}
-			>
-				<div className="absolute -top-2 -right-2 opacity-0 transition-opacity group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100">
-					<Button
-						aria-label="Eliminar entrada"
-						onClick={handleRemove}
-						size="sm"
-						type="button"
-						variant="destructive-outline"
-					>
-						<TrashIcon /> Borrar
-					</Button>
-				</div>
+			<article className="group relative flex gap-3" data-current={isCurrent} ref={rootRef}>
+				{showRailDot && (
+					<div aria-hidden="true" className="relative w-2 flex-none">
+						<span className="absolute -top-3 -bottom-3 left-1/2 w-px -translate-x-1/2 bg-border/60" />
+						<span className="absolute top-5 left-1/2 size-2 -translate-x-1/2 rounded-full border border-muted-foreground/40 bg-background transition-colors group-focus-within:border-primary group-focus-within:bg-primary group-data-[current]:border-foreground group-data-[current]:bg-foreground" />
+					</div>
+				)}
 
-				<div className="flex gap-3 px-3 py-3">
-					{showRailDot && (
-						<div aria-hidden="true" className="relative w-2 flex-none">
-							<span className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 bg-border/60" />
-							<span className="absolute top-5 left-1/2 size-2 -translate-x-1/2 rounded-full border border-muted-foreground/40 bg-background transition-colors group-focus-within:border-primary group-focus-within:bg-primary group-data-[current]:border-foreground group-data-[current]:bg-foreground" />
-						</div>
-					)}
-					<div className="min-w-0 flex-1 space-y-4">
-						<div className="grid gap-3 md:grid-cols-2">
+				<Frame className="min-w-0 flex-1">
+					<FrameHeader className="flex-row items-end gap-2">
+						<div className="grid flex-1 gap-3 md:grid-cols-2">
 							<form.AppField name={`blocks[${blockIndex}].content.title` as const}>
 								{(field) => <field.TextField label={labels.title} />}
 							</form.AppField>
@@ -120,6 +106,19 @@ export const EntryEditor = withForm({
 							</form.AppField>
 						</div>
 
+						<Button
+							aria-label="Eliminar entrada"
+							className="opacity-0 transition-opacity group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
+							onClick={handleRemove}
+							size="icon-sm"
+							type="button"
+							variant="ghost"
+						>
+							<TrashIcon />
+						</Button>
+					</FrameHeader>
+
+					<FramePanel className="space-y-4">
 						<div
 							className={
 								sectionKind === "experience"
@@ -140,7 +139,12 @@ export const EntryEditor = withForm({
 							)}
 
 							<form.AppField name={`blocks[${blockIndex}].content.startDate` as const}>
-								{(field) => <field.MonthField label="Inicio" />}
+								{(field) => (
+									<field.MonthField
+										disableFuture={sectionKind === "experience" || sectionKind === "education"}
+										label="Inicio"
+									/>
+								)}
 							</form.AppField>
 
 							<form.Subscribe
@@ -217,8 +221,8 @@ export const EntryEditor = withForm({
 								})}
 							</div>
 						)}
-					</div>
-				</div>
+					</FramePanel>
+				</Frame>
 			</article>
 		);
 	},

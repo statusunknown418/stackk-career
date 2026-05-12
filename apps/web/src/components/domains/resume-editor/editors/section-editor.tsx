@@ -116,7 +116,7 @@ export const SectionEditor = withForm({
 
 					{block.content.layout === "entries" && (
 						<div className="space-y-3">
-							<div>
+							<div className="space-y-6">
 								<AnimatePresence initial={false} mode="popLayout">
 									{entries.map((entry) => {
 										if (entry.blockType !== "entry") {

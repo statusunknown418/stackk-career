@@ -5,20 +5,29 @@ import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/lib/forms/resume-form";
 
 interface TextFieldProps {
+	"aria-label"?: string;
 	className?: string;
-	label: string;
+	label?: string;
 	placeholder?: string;
 	variant?: "default" | "ghost";
 }
 
-export function TextField({ className, label, placeholder, variant = "default" }: TextFieldProps) {
+export function TextField({
+	className,
+	label,
+	"aria-label": ariaLabel,
+	placeholder,
+	variant = "default",
+}: TextFieldProps) {
 	const field = useFieldContext<string>();
 	const id = useId();
 
 	return (
 		<label className="flex min-w-0 flex-col gap-1" htmlFor={id}>
-			<span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</span>
+			{label && <span className="font-medium text-muted-foreground text-xs uppercase">{label}</span>}
+
 			<Input
+				aria-label={label ? undefined : ariaLabel}
 				className={className}
 				id={id}
 				nativeInput

@@ -1,7 +1,9 @@
-import { PencilSimpleIcon, SparkleIcon } from "@phosphor-icons/react";
+import { ArrowUpIcon, SparkleIcon } from "@phosphor-icons/react";
+import { ArrowDownIcon } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Group, GroupSeparator } from "@/components/ui/group";
 
 interface TimelineSectionProps {
 	aiGenerated?: boolean;
@@ -47,14 +49,17 @@ export const TimelineSection = ({
 						)}
 					</div>
 
-					<div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/section:opacity-100">
-						<Button aria-label={`Enhance ${title} with AI`} size="icon-xs" variant="ghost">
-							<SparkleIcon />
+					<Group className="opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/section:opacity-100">
+						<Button aria-label={`Mover ${title} arriba`} size="icon-sm" variant="outline">
+							<ArrowUpIcon />
 						</Button>
-						<Button aria-label={`Edit ${title}`} size="icon-xs" variant="ghost">
-							<PencilSimpleIcon />
+
+						<GroupSeparator />
+
+						<Button aria-label={`Mover ${title} abajo`} size="icon-sm" variant="outline">
+							<ArrowDownIcon />
 						</Button>
-					</div>
+					</Group>
 				</header>
 
 				{children}

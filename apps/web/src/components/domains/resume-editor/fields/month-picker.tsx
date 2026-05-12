@@ -8,6 +8,7 @@ import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/c
 import { cn } from "@/lib/utils";
 
 interface MonthPickerProps {
+	maxDate?: Date;
 	maxYear?: number;
 	minYear?: number;
 	onSelect: (date: Date) => void;
@@ -23,10 +24,13 @@ const formatMonthLabel = (monthIndex: number) => {
 
 const monthLabels = MONTH_INDICES.map((index) => ({ index, label: formatMonthLabel(index) }));
 
-export function MonthPicker({ maxYear, minYear, onSelect, selected }: MonthPickerProps) {
+export function MonthPicker({ maxDate, maxYear, minYear, onSelect, selected }: MonthPickerProps) {
 	const now = new Date();
-	const defaultMaxYear = maxYear ?? now.getFullYear() + 5;
+	const cappedMaxYear = Math.min(maxYear ?? now.getFullYear() + 5, maxDate?.getFullYear() ?? Number.POSITIVE_INFINITY);
+	const defaultMaxYear = cappedMaxYear;
 	const defaultMinYear = minYear ?? now.getFullYear() - 60;
+	const maxYearForMonthGate = maxDate?.getFullYear();
+	const maxMonthForMonthGate = maxDate?.getMonth();
 	const selectedYear = selected?.getFullYear();
 	const selectedMonth = selected?.getMonth();
 	const [viewYear, setViewYear] = useState<number>(selectedYear ?? now.getFullYear());
@@ -64,12 +68,17 @@ export function MonthPicker({ maxYear, minYear, onSelect, selected }: MonthPicke
 			<div className="grid grid-cols-3 gap-2">
 				{monthLabels.map(({ index, label }) => {
 					const isSelected = selectedYear === viewYear && selectedMonth === index;
+					const isBeyondMax =
+						maxYearForMonthGate !== undefined &&
+						maxMonthForMonthGate !== undefined &&
+						(viewYear > maxYearForMonthGate || (viewYear === maxYearForMonthGate && index > maxMonthForMonthGate));
 					return (
 						<Button
 							className={cn(
 								"font-medium text-sm",
 								isSelected && "bg-primary text-primary-foreground hover:bg-primary/90"
 							)}
+							disabled={isBeyondMax}
 							key={index}
 							onClick={() => onSelect(new Date(viewYear, index, 1))}
 							size="sm"

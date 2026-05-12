@@ -11,6 +11,7 @@ import { MonthPicker } from "./month-picker";
 
 interface MonthFieldProps {
 	disabled?: boolean;
+	disableFuture?: boolean;
 	emptyAsNull?: boolean;
 	label: string;
 }
@@ -28,13 +29,14 @@ const parseStoredValue = (value: string | null | undefined): Date | undefined =>
 const formatDisplay = (date: Date | undefined): string | null =>
 	date ? format(date, "MMM yyyy", { locale: es }) : null;
 
-export function MonthField({ disabled = false, emptyAsNull = false, label }: MonthFieldProps) {
+export function MonthField({ disabled = false, disableFuture = false, emptyAsNull = false, label }: MonthFieldProps) {
 	const field = useFieldContext<string | null | undefined>();
 	const id = useId();
 	const [open, setOpen] = useState(false);
 
 	const selectedDate = parseStoredValue(field.state.value);
 	const display = formatDisplay(selectedDate);
+	const maxDate = disableFuture ? new Date() : undefined;
 
 	const handleSelect = (next: Date) => {
 		const firstOfMonth = new Date(next.getFullYear(), next.getMonth(), 1);
@@ -68,7 +70,7 @@ export function MonthField({ disabled = false, emptyAsNull = false, label }: Mon
 				/>
 
 				<PopoverContent align="start" className="w-auto p-0!">
-					<MonthPicker onSelect={handleSelect} selected={selectedDate} />
+					<MonthPicker maxDate={maxDate} onSelect={handleSelect} selected={selectedDate} />
 
 					{selectedDate && (
 						<div className="flex justify-end border-t px-2 pt-2">
