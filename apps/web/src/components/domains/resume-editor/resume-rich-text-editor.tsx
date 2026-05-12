@@ -68,7 +68,7 @@ export const ResumeRichTextEditor = ({
 		editorProps: {
 			attributes: {
 				class:
-					"min-h-20 whitespace-pre-wrap rounded-md px-2 py-2 text-base text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
+					"min-h-20 whitespace-pre-wrap rounded-lg border p-2 text-base text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
 			},
 		},
 		extensions: [
@@ -142,15 +142,15 @@ export const ResumeRichTextEditor = ({
 				editor={editor}
 			/>
 
-			{placeholder && editor.isEmpty ? (
+			{placeholder && editor.isEmpty && (
 				<p className="pointer-events-none absolute top-1.5 left-2 text-muted-foreground/70 text-sm">{placeholder}</p>
-			) : null}
+			)}
 
 			<AnimatePresence>
 				{showToolbar && (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="absolute top-full left-1/2 z-20 mt-2 -translate-x-1/2"
+						className="absolute top-full left-1/2 z-20 mt-1 -translate-x-1/2"
 						exit={{ opacity: 0, y: -4 }}
 						initial={{ opacity: 0, y: -4 }}
 						transition={{ duration: 0.15, ease: "easeOut" }}

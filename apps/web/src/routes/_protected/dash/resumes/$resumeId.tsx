@@ -1,19 +1,18 @@
-import { CopyIcon, ExportIcon, ListIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
-import { type ResumeDocumentWrapperForm, resumeDocumentWrapperFormSchema } from "@stackk-career/schemas/api/resumes";
-import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
+import { CopyIcon, DotsThreeOutlineIcon, ExportIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { getSectionKind } from "@stackk-career/schemas/api/resumes";
+import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
 import { ResumeDocumentEditor } from "@/components/domains/resume-editor/resume-document-editor";
-import {
-	type ResumeAutosave,
-	type SaveStatus,
-	useResumeAutosave,
-} from "@/components/domains/resume-editor/use-resume-autosave";
+import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
+import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";
 import {
 	AlertDialog,
@@ -28,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import { Input } from "@/components/ui/input";
 import { InputGroup } from "@/components/ui/input-group";
+import { Kbd } from "@/components/ui/kbd";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,94 +35,20 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { type ResumeFormApi, useAppForm } from "@/lib/forms/resume-form";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
+import {
+	blockIdFromFieldName,
+	buildDocumentFormValues,
+	buildHydrationKey,
+	reconcileBlocks,
+	SAVE_STATUS_LABELS,
+	useAppForm,
+} from "@/lib/forms/resume-form";
 import { orpc, queryClient } from "@/utils/orpc";
 
-const SAVE_STATUS_LABELS: Record<SaveStatus, string | null> = {
-	error: "Error",
-	idle: null,
-	saved: "Saved",
-	saving: "Saving",
-};
-
-const buildDocumentFormValues = (data: { blocks: unknown[]; id: string; title: string }): ResumeDocumentWrapperForm =>
-	resumeDocumentWrapperFormSchema.parse({
-		id: data.id,
-		title: data.title,
-		blocks: data.blocks,
-	});
-
-// Hydration key is intentionally shape-only (id + parent + position). Content
-// updates (title, block content, updatedAt) flow into the cache via our own
-// mutations and must NOT trigger a `form.reset` — that would clobber any
-// keystrokes that arrived between request dispatch and response. Add/remove/
-// reorder operations DO change the shape and rightly cause a reset so the form
-// picks up the new field paths.
-const buildHydrationKey = (data: {
-	blocks: { id: number; parentBlockId: number | null; position: string }[];
-	id: string;
-}) => [data.id, ...data.blocks.map((block) => `${block.id}:${block.parentBlockId ?? ""}:${block.position}`)].join("|");
-
-const BLOCK_FIELD_PATH_RE = /^blocks\[(\d+)\]/;
-
-type FormBlock = ResumeDocumentWrapperForm["blocks"][number];
-
-const removeMissingBlocks = async (form: ResumeFormApi, keepIds: Set<number>) => {
-	const formBlocks = form.state.values.blocks;
-	for (let index = formBlocks.length - 1; index >= 0; index--) {
-		const formBlock = formBlocks[index];
-		if (formBlock && !keepIds.has(formBlock.id)) {
-			await form.removeFieldValue("blocks", index);
-		}
-	}
-};
-
-const patchSurvivorBlockMetadata = (form: ResumeFormApi, nextById: Map<number, FormBlock>): Set<number> => {
-	const survivors = form.state.values.blocks;
-	const survivorIds = new Set<number>();
-	for (let index = 0; index < survivors.length; index++) {
-		const formBlock = survivors[index];
-		if (!formBlock) {
-			continue;
-		}
-		survivorIds.add(formBlock.id);
-		const next = nextById.get(formBlock.id);
-		if (!next) {
-			continue;
-		}
-		if (next.position !== formBlock.position) {
-			form.setFieldValue(`blocks[${index}].position`, next.position);
-		}
-		if ((next.parentBlockId ?? null) !== (formBlock.parentBlockId ?? null)) {
-			form.setFieldValue(`blocks[${index}].parentBlockId`, next.parentBlockId);
-		}
-		if ((next as Block).updatedAt !== formBlock.updatedAt) {
-			form.setFieldValue(`blocks[${index}].updatedAt`, next.updatedAt);
-		}
-	}
-	return survivorIds;
-};
-
-const reconcileBlocks = async (form: ResumeFormApi, nextBlocks: FormBlock[]) => {
-	const nextById = new Map<number, FormBlock>(nextBlocks.map((block) => [block.id, block]));
-	const keepIds = new Set<number>(nextBlocks.map((block) => block.id));
-	await removeMissingBlocks(form, keepIds);
-	const survivorIds = patchSurvivorBlockMetadata(form, nextById);
-	for (const next of nextBlocks) {
-		if (!survivorIds.has(next.id)) {
-			form.pushFieldValue("blocks", next);
-		}
-	}
-};
-
-const blockIdFromFieldName = (name: string, values: ResumeDocumentWrapperForm): number | null => {
-	const match = BLOCK_FIELD_PATH_RE.exec(name);
-	if (!match) {
-		return null;
-	}
-	const block = values.blocks[Number(match[1])];
-	return block?.id ?? null;
-};
+const resumeSearchSchema = z.object({
+	section: z.coerce.number().int().positive().optional().catch(undefined),
+});
 
 export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 	component: RouteComponent,
@@ -132,14 +58,47 @@ export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 				input: { id: params.resumeId },
 			})
 		),
+	validateSearch: resumeSearchSchema,
 });
 
 function RouteComponent() {
 	const params = Route.useParams();
 	const navigate = useNavigate();
+	const search = Route.useSearch();
+	const focusedSectionId = search.section ?? null;
 	const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: params.resumeId } });
 	const { data } = useSuspenseQuery(resumeQuery);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+	const [activeView, setActiveView] = useState<"editor" | "preview">("editor");
+	const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
+	const prefersReducedMotion = useReducedMotion();
+
+	const registerSection = useCallback((id: number, el: HTMLElement | null) => {
+		if (el) {
+			sectionRefs.current.set(id, el);
+		} else {
+			sectionRefs.current.delete(id);
+		}
+	}, []);
+
+	const handleSelectSection = (id: number | null) => {
+		navigate({
+			to: "/dash/resumes/$resumeId",
+			params: { resumeId: params.resumeId },
+			search: id === null ? {} : { section: id },
+			replace: true,
+		});
+	};
+
+	useEffect(() => {
+		if (focusedSectionId === null) {
+			return;
+		}
+		sectionRefs.current.get(focusedSectionId)?.scrollIntoView({
+			behavior: prefersReducedMotion ? "auto" : "smooth",
+			block: "start",
+		});
+	}, [focusedSectionId, prefersReducedMotion]);
 
 	const initialValues = useMemo(() => buildDocumentFormValues(data), [data]);
 
@@ -224,6 +183,27 @@ function RouteComponent() {
 	const rootBlocks = buildBlockTree(form.state.values.blocks);
 	const blockIndexById = new Map(form.state.values.blocks.map((block, index) => [block.id, index] as const));
 
+	const railSections: SectionRailItem[] = rootBlocks.flatMap((block) =>
+		block.blockType === "section"
+			? [{ id: block.id, kind: getSectionKind(block.content), title: block.content.title }]
+			: []
+	);
+
+	useEffect(() => {
+		if (focusedSectionId === null) {
+			return;
+		}
+		const exists = railSections.some((section) => section.id === focusedSectionId);
+		if (!exists) {
+			navigate({
+				to: "/dash/resumes/$resumeId",
+				params: { resumeId: params.resumeId },
+				search: {},
+				replace: true,
+			});
+		}
+	}, [railSections, focusedSectionId, navigate, params.resumeId]);
+
 	const deleteMutation = useMutation(
 		orpc.resumes.delete.mutationOptions({
 			onError: (error) => {
@@ -245,91 +225,123 @@ function RouteComponent() {
 	const saveStatusLabel = SAVE_STATUS_LABELS[autosave.saveStatus];
 
 	return (
-		<section className="relative flex flex-col gap-8">
-			<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 px-8 py-6 backdrop-blur-md md:flex-row md:justify-between">
-				<article className="w-full max-w-xl">
-					<div className="flex items-center gap-3 pl-3">
-						<p className="text-muted-foreground text-sm">
-							<span>{formatDate(data.createdAt, "PP")}</span>
-							{" - "}
-							<span>{formatDate(data.createdAt, "HH:mm")}</span>
-						</p>
+		<section className="relative flex flex-col gap-4">
+			<Tabs
+				className="gap-8"
+				onValueChange={(value) => setActiveView(value as "editor" | "preview")}
+				value={activeView}
+			>
+				<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 px-8 pt-6 pb-3 backdrop-blur-md md:flex-row md:justify-between">
+					<article className="w-full max-w-xl">
+						<div className="flex items-center gap-3 pl-3">
+							<p className="text-muted-foreground text-sm">
+								<span>{formatDate(data.createdAt, "PP")}</span>
+								{" - "}
+								<span>{formatDate(data.createdAt, "HH:mm")}</span>
+							</p>
 
-						{saveStatusLabel && (
-							<span
-								className={
-									autosave.saveStatus === "error" ? "text-destructive text-xs" : "text-muted-foreground text-xs"
-								}
-							>
-								{saveStatusLabel}
-							</span>
-						)}
-					</div>
+							{saveStatusLabel && (
+								<span
+									className={
+										autosave.saveStatus === "error" ? "text-destructive text-xs" : "text-muted-foreground text-xs"
+									}
+								>
+									{saveStatusLabel}
+								</span>
+							)}
+						</div>
 
-					<form.AppField name="title">
-						{(field) => (
-							<InputGroup className="px-0" variant="ghost">
-								<Input
-									className="text-lg!"
-									nativeInput
-									onBlur={field.handleBlur}
-									onChange={(event) => {
-										field.handleChange(event.currentTarget.value);
-									}}
-									value={field.state.value}
-									variant="ghost"
-								/>
-							</InputGroup>
-						)}
-					</form.AppField>
-				</article>
+						<form.AppField name="title">
+							{(field) => (
+								<InputGroup variant="ghost">
+									<Input
+										className="text-lg!"
+										nativeInput
+										onBlur={field.handleBlur}
+										onChange={(event) => {
+											field.handleChange(event.currentTarget.value);
+										}}
+										value={field.state.value}
+										variant="ghost"
+									/>
+								</InputGroup>
+							)}
+						</form.AppField>
 
-				<article className="flex items-center gap-2">
-					<Group>
-						<Button>
-							<SparkleIcon />
-							Casey
-						</Button>
+						<TabsList className="mt-3">
+							<TabsTab value="editor">Editor</TabsTab>
+							<TabsTab value="preview">Preview</TabsTab>
+						</TabsList>
+					</article>
 
-						<NewSectionSheet form={form} />
-
-						<GroupSeparator />
-
-						<DropdownMenu>
-							<Button render={<DropdownMenuTrigger />} size="icon" variant="outline">
-								<ListIcon />
+					<article className="flex items-center gap-2">
+						<Group>
+							<Button className="tabular-nums" variant="outline">
+								<SparkleIcon />
+								Agente
+								<Kbd>K-02</Kbd>
 							</Button>
 
-							<DropdownMenuContent align="start">
-								<DropdownMenuItem>
-									<ExportIcon />
-									Exportar
-								</DropdownMenuItem>
+							<GroupSeparator />
 
-								<DropdownMenuItem>
-									<CopyIcon />
-									Clonar
-								</DropdownMenuItem>
+							<NewSectionSheet form={form} />
 
-								<DropdownMenuSeparator />
+							<GroupSeparator />
 
-								<DropdownMenuItem
-									onClick={(event) => {
-										event.preventDefault();
-										setIsDeleteOpen(true);
-									}}
-									variant="destructive"
-								>
-									<TrashSimpleIcon />
-									Borrar
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</Group>
-				</article>
-			</header>
+							<DropdownMenu>
+								<Button render={<DropdownMenuTrigger />} size="icon" variant="outline">
+									<DotsThreeOutlineIcon weight="fill" />
+								</Button>
 
-			<ResumeDocumentEditor blockIndexById={blockIndexById} form={form} rootBlocks={rootBlocks} />
+								<DropdownMenuContent align="start">
+									<DropdownMenuItem>
+										<ExportIcon />
+										Exportar
+									</DropdownMenuItem>
+
+									<DropdownMenuItem>
+										<CopyIcon />
+										Clonar
+									</DropdownMenuItem>
+
+									<DropdownMenuSeparator />
+
+									<DropdownMenuItem
+										onClick={(event) => {
+											event.preventDefault();
+											setIsDeleteOpen(true);
+										}}
+										variant="destructive"
+									>
+										<TrashSimpleIcon />
+										Borrar
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</Group>
+					</article>
+				</header>
+
+				<TabsPanel className="flex gap-4 px-8" value="editor">
+					<SectionRail activeId={focusedSectionId} onSelect={handleSelectSection} sections={railSections} />
+
+					<ResumeDocumentEditor
+						blockIndexById={blockIndexById}
+						focusedSectionId={focusedSectionId}
+						form={form}
+						registerSection={registerSection}
+						rootBlocks={rootBlocks}
+					/>
+				</TabsPanel>
+
+				<TabsPanel
+					className="flex flex-col items-center justify-center gap-3 py-24 text-muted-foreground"
+					value="preview"
+				>
+					<SparkleIcon className="size-8" />
+					<p className="text-sm">Preview próximamente</p>
+				</TabsPanel>
+			</Tabs>
 
 			<AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
 				<AlertDialogPopup>

@@ -11,7 +11,7 @@ interface TextFieldProps {
 	variant?: "default" | "ghost";
 }
 
-export function TextField({ className, label, placeholder, variant = "ghost" }: TextFieldProps) {
+export function TextField({ className, label, placeholder, variant = "default" }: TextFieldProps) {
 	const field = useFieldContext<string>();
 	const id = useId();
 

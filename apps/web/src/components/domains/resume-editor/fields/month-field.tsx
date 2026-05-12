@@ -58,7 +58,11 @@ export function MonthField({ disabled = false, emptyAsNull = false, label }: Mon
 					render={
 						<Button disabled={disabled} id={id} onBlur={field.handleBlur} type="button" variant="outline">
 							<CalendarBlankIcon />
-							{display ?? <span className="text-muted-foreground">Seleccionar mes</span>}
+							{display ? (
+								<span className="capitalize">{display}</span>
+							) : (
+								<span className="text-muted-foreground">Seleccionar mes</span>
+							)}
 						</Button>
 					}
 				/>

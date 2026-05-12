@@ -1,45 +1,23 @@
-import {
-	BriefcaseIcon,
-	CertificateIcon,
-	CheckCircleIcon,
-	FolderSimpleIcon,
-	GraduationCapIcon,
-	HandHeartIcon,
-	PlusCircleIcon,
-	TextAlignLeftIcon,
-	TranslateIcon,
-	WrenchIcon,
-} from "@phosphor-icons/react";
+import { PlusCircleIcon } from "@phosphor-icons/react";
 import type { CreateBlockApiMutationInput } from "@stackk-career/schemas/api/blocks";
 import { blankResumeSections, SECTION_DEFINITIONS } from "@stackk-career/schemas/api/resumes";
 import { mapParseBlocks } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ComponentType } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ResumeFormApi } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
+import { SECTION_ICONS } from "./section-icons";
 import { useCreateBlock } from "./use-block-mutations";
 
 interface NewSectionSheetProps {
 	form: ResumeFormApi;
 }
-
-type DefinedSectionKind = (typeof SECTION_DEFINITIONS)[number]["kind"];
-
-const SECTION_ICONS: Record<DefinedSectionKind, ComponentType<{ className?: string }>> = {
-	summary: TextAlignLeftIcon,
-	experience: BriefcaseIcon,
-	education: GraduationCapIcon,
-	skills: WrenchIcon,
-	languages: TranslateIcon,
-	certifications: CertificateIcon,
-	projects: FolderSimpleIcon,
-	volunteering: HandHeartIcon,
-};
 
 interface SectionOption {
 	description: string;
@@ -122,8 +100,8 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 										aria-disabled={isDisabled}
 										className={
 											isDisabled
-												? "pointer-events-none text-left opacity-50"
-												: "cursor-pointer text-left hover:bg-accent/50"
+												? "pointer-events-none text-left opacity-60"
+												: "cursor-pointer text-left transition-transform hover:bg-accent/50 active:scale-[0.99]"
 										}
 										data-disabled={isDisabled}
 										disabled={isDisabled || createBlock.isPending}
@@ -141,7 +119,7 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 										</ItemContent>
 										{isDisabled && (
 											<ItemActions>
-												<CheckCircleIcon className="size-5 text-success" weight="fill" />
+												<Badge>Ya agregada</Badge>
 											</ItemActions>
 										)}
 									</button>
