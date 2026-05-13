@@ -68,7 +68,7 @@ export const ResumeRichTextEditor = ({
 		editorProps: {
 			attributes: {
 				class:
-					"min-h-20 whitespace-pre-wrap rounded-lg border p-2 text-base text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
+					"min-h-20 whitespace-pre-wrap rounded-lg border p-2 text-sm text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
 			},
 		},
 		extensions: [
