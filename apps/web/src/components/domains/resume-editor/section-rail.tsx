@@ -1,6 +1,7 @@
-import { SquaresFourIcon } from "@phosphor-icons/react";
+import { AddressBookIcon, SquaresFourIcon } from "@phosphor-icons/react";
 import type { SectionKind } from "@stackk-career/schemas/api/resumes";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { getBlockKey } from "./block-key-registry";
 import { getSectionIcon } from "./section-icons";
 
 export interface SectionRailItem {
@@ -11,12 +12,13 @@ export interface SectionRailItem {
 
 interface SectionRailProps {
 	activeId: number | null;
+	contactId?: number | null;
 	onSelect: (id: number | null) => void;
 	sections: SectionRailItem[];
 }
 
-export const SectionRail = ({ activeId, onSelect, sections }: SectionRailProps) => {
-	if (sections.length === 0) {
+export const SectionRail = ({ activeId, contactId, onSelect, sections }: SectionRailProps) => {
+	if (sections.length === 0 && !contactId) {
 		return null;
 	}
 
@@ -36,12 +38,26 @@ export const SectionRail = ({ activeId, onSelect, sections }: SectionRailProps) 
 					</SidebarMenuButton>
 				</SidebarMenuItem>
 
+				{contactId ? (
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							className={"text-muted-foreground data-[active=true]:text-foreground"}
+							isActive={activeId === contactId}
+							onClick={() => onSelect(activeId === contactId ? null : contactId)}
+							tooltip="Contacto"
+						>
+							<AddressBookIcon />
+							<span>Contacto</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				) : null}
+
 				{sections.map((section) => {
 					const Icon = getSectionIcon(section.kind);
 					const isActive = section.id === activeId;
 
 					return (
-						<SidebarMenuItem key={section.id}>
+						<SidebarMenuItem key={getBlockKey(section.id)}>
 							<SidebarMenuButton
 								className={"text-muted-foreground data-[active=true]:text-foreground"}
 								isActive={isActive}

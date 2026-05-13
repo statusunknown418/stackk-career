@@ -19,6 +19,7 @@ import { Frame, FrameFooter, FrameHeader, FramePanel } from "@/components/ui/fra
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
+import { getBlockKey } from "../block-key-registry";
 import { useCreateBlock, useDeleteBlock } from "../use-block-mutations";
 
 type SectionBlock = Extract<BlockNode, { blockType: "section" }>;
@@ -55,7 +56,7 @@ export const SkillsEditor = withForm({
 
 		const isLanguages = sectionKind === "languages";
 		const proficiencyOptions = isLanguages ? languageProficiencyOptions : skillProficiencyOptions;
-		const addItemLabel = isLanguages ? "Agregar idioma" : "Agregar habilidad";
+		const addItemLabel = isLanguages ? "Agregar idioma" : "Añadir item";
 		const itemLabel = isLanguages ? "Idioma" : "Habilidad";
 
 		const handleAddCategory = () => {
@@ -116,7 +117,7 @@ export const SkillsEditor = withForm({
 							return (
 								<div
 									className="group/item relative grid gap-2 rounded-lg bg-muted/40 px-3 py-2 md:grid-cols-[1fr_160px_auto]"
-									key={item.id}
+									key={getBlockKey(item.id)}
 								>
 									<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 										{(field) => <field.TextField label={itemLabel} />}
@@ -186,7 +187,7 @@ export const SkillsEditor = withForm({
 						};
 
 						return (
-							<Frame className="group/line" key={line.id}>
+							<Frame className="group/line" key={getBlockKey(line.id)}>
 								<FrameHeader className="flex-row items-end gap-2">
 									<div className="grid flex-1 gap-3 md:grid-cols-2">
 										<form.AppField name={`blocks[${lineIndex}].content.category` as const}>
@@ -221,7 +222,7 @@ export const SkillsEditor = withForm({
 											return (
 												<div
 													className="group/item relative grid gap-2 rounded-lg bg-muted/40 px-3 py-2 md:grid-cols-[1fr_160px_auto]"
-													key={item.id}
+													key={getBlockKey(item.id)}
 												>
 													<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 														{(field) => <field.TextField label={itemLabel} />}

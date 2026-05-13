@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import type { ResumeFormApi } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc, queryClient } from "@/utils/orpc";
+import { getBlockKey, migrateBlockKey, releaseBlockKey } from "./block-key-registry";
 
 let nextOptimisticBlockId = -1;
 export const optimisticBlockId = () => nextOptimisticBlockId--;
@@ -72,6 +73,11 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 					previousResume.blocks as ResumeBlock[]
 				);
 
+				// Seed a stable React key for this optimistic id; `onSuccess` migrates it
+				// to the real id so consumers iterating with `getBlockKey(block.id)` never
+				// see the key change across the id swap (would otherwise remount inputs).
+				getBlockKey(optimisticBlock.id);
+
 				queryClient.setQueryData(resumeQuery.queryKey, {
 					...previousResume,
 					activeBlockTypes: previousResume.activeBlockTypes.includes(input.blockType)
@@ -90,6 +96,10 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 				}
 
 				const optimisticId = context.optimisticId;
+
+				// Move the key BEFORE the cache/form id swap so the next render reads the
+				// same uuid under `created.id` that it previously read under the optimistic id.
+				migrateBlockKey(optimisticId, created.id);
 
 				queryClient.setQueryData(resumeQuery.queryKey, (prev) =>
 					prev
@@ -120,6 +130,7 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 					queryClient.setQueryData(resumeQuery.queryKey, context.previousResume);
 				}
 				if (context?.optimisticId) {
+					releaseBlockKey(context.optimisticId);
 					const idx = findBlockIndexById(form.state.values.blocks, context.optimisticId);
 					if (idx !== -1) {
 						await form.removeFieldValue("blocks", idx);
@@ -158,6 +169,21 @@ interface DeleteContext {
 	removedFormIndices: number[];
 }
 
+const collectSubtreeIds = (blocks: { id: number; parentBlockId: number | null }[], rootId: number): Set<number> => {
+	const ids = new Set<number>([rootId]);
+	let changed = true;
+	while (changed) {
+		changed = false;
+		for (const block of blocks) {
+			if (block.parentBlockId !== null && ids.has(block.parentBlockId) && !ids.has(block.id)) {
+				ids.add(block.id);
+				changed = true;
+			}
+		}
+	}
+	return ids;
+};
+
 interface UseDeleteBlockOptions {
 	form: ResumeFormApi;
 }
@@ -176,22 +202,16 @@ export const useDeleteBlock = ({ form }: UseDeleteBlockOptions) => {
 					return { previousResume, removedFormIndices: [] } satisfies DeleteContext;
 				}
 
-				const toRemove = new Set<number>([input.id]);
-				let changed = true;
-				while (changed) {
-					changed = false;
-					for (const block of previousResume.blocks) {
-						if (block.parentBlockId !== null && toRemove.has(block.parentBlockId) && !toRemove.has(block.id)) {
-							toRemove.add(block.id);
-							changed = true;
-						}
-					}
-				}
+				const toRemove = collectSubtreeIds(previousResume.blocks, input.id);
 
 				queryClient.setQueryData(resumeQuery.queryKey, {
 					...previousResume,
 					blocks: previousResume.blocks.filter((block) => !toRemove.has(block.id)),
 				});
+
+				for (const removedId of toRemove) {
+					releaseBlockKey(removedId);
+				}
 
 				const indices: number[] = [];
 				const formBlocks = form.state.values.blocks;

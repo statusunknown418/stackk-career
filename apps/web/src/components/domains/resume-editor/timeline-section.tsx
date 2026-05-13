@@ -36,8 +36,8 @@ export const TimelineSection = ({
 			<div className="flex flex-col gap-6">
 				<header className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 items-center gap-2 pl-2">
-						{Icon && <Icon className="size-4 text-muted-foreground" />}
-						<h2 className="truncate font-medium text-foreground text-sm">{title}</h2>
+						{Icon && <Icon className="size-5 text-muted-foreground" />}
+						<h2 className="truncate font-light text-foreground text-xl">{title}</h2>
 
 						{countLabel && <span className="text-muted-foreground text-xs">· {countLabel}</span>}
 

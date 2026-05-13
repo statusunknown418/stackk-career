@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
+import { getBlockKey } from "../block-key-registry";
 import { getSectionIcon } from "../section-icons";
 import { TimelineSection } from "../timeline-section";
 import { useCreateBlock } from "../use-block-mutations";
@@ -107,7 +108,7 @@ export const SectionEditor = withForm({
 									block={paragraph}
 									blockIndex={idx}
 									form={form}
-									key={paragraph.id}
+									key={getBlockKey(paragraph.id)}
 									placeholder="Escribe contenido de sección"
 									toolbar="prose"
 								/>
@@ -134,7 +135,7 @@ export const SectionEditor = withForm({
 												animate={{ opacity: 1, y: 0 }}
 												exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
 												initial={{ opacity: 0, y: -4 }}
-												key={entry.id}
+												key={getBlockKey(entry.id)}
 												layout="position"
 												transition={entryTransition}
 											>

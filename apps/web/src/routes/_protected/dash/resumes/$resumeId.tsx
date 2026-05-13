@@ -65,11 +65,13 @@ function RouteComponent() {
 	const params = Route.useParams();
 	const navigate = useNavigate();
 	const search = Route.useSearch();
+
 	const focusedSectionId = search.section ?? null;
 	const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: params.resumeId } });
 	const { data } = useSuspenseQuery(resumeQuery);
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [activeView, setActiveView] = useState<"editor" | "preview">("editor");
+
 	const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
 	const prefersReducedMotion = useReducedMotion();
 
@@ -143,6 +145,7 @@ function RouteComponent() {
 		resumeId: params.resumeId,
 		setTitle: (title) => form.setFieldValue("title", title),
 	});
+
 	autosaveRef.current = autosave;
 
 	// Re-hydrate the form when the underlying resume snapshot changes (e.g. after
@@ -188,12 +191,16 @@ function RouteComponent() {
 			? [{ id: block.id, kind: getSectionKind(block.content), title: block.content.title }]
 			: []
 	);
+	const contactBlockId = rootBlocks.find((block) => block.blockType === "contact")?.id ?? null;
 
 	useEffect(() => {
 		if (focusedSectionId === null) {
 			return;
 		}
-		const exists = railSections.some((section) => section.id === focusedSectionId);
+
+		const exists =
+			focusedSectionId === contactBlockId || railSections.some((section) => section.id === focusedSectionId);
+
 		if (!exists) {
 			navigate({
 				to: "/dash/resumes/$resumeId",
@@ -202,7 +209,7 @@ function RouteComponent() {
 				replace: true,
 			});
 		}
-	}, [railSections, focusedSectionId, navigate, params.resumeId]);
+	}, [railSections, contactBlockId, focusedSectionId, navigate, params.resumeId]);
 
 	const deleteMutation = useMutation(
 		orpc.resumes.delete.mutationOptions({
@@ -323,7 +330,12 @@ function RouteComponent() {
 				</header>
 
 				<TabsPanel className="flex gap-4 px-8" value="editor">
-					<SectionRail activeId={focusedSectionId} onSelect={handleSelectSection} sections={railSections} />
+					<SectionRail
+						activeId={focusedSectionId}
+						contactId={contactBlockId}
+						onSelect={handleSelectSection}
+						sections={railSections}
+					/>
 
 					<ResumeDocumentEditor
 						blockIndexById={blockIndexById}
