@@ -63,7 +63,7 @@ export function MonthField({ disabled = false, disableFuture = false, emptyAsNul
 							{display ? (
 								<span className="capitalize">{display}</span>
 							) : (
-								<span className="text-muted-foreground">Seleccionar mes</span>
+								<span className="text-muted-foreground">Fecha</span>
 							)}
 						</Button>
 					}

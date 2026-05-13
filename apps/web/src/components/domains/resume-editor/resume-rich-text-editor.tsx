@@ -143,7 +143,7 @@ export const ResumeRichTextEditor = ({
 			/>
 
 			{placeholder && editor.isEmpty && (
-				<p className="pointer-events-none absolute top-1.5 left-2 text-muted-foreground/70 text-sm">{placeholder}</p>
+				<p className="pointer-events-none absolute top-2.5 left-2.5 text-muted-foreground/70 text-sm">{placeholder}</p>
 			)}
 
 			<AnimatePresence>
