@@ -1,12 +1,12 @@
 import { logger } from "@trigger.dev/sdk";
-import type { LanguageModelUsage } from "ai";
+import type { LanguageModel, LanguageModelUsage } from "ai";
 
 export type UsageEventKind = "chat" | "object" | "embed" | "image" | "tool";
 
 export interface EmitUsageEventInput {
 	kind: UsageEventKind;
 	metadata?: Record<string, unknown>;
-	modelId: string;
+	modelId: LanguageModel;
 	usage: LanguageModelUsage | undefined;
 	userId?: string | null;
 }
@@ -16,7 +16,7 @@ interface AxiomPayload {
 	inputTokens: number;
 	kind: UsageEventKind;
 	metadata?: Record<string, unknown>;
-	model: string;
+	model: LanguageModel;
 	outputTokens: number;
 	provider: string;
 	reasoningTokens: number;
@@ -24,12 +24,12 @@ interface AxiomPayload {
 	userId: string | null;
 }
 
-function splitModel(modelId: string): { provider: string; model: string } {
-	const slash = modelId.indexOf("/");
+function splitModel(modelId: LanguageModel): { provider: string; model: LanguageModel } {
+	const slash = modelId.toString().indexOf("/");
 	if (slash < 0) {
 		return { provider: "unknown", model: modelId };
 	}
-	return { provider: modelId.slice(0, slash), model: modelId.slice(slash + 1) };
+	return { provider: modelId.toString().slice(0, slash), model: modelId.toString().slice(slash + 1) };
 }
 
 function buildPayload({ usage, kind, modelId, userId, metadata }: EmitUsageEventInput): AxiomPayload | null {

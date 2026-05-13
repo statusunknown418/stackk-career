@@ -29,7 +29,7 @@ export const resumeAnalyses = sqliteTable(
 
 		status: t.text({ enum: resumeAnalysisStatusEnum }).notNull().default("pending"),
 
-		model: t.text().$type<string & LanguageModel>(),
+		model: t.text().$type<LanguageModel>(),
 		object: t.blob({ mode: "json" }),
 		error: t.text(),
 

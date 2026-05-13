@@ -4,16 +4,18 @@ import { ListBulletsIcon, ListNumbersIcon, TextBolderIcon, TextItalicIcon } from
 import { EditorContent, type Editor as TiptapEditor, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { AnimatePresence, motion } from "motion/react";
-import { type MouseEvent, type ReactNode, useState } from "react";
+import { type MouseEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, GroupSeparator } from "@/components/ui/group";
 import { cn } from "@/lib/utils";
 
 interface ResumeRichTextEditorProps {
-	initialContent: string;
+	onBlur?: () => void;
 	onChange?: (value: string) => void;
 	placeholder?: string;
 	readOnly?: boolean;
+	toolbar?: "prose" | "short";
+	value: string;
 }
 
 interface ToolbarButtonProps {
@@ -51,20 +53,22 @@ const ToolbarButton = ({
 );
 
 export const ResumeRichTextEditor = ({
-	initialContent,
+	onBlur,
 	onChange,
 	placeholder,
 	readOnly = false,
+	toolbar = "prose",
+	value,
 }: ResumeRichTextEditorProps) => {
 	const [isFocused, setIsFocused] = useState(false);
 
 	const editor = useEditor({
-		content: initialContent,
+		content: value,
 		editable: !readOnly,
 		editorProps: {
 			attributes: {
 				class:
-					"min-h-20 whitespace-pre-wrap rounded-md px-2 py-2 text-base text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
+					"min-h-20 whitespace-pre-wrap rounded-lg border p-2 text-base text-foreground leading-relaxed outline-none transition-colors hover:bg-accent/50",
 			},
 		},
 		extensions: [
@@ -92,12 +96,31 @@ export const ResumeRichTextEditor = ({
 			}),
 		],
 		immediatelyRender: false,
-		onBlur: () => setIsFocused(false),
+		onBlur: () => {
+			setIsFocused(false);
+			onBlur?.();
+		},
 		onFocus: () => setIsFocused(true),
 		onUpdate: ({ editor: currentEditor }) => {
 			onChange?.(currentEditor.getHTML());
 		},
 	});
+
+	// Sync external value changes into the editor without remounting. Skip when
+	// the editor is focused so we never clobber active typing, and skip when the
+	// HTML already matches to avoid setContent loops.
+	useEffect(() => {
+		if (!editor) {
+			return;
+		}
+		if (editor.isFocused) {
+			return;
+		}
+		if (editor.getHTML() === value) {
+			return;
+		}
+		editor.commands.setContent(value, { emitUpdate: false });
+	}, [editor, value]);
 
 	if (!editor) {
 		return (
@@ -119,15 +142,15 @@ export const ResumeRichTextEditor = ({
 				editor={editor}
 			/>
 
-			{placeholder && editor.isEmpty ? (
+			{placeholder && editor.isEmpty && (
 				<p className="pointer-events-none absolute top-1.5 left-2 text-muted-foreground/70 text-sm">{placeholder}</p>
-			) : null}
+			)}
 
 			<AnimatePresence>
 				{showToolbar && (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="absolute top-full left-1/2 z-20 mt-2 -translate-x-1/2"
+						className="absolute top-full left-1/2 z-20 mt-1 -translate-x-1/2"
 						exit={{ opacity: 0, y: -4 }}
 						initial={{ opacity: 0, y: -4 }}
 						transition={{ duration: 0.15, ease: "easeOut" }}
@@ -158,27 +181,31 @@ export const ResumeRichTextEditor = ({
 
 								<GroupSeparator />
 
-								<ToolbarButton
-									ariaLabel="Alternar lista con viñetas"
-									editor={editor}
-									icon={<ListBulletsIcon />}
-									isActive={editor.isActive("bulletList")}
-									onClick={() => {
-										editor.chain().focus().toggleBulletList().run();
-									}}
-								/>
+								{toolbar === "prose" ? (
+									<>
+										<ToolbarButton
+											ariaLabel="Alternar lista con viñetas"
+											editor={editor}
+											icon={<ListBulletsIcon />}
+											isActive={editor.isActive("bulletList")}
+											onClick={() => {
+												editor.chain().focus().toggleBulletList().run();
+											}}
+										/>
 
-								<GroupSeparator />
+										<GroupSeparator />
 
-								<ToolbarButton
-									ariaLabel="Alternar lista numerada"
-									editor={editor}
-									icon={<ListNumbersIcon />}
-									isActive={editor.isActive("orderedList")}
-									onClick={() => {
-										editor.chain().focus().toggleOrderedList().run();
-									}}
-								/>
+										<ToolbarButton
+											ariaLabel="Alternar lista numerada"
+											editor={editor}
+											icon={<ListNumbersIcon />}
+											isActive={editor.isActive("orderedList")}
+											onClick={() => {
+												editor.chain().focus().toggleOrderedList().run();
+											}}
+										/>
+									</>
+								) : null}
 							</ButtonGroup>
 						</div>
 					</motion.div>

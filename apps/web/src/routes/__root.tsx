@@ -1,26 +1,36 @@
+import { pacerDevtoolsPlugin } from "@tanstack/react-pacer-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { createMiddleware } from "@tanstack/react-start";
 import { evlogErrorHandler } from "evlog/nitro/v3";
 import { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 import type { orpc } from "@/utils/orpc";
+
 import appCss from "../index.css?url";
 import "streamdown/styles.css?url";
-import { ThemeProvider } from "@/components/theme-provider";
 
 const Devtools =
 	import.meta.env.DEV &&
 	lazy(async () => {
-		const [{ ReactQueryDevtools }, { TanStackRouterDevtools }] = await Promise.all([
+		const [{ ReactQueryDevtools }, { TanStackRouterDevtools }, { TanStackDevtools }] = await Promise.all([
 			import("@tanstack/react-query-devtools"),
 			import("@tanstack/react-router-devtools"),
+			import("@tanstack/react-devtools"),
 		]);
 
 		return {
 			default: () => (
 				<>
+					<TanStackDevtools
+						config={{ position: "top-right", panelLocation: "top" }}
+						eventBusConfig={{ debug: false }}
+						plugins={[pacerDevtoolsPlugin()]}
+					/>
+
 					<TanStackRouterDevtools position="bottom-left" />
+
 					<ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
 				</>
 			),
@@ -67,7 +77,7 @@ function RootDocument() {
 			</head>
 
 			<body>
-				<ThemeProvider defaultTheme="system" storageKey="theme">
+				<ThemeProvider defaultTheme="light" storageKey="theme">
 					<div className="grid min-h-svh">
 						<Outlet />
 					</div>

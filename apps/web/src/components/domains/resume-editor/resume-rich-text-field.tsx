@@ -11,17 +11,23 @@ const ResumeRichTextEditor = lazy(async () => {
 });
 
 interface ResumeRichTextFieldProps {
-	initialContent: string;
+	editorKey?: string;
+	onBlur?: () => void;
 	onChange?: (value: string) => void;
 	placeholder?: string;
 	readOnly?: boolean;
+	toolbar?: "prose" | "short";
+	value: string;
 }
 
 export const ResumeRichTextField = ({
-	initialContent,
+	editorKey,
+	onBlur,
 	onChange,
 	placeholder,
 	readOnly = false,
+	toolbar = "prose",
+	value,
 }: ResumeRichTextFieldProps) => (
 	<Suspense
 		fallback={
@@ -31,10 +37,13 @@ export const ResumeRichTextField = ({
 		}
 	>
 		<ResumeRichTextEditor
-			initialContent={initialContent}
+			key={editorKey}
+			onBlur={onBlur}
 			onChange={onChange}
 			placeholder={placeholder}
 			readOnly={readOnly}
+			toolbar={toolbar}
+			value={value}
 		/>
 	</Suspense>
 );

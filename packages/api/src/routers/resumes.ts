@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { blankResumeSections } from "@stackk-career/schemas/api/resumes";
+import { blankResumeSections, updateResumeTitleSchema } from "@stackk-career/schemas/api/resumes";
 import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
 import { constructNow, formatDate } from "date-fns";
@@ -249,5 +249,25 @@ export const resumesRouter = {
 		});
 
 		return { deleted, blocks };
+	}),
+
+	updateTitle: protectedProcedure.input(updateResumeTitleSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+
+		const [updatedResume] = await context.db
+			.update(resumes)
+			.set({
+				title: input.title,
+			})
+			.where(and(eq(resumes.id, input.id), eq(resumes.userId, userId)))
+			.returning();
+
+		if (!updatedResume) {
+			throw new ORPCError("NOT_FOUND", {
+				message: "CV no encontrado",
+			});
+		}
+
+		return updatedResume;
 	}),
 };

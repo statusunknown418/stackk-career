@@ -57,6 +57,20 @@
       "when": 1778189701698,
       "tag": "0007_zippy_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1778517175386,
+      "tag": "0008_cooing_blizzard",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1778561367619,
+      "tag": "0009_motionless_kronos",
+      "breakpoints": true
     }
   ]
 }

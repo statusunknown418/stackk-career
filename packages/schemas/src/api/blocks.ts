@@ -14,3 +14,19 @@ export const createBlockApiMutationSchema = insertResumeBlocksSchema
 	.and(blockPayloadSchema);
 
 export type CreateBlockApiMutationInput = z.infer<typeof createBlockApiMutationSchema>;
+
+export const updateBlockApiMutationSchema = z
+	.object({
+		id: z.number().int(),
+		resumeId: z.string(),
+	})
+	.and(blockPayloadSchema);
+
+export type UpdateBlockApiMutationInput = z.infer<typeof updateBlockApiMutationSchema>;
+
+export const deleteBlockApiMutationSchema = z.object({
+	id: z.number().int(),
+	resumeId: z.string(),
+});
+
+export type DeleteBlockApiMutationInput = z.infer<typeof deleteBlockApiMutationSchema>;
