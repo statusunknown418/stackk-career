@@ -53,10 +53,19 @@ export function Pricing() {
 
 			<SingleSessionCard />
 
-			<p className="mx-auto mt-12 max-w-[640px] text-balance text-center text-[14.5px] text-foreground/65 leading-[1.65]">
-				<span className="font-display-italic font-medium text-foreground/85">¿Encontraste trabajo?</span> No te
-				preocupes, cancela cuando quieras. Siempre estaremos aquí cuando quieras volver a desarrollar tu carrera.
-			</p>
+			<div className="mx-auto mt-16 max-w-[820px] border-foreground/8 border-t pt-14 text-center">
+				<span
+					aria-hidden="true"
+					className="inline-block size-1.5 rounded-full bg-marigold shadow-[0_0_12px_oklch(from_var(--marigold)_l_c_h/0.6)]"
+				/>
+				<p className="mt-5 font-display-italic font-light text-[clamp(1.75rem,3.6vw,2.6rem)] text-foreground leading-[1.12] tracking-[-0.025em]">
+					¿Encontraste trabajo?
+				</p>
+				<p className="mx-auto mt-5 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]">
+					No te preocupes, cancela cuando quieras. <span className="text-foreground/90">Siempre estaremos aquí</span>{" "}
+					cuando quieras volver a desarrollar tu carrera.
+				</p>
+			</div>
 		</section>
 	);
 }
