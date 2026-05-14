@@ -32,6 +32,8 @@ export const env = createEnv({
 
 		AXIOM_API_TOKEN: z.string().nonempty(),
 		AXIOM_DATASET: z.string().nonempty(),
+
+		CAL_WEBHOOK_SECRET: z.string().min(1),
 	},
 	runtimeEnv: process.env,
 	skipValidation,

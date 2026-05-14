@@ -1,12 +1,20 @@
-import { Suspense, useState } from "react";
+import type { coachingBookingChangedTask } from "@stackk-career/jobs/trigger/tasks/coaching-booking-changed";
+import type { CoachingBookingSummary, CoachingStage } from "@stackk-career/schemas/api/coaching";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRealtimeRunsWithTag } from "@trigger.dev/react-hooks";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Loader from "@/components/loader";
 import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Stepper, StepperIndicator, StepperItem, StepperTitle, StepperTrigger } from "@/components/ui/stepper";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/utils/orpc";
 import { Booker } from "./booker";
+import { ScheduledEventCard } from "./scheduled-event-card";
 
 interface StepDef {
 	body: string;
 	calLink: string;
+	stage: CoachingStage;
 	step: number;
 	title: string;
 }
@@ -17,30 +25,83 @@ const steps: readonly StepDef[] = [
 		title: "Coaching general",
 		body: "Sesiones base con tu mentor. Define objetivos y prioridades.",
 		calLink: "impulsa-coaching-fp",
+		stage: "general-coaching",
 	},
 	{
 		step: 2,
 		title: "Prep pre-entrevista",
 		body: "Estrategia, materiales y revisión de CV.",
 		calLink: "impulsa-coaching-pi",
+		stage: "pre-interview-training",
 	},
 	{
 		step: 3,
 		title: "Mock interview",
 		body: "Simulacro en vivo con feedback inmediato.",
 		calLink: "impulsa-coaching-mock",
+		stage: "mock-interview",
 	},
 	{
 		step: 4,
 		title: "Follow up",
 		body: "Retro, ajustes y próximos pasos.",
 		calLink: "impulsa-coaching-follow",
+		stage: "follow-up",
 	},
 ];
+
+function pickStageBooking(
+	bookings: readonly CoachingBookingSummary[] | undefined,
+	stage: CoachingStage
+): CoachingBookingSummary | null {
+	if (!bookings) {
+		return null;
+	}
+	const nowMs = Date.now();
+	const candidates = bookings.filter(
+		(b) => b.stage === stage && b.bookingStatus !== "cancelled" && b.startsAt && b.startsAt.getTime() >= nowMs
+	);
+	candidates.sort((a, b) => (a.startsAt?.getTime() ?? 0) - (b.startsAt?.getTime() ?? 0));
+	return candidates[0] ?? null;
+}
 
 export function CoachingTimeline() {
 	const [active, setActive] = useState(2);
 	const current = steps.find((s) => s.step === active);
+
+	const { data: session } = authClient.useSession();
+	const userId = session?.user?.id;
+	const queryClient = useQueryClient();
+
+	const { data: dashboard } = useQuery(
+		orpc.coaching.dashboard.queryOptions({
+			enabled: !!userId,
+		})
+	);
+
+	const { data: realtime } = useQuery({
+		...orpc.coaching.realtimeToken.queryOptions(),
+		enabled: Boolean(userId),
+		refetchInterval: 25 * 60 * 1000,
+		staleTime: 25 * 60 * 1000,
+	});
+
+	const tag = userId ? `user:${userId}` : "user:pending";
+	const { runs } = useRealtimeRunsWithTag<typeof coachingBookingChangedTask>(tag, {
+		accessToken: realtime?.token,
+		enabled: Boolean(userId && realtime?.token),
+	});
+
+	const lastRunCountRef = useRef(0);
+
+	useEffect(() => {
+		if (runs.length > lastRunCountRef.current) {
+			queryClient.invalidateQueries({ queryKey: orpc.coaching.dashboard.queryOptions().queryKey });
+		}
+		lastRunCountRef.current = runs.length;
+	}, [runs.length, queryClient, orpc.coaching.dashboard.queryOptions().queryKey]);
+
+	const stageBooking = current ? pickStageBooking(dashboard?.bookings, current.stage) : null;
 
 	return (
 		<div className="w-full space-y-8">
@@ -62,17 +123,29 @@ export function CoachingTimeline() {
 				))}
 			</Stepper>
 
-			<Frame>
-				<FrameHeader>
-					<FrameDescription>{current?.body}</FrameDescription>
-				</FrameHeader>
+			{stageBooking ? (
+				<ScheduledEventCard booking={stageBooking} />
+			) : (
+				<Frame>
+					<FrameHeader>
+						<FrameDescription>{current?.body}</FrameDescription>
+					</FrameHeader>
 
-				<FramePanel>
-					<Suspense fallback={<Loader />}>
-						{current?.calLink && <Booker eventSlug={current?.calLink} key={current.calLink} />}
-					</Suspense>
-				</FramePanel>
-			</Frame>
+					<FramePanel className="min-h-max">
+						<Suspense fallback={<Loader />}>
+							{current?.calLink && userId && session?.user && (
+								<Booker
+									email={session.user.email}
+									eventSlug={current.calLink}
+									key={current.calLink}
+									name={session.user.name ?? ""}
+									userId={userId}
+								/>
+							)}
+						</Suspense>
+					</FramePanel>
+				</Frame>
+			)}
 		</div>
 	);
 }

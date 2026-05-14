@@ -39,6 +39,13 @@ export const coachingDashboardSchema = z.object({
 	}),
 });
 
+export const coachingRealtimeTokenSchema = z.object({
+	expiresAtMs: z.number().int().positive(),
+	token: z.string().min(1),
+});
+
+export type CoachingRealtimeToken = z.infer<typeof coachingRealtimeTokenSchema>;
+
 export const captureCoachingBookingInputSchema = insertCoachingSessionSchema
 	.pick({
 		bookingStatus: true,

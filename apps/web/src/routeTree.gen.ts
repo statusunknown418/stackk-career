@@ -22,6 +22,7 @@ import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
+import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -89,6 +90,11 @@ const ProtectedDashResumesIndexRoute =
     path: '/resumes/',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
+const ApiWebhooksCalSplatRoute = ApiWebhooksCalSplatRouteImport.update({
+  id: '/api/webhooks/cal/$',
+  path: '/api/webhooks/cal/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedDashResumesResumeIdRoute =
   ProtectedDashResumesResumeIdRouteImport.update({
     id: '/resumes/$resumeId',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash/': typeof ProtectedDashIndexRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
+  '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
   '/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash': typeof ProtectedDashIndexRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
+  '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
   '/dash/resumes': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesById {
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
   '/_protected/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
+  '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
   '/_protected/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRouteTypes {
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/dash/'
     | '/dash/resumes/$resumeId'
+    | '/api/webhooks/cal/$'
     | '/dash/resumes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/dash'
     | '/dash/resumes/$resumeId'
+    | '/api/webhooks/cal/$'
     | '/dash/resumes'
   id:
     | '__root__'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/_protected/dash/'
     | '/_protected/dash/resumes/$resumeId'
+    | '/api/webhooks/cal/$'
     | '/_protected/dash/resumes/'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
+  ApiWebhooksCalSplatRoute: typeof ApiWebhooksCalSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashResumesIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/api/webhooks/cal/$': {
+      id: '/api/webhooks/cal/$'
+      path: '/api/webhooks/cal/$'
+      fullPath: '/api/webhooks/cal/$'
+      preLoaderRoute: typeof ApiWebhooksCalSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected/dash/resumes/$resumeId': {
       id: '/_protected/dash/resumes/$resumeId'
       path: '/resumes/$resumeId'
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
+  ApiWebhooksCalSplatRoute: ApiWebhooksCalSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

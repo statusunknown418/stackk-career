@@ -1,7 +1,14 @@
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
 
-export function Booker({ eventSlug }: { eventSlug: string }) {
+interface BookerProps {
+	email: string;
+	eventSlug: string;
+	name: string;
+	userId: string;
+}
+
+export function Booker({ email, eventSlug, name, userId }: BookerProps) {
 	const getCalConfig = async () => {
 		const cal = await getCalApi({ namespace: eventSlug });
 		cal("ui", { hideEventTypeDetails: true, layout: "column_view", theme: "light" });
@@ -14,9 +21,17 @@ export function Booker({ eventSlug }: { eventSlug: string }) {
 	return (
 		<Cal
 			calLink={`statusunknown/${eventSlug}`}
-			config={{ layout: "column_view", useSlotsViewOnSmallScreen: "true", theme: "light" }}
+			className="min-h-125"
+			config={{
+				email,
+				layout: "column_view",
+				metadata: { userId },
+				name,
+				theme: "light",
+				useSlotsViewOnSmallScreen: "true",
+			}}
 			namespace={eventSlug}
-			style={{ width: "100%", height: "100%", overflow: "scroll" }}
+			style={{ width: "100%", minHeight: "200%", overflow: "visible" }}
 		/>
 	);
 }

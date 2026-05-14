@@ -3,7 +3,13 @@ import { relations } from "drizzle-orm";
 import { index, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth";
 
-export const coachingStageEnum = ["cv-analysis", "pre-interview-training", "general-coaching", "follow-up"] as const;
+export const coachingStageEnum = [
+	"cv-analysis",
+	"pre-interview-training",
+	"general-coaching",
+	"mock-interview",
+	"follow-up",
+] as const;
 
 export type CoachingStage = (typeof coachingStageEnum)[number];
 
