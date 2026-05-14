@@ -30,16 +30,16 @@ function featureDotColor(feature: string, featured: boolean): string {
 
 export function Pricing() {
 	return (
-		<section className="px-6 py-32" id="planes">
+		<section className="px-6 py-24" id="planes">
 			<Reveal>
-				<header className="mx-auto mb-20 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/55 uppercase tracking-[0.18em]">
+				<header className="mx-auto mb-14 max-w-[1200px]">
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
 						— Precios en soles
 					</span>
-					<h2 className="mt-4 max-w-[900px] font-bold font-display text-[clamp(2.4rem,5.6vw,4.5rem)] text-foreground leading-[0.98] tracking-[-0.04em]">
+					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Plan mensual o sesión única. Cancela cuando quieras.</WordReveal>
 					</h2>
-					<p className="mt-6 max-w-[620px] text-[1.05rem] text-foreground/65 leading-[1.55]">
+					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
 						Score CV gratis para siempre. Pro desde S/79. Premium si quieres acompañamiento hasta firmar.
 					</p>
 				</header>
@@ -54,6 +54,11 @@ export function Pricing() {
 			</div>
 
 			<SingleSessionCard />
+
+			<p className="mx-auto mt-12 max-w-[640px] text-balance text-center text-[14.5px] text-foreground/65 leading-[1.65]">
+				<span className="font-display-italic font-medium text-foreground/85">¿Encontraste trabajo?</span> No te
+				preocupes — cancela cuando quieras. Siempre estaremos aquí cuando quieras volver a desarrollar tu carrera.
+			</p>
 		</section>
 	);
 }
@@ -84,15 +89,15 @@ function PriceCard({ plan }: { plan: Plan }) {
 			</p>
 
 			<div className="mt-8 flex items-baseline gap-1.5">
-				<span className={cn("font-medium text-base", featured ? "text-background/70" : "text-foreground/55")}>S/</span>
+				<span className={cn("font-medium text-base", featured ? "text-background/80" : "text-foreground/70")}>S/</span>
 				<span className="font-bold font-display text-[3.4rem] tabular-nums leading-[0.85] tracking-[-0.04em]">
 					{plan.priceSoles}
 				</span>
-				<span className={cn("ml-1 text-sm", featured ? "text-background/60" : "text-foreground/50")}>
+				<span className={cn("ml-1 text-sm", featured ? "text-background/60" : "text-foreground/70")}>
 					{isFree ? "" : "/ mes"}
 				</span>
 			</div>
-			<p className={cn("mt-2 text-[13px]", featured ? "text-background/55" : "text-foreground/50")}>
+			<p className={cn("mt-2 text-[13px]", featured ? "text-background/55" : "text-foreground/70")}>
 				{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}
 			</p>
 
@@ -110,7 +115,7 @@ function PriceCard({ plan }: { plan: Plan }) {
 						<summary
 							className={cn(
 								"flex cursor-pointer list-none items-center gap-1.5 font-medium text-[12.5px] transition-colors",
-								featured ? "text-background/60 hover:text-background/90" : "text-foreground/55 hover:text-foreground"
+								featured ? "text-background/60 hover:text-background/90" : "text-foreground/70 hover:text-foreground"
 							)}
 						>
 							<CaretDownIcon
@@ -174,12 +179,12 @@ function SingleSessionCard() {
 				<div className="flex items-center justify-between gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
 					<div>
 						<p className="flex items-baseline gap-1.5">
-							<span className="font-medium text-base text-foreground/55">S/</span>
+							<span className="font-medium text-base text-foreground/70">S/</span>
 							<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
 								{SINGLE_SESSION.priceSoles}
 							</span>
 						</p>
-						<p className="mt-1 text-foreground/55 text-xs">
+						<p className="mt-1 text-foreground/70 text-xs">
 							≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
 						</p>
 					</div>

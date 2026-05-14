@@ -7,24 +7,40 @@ import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
 import { cn } from "@/lib/utils";
-import { HERO_CHART } from "./data";
+import { HERO_CHART, WHY_REASONS, type WhyReason } from "./data";
 
 export function BentoGrid() {
 	return (
-		<section className="px-6 py-32" id="features">
+		<section className="px-6 py-24" id="features">
 			<Reveal>
-				<header className="mx-auto mb-20 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/55 uppercase tracking-[0.18em]">— Producto</span>
-					<h2 className="mt-4 max-w-[900px] font-bold font-display text-[clamp(2.4rem,5.6vw,4.5rem)] text-foreground leading-[0.98] tracking-[-0.04em]">
-						<WordReveal>Seis herramientas. Una sola suscripción.</WordReveal>
+				<header className="mx-auto mb-12 max-w-[1200px]">
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
+						— Por qué + Producto
+					</span>
+					<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
+						<WordReveal>Todo lo que LATAM no tenía. En un solo plan.</WordReveal>
 					</h2>
-					<p className="mt-6 max-w-[620px] text-[1.05rem] text-foreground/65 leading-[1.55]">
-						Score CV, rewrite con IA, cartas, LinkedIn y outreach — más coaching humano — en un solo plan, en español.
+					<p className="mt-5 max-w-[620px] text-[1rem] text-foreground/65 leading-[1.55]">
+						4 razones para elegirnos. 6 herramientas en una suscripción. 100% español, hecho para LATAM.
 					</p>
 				</header>
 			</Reveal>
 
-			<div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-3 [grid-auto-rows:minmax(200px,auto)] md:grid-cols-6">
+			<div className="mx-auto mb-12 grid max-w-[1200px] grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+				{WHY_REASONS.map((reason, idx) => (
+					<Reveal delay={idx * 0.06} key={reason.number}>
+						<ReasonCompactCard reason={reason} />
+					</Reveal>
+				))}
+			</div>
+
+			<div className="mx-auto mb-6 max-w-[1200px]">
+				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.2em]">
+					— Las 6 herramientas
+				</span>
+			</div>
+
+			<div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-3 [grid-auto-rows:minmax(180px,auto)] md:grid-cols-6">
 				<BentoCellHero />
 				<BentoCellPlain
 					body="Sube tu CV o constrúyelo desde cero. La IA convierte tareas en logros con métricas. Score inmediato al terminar."
@@ -44,6 +60,33 @@ export function BentoGrid() {
 				<BentoCellCoaching />
 			</div>
 		</section>
+	);
+}
+
+function ReasonCompactCard({ reason }: { reason: WhyReason }) {
+	return (
+		<article className="group flex h-full flex-col gap-3.5 rounded-2xl border border-foreground/8 bg-card/50 p-5 transition-colors duration-300 hover:border-foreground/18 hover:bg-card/85">
+			<header className="flex items-baseline justify-between">
+				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.18em]">
+					— Razón {reason.number}
+				</span>
+				<span className="font-display-italic font-light text-[28px] text-foreground/15 leading-none">
+					{reason.number}
+				</span>
+			</header>
+			<h3 className="font-display font-semibold text-[1.05rem] text-foreground leading-[1.2] tracking-[-0.02em]">
+				{reason.title} <span className="font-display-italic font-light text-oxblood">{reason.emphasis}</span>
+			</h3>
+			<p className="flex-1 text-[13px] text-foreground/65 leading-[1.55]">{reason.body}</p>
+			<footer className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-foreground/8 border-t pt-3">
+				<span className="font-mono text-[9px] text-foreground/70 uppercase tracking-[0.14em]">
+					{reason.receipt.label}
+				</span>
+				<span className="font-display font-medium text-[11px] text-foreground tracking-tight">
+					{reason.receipt.value}
+				</span>
+			</footer>
+		</article>
 	);
 }
 
@@ -162,7 +205,7 @@ function BentoCellCoaching() {
 					<div className="rounded-xl border border-foreground/10 bg-background/40 p-5">
 						<div className="flex items-center justify-between border-foreground/10 border-b pb-3">
 							<span className="text-foreground/60 text-sm">Otros servicios</span>
-							<span className="text-foreground/40 line-through">US$699+</span>
+							<span className="text-foreground/60 line-through">US$699+</span>
 						</div>
 						<div className="flex items-center justify-between pt-3">
 							<span className="text-foreground/60 text-sm">IMPULSA Pro</span>

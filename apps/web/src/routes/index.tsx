@@ -10,7 +10,7 @@ import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
 import { StatsAccumulation } from "@/components/landing/stats-accumulation";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
-import { WhyImpulsa } from "@/components/landing/why-impulsa";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 const SITE_URL = "https://impulsa.com";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
@@ -132,12 +132,17 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
 	return (
-		<div className="relative">
+		<div className="relative isolate">
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[100vh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]"
+			>
+				<AuroraBackground />
+			</div>
 			<LandingNav />
-			<main>
+			<main className="-mt-16">
 				<Hero />
 				<StatsAccumulation />
-				<WhyImpulsa />
 				<BentoGrid />
 				<HowItWorks />
 				<TestimonialsCarousel />

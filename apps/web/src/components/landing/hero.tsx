@@ -1,5 +1,4 @@
 import { ArrowRightIcon, CalendarCheckIcon, CheckIcon, SparkleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 import { LogoMarqueeRows } from "@/components/ui/logo-marquee-rows";
 import { PixelGridShader } from "@/components/ui/pixelgrid-shader";
 
@@ -11,22 +10,21 @@ export function Hero() {
 	return (
 		<>
 			<section className="relative flex min-h-[88vh] items-center overflow-hidden px-6 pt-28 pb-16" id="top">
-				<AuroraBackground />
-				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.11]">
-					<PixelGridShader amplitude={0.2} colorFg="#3a0a5e" frequency={0.7} pxSize={5} shape="noise" speed={0.06} />
+				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.09]">
+					<PixelGridShader amplitude={0.2} colorFg="#3a0a5e" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
 				</div>
-				<div className="absolute inset-0 opacity-[0.18]">
+				<div className="absolute inset-0 opacity-[0.14]">
 					<PixelGridShader
 						amplitude={0.3}
 						colorFg="#3a0a5e"
 						cursorMode="ripple"
 						cursorScale={0.4}
 						cursorSize={0.35}
-						frequency={1.4}
-						pxSize={4}
-						rings={5}
+						frequency={1.2}
+						pxSize={10}
+						rings={3}
 						shape="ripple"
-						speed={0.25}
+						speed={0.18}
 					/>
 				</div>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
@@ -76,12 +74,12 @@ export function Hero() {
 									<span className="block font-display font-semibold text-[15px] text-foreground tracking-tight">
 										Arrastra tu CV o haz clic
 									</span>
-									<span className="block font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em]">
+									<span className="block font-mono text-[10px] text-foreground/70 uppercase tracking-[0.12em]">
 										PDF · Score en 30s · Gratis
 									</span>
 								</span>
 								<ArrowRightIcon
-									className="relative shrink-0 text-foreground/40 transition-all duration-300 group-hover/drop:translate-x-1 group-hover/drop:text-oxblood"
+									className="relative shrink-0 text-foreground/70 transition-all duration-300 group-hover/drop:translate-x-1 group-hover/drop:text-oxblood"
 									size={18}
 									weight="bold"
 								/>
@@ -104,10 +102,10 @@ export function Hero() {
 				<div className="absolute top-0 left-1/2 h-px w-[60%] -translate-x-1/2 bg-gradient-to-r from-transparent via-oxblood/30 to-transparent" />
 				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-7">
 					<div className="flex flex-col items-center gap-2 text-center">
-						<span className="font-mono text-[10px] text-foreground/50 uppercase tracking-[0.22em]">— Trabajan en</span>
+						<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.22em]">— Trabajan en</span>
 					</div>
 					<LogoMarqueeRows />
-					<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/40 uppercase tracking-[0.18em]">
+					<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/70 uppercase tracking-[0.18em]">
 						<span aria-hidden="true" className="size-1 rounded-full bg-oxblood/60" />
 						<span>Empresas verificadas vía LinkedIn de cada talento</span>
 					</div>
@@ -178,7 +176,7 @@ function ScoreCard() {
 				</span>
 				<div className="flex-1">
 					<p className="font-display font-medium text-foreground text-sm leading-tight">CV pasó el ATS</p>
-					<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em]">Score 94 / 100</p>
+					<p className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.12em]">Score 94 / 100</p>
 				</div>
 			</div>
 			<div className="h-1.5 overflow-hidden rounded-full bg-foreground/8">

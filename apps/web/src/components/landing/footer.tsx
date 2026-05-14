@@ -42,9 +42,9 @@ export function LandingFooter() {
 
 					{FOOTER_COLUMNS.map((col) => (
 						<div key={col.heading}>
-							<h5 className="mb-5 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.18em]">
+							<h2 className="mb-5 font-mono text-[10px] text-foreground/75 uppercase tracking-[0.18em]">
 								— {col.heading}
-							</h5>
+							</h2>
 							<ul className="flex flex-col gap-2.5">
 								{col.links.map((link) => (
 									<li key={link.label}>
@@ -63,13 +63,13 @@ export function LandingFooter() {
 
 				<div className="mt-14 flex flex-col-reverse items-start justify-between gap-6 border-foreground/10 border-t pt-7 md:flex-row md:items-center">
 					<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-						<p className="text-foreground/55 text-xs">© 2026 IMPULSA · Lima · Bogotá · CDMX</p>
+						<p className="text-foreground/70 text-xs">© 2026 IMPULSA · Lima · Bogotá · CDMX</p>
 						<span aria-hidden="true" className="size-1 rounded-full bg-foreground/20" />
 						<ul className="flex flex-wrap items-center gap-x-4">
 							{LEGAL_LINKS.map((link) => (
 								<li key={link.href}>
 									<a
-										className="text-[12px] text-foreground/55 transition-colors hover:text-foreground/90"
+										className="text-[12px] text-foreground/75 transition-colors hover:text-foreground"
 										href={link.href}
 									>
 										{link.label}
@@ -78,7 +78,7 @@ export function LandingFooter() {
 							))}
 						</ul>
 						<span aria-hidden="true" className="size-1 rounded-full bg-foreground/20" />
-						<span className="flex items-center gap-1.5 font-mono text-[11px] text-foreground/45 uppercase tracking-[0.12em]">
+						<span className="flex items-center gap-1.5 font-mono text-[11px] text-foreground/70 uppercase tracking-[0.12em]">
 							<ShieldCheckIcon size={12} weight="bold" />
 							Datos protegidos · Ley 29733 PE
 						</span>

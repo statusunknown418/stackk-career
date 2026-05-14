@@ -65,7 +65,7 @@ export function StatsAccumulation() {
 				<div className="relative z-10 mx-auto w-full max-w-[900px] text-center">
 					<motion.p
 						animate={{ opacity: 1, y: 0 }}
-						className="mb-6 font-mono text-[11px] text-foreground/55 uppercase tracking-[0.22em]"
+						className="mb-6 font-mono text-[11px] text-foreground/70 uppercase tracking-[0.22em]"
 						initial={{ opacity: 0, y: 10 }}
 						transition={{ duration: 0.5 }}
 						viewport={{ once: false, margin: "-30% 0px" }}
@@ -131,20 +131,26 @@ function StatLineItem({
 	);
 }
 
-function FloatingLogos({ progress }: { progress: MotionValue<number> }) {
-	const parallax = useTransform(progress, [0, 1], [0, -120]);
+const MAX_LOGO_DELAY = 5.4;
+const PARALLAX_SPEED_MIN = 0.45;
+const PARALLAX_SPEED_RANGE = 1.1;
+const PARALLAX_ENTER_Y = 70;
+const PARALLAX_EXIT_Y = -160;
 
+function FloatingLogos({ progress }: { progress: MotionValue<number> }) {
 	return (
-		<motion.div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ y: parallax }}>
+		<div aria-hidden="true" className="pointer-events-none absolute inset-0">
 			{FLOATING_LOGOS.map((logo) => (
 				<FloatingLogoChip key={logo.name} logo={logo} progress={progress} />
 			))}
-		</motion.div>
+		</div>
 	);
 }
 
 function FloatingLogoChip({ logo, progress }: { logo: FloatingLogo; progress: MotionValue<number> }) {
-	const opacity = useTransform(progress, [0, 0.05, 0.85, 1], [0, 1, 1, 0.3]);
+	const speedFactor = PARALLAX_SPEED_MIN + (logo.delay / MAX_LOGO_DELAY) * PARALLAX_SPEED_RANGE;
+	const y = useTransform(progress, [0, 1], [PARALLAX_ENTER_Y * speedFactor, PARALLAX_EXIT_Y * speedFactor]);
+	const opacity = useTransform(progress, [0, 0.18, 0.78, 1], [0, 1, 1, 0.1]);
 
 	const positionStyle: React.CSSProperties = { top: logo.top };
 	if (logo.left) {
@@ -153,12 +159,11 @@ function FloatingLogoChip({ logo, progress }: { logo: FloatingLogo; progress: Mo
 	if (logo.right) {
 		positionStyle.right = logo.right;
 	}
-	positionStyle.transform = `rotate(${logo.rotate}deg)`;
 
 	return (
 		<motion.span
 			className={`absolute select-none font-display text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/15 ${logo.style}`}
-			style={{ ...positionStyle, opacity }}
+			style={{ ...positionStyle, y, rotate: logo.rotate, opacity }}
 		>
 			{logo.name}
 		</motion.span>
