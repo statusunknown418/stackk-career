@@ -1,4 +1,11 @@
-import { CopyIcon, DotsThreeOutlineIcon, ExportIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import {
+	CopyIcon,
+	DotsThreeOutlineIcon,
+	ExportIcon,
+	PencilIcon,
+	SparkleIcon,
+	TrashSimpleIcon,
+} from "@phosphor-icons/react";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
@@ -26,7 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import { Input } from "@/components/ui/input";
-import { InputGroup } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
 import {
 	DropdownMenu,
@@ -35,7 +42,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import {
 	blockIdFromFieldName,
 	buildDocumentFormValues,
@@ -69,10 +75,10 @@ function RouteComponent() {
 	const focusedSectionId = search.section ?? null;
 	const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: params.resumeId } });
 	const { data } = useSuspenseQuery(resumeQuery);
-	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-	const [activeView, setActiveView] = useState<"editor" | "preview">("editor");
 
+	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
+
 	const prefersReducedMotion = useReducedMotion();
 
 	const registerSection = useCallback((id: number, el: HTMLElement | null) => {
@@ -233,110 +239,108 @@ function RouteComponent() {
 
 	return (
 		<section className="relative flex flex-col gap-4">
-			<Tabs
-				className="gap-8"
-				onValueChange={(value) => setActiveView(value as "editor" | "preview")}
-				value={activeView}
-			>
-				<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 px-8 pt-6 pb-3 backdrop-blur-md md:flex-row md:justify-between">
-					<article className="w-full max-w-xl">
-						<div className="flex items-center gap-3 pl-3">
-							<p className="text-muted-foreground text-sm">
-								<span>{formatDate(data.createdAt, "PP")}</span>
-								{" - "}
-								<span>{formatDate(data.createdAt, "HH:mm")}</span>
-							</p>
+			<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+				<article className="w-full max-w-xl">
+					<div className="flex items-center gap-3 pl-3">
+						<p className="text-muted-foreground text-sm">
+							<span>{formatDate(data.createdAt, "PP")}</span>
+							{" - "}
+							<span>{formatDate(data.createdAt, "HH:mm")}</span>
+						</p>
 
-							{saveStatusLabel && (
-								<span
-									className={
-										autosave.saveStatus === "error" ? "text-destructive text-xs" : "text-muted-foreground text-xs"
-									}
-								>
-									{saveStatusLabel}
-								</span>
-							)}
-						</div>
+						{saveStatusLabel && (
+							<span
+								className={
+									autosave.saveStatus === "error" ? "text-destructive text-xs" : "text-muted-foreground text-xs"
+								}
+							>
+								{saveStatusLabel}
+							</span>
+						)}
+					</div>
 
-						<form.AppField name="title">
-							{(field) => (
-								<InputGroup variant="ghost">
-									<Input
-										className="text-lg!"
-										nativeInput
-										onBlur={field.handleBlur}
-										onChange={(event) => {
-											field.handleChange(event.currentTarget.value);
-										}}
-										value={field.state.value}
-										variant="ghost"
-									/>
-								</InputGroup>
-							)}
-						</form.AppField>
+					<form.AppField name="title">
+						{(field) => (
+							<InputGroup className="max-w-xs" variant="ghost">
+								<Input
+									className="text-lg!"
+									nativeInput
+									onBlur={field.handleBlur}
+									onChange={(event) => {
+										field.handleChange(event.currentTarget.value);
+									}}
+									size="lg"
+									value={field.state.value}
+									variant="ghost"
+								/>
 
-						<TabsList className="mt-3">
-							<TabsTab value="editor">Editor</TabsTab>
-							<TabsTab value="preview">Preview</TabsTab>
-						</TabsList>
-					</article>
+								<InputGroupAddon align="inline-end">
+									<PencilIcon />
+								</InputGroupAddon>
+							</InputGroup>
+						)}
+					</form.AppField>
+				</article>
 
-					<article className="flex items-center gap-2">
-						<Group>
-							<Button className="tabular-nums" variant="outline">
-								<SparkleIcon />
-								Agente
-								<Kbd>K-02</Kbd>
+				<article className="flex items-center gap-2">
+					<Group>
+						<Button className="tabular-nums" variant="outline">
+							<SparkleIcon />
+							Agente
+							<Kbd>K-02</Kbd>
+						</Button>
+
+						<GroupSeparator />
+
+						<NewSectionSheet form={form} />
+
+						<GroupSeparator />
+
+						<DropdownMenu>
+							<Button render={<DropdownMenuTrigger />} size="icon" variant="outline">
+								<DotsThreeOutlineIcon weight="fill" />
 							</Button>
 
-							<GroupSeparator />
+							<DropdownMenuContent align="start">
+								<DropdownMenuItem>
+									<ExportIcon />
+									Exportar
+								</DropdownMenuItem>
 
-							<NewSectionSheet form={form} />
+								<DropdownMenuItem>
+									<CopyIcon />
+									Clonar
+								</DropdownMenuItem>
 
-							<GroupSeparator />
+								<DropdownMenuSeparator />
 
-							<DropdownMenu>
-								<Button render={<DropdownMenuTrigger />} size="icon" variant="outline">
-									<DotsThreeOutlineIcon weight="fill" />
-								</Button>
+								<DropdownMenuItem
+									onClick={(event) => {
+										event.preventDefault();
+										setIsDeleteOpen(true);
+									}}
+									variant="destructive"
+								>
+									<TrashSimpleIcon />
+									Borrar
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</Group>
+				</article>
+			</header>
 
-								<DropdownMenuContent align="start">
-									<DropdownMenuItem>
-										<ExportIcon />
-										Exportar
-									</DropdownMenuItem>
-
-									<DropdownMenuItem>
-										<CopyIcon />
-										Clonar
-									</DropdownMenuItem>
-
-									<DropdownMenuSeparator />
-
-									<DropdownMenuItem
-										onClick={(event) => {
-											event.preventDefault();
-											setIsDeleteOpen(true);
-										}}
-										variant="destructive"
-									>
-										<TrashSimpleIcon />
-										Borrar
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</Group>
-					</article>
-				</header>
-
-				<TabsPanel className="flex gap-4 px-8" value="editor">
+			<section className="relative flex gap-2 ps-3 pe-6">
+				<article>
 					<SectionRail
 						activeId={focusedSectionId}
 						contactId={contactBlockId}
 						onSelect={handleSelectSection}
 						sections={railSections}
 					/>
+				</article>
 
+				<article className="max-h-full px-6 pb-10 md:px-8">
 					<ResumeDocumentEditor
 						blockIndexById={blockIndexById}
 						focusedSectionId={focusedSectionId}
@@ -344,16 +348,8 @@ function RouteComponent() {
 						registerSection={registerSection}
 						rootBlocks={rootBlocks}
 					/>
-				</TabsPanel>
-
-				<TabsPanel
-					className="flex flex-col items-center justify-center gap-3 py-24 text-muted-foreground"
-					value="preview"
-				>
-					<SparkleIcon className="size-8" />
-					<p className="text-sm">Preview próximamente</p>
-				</TabsPanel>
-			</Tabs>
+				</article>
+			</section>
 
 			<AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
 				<AlertDialogPopup>

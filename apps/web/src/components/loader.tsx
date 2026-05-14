@@ -1,8 +1,8 @@
-import { Loader2 } from "lucide-react";
+import { BeachBallIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export default function Loader({ centered = true, className }: { centered?: boolean; className?: string }) {
-	const icon = <Loader2 className={cn("size-4 animate-spin", className)} />;
+	const icon = <BeachBallIcon className={cn("size-4 animate-spin", className)} />;
 
 	if (!centered) {
 		return icon;

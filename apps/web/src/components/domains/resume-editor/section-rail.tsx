@@ -25,52 +25,50 @@ export const SectionRail = ({ activeId, contactId, onSelect, sections }: Section
 	const allActive = activeId === null;
 
 	return (
-		<aside aria-label="Secciones del CV" className="sticky top-44 w-52 flex-none self-start py-0">
-			<SidebarMenu>
+		<SidebarMenu>
+			<SidebarMenuItem>
+				<SidebarMenuButton
+					className={"text-muted-foreground data-[active=true]:text-foreground"}
+					isActive={allActive}
+					onClick={() => onSelect(null)}
+				>
+					<SquaresFourIcon />
+					<span>Todo</span>
+				</SidebarMenuButton>
+			</SidebarMenuItem>
+
+			{contactId ? (
 				<SidebarMenuItem>
 					<SidebarMenuButton
 						className={"text-muted-foreground data-[active=true]:text-foreground"}
-						isActive={allActive}
-						onClick={() => onSelect(null)}
+						isActive={activeId === contactId}
+						onClick={() => onSelect(activeId === contactId ? null : contactId)}
+						tooltip="Contacto"
 					>
-						<SquaresFourIcon />
-						<span>Todo</span>
+						<AddressBookIcon />
+						<span>Contacto</span>
 					</SidebarMenuButton>
 				</SidebarMenuItem>
+			) : null}
 
-				{contactId ? (
-					<SidebarMenuItem>
+			{sections.map((section) => {
+				const Icon = getSectionIcon(section.kind);
+				const isActive = section.id === activeId;
+
+				return (
+					<SidebarMenuItem key={getBlockKey(section.id)}>
 						<SidebarMenuButton
 							className={"text-muted-foreground data-[active=true]:text-foreground"}
-							isActive={activeId === contactId}
-							onClick={() => onSelect(activeId === contactId ? null : contactId)}
-							tooltip="Contacto"
+							isActive={isActive}
+							onClick={() => onSelect(isActive ? null : section.id)}
+							tooltip={section.title}
 						>
-							<AddressBookIcon />
-							<span>Contacto</span>
+							{Icon ? <Icon /> : <SquaresFourIcon />}
+							<span>{section.title}</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
-				) : null}
-
-				{sections.map((section) => {
-					const Icon = getSectionIcon(section.kind);
-					const isActive = section.id === activeId;
-
-					return (
-						<SidebarMenuItem key={getBlockKey(section.id)}>
-							<SidebarMenuButton
-								className={"text-muted-foreground data-[active=true]:text-foreground"}
-								isActive={isActive}
-								onClick={() => onSelect(isActive ? null : section.id)}
-								tooltip={section.title}
-							>
-								{Icon ? <Icon /> : <SquaresFourIcon />}
-								<span>{section.title}</span>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					);
-				})}
-			</SidebarMenu>
-		</aside>
+				);
+			})}
+		</SidebarMenu>
 	);
 };

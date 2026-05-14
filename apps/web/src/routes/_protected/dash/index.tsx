@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_protected/dash/")({
 
 function RouteComponent() {
 	return (
-		<main className="flex w-full max-w-6xl flex-col gap-6 px-11 py-7">
+		<main className="flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
 			<DashboardGreeting />
 			<DashboardStats />
 			{/*<DashboardPipeline />*/}

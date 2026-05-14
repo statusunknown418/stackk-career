@@ -10,6 +10,7 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.177",
     "@base-ui/react": "^1.4.1",
+    "@calcom/embed-react": "^1.5.3",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/inter": "^5.2.8",
     "@libsql/client": "catalog:",

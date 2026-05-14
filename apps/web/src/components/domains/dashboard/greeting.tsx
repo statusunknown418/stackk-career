@@ -13,9 +13,7 @@ export function DashboardGreeting() {
 				<span>Hoy</span>
 			</p>
 
-			<h1 className="text-balance font-light text-2xl leading-tight tracking-tight md:text-4xl">
-				Buenas tardes, Alvaro
-			</h1>
+			<h1 className="text-balance font-light text-2xl leading-tight tracking-tight">Buenas tardes, Alvaro</h1>
 
 			<p className="max-w-2xl text-muted-foreground text-sm">
 				Casey preparó 3 ediciones durante la noche que suben tu puntaje a ~81. Priya las revisa el jueves a las 2pm.

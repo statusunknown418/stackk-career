@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const STATUS_LABEL: Record<ResumeStatus, string> = {
@@ -29,80 +29,77 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const agentCreated = resume.aiMetadata?.agentCreated ?? false;
 
 	return (
-		<Frame aria-labelledby={`resume-${resume.id}-title`} className="group">
-			<FrameHeader>
-				<ul aria-label="Estado del CV" className="flex list-none items-center gap-2">
-					<Badge size="sm" variant={STATUS_VARIANT[resume.status]}>
-						{STATUS_LABEL[resume.status]}
-					</Badge>
-
-					{resume.isPrimary && (
-						<Badge size="sm" variant="info">
-							<StarIcon weight="fill" />
-							Principal
+		<Link params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
+			<Frame aria-labelledby={`resume-${resume.id}-title`} className="group">
+				<FrameHeader>
+					<ul aria-label="Estado del CV" className="flex list-none items-center gap-2">
+						<Badge size="sm" variant={STATUS_VARIANT[resume.status]}>
+							{STATUS_LABEL[resume.status]}
 						</Badge>
-					)}
 
-					{agentCreated && (
-						<Badge size="sm" variant="secondary">
-							<SparkleIcon weight="fill" />
-							IA
-						</Badge>
-					)}
-				</ul>
-
-				<Link
-					className="flex items-start justify-between gap-3 underline-offset-2 transition-all group-hover:underline"
-					params={{ resumeId: resume.id }}
-					to="/dash/resumes/$resumeId"
-				>
-					<FrameTitle id={`resume-${resume.id}-title`}>{resume.displayName}</FrameTitle>
-
-					<ArrowUpRightIcon
-						aria-hidden="true"
-						className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
-						weight="bold"
-					/>
-				</Link>
-
-				<FrameDescription>{resume.title}</FrameDescription>
-			</FrameHeader>
-
-			<FramePanel className="grid grid-cols-2 gap-3 text-sm">
-				<div className="flex min-w-0 flex-col gap-1">
-					<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
-						<UserIcon aria-hidden="true" className="size-3.5" />
-						Titular
-					</dt>
-					<dd className="truncate">
-						{ownerName ? (
-							<address className="not-italic">{ownerName}</address>
-						) : (
-							<span className="text-muted-foreground">{EMPTY}</span>
+						{resume.isPrimary && (
+							<Badge size="sm" variant="info">
+								<StarIcon weight="fill" />
+								Principal
+							</Badge>
 						)}
-					</dd>
-				</div>
 
-				<div className="flex min-w-0 flex-col gap-1">
-					<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
-						<BuildingsIcon aria-hidden="true" className="size-3.5" />
-						Empresa
-					</dt>
-					<dd className="truncate">
-						{resume.targetedCompanyIdentifier ?? <span className="text-muted-foreground">{EMPTY}</span>}
-					</dd>
-				</div>
-			</FramePanel>
+						{agentCreated && (
+							<Badge size="sm" variant="secondary">
+								<SparkleIcon weight="fill" />
+								IA
+							</Badge>
+						)}
+					</ul>
 
-			<FrameFooter className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
-				<time dateTime={formatISO(resume.updatedAt)}>Actualizado {updatedLabel}</time>
-				{typeof score === "number" && (
-					<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground tabular-nums">
-						{score}/100
-					</span>
-				)}
-			</FrameFooter>
-		</Frame>
+					<section className="flex items-center gap-2 underline-offset-4 group-hover:underline">
+						<FrameTitle id={`resume-${resume.id}-title`}>{resume.title}</FrameTitle>
+
+						<ArrowUpRightIcon
+							aria-hidden="true"
+							className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+							weight="bold"
+						/>
+					</section>
+				</FrameHeader>
+
+				<FramePanel className="grid grid-cols-2 gap-3 text-sm">
+					<div className="flex min-w-0 flex-col gap-1">
+						<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
+							<UserIcon aria-hidden="true" className="size-3.5" />
+							Nombre
+						</dt>
+
+						<dd className="truncate">
+							{ownerName ? (
+								<p className="not-italic">{ownerName}</p>
+							) : (
+								<span className="text-muted-foreground">{EMPTY}</span>
+							)}
+						</dd>
+					</div>
+
+					<div className="flex min-w-0 flex-col gap-1">
+						<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
+							<BuildingsIcon aria-hidden="true" className="size-3.5" />
+							Empresa
+						</dt>
+						<dd className="truncate">
+							{resume.targetedCompanyIdentifier ?? <span className="text-muted-foreground">{EMPTY}</span>}
+						</dd>
+					</div>
+				</FramePanel>
+
+				<FrameFooter className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
+					<time dateTime={formatISO(resume.updatedAt)}>Actualizado {updatedLabel}</time>
+					{typeof score === "number" && (
+						<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground tabular-nums">
+							{score}/100
+						</span>
+					)}
+				</FrameFooter>
+			</Frame>
+		</Link>
 	);
 }
 

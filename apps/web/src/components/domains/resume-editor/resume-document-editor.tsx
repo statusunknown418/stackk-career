@@ -21,7 +21,7 @@ export const ResumeDocumentEditor = withForm({
 		const sectionBlocks = rootBlocks.filter((block) => block.blockType === "section");
 
 		return (
-			<section className="flex w-full max-w-4xl flex-col gap-10 px-6 pb-10 md:px-8">
+			<section className="flex w-full max-w-4xl flex-col gap-10">
 				{contactBlock && contactBlock.blockType === "contact" && contactIndex !== undefined && (
 					<div
 						className={cn(

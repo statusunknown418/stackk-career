@@ -64,7 +64,7 @@ export function DashboardCoaching() {
 				</Button>
 			</FrameHeader>
 
-			<FramePanel>
+			<FramePanel className="gap-6">
 				<ol className="flex flex-col gap-2">
 					{sessions.map((session, index) => {
 						const isNext = index === 0;

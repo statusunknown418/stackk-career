@@ -181,7 +181,7 @@
 	--accent: --alpha(var(--color-black) / 4%);
 	--accent-foreground: var(--color-neutral-800);
 	--background: var(--color-white);
-	--border: --alpha(var(--color-black) / 8%);
+	--border: --alpha(var(--color-black) / 6%);
 	--card: var(--color-white);
 	--card-foreground: var(--color-neutral-800);
 	--destructive: var(--color-red-500);

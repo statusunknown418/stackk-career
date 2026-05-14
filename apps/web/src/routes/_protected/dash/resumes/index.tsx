@@ -42,7 +42,7 @@ function RouteComponent() {
 
 	return (
 		<section className="space-y-4">
-			<section className="flex justify-between gap-4 bg-card px-11 py-7 lg:gap-10">
+			<section className="flex justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
 				<article className="grid gap-1">
 					<h1 className="font-light text-2xl">Curriculums</h1>
 
@@ -71,10 +71,10 @@ function RouteComponent() {
 				</Meter>
 			</section>
 
-			<section aria-labelledby="resumes-list-heading" className="px-11 py-2">
+			<section aria-labelledby="resumes-list-heading" className="px-4 py-2">
 				{hasResumeContent ? (
 					<article className="flex flex-col gap-4">
-						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 							{data.map((resume) => (
 								<ResumeCard key={resume.id} resume={resume} />
 							))}
