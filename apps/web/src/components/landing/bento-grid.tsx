@@ -15,7 +15,7 @@ export function BentoGrid() {
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-[1200px]">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
-						— Por qué + Producto
+						Por qué + Producto
 					</span>
 					<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Todo lo que LATAM no tenía. En un solo plan.</WordReveal>
@@ -35,9 +35,7 @@ export function BentoGrid() {
 			</div>
 
 			<div className="mx-auto mb-6 max-w-[1200px]">
-				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.2em]">
-					— Las 6 herramientas
-				</span>
+				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.2em]">Las 6 herramientas</span>
 			</div>
 
 			<div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-3 [grid-auto-rows:minmax(180px,auto)] md:grid-cols-6">
@@ -68,7 +66,7 @@ function ReasonCompactCard({ reason }: { reason: WhyReason }) {
 		<article className="group flex h-full flex-col gap-3.5 rounded-2xl border border-foreground/8 bg-card/50 p-5 transition-colors duration-300 hover:border-foreground/18 hover:bg-card/85">
 			<header className="flex items-baseline justify-between">
 				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.18em]">
-					— Razón {reason.number}
+					Razón {reason.number}
 				</span>
 				<span className="font-display-italic font-light text-[28px] text-foreground/15 leading-none">
 					{reason.number}
@@ -108,7 +106,7 @@ function BentoCellHero() {
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
 				Subes tu CV. La IA lo evalúa en estructura, logros con métricas, keywords del sector y compatibilidad con
-				sistemas ATS. En 30 segundos tienes un puntaje 0–100 y la lista exacta de qué arreglar.
+				sistemas ATS. En 30 segundos tienes un puntaje de 0 a 100 y la lista exacta de qué arreglar.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
 				En Pro: comparas tu CV contra la oferta específica y la IA reescribe las secciones débiles.
@@ -147,7 +145,7 @@ function BentoCellLinkedIn() {
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
 				Headline, About y bullets de cada experiencia con score de perfil. En LATAM, los reclutadores filtran por
-				LinkedIn antes que por CV — optimizarlo abre la puerta.
+				LinkedIn antes que por CV. Optimizarlo abre la puerta.
 			</p>
 
 			<div className="mt-auto pt-6">
@@ -196,7 +194,7 @@ function BentoCellCoaching() {
 						Coaching 1:1 humano. No lo pagas aparte.
 					</h3>
 					<p className="mt-4 max-w-[560px] text-[15px] text-foreground/65 leading-[1.55]">
-						3 a 5 coaches senior en planilla — no freelancers de plataforma. Sesión 1:1 en Pro (1/mes) o el camino
+						3 a 5 coaches senior en planilla, no freelancers de plataforma. Sesión 1:1 en Pro (1 al mes) o el camino
 						completo en Premium (3 sesiones + WhatsApp con tu coach).
 					</p>
 				</div>

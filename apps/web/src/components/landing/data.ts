@@ -94,28 +94,28 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "01",
 		title: "Tu coach humano,",
 		emphasis: "no un chatbot solo.",
-		body: "Un coach senior con tu CV en mano — no freelancers que entran y salen. La IA hace el trabajo pesado en segundos, tu coach te dice qué decir en la entrevista del lunes.",
-		receipt: { label: "Equipo de coaches", value: "3–5 senior · planilla · LATAM" },
+		body: "Un coach senior con tu CV en mano. No freelancers que entran y salen. La IA hace el trabajo pesado en segundos. Tu coach te dice qué decir en la entrevista del lunes.",
+		receipt: { label: "Equipo de coaches", value: "3 a 5 senior · planilla · LATAM" },
 	},
 	{
 		number: "02",
 		title: "Todo en un",
 		emphasis: "solo plan.",
-		body: "CV, carta, LinkedIn, outreach y score — afuera te los cobran por separado. Acá vienen juntos, en español. Cero paquetes inflados, cero onboarding eterno.",
+		body: "CV, carta, LinkedIn, outreach y score. Afuera te los cobran por separado. Acá vienen juntos, en español. Cero paquetes inflados, cero onboarding eterno.",
 		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin sorpresas en el checkout" },
 	},
 	{
 		number: "03",
 		title: "Hablamos tu",
 		emphasis: "mercado.",
-		body: "Tu coach ya entrevistó en BCP, Yape, Rappi o Belcorp. Sabe exactamente qué busca un recruiter LATAM — no fórmulas gringas traducidas con Google Translate.",
+		body: "Tu coach ya entrevistó en BCP, Yape, Rappi o Belcorp. Sabe exactamente qué busca un recruiter LATAM. Nada de fórmulas gringas traducidas con Google Translate.",
 		receipt: { label: "Cobertura regional", value: "8 países · 100% español" },
 	},
 	{
 		number: "04",
 		title: "Velocidad medible.",
 		emphasis: "Semanas, no meses.",
-		body: "Primer aha-moment en 30 segundos. Entrevistas concretas en 2–4 semanas. Oferta firmada en promedio 36 días (Premium). Mientras otros revisan tu CV en 2 semanas, acá ya estás aplicando.",
+		body: "Primer aha en 30 segundos. Entrevistas concretas en 2 a 4 semanas. Oferta firmada en promedio 36 días (Premium). Mientras otros revisan tu CV en 2 semanas, acá ya estás aplicando.",
 		receipt: { label: "Tiempo promedio a oferta", value: "36 días en Premium" },
 	},
 ];
@@ -123,7 +123,7 @@ export const WHY_REASONS: readonly WhyReason[] = [
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Sube tu CV. Score 0–100 + lista exacta de qué arreglar. Tu primer aha-moment, gratis.",
+		body: "Sube tu CV. Score de 0 a 100 + lista exacta de qué arreglar. Tu primer aha, gratis.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
@@ -162,7 +162,7 @@ export const PLANS: readonly Plan[] = [
 		priceUsd: 0,
 		per: "Gratis · sin tarjeta",
 		features: [
-			"Score CV 0–100 por rol · 1/mes",
+			"Score CV de 0 a 100 por rol · 1 al mes",
 			"Lista de puntos a mejorar (texto)",
 			"1 CV generado con IA / mes",
 			"1 carta de presentación / mes",
@@ -185,7 +185,7 @@ export const PLANS: readonly Plan[] = [
 			"Cartas de presentación ilimitadas",
 			"Optimizador LinkedIn completo",
 			"Mensajes de outreach ilimitados",
-			"1 sesión 1:1 con coach (30 min) / mes — temas a tu elección",
+			"1 sesión 1:1 con coach (30 min) al mes, temas a tu elección",
 		],
 		cta: "Empezar Pro",
 		featured: true,
@@ -199,9 +199,9 @@ export const PLANS: readonly Plan[] = [
 		per: "/ mes · camino completo",
 		features: [
 			"Todo lo del plan Pro",
-			"Sesión 1 — Mapea tu próximo trabajo (45 min)",
-			"Sesión 2 — Domina la entrevista (45 min)",
-			"Sesión 3 — Cierra y negocia (30 min)",
+			"Sesión 1: Mapea tu próximo trabajo (45 min)",
+			"Sesión 2: Domina la entrevista (45 min)",
+			"Sesión 3: Cierra y negocia (30 min)",
 			"Revisión humana de CV + LinkedIn",
 			"WhatsApp con coach (24h respuesta)",
 		],
@@ -249,7 +249,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "UX Designer en Crehana",
 		location: "Lima",
 		quote:
-			"La sesión de pre-entrevista fue brutal — en el buen sentido. Me salvó de decir tres cosas que habrían matado el proceso.",
+			"La sesión de pre entrevista fue brutal, en el buen sentido. Me salvó de decir tres cosas que habrían matado el proceso.",
 		chip: "2 meses",
 	},
 	{
@@ -334,7 +334,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 export const FAQ_ITEMS: readonly FaqItem[] = [
 	{
 		q: "¿Cómo funciona el Score CV?",
-		a: "Subes tu CV y registras el rol al que apuntas. La IA analiza estructura, logros vs. tareas, keywords del sector y compatibilidad ATS. En menos de 30 segundos te devuelve un puntaje 0–100 y la lista de qué mejorar. En el plan Gratuito, 1 análisis por mes; en Pro, ilimitado.",
+		a: "Subes tu CV y registras el rol al que apuntas. La IA analiza estructura, logros vs. tareas, keywords del sector y compatibilidad ATS. En menos de 30 segundos te devuelve un puntaje de 0 a 100 y la lista de qué mejorar. En el plan Gratuito, 1 análisis por mes; en Pro, ilimitado.",
 	},
 	{
 		q: "¿Quiénes son los coaches?",
@@ -346,7 +346,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Puedo probar sin suscribirme?",
-		a: "Sí. El Score CV y el constructor son gratis para siempre (con límite de 1/mes). Y si quieres probar el coaching humano antes de suscribirte, tienes la sesión única de S/40 por 45 minutos — sin compromiso, con cualquier coach del equipo.",
+		a: "Sí. El Score CV y el constructor son gratis para siempre (con límite de 1 al mes). Si quieres probar el coaching humano antes de suscribirte, tienes la sesión única de S/40 por 45 minutos, sin compromiso, con cualquier coach del equipo.",
 	},
 	{
 		q: "¿En qué países funciona?",
@@ -366,7 +366,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Funciona si no soy de tech?",
-		a: "Sí. Tenemos casos en marketing, comunicaciones, project management, customer success, diseño y consultoría. Los coaches han hecho hiring para BCP, Belcorp, Globant y agencias regionales — no solo para tech.",
+		a: "Sí. Tenemos casos en marketing, comunicaciones, project management, customer success, diseño y consultoría. Los coaches han hecho hiring para BCP, Belcorp, Globant y agencias regionales, no solo para tech.",
 	},
 	{
 		q: "¿Mis datos están seguros?",

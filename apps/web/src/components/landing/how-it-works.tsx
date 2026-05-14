@@ -51,7 +51,7 @@ export function HowItWorks() {
 		<section className="px-6 py-24" id="camino">
 			<Reveal>
 				<header className="mx-auto mb-14 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">— Cómo funciona</span>
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Cómo funciona</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>De CV ignorado a oferta firmada.</WordReveal>
 					</h2>
@@ -215,7 +215,7 @@ function SalaryBandVisual() {
 		<div className="mt-4 max-w-[440px] rounded-md border border-foreground/8 bg-card/60 px-3 py-2.5">
 			<div className="flex items-baseline justify-between text-[11px]">
 				<span className="font-mono text-foreground/70 uppercase tracking-[0.14em]">Banda mercado</span>
-				<span className="font-display text-foreground/65 tabular-nums">S/4.5K — S/7.2K</span>
+				<span className="font-display text-foreground/65 tabular-nums">S/4.5K a S/7.2K</span>
 			</div>
 			<div className="relative mt-2 h-2 rounded-full bg-foreground/8">
 				<div className="absolute inset-y-0 left-[12%] w-[58%] rounded-full bg-gradient-to-r from-oxblood/30 to-oxblood/55" />

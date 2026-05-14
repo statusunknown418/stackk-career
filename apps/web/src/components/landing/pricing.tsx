@@ -33,9 +33,7 @@ export function Pricing() {
 		<section className="px-6 py-24" id="planes">
 			<Reveal>
 				<header className="mx-auto mb-14 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
-						— Precios en soles
-					</span>
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Precios en soles</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Plan mensual o sesión única. Cancela cuando quieras.</WordReveal>
 					</h2>
@@ -57,7 +55,7 @@ export function Pricing() {
 
 			<p className="mx-auto mt-12 max-w-[640px] text-balance text-center text-[14.5px] text-foreground/65 leading-[1.65]">
 				<span className="font-display-italic font-medium text-foreground/85">¿Encontraste trabajo?</span> No te
-				preocupes — cancela cuando quieras. Siempre estaremos aquí cuando quieras volver a desarrollar tu carrera.
+				preocupes, cancela cuando quieras. Siempre estaremos aquí cuando quieras volver a desarrollar tu carrera.
 			</p>
 		</section>
 	);
@@ -171,7 +169,7 @@ function SingleSessionCard() {
 			<div className="grid items-center gap-8 p-9 md:grid-cols-12">
 				<div className="md:col-span-7">
 					<h3 className="font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
-						Sesión única — {SINGLE_SESSION.tagline}
+						Sesión única: {SINGLE_SESSION.tagline}
 					</h3>
 					<p className="mt-3 max-w-[560px] text-[14px] text-foreground/65 leading-[1.55]">{SINGLE_SESSION.body}</p>
 				</div>

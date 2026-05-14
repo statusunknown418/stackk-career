@@ -100,12 +100,12 @@ export function Hero() {
 
 			<section className="relative border-foreground/5 border-t bg-foreground/[0.015] px-6 py-14">
 				<div className="absolute top-0 left-1/2 h-px w-[60%] -translate-x-1/2 bg-gradient-to-r from-transparent via-oxblood/30 to-transparent" />
-				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-7">
-					<div className="flex flex-col items-center gap-2 text-center">
-						<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.22em]">— Trabajan en</span>
-					</div>
+				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-8">
+					<p className="font-mono text-[10px] text-foreground/65 uppercase tracking-[0.22em]">
+						Nuestros talentos ya trabajan en
+					</p>
 					<LogoMarqueeRows />
-					<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/70 uppercase tracking-[0.18em]">
+					<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.18em]">
 						<span aria-hidden="true" className="size-1 rounded-full bg-oxblood/60" />
 						<span>Empresas verificadas vía LinkedIn de cada talento</span>
 					</div>

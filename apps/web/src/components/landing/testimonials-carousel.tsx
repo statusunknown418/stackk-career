@@ -7,12 +7,12 @@ export function TestimonialsCarousel() {
 		<section className="overflow-hidden px-6 py-24" id="casos">
 			<Reveal>
 				<header className="mx-auto mb-14 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">— Casos reales</span>
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Casos reales</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Del CV ignorado a firmar oferta.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						Historias reales — selección curada de Lima, Bogotá, Buenos Aires, Quito, Montevideo y más.
+						Historias reales. Selección curada de Lima, Bogotá, Buenos Aires, Quito, Montevideo y más.
 					</p>
 				</header>
 			</Reveal>

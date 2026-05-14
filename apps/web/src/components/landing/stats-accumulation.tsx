@@ -13,7 +13,7 @@ const STAT_LINES: readonly StatLine[] = [
 	{ value: "2,400+", label: "profesionales colocados" },
 	{ value: "4.9★", label: "en 380 reseñas verificadas" },
 	{ value: "47 → 95", label: "score CV en promedio", accent: "oxblood" },
-	{ value: "S/79", label: "tu coach — no US$699", accent: "marigold" },
+	{ value: "S/79", label: "tu coach, no US$699", accent: "marigold" },
 ];
 
 const ACCENT_COLOR = {
@@ -71,7 +71,7 @@ export function StatsAccumulation() {
 						viewport={{ once: false, margin: "-30% 0px" }}
 						whileInView={{ opacity: 1, y: 0 }}
 					>
-						— Los números detrás
+						Los números detrás
 					</motion.p>
 
 					<motion.h2

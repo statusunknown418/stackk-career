@@ -15,7 +15,7 @@ import { AuroraBackground } from "@/components/ui/aurora-background";
 const SITE_URL = "https://impulsa.com";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const SITE_NAME = "IMPULSA";
-const TITLE = "IMPULSA — Garantizamos tu próxima entrevista en menos de 3 meses";
+const TITLE = "IMPULSA · Garantizamos tu próxima entrevista en menos de 3 meses";
 const DESCRIPTION =
 	"Garantizamos tu próxima entrevista en menos de 3 meses, o te devolvemos el 100%. IA que arregla tu CV en segundos + coach senior que te acompaña paso a paso. Score gratis, sin tarjeta. Hecho para LATAM.";
 
@@ -44,7 +44,7 @@ const structuredData = {
 		{
 			"@type": "Service",
 			"@id": `${SITE_URL}#service`,
-			name: "IMPULSA — Coaching de carrera con IA",
+			name: "IMPULSA · Coaching de carrera con IA",
 			provider: { "@id": `${SITE_URL}#organization` },
 			areaServed: "LATAM",
 			serviceType: "Career coaching, CV optimization, LinkedIn optimization, interview preparation",

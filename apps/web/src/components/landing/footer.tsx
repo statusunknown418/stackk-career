@@ -43,7 +43,7 @@ export function LandingFooter() {
 					{FOOTER_COLUMNS.map((col) => (
 						<div key={col.heading}>
 							<h2 className="mb-5 font-mono text-[10px] text-foreground/75 uppercase tracking-[0.18em]">
-								— {col.heading}
+								{col.heading}
 							</h2>
 							<ul className="flex flex-col gap-2.5">
 								{col.links.map((link) => (

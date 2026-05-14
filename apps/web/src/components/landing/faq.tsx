@@ -18,13 +18,13 @@ export function Faq() {
 		<section className="px-6 py-24" id="faq">
 			<div className="mx-auto mb-12 grid max-w-[1200px] gap-12 md:grid-cols-12">
 				<Reveal className="md:col-span-5">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">— FAQ</span>
+					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">FAQ</span>
 					<h2 className="mt-3 font-bold font-display text-[clamp(2rem,4.4vw,3.25rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Preguntas frecuentes.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[420px] text-[1rem] text-foreground/65 leading-[1.55]">
 						Si tu duda no está aquí, escríbenos por WhatsApp o desde el dashboard. Responde una persona del equipo en
-						menos de 24 horas — nunca un bot.
+						menos de 24 horas. Nunca un bot.
 					</p>
 				</Reveal>
 
