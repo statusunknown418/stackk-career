@@ -17,7 +17,8 @@
     "TRIGGER_SECRET_KEY",
     "TRIGGER_PROJECT_ID",
     "AXIOM_API_TOKEN",
-    "AXIOM_DATASET"
+    "AXIOM_DATASET",
+    "CAL_WEBHOOK_SECRET"
   ],
   "tasks": {
     "build": {
