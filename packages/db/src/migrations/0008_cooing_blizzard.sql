@@ -1,0 +1,1 @@
+CREATE INDEX `blocks_resume_parent_deleted_idx` ON `resumeBlocks` (`resumeId`,`parentBlockId`,`deletedAt`);

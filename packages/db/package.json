@@ -21,7 +21,7 @@
     "@libsql/client": "catalog:",
     "@paralleldrive/cuid2": "^3.3.0",
     "@stackk-career/env": "workspace:*",
-    "@upstash/redis": "^1.37.0",
+    "@upstash/redis": "^1.38.0",
     "ai": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",

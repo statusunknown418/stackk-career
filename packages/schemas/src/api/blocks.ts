@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { blockPayloadSchema } from "../ai/resume-blocks";
-import { insertResumeBlocksSchema } from "../db/resume-blocks";
+import { blockPayloadSchema, insertResumeBlocksSchema } from "../db/resume-blocks";
 
 export const createBlockApiMutationSchema = insertResumeBlocksSchema
 	.omit({
 		blockType: true,
 		content: true,
+		position: true,
 	})
 	.extend({
 		before: z.string().nullable(),
@@ -14,3 +14,19 @@ export const createBlockApiMutationSchema = insertResumeBlocksSchema
 	.and(blockPayloadSchema);
 
 export type CreateBlockApiMutationInput = z.infer<typeof createBlockApiMutationSchema>;
+
+export const updateBlockApiMutationSchema = z
+	.object({
+		id: z.number().int(),
+		resumeId: z.string(),
+	})
+	.and(blockPayloadSchema);
+
+export type UpdateBlockApiMutationInput = z.infer<typeof updateBlockApiMutationSchema>;
+
+export const deleteBlockApiMutationSchema = z.object({
+	id: z.number().int(),
+	resumeId: z.string(),
+});
+
+export type DeleteBlockApiMutationInput = z.infer<typeof deleteBlockApiMutationSchema>;

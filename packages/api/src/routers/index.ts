@@ -3,6 +3,7 @@ import type { RouterClient } from "@orpc/server";
 import { publicProcedure } from "../index";
 import { agentsRouter } from "./agents";
 import { blocksRouter } from "./blocks";
+import { coachingRouter } from "./coaching";
 import { filesMetadataRouter } from "./files-metadata";
 import { generationsRouter } from "./generations";
 import { messagesRouter } from "./messages";
@@ -22,6 +23,7 @@ export const appRouter = {
 	filesMetadata: filesMetadataRouter,
 	generations: generationsRouter,
 	messages: messagesRouter,
+	coaching: coachingRouter,
 	onboardingProfile: onboardingProfileRouter,
 	viewer: viewerRouter,
 	resumes: resumesRouter,

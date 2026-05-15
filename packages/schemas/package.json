@@ -7,7 +7,8 @@
     "./api/*": "./src/api/*.ts",
     "./db/*": "./src/db/*.ts",
     "./jobs/*": "./src/jobs/*.ts",
-    "./ai/*": "./src/ai/*.ts"
+    "./ai/*": "./src/ai/*.ts",
+    "./utils/*": "./src/utils/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"

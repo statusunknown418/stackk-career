@@ -71,7 +71,7 @@ export function EmptyMedia({
 }
 
 export function EmptyTitle({ className, ...props }: React.ComponentProps<"div">): React.ReactElement {
-	return <div className={cn("font-heading font-semibold text-xl", className)} data-slot="empty-title" {...props} />;
+	return <div className={cn("font-heading text-xl", className)} data-slot="empty-title" {...props} />;
 }
 
 export function EmptyDescription({ className, ...props }: React.ComponentProps<"p">): React.ReactElement {

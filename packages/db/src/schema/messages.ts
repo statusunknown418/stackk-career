@@ -22,7 +22,7 @@ export const messages = sqliteTable(
 		content: t.text({ mode: "json" }),
 		text: t.text(),
 		error: t.text(),
-		model: t.text().$type<string & LanguageModel>(),
+		model: t.text().$type<LanguageModel>(),
 		order: t.integer(),
 		toolMeta: t.blob({ mode: "json" }).$type<{ toolId: string; toolName: string }>(),
 		isTool: t.integer({ mode: "boolean" }),

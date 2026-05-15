@@ -15,6 +15,9 @@
 	--animate-toast-error-even: toast-error-even 0.28s
 		cubic-bezier(0.5, 1, 0.89, 1);
 
+	--ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+
 	--font-heading:
 		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
 	--font-display:
@@ -606,4 +609,10 @@
 		background-position: 0 50%;
 		background-size: 8px 1px;
 	}
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	mix-blend-mode: normal;
+	animation: none;
 }

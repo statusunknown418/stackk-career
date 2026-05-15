@@ -2,7 +2,7 @@ const LEXO_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw
 const LEXO_BASE = BigInt(LEXO_DIGITS.length);
 const MIN_DIGIT = LEXO_DIGITS[0] ?? "0";
 
-function assertValidLexoKey(key: string, label: "before" | "after"): void {
+export function assertValidLexoKey(key: string, label: "before" | "after"): void {
 	if (key.length === 0) {
 		throw new Error(`Invalid ${label} key: key cannot be empty`);
 	}
@@ -14,7 +14,7 @@ function assertValidLexoKey(key: string, label: "before" | "after"): void {
 	}
 }
 
-function normalizeLexoBound(bound: string | null | undefined, label: "before" | "after"): string | null {
+export function normalizeLexoBound(bound: string | null | undefined, label: "before" | "after"): string | null {
 	const key = bound ?? null;
 
 	if (key !== null) {
@@ -122,6 +122,36 @@ function isCandidateBetweenBounds(candidateKey: string, lowerKey: string | null,
  * `before` and `after` can be `null` to represent start/end of list.
  * Returned key sorts strictly between provided neighbors.
  */
+function compareLexoKeys(a: string, b: string): number {
+	if (a < b) {
+		return -1;
+	}
+
+	if (a > b) {
+		return 1;
+	}
+
+	return 0;
+}
+
+export function sortLexoPositions(keys: readonly string[]): string[];
+export function sortLexoPositions<T>(items: readonly T[], getKey: (item: T) => string): T[];
+export function sortLexoPositions<T>(items: readonly T[], getKey?: (item: T) => string): T[] {
+	if (getKey === undefined) {
+		return (items as readonly string[]).slice().sort(compareLexoKeys) as T[];
+	}
+
+	const indexed = items.map((item, index) => ({ item, key: getKey(item), index }));
+
+	indexed.sort((left, right) => {
+		const keyOrder = compareLexoKeys(left.key, right.key);
+
+		return keyOrder === 0 ? left.index - right.index : keyOrder;
+	});
+
+	return indexed.map(({ item }) => item);
+}
+
 export function generateLexoKeyBetween(before?: string | null, after?: string | null): string {
 	const lowerKey = normalizeLexoBound(before, "before");
 	const upperKey = normalizeLexoBound(after, "after");

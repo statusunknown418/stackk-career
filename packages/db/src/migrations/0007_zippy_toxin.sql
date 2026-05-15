@@ -1,0 +1,1 @@
+ALTER TABLE `resumeBlocks` ADD `isHidden` integer DEFAULT false NOT NULL;

@@ -36,6 +36,8 @@ export const env = createEnv({
 		AXIOM_DATASET: z.string().optional(),
 
 		AGENT_QUEUE_CONCURRENCY: z.coerce.number().default(10),
+
+		CAL_WEBHOOK_SECRET: z.string().min(1),
 	},
 	runtimeEnv: process.env,
 	skipValidation,
