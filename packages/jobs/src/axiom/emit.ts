@@ -63,7 +63,7 @@ export async function emitUsageEvent(input: EmitUsageEventInput): Promise<void> 
 		return;
 	}
 
-	const token = process.env.AXIOM_TOKEN;
+	const token = process.env.AXIOM_API_TOKEN ?? process.env.AXIOM_TOKEN;
 	const dataset = process.env.AXIOM_DATASET;
 
 	if (!(token && dataset)) {

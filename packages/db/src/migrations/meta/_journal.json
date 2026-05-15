@@ -71,6 +71,13 @@
       "when": 1778561367619,
       "tag": "0009_motionless_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1778806859210,
+      "tag": "0010_special_onslaught",
+      "breakpoints": true
     }
   ]
 }

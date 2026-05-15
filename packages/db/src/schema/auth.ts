@@ -2,6 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { fileMetadata } from "./file-metadata";
+import { userSubscriptions } from "./subscriptions";
 
 export const user = sqliteTable("user", {
 	id: text("id")
@@ -99,6 +100,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	accounts: many(account),
 	files: many(fileMetadata),
+	subscriptions: many(userSubscriptions),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({

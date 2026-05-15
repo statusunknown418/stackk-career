@@ -7,3 +7,4 @@ export * from "./onboarding-profile";
 export * from "./resume-analyses";
 export * from "./resume-blocks";
 export * from "./resumes";
+export * from "./subscriptions";

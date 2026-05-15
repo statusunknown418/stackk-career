@@ -168,6 +168,7 @@ async function handle({ request }: { request: Request }): Promise<Response> {
 	}
 
 	let envelope: CalWebhookEnvelope;
+
 	try {
 		const parsed = JSON.parse(rawBody);
 		envelope = calWebhookEnvelopeSchema.parse(parsed);

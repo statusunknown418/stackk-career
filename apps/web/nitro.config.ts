@@ -6,6 +6,7 @@ export default defineConfig({
 		asyncContext: true,
 	},
 	preset: "vercel",
+	plugins: ["./server/plugins/evlog-drain.ts"],
 	modules: [
 		evlog({
 			env: {
