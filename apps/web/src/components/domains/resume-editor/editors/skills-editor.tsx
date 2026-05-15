@@ -12,7 +12,7 @@ import {
 } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { log } from "evlog";
+import { log } from "evlog/client";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameFooter, FrameHeader, FramePanel } from "@/components/ui/frame";
