@@ -1,11 +1,4 @@
-import {
-	CopyIcon,
-	DotsThreeOutlineIcon,
-	ExportIcon,
-	PencilIcon,
-	SparkleIcon,
-	TrashSimpleIcon,
-} from "@phosphor-icons/react";
+import { CopyIcon, DotsThreeOutlineIcon, ExportIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
@@ -33,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
+import { InputGroup } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
 import {
 	DropdownMenu,
@@ -273,10 +266,6 @@ function RouteComponent() {
 									value={field.state.value}
 									variant="ghost"
 								/>
-
-								<InputGroupAddon align="inline-end">
-									<PencilIcon />
-								</InputGroupAddon>
 							</InputGroup>
 						)}
 					</form.AppField>

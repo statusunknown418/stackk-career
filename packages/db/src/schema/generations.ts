@@ -6,6 +6,9 @@ import { fileMetadata } from "./file-metadata";
 import { messages } from "./messages";
 import { resumeAnalyses } from "./resume-analyses";
 
+export const generationTypes = ["conversation", "resume-creation"] as const;
+export type GenerationTypes = (typeof generationTypes)[number];
+
 export const generations = sqliteTable(
 	"generations",
 	(t) => ({
@@ -18,6 +21,7 @@ export const generations = sqliteTable(
 		title: t.text(),
 		summary: t.text(),
 		model: t.text(),
+		type: t.text({ enum: generationTypes }),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })

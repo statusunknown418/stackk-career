@@ -1,9 +1,12 @@
 import type { coachingBookingChangedTask } from "@stackk-career/jobs/trigger/tasks/coaching-booking-changed";
 import type { CoachingBookingSummary, CoachingStage } from "@stackk-career/schemas/api/coaching";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { useRealtimeRunsWithTag } from "@trigger.dev/react-hooks";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { Suspense, useEffect, useRef } from "react";
 import Loader from "@/components/loader";
+import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Stepper, StepperIndicator, StepperItem, StepperTitle, StepperTrigger } from "@/components/ui/stepper";
 import { authClient } from "@/lib/auth-client";
@@ -18,6 +21,10 @@ interface StepDef {
 	step: number;
 	title: string;
 }
+
+const routeApi = getRouteApi("/_protected/dash/coaches");
+
+const DEFAULT_STEP = 1;
 
 const steps: readonly StepDef[] = [
 	{
@@ -66,7 +73,15 @@ function pickStageBooking(
 }
 
 export function CoachingTimeline() {
-	const [active, setActive] = useState(2);
+	const search = routeApi.useSearch();
+	const navigate = routeApi.useNavigate();
+	const active = search.step ?? DEFAULT_STEP;
+	const setActive = (next: number) => {
+		navigate({
+			search: (prev) => ({ ...prev, step: next === DEFAULT_STEP ? undefined : next }),
+			replace: true,
+		});
+	};
 	const current = steps.find((s) => s.step === active);
 
 	const { data: session } = authClient.useSession();
@@ -103,6 +118,22 @@ export function CoachingTimeline() {
 
 	const stageBooking = current ? pickStageBooking(dashboard?.bookings, current.stage) : null;
 
+	const firstStep = steps[0]?.step ?? DEFAULT_STEP;
+	const lastStep = steps.at(-1)?.step ?? DEFAULT_STEP;
+	const canGoPrev = active > firstStep;
+	const canGoNext = active < lastStep;
+
+	const goPrev = () => {
+		if (canGoPrev) {
+			setActive(active - 1);
+		}
+	};
+	const goNext = () => {
+		if (canGoNext) {
+			setActive(active + 1);
+		}
+	};
+
 	return (
 		<div className="w-full space-y-8">
 			<Stepper className="items-start gap-4" onValueChange={setActive} value={active}>
@@ -112,6 +143,7 @@ export function CoachingTimeline() {
 							<StepperIndicator asChild className="h-1 w-full bg-border">
 								<span className="sr-only">{step}</span>
 							</StepperIndicator>
+
 							<div className="flex items-center gap-2">
 								<span className="flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted font-medium text-[10px] text-muted-foreground group-data-[state=active]/step:border-transparent group-data-[state=completed]/step:border-transparent group-data-[state=active]/step:bg-primary group-data-[state=completed]/step:bg-primary group-data-[state=active]/step:text-primary-foreground group-data-[state=completed]/step:text-primary-foreground">
 									{step}
@@ -123,15 +155,15 @@ export function CoachingTimeline() {
 				))}
 			</Stepper>
 
-			{stageBooking ? (
-				<ScheduledEventCard booking={stageBooking} />
+			{stageBooking && current ? (
+				<ScheduledEventCard booking={stageBooking} stepName={current.title} />
 			) : (
 				<Frame>
 					<FrameHeader>
 						<FrameDescription>{current?.body}</FrameDescription>
 					</FrameHeader>
 
-					<FramePanel className="min-h-max">
+					<FramePanel className="h-135 overflow-y-scroll">
 						<Suspense fallback={<Loader />}>
 							{current?.calLink && userId && session?.user && (
 								<Booker
@@ -146,6 +178,20 @@ export function CoachingTimeline() {
 					</FramePanel>
 				</Frame>
 			)}
+
+			<section className="flex items-center justify-between">
+				<Button disabled={!canGoPrev} onClick={goPrev} size="sm" type="button" variant="outline">
+					<ChevronLeftIcon aria-hidden="true" />
+					Anterior
+				</Button>
+				<span className="text-muted-foreground text-xs">
+					Paso {active} de {lastStep}
+				</span>
+				<Button disabled={!canGoNext} onClick={goNext} size="sm" type="button" variant="outline">
+					Siguiente
+					<ChevronRightIcon aria-hidden="true" />
+				</Button>
+			</section>
 		</div>
 	);
 }

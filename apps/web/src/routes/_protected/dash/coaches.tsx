@@ -1,9 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { CoachingTimeline } from "@/components/domains/coaching/coaching-timeline";
 import { FrameDescription } from "@/components/ui/frame";
 
+const coachesSearchSchema = z.object({
+	step: z.coerce.number().int().min(1).max(4).optional().catch(undefined),
+});
+
 export const Route = createFileRoute("/_protected/dash/coaches")({
 	component: RouteComponent,
+	validateSearch: coachesSearchSchema,
 });
 
 function RouteComponent() {

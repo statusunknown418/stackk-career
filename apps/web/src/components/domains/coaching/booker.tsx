@@ -11,7 +11,7 @@ interface BookerProps {
 export function Booker({ email, eventSlug, name, userId }: BookerProps) {
 	const getCalConfig = async () => {
 		const cal = await getCalApi({ namespace: eventSlug });
-		cal("ui", { hideEventTypeDetails: true, layout: "column_view", theme: "light" });
+		cal("ui", { hideEventTypeDetails: true, layout: "month_view", theme: "light" });
 	};
 
 	useEffect(() => {
@@ -21,17 +21,17 @@ export function Booker({ email, eventSlug, name, userId }: BookerProps) {
 	return (
 		<Cal
 			calLink={`statusunknown/${eventSlug}`}
-			className="min-h-125"
+			className="min-h-full overflow-y-scroll"
 			config={{
+				"cal.locale": "es",
 				email,
-				layout: "column_view",
+				layout: "month_view",
 				metadata: { userId },
 				name,
 				theme: "light",
 				useSlotsViewOnSmallScreen: "true",
 			}}
 			namespace={eventSlug}
-			style={{ width: "100%", minHeight: "200%", overflow: "visible" }}
 		/>
 	);
 }
