@@ -4,7 +4,7 @@ import z from "zod";
 import { sortLexoPositions } from "../utils/lexographical";
 
 export const selectResumeBlocksSchema = createSelectSchema(resumeBlocks);
-export const insertResumeBlocksSchema = createInsertSchema(resumeBlocks);
+export const insertResumeBlocksSchema = createInsertSchema(resumeBlocks).strict();
 export const updateResumeBlocksSchema = createUpdateSchema(resumeBlocks);
 
 export type BlockType = (typeof BLOCK_TYPES)[number];

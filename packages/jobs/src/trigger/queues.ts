@@ -1,6 +1,7 @@
+import { env } from "@stackk-career/env/server";
 import { queue } from "@trigger.dev/sdk";
 
 export const agentQueue = queue({
 	name: "ai-agents",
-	concurrencyLimit: Number(process.env.AGENT_QUEUE_CONCURRENCY ?? 10),
+	concurrencyLimit: env.AGENT_QUEUE_CONCURRENCY,
 });

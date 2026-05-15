@@ -55,6 +55,7 @@
     "date-fns": "catalog:",
     "defu": "^6.1.7",
     "dotenv": "catalog:",
+    "embla-carousel-auto-scroll": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "evlog": "catalog:",
     "libsql": "catalog:",

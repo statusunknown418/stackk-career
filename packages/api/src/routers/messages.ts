@@ -81,11 +81,13 @@ export const messagesRouter = {
 			.select()
 			.from(messages)
 			.where(eq(messages.generationId, input.generationId))
-			.orderBy(asc(messages.order), asc(messages.createdAt));
+			.orderBy(asc(messages.order), asc(messages.createdAt))
+			.limit(input.limit)
+			.offset(input.offset);
 
 		context.log?.set({
 			outcome: "listed",
-			messages: { count: rows.length },
+			messages: { count: rows.length, limit: input.limit, offset: input.offset },
 		});
 
 		return rows;

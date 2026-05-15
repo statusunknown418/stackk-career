@@ -1,7 +1,11 @@
 import { ORPCError } from "@orpc/client";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { blankResumeSections, updateResumeTitleSchema } from "@stackk-career/schemas/api/resumes";
+import {
+	blankResumeSections,
+	listResumesInputSchema,
+	updateResumeTitleSchema,
+} from "@stackk-career/schemas/api/resumes";
 import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
 import { constructNow, formatDate } from "date-fns";
@@ -11,10 +15,16 @@ import { protectedProcedure } from "..";
 import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
 
 export const resumesRouter = {
-	list: protectedProcedure.handler(async ({ context }) => {
+	list: protectedProcedure.input(listResumesInputSchema).handler(async ({ context, input }) => {
 		const userId = context.session.user.id;
 
-		const userResumes = await context.db.select().from(resumes).where(eq(resumes.userId, userId));
+		const userResumes = await context.db
+			.select()
+			.from(resumes)
+			.where(eq(resumes.userId, userId))
+			.limit(input.limit)
+			.offset(input.offset)
+			.$withCache();
 
 		context.log?.set({
 			action: "get_resumes",
