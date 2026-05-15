@@ -1,3 +1,4 @@
+import { dash } from "@better-auth/infra";
 import { createDb } from "@stackk-career/db";
 import * as schema from "@stackk-career/db/schema/auth";
 import { env } from "@stackk-career/env/server";
@@ -30,7 +31,7 @@ export function createAuth() {
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
-		plugins: [tanstackStartCookies()],
+		plugins: [dash(), tanstackStartCookies()],
 	});
 }
 

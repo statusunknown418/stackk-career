@@ -18,6 +18,7 @@ import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiEvlogIngestRouteImport } from './routes/api/_evlog/ingest'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
@@ -69,6 +70,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEvlogIngestRoute = ApiEvlogIngestRouteImport.update({
+  id: '/api/_evlog/ingest',
+  path: '/api/ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
   id: '/suggested',
   path: '/suggested',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
+  '/api/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash/': typeof ProtectedDashIndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
+  '/api/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash': typeof ProtectedDashIndexRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
   '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
+  '/api/_evlog/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/dash/agents'
     | '/dash/coaches'
     | '/dash/suggested'
+    | '/api/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/dash/agents'
     | '/dash/coaches'
     | '/dash/suggested'
+    | '/api/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/_protected/dash/agents'
     | '/_protected/dash/coaches'
     | '/_protected/dash/suggested'
+    | '/api/_evlog/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/_protected/dash/'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
+  ApiEvlogIngestRoute: typeof ApiEvlogIngestRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
   ApiWebhooksCalSplatRoute: typeof ApiWebhooksCalSplatRoute
@@ -275,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/_evlog/ingest': {
+      id: '/api/_evlog/ingest'
+      path: '/api/ingest'
+      fullPath: '/api/ingest'
+      preLoaderRoute: typeof ApiEvlogIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/dash/suggested': {
@@ -362,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
+  ApiEvlogIngestRoute: ApiEvlogIngestRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
   ApiWebhooksCalSplatRoute: ApiWebhooksCalSplatRoute,
