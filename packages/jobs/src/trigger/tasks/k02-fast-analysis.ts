@@ -9,7 +9,6 @@ import {
 	K02_FAST_ANALYSIS_OBJECT_TYPE,
 	runK02FastAnalysisAgent,
 } from "../../agents/k02-fast-analysis";
-import { emitUsageEvent } from "../../axiom/emit";
 import { assertPdfHostAllowed } from "../lib/utils";
 import { agentQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
@@ -76,21 +75,6 @@ export const k02FastAnalysisTask = schemaTask({
 				objectType: K02_FAST_ANALYSIS_OBJECT_TYPE,
 			}),
 		]);
-
-		await emitUsageEvent({
-			usage,
-			kind: "object",
-			modelId: K02_FAST_ANALYSIS_MODEL,
-			userId,
-			metadata: {
-				analysisId,
-				generationId,
-				taskRunId: ctx.run.id,
-				attempt: ctx.attempt.number,
-				objectType: K02_FAST_ANALYSIS_OBJECT_TYPE,
-				agent: "k02-fast-analysis",
-			},
-		});
 
 		metadata.set("step", "complete");
 

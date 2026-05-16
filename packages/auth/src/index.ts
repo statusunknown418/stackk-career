@@ -10,6 +10,8 @@ export function createAuth() {
 	const db = createDb();
 
 	return betterAuth({
+		appName: "Stackk Career",
+
 		database: drizzleAdapter(db, {
 			provider: "sqlite",
 			schema,
