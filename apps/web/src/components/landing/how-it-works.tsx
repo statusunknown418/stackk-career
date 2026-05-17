@@ -61,7 +61,7 @@ export function HowItWorks() {
 				<header className="mx-auto mb-14 max-w-[1200px]">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Cómo funciona</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
-						<WordReveal>El camino. De Día 0 a oferta firmada.</WordReveal>
+						<WordReveal>El camino. De Día 0 a entrevista conseguida.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
 						6 pasos. La IA hace el volumen. El coach hace que cada uno cuente.
@@ -229,7 +229,7 @@ function OfferReceiptVisual() {
 			>
 				<CheckIcon size={11} weight="bold" />
 			</span>
-			<span className="font-display font-medium text-[13px] text-foreground">Día 42 · Oferta firmada</span>
+			<span className="font-display font-medium text-[13px] text-foreground">Día 42 · Entrevistas reales</span>
 			<span className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.14em]">Premium</span>
 		</div>
 	);

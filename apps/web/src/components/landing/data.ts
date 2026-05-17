@@ -115,8 +115,8 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "04",
 		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Mientras otras plataformas todavía revisan tu CV, tú ya estás eligiendo entre ofertas.",
-		receipt: { label: "Días promedio a oferta", value: "36 en Premium" },
+		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Mientras otras plataformas todavía revisan tu CV, tú ya estás en entrevistas reales.",
+		receipt: { label: "Días a primera entrevista", value: "18 promedio en Premium" },
 	},
 ];
 
@@ -143,12 +143,12 @@ export const HOW_STEPS: readonly HowStep[] = [
 	},
 	{
 		title: "Cierra y negocia (Sesión 3)",
-		body: "30 min después de la entrevista. Plan para cerrar el proceso y negociar tu oferta.",
+		body: "30 min después de la entrevista. Plan para cerrar el proceso. Si llegas a oferta, te ayudamos a negociarla.",
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Tu nueva oferta",
-		body: "Firmaste. Día 42 en promedio. Cancelas la suscripción cuando quieras.",
+		title: "Resultado",
+		body: "Día 42 promedio en Premium. Conseguiste entrevistas reales. Si firmaste oferta, mejor todavía. Cancelas la suscripción cuando quieras.",
 		tag: "★ Resultado",
 	},
 ];
@@ -472,7 +472,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿En cuánto tiempo veo resultados?",
-		a: "Score y CV mejorado: el mismo día. Primera entrevista real: entre 2 y 4 semanas en Pro o Premium, según tu nivel y rol. Oferta firmada: el promedio del último año fue 36 días en Premium.",
+		a: "Score y CV mejorado: el mismo día. Primera entrevista real: entre 2 y 4 semanas en Pro o Premium, según tu nivel y rol. La garantía Premium cubre la entrevista en 90 días. Si llegas a oferta firmada, el promedio histórico es de 36 días, pero no es algo que garanticemos: depende de la empresa y de ti.",
 	},
 	{
 		q: "¿Funciona si no soy de tech?",

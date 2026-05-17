@@ -36,7 +36,7 @@ export function LandingFooter() {
 							<span className="font-bold font-display text-2xl text-foreground tracking-[-0.02em]">IMPULSA</span>
 						</div>
 						<p className="mt-4 max-w-[300px] text-[14px] text-foreground/70 leading-[1.55]">
-							Tu próxima oferta empieza con un score. IA + coach humano, hecho en Perú para LATAM.
+							Tu próxima entrevista empieza con un score. IA + coach humano, hecho en Perú para LATAM.
 						</p>
 					</div>
 
