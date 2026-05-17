@@ -339,22 +339,22 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.225 0.003 247);
-	--background: oklch(0.977 0.002 320); /* #fbf9fa parchment */
-	--border: oklch(0.225 0.003 247 / 10%);
+	--accent-foreground: oklch(0.215 0.001 209);
+	--background: oklch(0.973 0 0); /* #f9f9f9 paper */
+	--border: oklch(0.215 0.001 209 / 10%);
 	--card: oklch(1 0 0); /* #ffffff surface-container-lowest */
-	--card-foreground: oklch(0.225 0.003 247);
+	--card-foreground: oklch(0.215 0.001 209);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.225 0.003 247); /* #1b1c1d on-surface */
-	--input: oklch(0.225 0.003 247 / 12%);
-	--muted: oklch(0.225 0.003 247 / 5%);
-	--muted-foreground: oklch(0.32 0.012 250); /* #44474c on-surface-variant */
+	--foreground: oklch(0.215 0.001 209); /* #1a1c1c ink */
+	--input: oklch(0.215 0.001 209 / 12%);
+	--muted: oklch(0.215 0.001 209 / 5%);
+	--muted-foreground: oklch(0.36 0.003 195); /* #444748 lead */
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.225 0.003 247);
-	--primary: oklch(0.165 0.041 246); /* #041525 Midnight Navy */
+	--popover-foreground: oklch(0.215 0.001 209);
+	--primary: oklch(0.215 0.001 209); /* #1a1c1c ink */
 	--primary-foreground: oklch(1 0 0);
-	--ring: oklch(0.165 0.041 246);
-	--secondary: oklch(0.41 0.052 153); /* #3a6752 Sage Green */
+	--ring: oklch(0.215 0.001 209);
+	--secondary: oklch(0.52 0.215 28); /* #b6181a editorial red */
 	--secondary-foreground: oklch(1 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
@@ -380,15 +380,19 @@
 }
 
 :root {
-	/* Modern Editorial — Midnight Navy + Sage Green on Parchment */
-	--ink: oklch(0.225 0.003 247); /* #1b1c1d on-surface */
-	--paper: oklch(0.977 0.002 320); /* #fbf9fa surface */
-	--oxblood: oklch(0.165 0.041 246); /* #041525 Midnight Navy — primary */
-	--marigold: oklch(0.41 0.052 153); /* #3a6752 Sage Green — secondary */
-	--rule: oklch(0.81 0.005 280 / 1); /* #c4c6cc outline-variant */
-	--aurora-1: oklch(0.86 0.025 246); /* soft navy tint */
-	--aurora-2: oklch(0.86 0.025 153); /* soft sage tint */
-	--aurora-3: oklch(0.88 0.018 200); /* soft cool bridge */
+	/* Ink & Paper — Newspaper aesthetic, high contrast B&W + editorial red */
+	--ink: oklch(0.215 0.001 209); /* #1a1c1c on-surface */
+	--paper: oklch(0.973 0 0); /* #f9f9f9 surface */
+	--oxblood: oklch(
+		0.215 0.001 209
+	); /* Ink #1a1c1c — primary (used for buttons, fills, structural) */
+	--marigold: oklch(
+		0.52 0.215 28
+	); /* #b6181a editorial red — restrained accent */
+	--rule: oklch(0.82 0.003 195); /* #c4c7c7 outline-variant */
+	--aurora-1: oklch(0.93 0.003 195); /* near-paper tint */
+	--aurora-2: oklch(0.94 0.01 28); /* warm paper tint */
+	--aurora-3: oklch(0.92 0.004 195); /* cool paper tint */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
