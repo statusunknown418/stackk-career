@@ -339,23 +339,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.215 0.001 209);
-	--background: oklch(0.973 0 0); /* #f9f9f9 paper */
-	--border: oklch(0.215 0.001 209 / 10%);
-	--card: oklch(1 0 0); /* #ffffff surface-container-lowest */
-	--card-foreground: oklch(0.215 0.001 209);
+	--accent-foreground: oklch(0.215 0.008 60);
+	--background: oklch(0.968 0.011 85); /* #f8f5ee cream */
+	--border: oklch(0.215 0.008 60 / 10%);
+	--card: oklch(0.993 0.005 85); /* warm white */
+	--card-foreground: oklch(0.215 0.008 60);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.215 0.001 209); /* #1a1c1c ink */
-	--input: oklch(0.215 0.001 209 / 12%);
-	--muted: oklch(0.215 0.001 209 / 5%);
-	--muted-foreground: oklch(0.36 0.003 195); /* #444748 lead */
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.215 0.001 209);
-	--primary: oklch(0.215 0.001 209); /* #1a1c1c ink */
-	--primary-foreground: oklch(1 0 0);
-	--ring: oklch(0.215 0.001 209);
-	--secondary: oklch(0.52 0.215 28); /* #b6181a editorial red */
-	--secondary-foreground: oklch(1 0 0);
+	--foreground: oklch(0.215 0.008 60); /* espresso ink */
+	--input: oklch(0.215 0.008 60 / 12%);
+	--muted: oklch(0.215 0.008 60 / 5%);
+	--muted-foreground: oklch(0.42 0.012 70); /* warm lead */
+	--popover: oklch(0.993 0.005 85);
+	--popover-foreground: oklch(0.215 0.008 60);
+	--primary: oklch(0.27 0.018 60); /* warm charcoal */
+	--primary-foreground: oklch(0.99 0.008 85);
+	--ring: oklch(0.745 0.155 60); /* marigold focus */
+	--secondary: oklch(0.745 0.155 60); /* marigold accent */
+	--secondary-foreground: oklch(0.215 0.008 60);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -380,19 +380,15 @@
 }
 
 :root {
-	/* Ink & Paper — Newspaper aesthetic, high contrast B&W + editorial red */
-	--ink: oklch(0.215 0.001 209); /* #1a1c1c on-surface */
-	--paper: oklch(0.973 0 0); /* #f9f9f9 surface */
-	--oxblood: oklch(
-		0.215 0.001 209
-	); /* Ink #1a1c1c — primary (used for buttons, fills, structural) */
-	--marigold: oklch(
-		0.52 0.215 28
-	); /* #b6181a editorial red — restrained accent */
-	--rule: oklch(0.82 0.003 195); /* #c4c7c7 outline-variant */
-	--aurora-1: oklch(0.93 0.003 195); /* near-paper tint */
-	--aurora-2: oklch(0.94 0.01 28); /* warm paper tint */
-	--aurora-3: oklch(0.92 0.004 195); /* cool paper tint */
+	/* Espresso & Marigold — warm editorial. Charcoal brand + amber accent on cream */
+	--ink: oklch(0.215 0.008 60);
+	--paper: oklch(0.968 0.011 85);
+	--oxblood: oklch(0.27 0.018 60);
+	--marigold: oklch(0.745 0.155 60);
+	--rule: oklch(0.86 0.012 80);
+	--aurora-1: oklch(0.92 0.04 75);
+	--aurora-2: oklch(0.9 0.05 50);
+	--aurora-3: oklch(0.94 0.025 90);
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
