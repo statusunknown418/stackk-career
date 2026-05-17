@@ -11,9 +11,6 @@
   },
   "scripts": {},
   "dependencies": {
-    "@better-auth/core": "catalog:",
-    "@better-auth/infra": "catalog:",
-    "@better-auth/sso": "catalog:",
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
     "better-auth": "catalog:",
