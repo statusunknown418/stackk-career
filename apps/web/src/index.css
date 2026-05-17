@@ -339,23 +339,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.16 0.04 280);
-	--background: oklch(0.98 0.005 280);
-	--border: oklch(0.16 0.04 280 / 10%);
-	--card: oklch(0.995 0.003 280);
-	--card-foreground: oklch(0.16 0.04 280);
+	--accent-foreground: oklch(0.225 0.003 247);
+	--background: oklch(0.977 0.002 320); /* #fbf9fa parchment */
+	--border: oklch(0.225 0.003 247 / 10%);
+	--card: oklch(1 0 0); /* #ffffff surface-container-lowest */
+	--card-foreground: oklch(0.225 0.003 247);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.16 0.04 280);
-	--input: oklch(0.16 0.04 280 / 12%);
-	--muted: oklch(0.16 0.04 280 / 5%);
-	--muted-foreground: oklch(0.45 0.05 280);
-	--popover: oklch(0.995 0.003 280);
-	--popover-foreground: oklch(0.16 0.04 280);
-	--primary: oklch(0.5 0.24 290);
-	--primary-foreground: oklch(0.99 0 0);
-	--ring: oklch(0.5 0.24 290);
-	--secondary: oklch(0.16 0.04 280 / 5%);
-	--secondary-foreground: oklch(0.16 0.04 280);
+	--foreground: oklch(0.225 0.003 247); /* #1b1c1d on-surface */
+	--input: oklch(0.225 0.003 247 / 12%);
+	--muted: oklch(0.225 0.003 247 / 5%);
+	--muted-foreground: oklch(0.32 0.012 250); /* #44474c on-surface-variant */
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.225 0.003 247);
+	--primary: oklch(0.165 0.041 246); /* #041525 Midnight Navy */
+	--primary-foreground: oklch(1 0 0);
+	--ring: oklch(0.165 0.041 246);
+	--secondary: oklch(0.41 0.052 153); /* #3a6752 Sage Green */
+	--secondary-foreground: oklch(1 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -380,14 +380,15 @@
 }
 
 :root {
-	--ink: oklch(0.16 0.04 280);
-	--paper: oklch(0.98 0.005 280);
-	--oxblood: oklch(0.5 0.24 290);
-	--marigold: oklch(0.5 0.24 290);
-	--rule: oklch(0.16 0.04 280 / 8%);
-	--aurora-1: oklch(0.65 0.24 290);
-	--aurora-2: oklch(0.5 0.24 290);
-	--aurora-3: oklch(0.55 0.22 295);
+	/* Modern Editorial — Midnight Navy + Sage Green on Parchment */
+	--ink: oklch(0.225 0.003 247); /* #1b1c1d on-surface */
+	--paper: oklch(0.977 0.002 320); /* #fbf9fa surface */
+	--oxblood: oklch(0.165 0.041 246); /* #041525 Midnight Navy — primary */
+	--marigold: oklch(0.41 0.052 153); /* #3a6752 Sage Green — secondary */
+	--rule: oklch(0.81 0.005 280 / 1); /* #c4c6cc outline-variant */
+	--aurora-1: oklch(0.86 0.025 246); /* soft navy tint */
+	--aurora-2: oklch(0.86 0.025 153); /* soft sage tint */
+	--aurora-3: oklch(0.88 0.018 200); /* soft cool bridge */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
