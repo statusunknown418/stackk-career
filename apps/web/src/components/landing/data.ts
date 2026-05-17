@@ -142,13 +142,13 @@ export const HOW_STEPS: readonly HowStep[] = [
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Cierra y negocia (Sesión 3)",
-		body: "30 min después de la entrevista. Plan para cerrar el proceso. Si llegas a oferta, te ayudamos a negociarla.",
+		title: "Refuerzo post entrevista (Sesión 3)",
+		body: "30 min de debrief con tu coach: qué salió bien, qué pulir y cómo encarar los siguientes procesos con más seguridad.",
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Resultado",
-		body: "Día 42 promedio en Premium. Conseguiste entrevistas reales. Si firmaste oferta, mejor todavía. Cancelas la suscripción cuando quieras.",
+		title: "Entrevistas reales en mano",
+		body: "Día 42 promedio en Premium. Pasaste por simulacros, las hiciste en vivo y ya tienes el método para las siguientes. Cancelas la suscripción cuando quieras.",
 		tag: "★ Resultado",
 	},
 ];
@@ -201,7 +201,7 @@ export const PLANS: readonly Plan[] = [
 			"Todo lo del plan Pro",
 			"Sesión 1: Mapea tu próximo trabajo (45 min)",
 			"Sesión 2: Domina la entrevista (45 min)",
-			"Sesión 3: Cierra y negocia (30 min)",
+			"Sesión 3: Refuerzo post entrevista (30 min)",
 			"Revisión humana de CV + LinkedIn",
 			"WhatsApp con coach (24h respuesta)",
 		],
@@ -282,8 +282,8 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Backend Engineer en Belcorp",
 		location: "Lima",
 		quote:
-			"Hice Premium pensando que era mucho. Negocié S/4.500 más en la oferta gracias a la sesión 3. ROI inmediato.",
-		chip: "+S/4.5k oferta",
+			"Hice Premium pensando que era mucho. La sesión 2 me cambió cómo me preparo: entré a la entrevista con seguridad y la pasé al primer intento.",
+		chip: "Pasé al primer intento",
 	},
 	{
 		id: "paula",
@@ -349,7 +349,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		location: "Bogotá",
 		quote:
 			"La parte técnica la sabía; lo que me faltaba era contarla. Tres rondas de simulacro y entré a la entrevista real sin nervios.",
-		chip: "+15% sueldo",
+		chip: "Entré sin nervios",
 	},
 	{
 		id: "florencia",
@@ -392,8 +392,8 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Analyst en Rappi",
 		location: "Lima",
 		quote:
-			"Lo más útil fue practicar la negociación con mi coach. Aprendí a pedir más sueldo sin sonar arrogante. Cerré con un upgrade real.",
-		chip: "+25% sueldo",
+			"Lo más útil fue practicar las preguntas difíciles con mi coach. Cuando llegó la entrevista real, sentí que ya la había hecho tres veces.",
+		chip: "Práctica real",
 	},
 	{
 		id: "sara",
@@ -472,7 +472,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿En cuánto tiempo veo resultados?",
-		a: "Score y CV mejorado: el mismo día. Primera entrevista real: entre 2 y 4 semanas en Pro o Premium, según tu nivel y rol. La garantía Premium cubre la entrevista en 90 días. Si llegas a oferta firmada, el promedio histórico es de 36 días, pero no es algo que garanticemos: depende de la empresa y de ti.",
+		a: "Score y CV mejorado: el mismo día. Primera entrevista real: entre 2 y 4 semanas en Pro o Premium, según tu nivel y rol. La garantía Premium cubre tu primera entrevista en 90 días.",
 	},
 	{
 		q: "¿Funciona si no soy de tech?",

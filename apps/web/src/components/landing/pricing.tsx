@@ -63,11 +63,12 @@ export function Pricing() {
 					className="inline-block size-1.5 rounded-full bg-marigold shadow-[0_0_12px_oklch(from_var(--marigold)_l_c_h/0.6)]"
 				/>
 				<p className="mt-5 font-display-italic font-light text-[clamp(1.75rem,3.6vw,2.6rem)] text-foreground leading-[1.12] tracking-[-0.025em]">
-					¿Encontraste trabajo?
+					¿Cumpliste tu objetivo?
 				</p>
 				<p className="mx-auto mt-5 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]">
-					No te preocupes, cancela cuando quieras. <span className="text-foreground/90">Siempre estaremos aquí</span>{" "}
-					cuando quieras volver a desarrollar tu carrera.
+					Cancela cuando quieras. Sin retención agresiva.{" "}
+					<span className="text-foreground/90">Siempre estaremos aquí</span> cuando quieras volver a desarrollar tu
+					carrera.
 				</p>
 			</div>
 		</section>
