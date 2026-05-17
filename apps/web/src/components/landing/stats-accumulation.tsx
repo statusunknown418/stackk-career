@@ -10,9 +10,9 @@ interface StatLine {
 }
 
 const STAT_LINES: readonly StatLine[] = [
-	{ value: "2,400+", label: "profesionales colocados" },
+	{ value: "2,400+", label: "firmaron oferta el último año" },
 	{ value: "4.9★", label: "en 380 reseñas verificadas" },
-	{ value: "47 → 95", label: "score CV en promedio", accent: "oxblood" },
+	{ value: "47 → 95", label: "salto promedio en su score CV", accent: "oxblood" },
 	{ value: "S/79", label: "tu coach, no US$699", accent: "marigold" },
 ];
 
@@ -33,16 +33,16 @@ interface FloatingLogo {
 }
 
 const FLOATING_LOGOS: readonly FloatingLogo[] = [
-	{ name: "Mercado Libre", style: "font-medium tracking-tight", top: "8%", left: "5%", rotate: -6, delay: 0 },
-	{ name: "Falabella", style: "font-semibold tracking-tight", top: "14%", right: "6%", rotate: 5, delay: 0.6 },
-	{ name: "Despegar", style: "font-bold tracking-tight", top: "70%", left: "7%", rotate: 3, delay: 1.2 },
-	{ name: "Tiendanube", style: "font-medium tracking-tight", top: "78%", right: "9%", rotate: -4, delay: 1.8 },
-	{ name: "Nubank", style: "font-bold italic tracking-tight", top: "44%", left: "3%", rotate: 7, delay: 2.4 },
-	{ name: "BBVA", style: "font-bold tracking-tight", top: "55%", right: "4%", rotate: -3, delay: 3 },
-	{ name: "Stori", style: "font-semibold tracking-tight", top: "88%", left: "20%", rotate: 4, delay: 3.6 },
-	{ name: "Avianca", style: "font-semibold italic tracking-tight", top: "12%", left: "60%", rotate: -3, delay: 4.2 },
-	{ name: "Konfío", style: "font-bold tracking-tight", top: "85%", right: "18%", rotate: 5, delay: 4.8 },
-	{ name: "Movistar", style: "font-medium tracking-tight", top: "50%", left: "75%", rotate: -2, delay: 5.4 },
+	{ name: "Mercado Libre", style: "font-medium tracking-tight", top: "8%", left: "8%", rotate: -6, delay: 0 },
+	{ name: "Avianca", style: "font-semibold italic tracking-tight", top: "10%", left: "30%", rotate: -3, delay: 1 },
+	{ name: "Konfío", style: "font-bold tracking-tight", top: "12%", right: "30%", rotate: 4, delay: 2 },
+	{ name: "Falabella", style: "font-semibold tracking-tight", top: "14%", right: "7%", rotate: 5, delay: 3 },
+	{ name: "Nubank", style: "font-bold italic tracking-tight", top: "44%", left: "4%", rotate: 7, delay: 1.5 },
+	{ name: "BBVA", style: "font-bold tracking-tight", top: "50%", right: "4%", rotate: -3, delay: 4 },
+	{ name: "Despegar", style: "font-bold tracking-tight", top: "76%", left: "7%", rotate: 3, delay: 2.5 },
+	{ name: "Stori", style: "font-semibold tracking-tight", top: "82%", left: "28%", rotate: 4, delay: 3.5 },
+	{ name: "Movistar", style: "font-medium tracking-tight", top: "82%", right: "28%", rotate: -2, delay: 5 },
+	{ name: "Tiendanube", style: "font-medium tracking-tight", top: "78%", right: "8%", rotate: -4, delay: 5.4 },
 ];
 
 export function StatsAccumulation() {
@@ -71,7 +71,7 @@ export function StatsAccumulation() {
 						viewport={{ once: false, margin: "-30% 0px" }}
 						whileInView={{ opacity: 1, y: 0 }}
 					>
-						Los números detrás
+						Datos de los últimos 12 meses
 					</motion.p>
 
 					<motion.h2

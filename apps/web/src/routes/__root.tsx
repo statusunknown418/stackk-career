@@ -78,7 +78,7 @@ function RootDocument() {
 
 			<body>
 				<ThemeProvider defaultTheme="light" storageKey="theme">
-					<div className="grid min-h-svh">
+					<div className="grid min-h-svh grid-cols-1">
 						<Outlet />
 					</div>
 				</ThemeProvider>

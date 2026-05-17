@@ -92,63 +92,63 @@ export const HERO_CHART: readonly BentoChartBar[] = [
 export const WHY_REASONS: readonly WhyReason[] = [
 	{
 		number: "01",
-		title: "Tu coach humano,",
-		emphasis: "no un chatbot solo.",
-		body: "Un coach senior con tu CV en mano. No freelancers que entran y salen. La IA hace el trabajo pesado en segundos. Tu coach te dice qué decir en la entrevista del lunes.",
+		title: "Coach senior real,",
+		emphasis: "no IA disfrazada.",
+		body: "Persona con tu CV en mano que te dice qué decir el lunes en la entrevista. La IA hace el volumen; el coach acelera tus decisiones. Eso no lo automatiza nadie.",
 		receipt: { label: "Equipo de coaches", value: "3 a 5 senior · planilla · LATAM" },
 	},
 	{
 		number: "02",
-		title: "Todo en un",
-		emphasis: "solo plan.",
-		body: "CV, carta, LinkedIn, outreach y score. Afuera te los cobran por separado. Acá vienen juntos, en español. Cero paquetes inflados, cero onboarding eterno.",
-		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin sorpresas en el checkout" },
+		title: "Un solo precio.",
+		emphasis: "Todo adentro.",
+		body: "CV, carta, LinkedIn, mensajes a reclutadores, score y coaching humano. Wonsulting te lo vende en paquetes de US$699 a US$2.299. Acá viene completo desde S/79.",
+		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin extras" },
 	},
 	{
 		number: "03",
-		title: "Hablamos tu",
-		emphasis: "mercado.",
-		body: "Tu coach ya entrevistó en BCP, Yape, Rappi o Belcorp. Sabe exactamente qué busca un recruiter LATAM. Nada de fórmulas gringas traducidas con Google Translate.",
+		title: "Conocemos a",
+		emphasis: "tu recruiter.",
+		body: "Tu coach ya entrevistó en BCP, Yape, Rappi y Belcorp. Sabe las preguntas reales, los códigos de cada empresa y la jerga local. Nada de fórmulas gringas traducidas con Google Translate.",
 		receipt: { label: "Cobertura regional", value: "8 países · 100% español" },
 	},
 	{
 		number: "04",
-		title: "Velocidad medible.",
+		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Primer aha en 30 segundos. Entrevistas concretas en 2 a 4 semanas. Oferta firmada en promedio 36 días (Premium). Mientras otros revisan tu CV en 2 semanas, acá ya estás aplicando.",
-		receipt: { label: "Tiempo promedio a oferta", value: "36 días en Premium" },
+		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Mientras otras plataformas todavía revisan tu CV, tú ya estás eligiendo entre ofertas.",
+		receipt: { label: "Días promedio a oferta", value: "36 en Premium" },
 	},
 ];
 
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Sube tu CV. Score de 0 a 100 + lista exacta de qué arreglar. Tu primer aha, gratis.",
+		body: "Sube tu CV. Score de 0 a 100 y lista exacta de qué arreglar. Gratis, sin tarjeta.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
 		title: "Mapea tu próximo trabajo (Sesión 1)",
-		body: "45 min con tu coach. CV + LinkedIn en vivo. Plan de acción, roles y empresas objetivo.",
+		body: "45 min con tu coach. Revisamos CV y LinkedIn juntos, definimos roles realistas y armamos la lista corta de empresas.",
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Ejecuta con IA",
-		body: "Score vs. oferta, cartas, outreach, optimización LinkedIn. Ejecutas el plan del coach.",
+		title: "Ejecuta el plan",
+		body: "Score vs. oferta específica, cartas en 30s, mensajes a reclutadores, LinkedIn al 90+. Las herramientas hacen el volumen; el plan del coach define la dirección.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Domina la entrevista (Sesión 2)",
-		body: "45 min. Simulacro para el puesto específico. Feedback + consejos de lenguaje corporal.",
+		body: "45 min. Simulacro real para el puesto al que apuntas. Feedback directo + claves de lenguaje corporal.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Cierra y negocia (Sesión 3)",
-		body: "30 min post-entrevista. Plan para cerrar el proceso. Negociación de oferta.",
+		body: "30 min después de la entrevista. Plan para cerrar el proceso y negociar tu oferta.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Tu nueva oferta",
-		body: "Conseguiste el trabajo. Cierras el ciclo. Tu coach celebra contigo.",
+		body: "Firmaste. Día 42 en promedio. Cancelas la suscripción cuando quieras.",
 		tag: "★ Resultado",
 	},
 ];
@@ -174,7 +174,7 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "pro",
 		name: "Pro",
-		tagline: "IA ilimitada + 1 sesión de coaching al mes.",
+		tagline: "IA ilimitada + 1 sesión 1:1 al mes.",
 		priceSoles: 79,
 		priceUsd: 21,
 		per: "/ mes · cancela cuando quieras",
@@ -184,7 +184,7 @@ export const PLANS: readonly Plan[] = [
 			"CV ilimitado + versiones por puesto",
 			"Cartas de presentación ilimitadas",
 			"Optimizador LinkedIn completo",
-			"Mensajes de outreach ilimitados",
+			"Mensajes a reclutadores ilimitados",
 			"1 sesión 1:1 con coach (30 min) al mes, temas a tu elección",
 		],
 		cta: "Empezar Pro",
@@ -214,7 +214,7 @@ export const SINGLE_SESSION = {
 	priceUsd: 11,
 	duration: "45 min",
 	tagline: "Prueba el coaching sin suscribirte.",
-	body: "Para cuando todavía no quieres comprometerte. Cualquier coach del equipo, 45 minutos de revisión real. Sirve como prueba del servicio Premium.",
+	body: "Cualquier coach del equipo, 45 minutos sobre tu caso real. Sin suscripción, sin compromiso.",
 	cta: "Reservar sesión única",
 } as const;
 
@@ -227,7 +227,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Analista en Yape",
 		location: "Lima",
 		quote:
-			"Subí mi CV y el score me dio 41. Después del rewrite con la IA y la sesión 1, salté a 95. Tres semanas después ya tenía dos entrevistas agendadas.",
+			"Subí mi CV y el score me dio 41. Después de la reescritura con la IA y la sesión 1, salté a 95. Tres semanas después ya tenía dos entrevistas agendadas.",
 		chip: "41 → 95",
 	},
 	{
@@ -238,7 +238,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Product Analyst en Rappi",
 		location: "Bogotá",
 		quote:
-			"El coach me hizo escribir bullets con números por primera vez. Suena obvio, pero no lo era para mí. Cambió todo.",
+			"El coach me hizo escribir logros con números por primera vez. Suena obvio, pero no lo era para mí. Cambió todo.",
 		chip: "1er empleo",
 	},
 	{
@@ -329,6 +329,116 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 			"Tenía miedo de que fuera otra cosa de coaching genérico. Es lo opuesto: feedback durísimo y concreto sobre mi caso real.",
 		chip: "42 días",
 	},
+	{
+		id: "camila",
+		initials: "CR",
+		gradient: "from-emerald-300 to-emerald-600",
+		name: "Camila Rodríguez",
+		role: "Product Designer en Yape",
+		location: "Lima",
+		quote:
+			"Mi CV decía mucho qué hice y nada de cómo lo medí. La sesión 2 me cambió el enfoque entero: dejé de listar tareas y empecé a contar impacto.",
+		chip: "35 días",
+	},
+	{
+		id: "mateo",
+		initials: "MA",
+		gradient: "from-indigo-200 to-indigo-600",
+		name: "Mateo Aliaga",
+		role: "Data Engineer en Globant",
+		location: "Bogotá",
+		quote:
+			"La parte técnica la sabía; lo que me faltaba era contarla. Tres rondas de simulacro y entré a la entrevista real sin nervios.",
+		chip: "+15% sueldo",
+	},
+	{
+		id: "florencia",
+		initials: "FR",
+		gradient: "from-emerald-200 to-emerald-600",
+		name: "Florencia Romero",
+		role: "Marketing Manager en Falabella",
+		location: "Santiago",
+		quote:
+			"Pensé que era coaching común. La diferencia: mi coach había sido CMO en la región. Hablamos el mismo idioma desde la primera sesión.",
+		chip: "Promoción",
+	},
+	{
+		id: "andres",
+		initials: "AC",
+		gradient: "from-indigo-300 to-indigo-700",
+		name: "Andrés Calderón",
+		role: "Frontend Engineer en Kushki",
+		location: "Lima",
+		quote:
+			"Era junior buscando rol senior. Me ayudaron a ordenar mis proyectos de freelance para que cuenten como experiencia formal en el CV.",
+		chip: "Salto de rol",
+	},
+	{
+		id: "lucia",
+		initials: "LM",
+		gradient: "from-emerald-300 to-emerald-700",
+		name: "Lucía Méndez",
+		role: "Customer Success en Despegar",
+		location: "Buenos Aires",
+		quote:
+			"Llevaba 5 meses sin recibir respuesta a una sola aplicación. Reescribimos el CV un sábado y a las 2 semanas tenía mi primera entrevista real.",
+		chip: "5 meses → 2 semanas",
+	},
+	{
+		id: "joaquin",
+		initials: "JV",
+		gradient: "from-indigo-200 to-indigo-700",
+		name: "Joaquín Vega",
+		role: "Analyst en Rappi",
+		location: "Lima",
+		quote:
+			"Lo más útil fue practicar la negociación con mi coach. Aprendí a pedir más sueldo sin sonar arrogante. Cerré con un upgrade real.",
+		chip: "+25% sueldo",
+	},
+	{
+		id: "sara",
+		initials: "SV",
+		gradient: "from-emerald-200 to-emerald-700",
+		name: "Sara Villanueva",
+		role: "UX Designer en Stori",
+		location: "CDMX",
+		quote:
+			"Antes probé plataformas gringas. Pagué dos veces y cero resultados. Acá la diferencia fue que mi coach conocía el mercado mexicano.",
+		chip: "32 días",
+	},
+	{
+		id: "alejandra",
+		initials: "AS",
+		gradient: "from-indigo-300 to-indigo-600",
+		name: "Alejandra Suárez",
+		role: "Project Manager en Belcorp",
+		location: "Lima",
+		quote:
+			"Tenía 6 años de experiencia pero mi CV parecía de 2. Lo reordenamos por impacto, no por orden cronológico. Otra historia.",
+		chip: "Score 95",
+	},
+	{
+		id: "bruno",
+		initials: "BL",
+		gradient: "from-emerald-200 to-emerald-600",
+		name: "Bruno Lazo",
+		role: "Marketing Digital en Niubiz",
+		location: "Lima",
+		quote:
+			"El simulacro grabado fue lo más útil. Verme escuchar y responder en video me hizo corregir tics que ni notaba.",
+		chip: "3 semanas",
+	},
+	{
+		id: "valeria",
+		initials: "VC",
+		gradient: "from-indigo-200 to-indigo-700",
+		name: "Valeria Castro",
+		role: "HR Business Partner en Crehana",
+		location: "Bogotá",
+		quote:
+			"Soy de RRHH y aún así no sabía cómo me veía desde afuera. La ironía perfecta: una coach me ayudó a reposicionarme para mi propio jefe.",
+		chip: "Cambio interno",
+	},
 ];
 
 export const FAQ_ITEMS: readonly FaqItem[] = [
@@ -338,7 +448,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Quiénes son los coaches?",
-		a: "Un equipo chico de 3 a 5 coaches senior con experiencia haciendo hiring para tech, producto, datos y consultoría en empresas de la región. No son freelancers de plataforma: están en planilla con IMPULSA y los entrevistamos uno por uno.",
+		a: "Un equipo chico de 3 a 5 coaches senior con experiencia contratando para tech, producto, datos y consultoría en empresas de la región. No son freelancers de plataforma: están en planilla con IMPULSA y los entrevistamos uno por uno.",
 	},
 	{
 		q: "¿Cuál es la diferencia con Wonsulting o ResumAI?",
@@ -366,7 +476,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Funciona si no soy de tech?",
-		a: "Sí. Tenemos casos en marketing, comunicaciones, project management, customer success, diseño y consultoría. Los coaches han hecho hiring para BCP, Belcorp, Globant y agencias regionales, no solo para tech.",
+		a: "Sí. Tenemos casos en marketing, comunicaciones, gestión de proyectos, atención al cliente, diseño y consultoría. Los coaches han contratado para BCP, Belcorp, Globant y agencias regionales, no solo para tech.",
 	},
 	{
 		q: "¿Mis datos están seguros?",

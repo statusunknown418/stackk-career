@@ -9,8 +9,8 @@ import {
 	TargetIcon,
 	UploadSimpleIcon,
 } from "@phosphor-icons/react";
-import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { type ReactNode, useRef } from "react";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
 import { HOW_STEPS } from "./data";
@@ -47,24 +47,34 @@ function getStepAccent(idx: number, total: number): { node: string; badge: strin
 
 export function HowItWorks() {
 	const reduced = useReducedMotion();
+	const timelineRef = useRef<HTMLOListElement>(null);
+	const { scrollYProgress } = useScroll({
+		target: timelineRef,
+		offset: ["start 0.85", "end 0.4"],
+	});
+	const smoothProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 28, mass: 0.5 });
+	const fillScaleY = useTransform(smoothProgress, [0, 1], reduced ? [1, 1] : [0, 1]);
+
 	return (
-		<section className="px-6 py-24" id="camino">
+		<section className="px-6 py-16 md:py-24" id="camino">
 			<Reveal>
 				<header className="mx-auto mb-14 max-w-[1200px]">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Cómo funciona</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
-						<WordReveal>De CV ignorado a oferta firmada.</WordReveal>
+						<WordReveal>El camino. De Día 0 a oferta firmada.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						6 pasos. La IA hace el trabajo de fondo. El coach hace que cada uno cuente.
+						6 pasos. La IA hace el volumen. El coach hace que cada uno cuente.
 					</p>
 				</header>
 			</Reveal>
 
-			<ol className="relative mx-auto max-w-[820px]">
-				<div
+			<ol className="relative mx-auto max-w-[820px]" ref={timelineRef}>
+				<div aria-hidden="true" className="absolute top-4 bottom-4 left-[19px] w-px bg-foreground/10 md:left-[27px]" />
+				<motion.div
 					aria-hidden="true"
-					className="absolute top-4 bottom-4 left-[19px] w-px bg-gradient-to-b from-foreground/8 via-oxblood/25 to-marigold/40 md:left-[27px]"
+					className="absolute top-4 bottom-4 left-[19px] w-px origin-top bg-gradient-to-b from-oxblood via-oxblood to-marigold md:left-[27px]"
+					style={{ scaleY: fillScaleY }}
 				/>
 
 				{HOW_STEPS.map((step, idx) => {
@@ -125,7 +135,7 @@ function StepVisual({ idx }: { idx: number }) {
 		return <RubricVisual />;
 	}
 	if (idx === 4) {
-		return <SalaryBandVisual />;
+		return null;
 	}
 	return <OfferReceiptVisual />;
 }
@@ -172,7 +182,7 @@ const TOOL_BARS: ReadonlyArray<{ label: string; pct: number }> = [
 	{ label: "CV", pct: 88 },
 	{ label: "Carta", pct: 62 },
 	{ label: "LinkedIn", pct: 91 },
-	{ label: "Outreach", pct: 45 },
+	{ label: "Mensajes", pct: 45 },
 ];
 
 function ToolsProgressVisual() {
@@ -206,27 +216,6 @@ function RubricVisual() {
 					{item}
 				</span>
 			))}
-		</div>
-	);
-}
-
-function SalaryBandVisual() {
-	return (
-		<div className="mt-4 max-w-[440px] rounded-md border border-foreground/8 bg-card/60 px-3 py-2.5">
-			<div className="flex items-baseline justify-between text-[11px]">
-				<span className="font-mono text-foreground/70 uppercase tracking-[0.14em]">Banda mercado</span>
-				<span className="font-display text-foreground/65 tabular-nums">S/4.5K a S/7.2K</span>
-			</div>
-			<div className="relative mt-2 h-2 rounded-full bg-foreground/8">
-				<div className="absolute inset-y-0 left-[12%] w-[58%] rounded-full bg-gradient-to-r from-oxblood/30 to-oxblood/55" />
-				<div
-					className="absolute top-1/2 left-[88%] size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-marigold shadow-[0_0_10px_-1px_oklch(from_var(--marigold)_l_c_h/0.65)] ring-2 ring-background"
-					title="Oferta cerrada"
-				/>
-			</div>
-			<div className="mt-1.5 flex items-center justify-end">
-				<span className="font-display font-semibold text-[12px] text-marigold tabular-nums">Cierra S/7.8K</span>
-			</div>
 		</div>
 	);
 }

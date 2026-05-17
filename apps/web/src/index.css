@@ -43,6 +43,7 @@
 	--animate-marquee-slow: marquee 80s linear infinite;
 	--animate-marquee-reverse: marquee-reverse 70s linear infinite;
 	--animate-marquee-reverse-slow: marquee-reverse 95s linear infinite;
+	--animate-marquee-y: marquee-y var(--duration, 30s) linear infinite;
 	--animate-underline-draw: underline-draw 1.4s cubic-bezier(0.65, 0, 0.35, 1)
 		forwards;
 	--animate-circle-draw: circle-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1)
@@ -283,6 +284,16 @@
 
 		to {
 			transform: translateX(0);
+		}
+	}
+
+	@keyframes marquee-y {
+		from {
+			transform: translateY(0);
+		}
+
+		to {
+			transform: translateY(calc(-100% - var(--gap, 1rem)));
 		}
 	}
 

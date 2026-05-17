@@ -1,5 +1,9 @@
+"use client";
+
 import { ArrowRightIcon, CaretDownIcon } from "@phosphor-icons/react";
+import { useRef } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { Magnetic } from "@/components/ui/magnetic";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
 import { cn } from "@/lib/utils";
@@ -30,20 +34,20 @@ function featureDotColor(feature: string, featured: boolean): string {
 
 export function Pricing() {
 	return (
-		<section className="px-6 py-24" id="planes">
+		<section className="px-6 py-16 md:py-24" id="planes">
 			<Reveal>
 				<header className="mx-auto mb-14 max-w-[1200px]">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Precios en soles</span>
 					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
-						<WordReveal>Plan mensual o sesión única. Cancela cuando quieras.</WordReveal>
+						<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						Score CV gratis para siempre. Pro desde S/79. Premium si quieres acompañamiento hasta firmar.
+						Score CV gratis, para siempre. Pro desde S/79. Premium incluye la garantía de entrevista en 90 días.
 					</p>
 				</header>
 			</Reveal>
 
-			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 md:grid-cols-3">
+			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
 				{PLANS.map((plan, idx) => (
 					<Reveal className="h-full" delay={idx * 0.08} key={plan.id}>
 						<PriceCard plan={plan} />
@@ -73,16 +77,38 @@ export function Pricing() {
 function PriceCard({ plan }: { plan: Plan }) {
 	const featured = plan.featured ?? false;
 	const isFree = plan.priceSoles === 0;
+	const cardRef = useRef<HTMLDivElement>(null);
+
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		const el = cardRef.current;
+		if (!el) {
+			return;
+		}
+		const r = el.getBoundingClientRect();
+		el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+		el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+	};
+
+	const spotlightColor = featured ? "rgba(255,255,255,0.10)" : "oklch(from var(--oxblood) l c h / 0.13)";
 
 	return (
 		<div
 			className={cn(
-				"flex h-full flex-col rounded-2xl border p-9 transition-transform duration-300 ease-out",
+				"group/price relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-transform duration-300 ease-out sm:p-9",
 				featured
 					? "border-transparent bg-foreground text-background hover:-translate-y-1.5 hover:scale-[1.02]"
 					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-foreground/25"
 			)}
+			onMouseMove={handleMouseMove}
+			ref={cardRef}
 		>
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/price:opacity-100"
+				style={{
+					background: `radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 50%), ${spotlightColor}, transparent 60%)`,
+				}}
+			/>
 			<div className="flex items-center justify-between">
 				<h3 className="font-display font-semibold text-[1.6rem] tracking-[-0.025em]">{plan.name}</h3>
 				{featured && (
@@ -142,17 +168,19 @@ function PriceCard({ plan }: { plan: Plan }) {
 				)}
 			</div>
 
-			<a
-				className={cn(
-					buttonVariants({ size: "lg" }),
-					"mt-8 w-full",
-					featured && "bg-background text-foreground hover:bg-background/90"
-				)}
-				href="#planes"
-			>
-				{plan.cta}
-				<ArrowRightIcon weight="bold" />
-			</a>
+			<Magnetic block className="mt-8" radius={120} strength={0.22}>
+				<a
+					className={cn(
+						buttonVariants({ size: "lg" }),
+						"w-full",
+						featured && "bg-background text-foreground hover:bg-background/90"
+					)}
+					href="#planes"
+				>
+					{plan.cta}
+					<ArrowRightIcon weight="bold" />
+				</a>
+			</Magnetic>
 		</div>
 	);
 }
@@ -175,7 +203,7 @@ function SingleSessionCard() {
 			className="mx-auto mt-6 max-w-[1200px] overflow-hidden rounded-2xl border border-foreground/10 bg-card"
 			id="sesion-unica"
 		>
-			<div className="grid items-center gap-8 p-9 md:grid-cols-12">
+			<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
 				<div className="md:col-span-7">
 					<h3 className="font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
 						Sesión única: {SINGLE_SESSION.tagline}
@@ -195,10 +223,12 @@ function SingleSessionCard() {
 							≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
 						</p>
 					</div>
-					<a className={cn(buttonVariants({ size: "default" }), "shrink-0")} href="#planes">
-						{SINGLE_SESSION.cta}
-						<ArrowRightIcon weight="bold" />
-					</a>
+					<Magnetic className="shrink-0" radius={100} strength={0.25}>
+						<a className={buttonVariants({ size: "default" })} href="#planes">
+							{SINGLE_SESSION.cta}
+							<ArrowRightIcon weight="bold" />
+						</a>
+					</Magnetic>
 				</div>
 			</div>
 		</aside>

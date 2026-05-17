@@ -15,7 +15,7 @@ export function Faq() {
 	const items = showAll ? FAQ_ITEMS : FAQ_ITEMS.slice(0, VISIBLE_FAQ_COUNT);
 
 	return (
-		<section className="px-6 py-24" id="faq">
+		<section className="px-6 py-16 md:py-24" id="faq">
 			<div className="mx-auto mb-12 grid max-w-[1200px] gap-12 md:grid-cols-12">
 				<Reveal className="md:col-span-5">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">FAQ</span>

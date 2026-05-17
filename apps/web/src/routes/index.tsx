@@ -17,7 +17,7 @@ const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const SITE_NAME = "IMPULSA";
 const TITLE = "IMPULSA · Garantizamos tu próxima entrevista en menos de 3 meses";
 const DESCRIPTION =
-	"Garantizamos tu próxima entrevista en menos de 3 meses, o te devolvemos el 100%. IA que arregla tu CV en segundos + coach senior que te acompaña paso a paso. Score gratis, sin tarjeta. Hecho para LATAM.";
+	"IA que reescribe tu CV en 30 segundos + coach senior que te lleva hasta firmar la oferta. Con Premium: entrevista en 90 días o te devolvemos el 100%. Score gratis, sin tarjeta. Hecho para LATAM.";
 
 const structuredData = {
 	"@context": "https://schema.org",
@@ -132,7 +132,7 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
 	return (
-		<div className="relative isolate">
+		<div className="relative isolate overflow-x-clip">
 			<div
 				aria-hidden="true"
 				className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[100vh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]"

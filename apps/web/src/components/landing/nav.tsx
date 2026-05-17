@@ -1,9 +1,11 @@
 "use client";
 
-import { ArrowRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, ListIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useScroll } from "motion/react";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { Magnetic } from "@/components/ui/magnetic";
+import { Sheet, SheetClose, SheetPanel, SheetPopup, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./data";
 
@@ -98,29 +100,98 @@ export function LandingNav() {
 
 					<div className="ml-auto flex items-center gap-1.5 md:ml-0">
 						<a
-							className="hidden rounded-full px-3 py-1.5 font-medium text-[13px] text-foreground/65 transition-colors hover:text-foreground sm:inline-flex"
+							className="hidden rounded-full px-3 py-1.5 font-medium text-[13px] text-foreground/65 transition-colors hover:text-foreground md:inline-flex"
 							href="/login"
 						>
 							Iniciar sesión
 						</a>
 						<AnimatePresence initial={false}>
 							{showCta && (
-								<motion.a
+								<motion.span
 									animate={{ opacity: 1, scale: 1, width: "auto" }}
-									className={cn(buttonVariants({ size: "sm" }), "overflow-hidden")}
+									className="hidden overflow-hidden md:inline-flex"
 									exit={{ opacity: 0, scale: 0.85, width: 0 }}
-									href="/setup"
 									initial={{ opacity: 0, scale: 0.85, width: 0 }}
 									transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
 								>
-									Analiza mi CV gratis
-									<ArrowRightIcon weight="bold" />
-								</motion.a>
+									<Magnetic radius={90} strength={0.22}>
+										<a className={buttonVariants({ size: "sm" })} href="/setup">
+											Analiza mi CV gratis
+											<ArrowRightIcon weight="bold" />
+										</a>
+									</Magnetic>
+								</motion.span>
 							)}
 						</AnimatePresence>
+						<MobileMenu />
 					</div>
 				</nav>
 			</header>
 		</>
+	);
+}
+
+function MobileMenu() {
+	return (
+		<Sheet>
+			<SheetTrigger
+				aria-label="Abrir menú"
+				className="grid size-9 place-items-center rounded-full border border-foreground/10 text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground md:hidden"
+			>
+				<ListIcon size={18} weight="bold" />
+			</SheetTrigger>
+			<SheetPopup className="w-[min(86vw,320px)]" side="right">
+				<div className="flex items-center gap-2 px-6 pt-6">
+					<span
+						aria-hidden="true"
+						className="grid size-8 place-items-center rounded-lg bg-foreground font-bold font-display text-[14px] text-background leading-none"
+					>
+						i
+					</span>
+					<span className="font-bold font-display text-[1.05rem] text-foreground leading-none tracking-[-0.02em]">
+						IMPULSA
+					</span>
+				</div>
+				<SheetPanel>
+					<ul className="mt-2 flex flex-col gap-1">
+						{NAV_LINKS.map((link) => (
+							<li key={link.href}>
+								<SheetClose
+									render={
+										<a
+											className="block rounded-lg px-3 py-2.5 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground"
+											href={link.href}
+										>
+											{link.label}
+										</a>
+									}
+								/>
+							</li>
+						))}
+					</ul>
+
+					<div className="mt-6 flex flex-col gap-2 border-foreground/10 border-t pt-6">
+						<SheetClose
+							render={
+								<a
+									className="rounded-lg px-3 py-2 font-medium text-[14px] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground"
+									href="/login"
+								>
+									Iniciar sesión
+								</a>
+							}
+						/>
+						<SheetClose
+							render={
+								<a className={cn(buttonVariants({ size: "default" }), "w-full justify-center")} href="/setup">
+									Analiza mi CV gratis
+									<ArrowRightIcon weight="bold" />
+								</a>
+							}
+						/>
+					</div>
+				</SheetPanel>
+			</SheetPopup>
+		</Sheet>
 	);
 }

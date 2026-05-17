@@ -2,7 +2,7 @@
 
 import { ChatTeardropDotsIcon, FileTextIcon, LinkedinLogoIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
@@ -11,7 +11,7 @@ import { HERO_CHART, WHY_REASONS, type WhyReason } from "./data";
 
 export function BentoGrid() {
 	return (
-		<section className="px-6 py-24" id="features">
+		<section className="px-6 py-16 md:py-24" id="features">
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-[1200px]">
 					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
@@ -21,12 +21,12 @@ export function BentoGrid() {
 						<WordReveal>Todo lo que LATAM no tenía. En un solo plan.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[620px] text-[1rem] text-foreground/65 leading-[1.55]">
-						4 razones para elegirnos. 6 herramientas en una suscripción. 100% español, hecho para LATAM.
+						4 razones que importan. 6 herramientas en una sola suscripción.
 					</p>
 				</header>
 			</Reveal>
 
-			<div className="mx-auto mb-12 grid max-w-[1200px] grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+			<div className="mx-auto mb-12 grid max-w-[1200px] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				{WHY_REASONS.map((reason, idx) => (
 					<Reveal delay={idx * 0.06} key={reason.number}>
 						<ReasonCompactCard reason={reason} />
@@ -38,17 +38,17 @@ export function BentoGrid() {
 				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.2em]">Las 6 herramientas</span>
 			</div>
 
-			<div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-3 [grid-auto-rows:minmax(180px,auto)] md:grid-cols-6">
+			<div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-3 [grid-auto-rows:minmax(180px,auto)] sm:grid-cols-2 md:grid-cols-6">
 				<BentoCellHero />
 				<BentoCellPlain
 					body="Sube tu CV o constrúyelo desde cero. La IA convierte tareas en logros con métricas. Score inmediato al terminar."
-					className="col-span-2 md:col-span-2"
+					className="md:col-span-2"
 					icon={<FileTextIcon size={18} weight="duotone" />}
 					title="Constructor de CV"
 				/>
 				<BentoCellPlain
 					body="Pega la oferta + tu CV. Carta personalizada en 30 segundos. 1/mes en Gratuito, ilimitadas en Pro."
-					className="col-span-2 md:col-span-2"
+					className="md:col-span-2"
 					icon={<PaperPlaneTiltIcon size={18} weight="duotone" />}
 					iconClassName="bg-foreground/10 text-foreground"
 					title="Carta de presentación"
@@ -89,8 +89,24 @@ function ReasonCompactCard({ reason }: { reason: WhyReason }) {
 }
 
 function BentoCellHero() {
+	const cellRef = useRef<HTMLDivElement>(null);
+
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		const el = cellRef.current;
+		if (!el) {
+			return;
+		}
+		const r = el.getBoundingClientRect();
+		el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+		el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+	};
+
 	return (
-		<div className="group/cell relative col-span-2 flex flex-col overflow-hidden rounded-2xl bg-foreground p-8 text-background transition-transform duration-300 ease-out hover:-translate-y-1 md:col-span-4 md:row-span-2">
+		<div
+			className="group/cell relative flex flex-col overflow-hidden rounded-2xl bg-foreground p-6 text-background transition-transform duration-300 ease-out hover:-translate-y-1 sm:col-span-2 sm:p-8 md:col-span-4 md:row-span-2"
+			onMouseMove={handleMouseMove}
+			ref={cellRef}
+		>
 			<div
 				aria-hidden="true"
 				className="pointer-events-none absolute inset-0 opacity-50"
@@ -99,21 +115,29 @@ function BentoCellHero() {
 					backgroundSize: "14px 14px",
 				}}
 			/>
-			<h3 className="relative z-10 font-bold font-display text-[clamp(1.9rem,3vw,2.6rem)] text-background leading-[1.05] tracking-[-0.03em]">
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/cell:opacity-100"
+				style={{
+					background:
+						"radial-gradient(540px circle at var(--spot-x, 50%) var(--spot-y, 50%), oklch(from var(--oxblood) l c h / 0.32), transparent 60%)",
+				}}
+			/>
+			<h3 className="relative z-10 break-words font-bold font-display text-[clamp(1.5rem,3.6vw,2.6rem)] text-background leading-[1.05] tracking-[-0.03em]">
 				Score CV con IA.
 				<br />
-				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> promedio.
+				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> en una semana.
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				Subes tu CV. La IA lo evalúa en estructura, logros con métricas, keywords del sector y compatibilidad con
-				sistemas ATS. En 30 segundos tienes un puntaje de 0 a 100 y la lista exacta de qué arreglar.
+				Sube tu CV. La IA evalúa estructura, logros con métricas, keywords del sector y compatibilidad ATS. En 30
+				segundos: puntaje de 0 a 100 y la lista exacta de qué arreglar.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				En Pro: comparas tu CV contra la oferta específica y la IA reescribe las secciones débiles.
+				En Pro: comparas tu CV vs. la oferta específica y la IA reescribe las secciones débiles.
 			</p>
 
 			<div className="relative z-10 mt-auto pt-8">
-				<div className="mb-3 flex h-28 items-end gap-1.5">
+				<div className="relative mb-3 flex h-28 items-end gap-1.5 overflow-hidden">
 					{HERO_CHART.map((bar, idx) => (
 						<motion.div
 							className={cn("flex-1 rounded-t-[2px]", bar.high ? "bg-oxblood" : "bg-background/15")}
@@ -124,6 +148,12 @@ function BentoCellHero() {
 							whileInView={{ height: `${bar.heightPct}%` }}
 						/>
 					))}
+					<motion.span
+						animate={{ x: ["0%", "100%"] }}
+						aria-hidden="true"
+						className="pointer-events-none absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-marigold to-transparent shadow-[0_0_12px_oklch(from_var(--marigold)_l_c_h/0.65)] motion-reduce:hidden"
+						transition={{ duration: 4.5, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+					/>
 				</div>
 				<div className="flex items-center justify-between text-[12px] text-background/50">
 					<span>Día 1</span>
@@ -136,7 +166,7 @@ function BentoCellHero() {
 
 function BentoCellLinkedIn() {
 	return (
-		<div className="relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 md:col-span-3">
+		<div className="relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-6 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 sm:col-span-2 sm:p-7 md:col-span-3">
 			<span className="mb-5 grid size-10 place-items-center rounded-lg bg-foreground/8 text-foreground">
 				<LinkedinLogoIcon size={20} weight="duotone" />
 			</span>
@@ -144,8 +174,8 @@ function BentoCellLinkedIn() {
 				Optimizador de LinkedIn
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
-				Headline, About y bullets de cada experiencia con score de perfil. En LATAM, los reclutadores filtran por
-				LinkedIn antes que por CV. Optimizarlo abre la puerta.
+				Titular, sección Acerca de y descripciones de cada experiencia con score del perfil. Los reclutadores LATAM
+				filtran por LinkedIn antes que por CV. Si tu perfil no pasa el primer vistazo, tu CV nunca lo ve un humano.
 			</p>
 
 			<div className="mt-auto pt-6">
@@ -165,12 +195,12 @@ function BentoCellLinkedIn() {
 
 function BentoCellNetwork() {
 	return (
-		<div className="relative col-span-2 flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 md:col-span-3">
+		<div className="relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-6 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 sm:col-span-2 sm:p-7 md:col-span-3">
 			<span className="mb-5 grid size-10 place-items-center rounded-lg bg-foreground/8 text-foreground">
 				<ChatTeardropDotsIcon size={20} weight="duotone" />
 			</span>
 			<h3 className="font-display font-semibold text-[1.4rem] text-foreground leading-[1.15] tracking-[-0.02em]">
-				Mensajes de outreach
+				Mensajes a reclutadores
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
 				Mensajes que abren conversaciones, no que parecen plantilla. 1/mes en Gratuito, ilimitados en Pro.
@@ -187,15 +217,15 @@ function BentoCellNetwork() {
 
 function BentoCellCoaching() {
 	return (
-		<div className="relative col-span-2 flex flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-card p-8 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 md:col-span-6">
+		<div className="relative flex flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-card p-6 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 sm:col-span-2 sm:p-8 md:col-span-6">
 			<div className="grid items-end gap-8 md:grid-cols-12">
 				<div className="md:col-span-7">
 					<h3 className="font-bold font-display text-[clamp(1.6rem,2.6vw,2.2rem)] text-foreground leading-[1.05] tracking-[-0.025em]">
-						Coaching 1:1 humano. No lo pagas aparte.
+						Coaching humano. Incluido, no aparte.
 					</h3>
 					<p className="mt-4 max-w-[560px] text-[15px] text-foreground/65 leading-[1.55]">
-						3 a 5 coaches senior en planilla, no freelancers de plataforma. Sesión 1:1 en Pro (1 al mes) o el camino
-						completo en Premium (3 sesiones + WhatsApp con tu coach).
+						Pro: 1 sesión 1:1 al mes, los temas los eliges tú. Premium: las 3 sesiones del camino completo (mapeo →
+						simulacro → cierre) + WhatsApp directo con tu coach.
 					</p>
 				</div>
 
@@ -232,7 +262,7 @@ function BentoCellPlain({
 	return (
 		<div
 			className={cn(
-				"relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-7 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20",
+				"relative flex flex-col rounded-2xl border border-foreground/10 bg-card p-6 transition-[transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-foreground/20 sm:p-7",
 				className
 			)}
 		>

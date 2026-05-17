@@ -9,7 +9,10 @@ const FLOAT_DELAY_4: React.CSSProperties = { animationDelay: "-4s" };
 export function Hero() {
 	return (
 		<>
-			<section className="relative flex min-h-[88vh] items-center overflow-hidden px-6 pt-28 pb-16" id="top">
+			<section
+				className="relative flex min-h-[88vh] flex-col justify-center overflow-hidden px-6 pt-24 pb-12 sm:pt-28 sm:pb-16"
+				id="top"
+			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.09]">
 					<PixelGridShader amplitude={0.2} colorFg="#3a0a5e" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
 				</div>
@@ -27,8 +30,8 @@ export function Hero() {
 						speed={0.18}
 					/>
 				</div>
-				<div className="pointer-events-none relative z-10 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
-					<div>
+				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
+					<div className="min-w-0">
 						<div className="pointer-events-auto mb-7 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card/70 py-1.5 pr-3.5 pl-2.5 backdrop-blur-sm">
 							<span aria-hidden="true" className="relative grid size-2 place-items-center">
 								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/50" />
@@ -39,7 +42,7 @@ export function Hero() {
 							</span>
 						</div>
 
-						<h1 className="font-bold font-display text-[clamp(2.5rem,5.6vw,5.25rem)] text-foreground leading-[0.98] tracking-[-0.035em]">
+						<h1 className="text-balance break-words font-bold font-display text-[clamp(2rem,6vw,5.25rem)] text-foreground leading-[1.02] tracking-[-0.035em] sm:leading-[0.98]">
 							Garantizamos tu próxima entrevista en menos de{" "}
 							<span className="relative whitespace-nowrap">
 								<span className="relative z-10">3 meses</span>
@@ -52,8 +55,8 @@ export function Hero() {
 						</h1>
 
 						<p className="mt-7 max-w-[560px] text-[clamp(1rem,1.2vw,1.15rem)] text-foreground/65 leading-[1.55]">
-							IA que arregla tu CV en segundos + coach senior que te acompaña paso a paso. Si no consigues entrevista,
-							te devolvemos el 100%.
+							IA que reescribe tu CV en 30 segundos. Coach senior que te acompaña hasta firmar la oferta. Con Premium:
+							si en 90 días no consigues entrevista, te devolvemos el 100%.
 						</p>
 
 						<div className="pointer-events-auto mt-9 flex flex-col flex-wrap items-start gap-3 sm:flex-row sm:items-center">
@@ -105,10 +108,10 @@ export function Hero() {
 						Nuestros talentos ya trabajan en
 					</p>
 					<LogoMarqueeRows />
-					<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.18em]">
-						<span aria-hidden="true" className="size-1 rounded-full bg-oxblood/60" />
+					<p className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/65 uppercase tracking-[0.18em]">
+						<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-oxblood/60" />
 						<span>Empresas verificadas vía LinkedIn de cada talento</span>
-					</div>
+					</p>
 				</div>
 			</section>
 		</>
