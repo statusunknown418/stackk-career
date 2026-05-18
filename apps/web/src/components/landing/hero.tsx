@@ -48,7 +48,7 @@ export function Hero() {
 								<span className="relative z-10">3 meses</span>
 								<span
 									aria-hidden="true"
-									className="absolute inset-x-[-2px] bottom-[6%] -z-0 h-[28%] rounded-sm bg-marigold/40"
+									className="absolute inset-x-[-2px] bottom-[6%] -z-0 h-[28%] rounded-sm bg-oxblood/30"
 								/>
 							</span>
 							.

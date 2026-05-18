@@ -354,8 +354,8 @@
 	--primary: oklch(0.66 0.235 20); /* coral-red */
 	--primary-foreground: oklch(1 0 0);
 	--ring: oklch(0.66 0.235 20); /* coral focus */
-	--secondary: oklch(0.88 0.19 100); /* electric lemon yellow */
-	--secondary-foreground: oklch(0.13 0 0);
+	--secondary: oklch(0.13 0 0); /* deep black */
+	--secondary-foreground: oklch(1 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -380,15 +380,15 @@
 }
 
 :root {
-	/* Impulso — coral-red + electric lemon yellow on pure white */
+	/* Impulso — coral-red brand + deep black accent on pure white. Fashion-editorial. */
 	--ink: oklch(0.13 0 0); /* #0a0a0a pure deep black */
 	--paper: oklch(1 0 0); /* #ffffff pure white */
 	--oxblood: oklch(0.66 0.235 20); /* #ff3d5a coral-red (brand) */
-	--marigold: oklch(0.88 0.19 100); /* #f6e409 electric lemon yellow (accent) */
+	--marigold: oklch(0.13 0 0); /* deep black accent — high-contrast editorial */
 	--rule: oklch(0.9 0 0); /* #e5e5e5 hairline */
 	--aurora-1: oklch(0.97 0.025 25); /* very soft coral tint */
-	--aurora-2: oklch(0.98 0.05 100); /* very soft lemon tint */
-	--aurora-3: oklch(0.97 0.02 60); /* near-paper warm */
+	--aurora-2: oklch(0.97 0 0); /* paper white */
+	--aurora-3: oklch(0.96 0.02 20); /* near-paper warm */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
