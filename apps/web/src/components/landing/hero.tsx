@@ -14,12 +14,12 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.09]">
-					<PixelGridShader amplitude={0.2} colorFg="#1d1d1f" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
+					<PixelGridShader amplitude={0.2} colorFg="#222222" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
 				</div>
 				<div className="absolute inset-0 opacity-[0.14]">
 					<PixelGridShader
 						amplitude={0.3}
-						colorFg="#1d1d1f"
+						colorFg="#222222"
 						cursorMode="ripple"
 						cursorScale={0.4}
 						cursorSize={0.35}
@@ -70,7 +70,7 @@ export function Hero() {
 								>
 									<span className="absolute inset-x-4 top-0 h-px animate-[score-fill_1.8s_cubic-bezier(.2,.7,.2,1)_infinite] bg-gradient-to-r from-transparent via-oxblood/60 to-transparent" />
 								</span>
-								<span className="relative grid size-11 place-items-center rounded-xl bg-gradient-to-br from-oxblood to-aurora-3 text-background transition-transform duration-300 group-hover/drop:scale-110">
+								<span className="relative grid size-11 place-items-center rounded-xl bg-oxblood text-background transition-transform duration-300 group-hover/drop:scale-110">
 									<UploadSimpleIcon size={20} weight="bold" />
 								</span>
 								<span className="relative flex-1 text-left">
@@ -174,7 +174,7 @@ function ScoreCard() {
 	return (
 		<div className="w-[240px] rounded-sm border border-foreground/10 bg-card/85 p-3.5 shadow-[var(--shadow-floating)] backdrop-blur-md">
 			<div className="mb-2.5 flex items-center gap-2.5">
-				<span className="grid size-7 place-items-center rounded-full bg-gradient-to-br from-oxblood to-aurora-3 text-background">
+				<span className="grid size-7 place-items-center rounded-full bg-oxblood text-background">
 					<CheckIcon size={14} weight="bold" />
 				</span>
 				<div className="flex-1">
@@ -183,7 +183,7 @@ function ScoreCard() {
 				</div>
 			</div>
 			<div className="h-1.5 overflow-hidden rounded-full bg-foreground/8">
-				<div className="h-full w-[94%] rounded-full bg-gradient-to-r from-oxblood to-aurora-3 motion-safe:animate-[score-fill_1.6s_cubic-bezier(.2,.7,.2,1)_0.6s_both]" />
+				<div className="h-full w-[94%] rounded-full bg-oxblood motion-safe:animate-[score-fill_1.6s_cubic-bezier(.2,.7,.2,1)_0.6s_both]" />
 			</div>
 		</div>
 	);
@@ -192,7 +192,7 @@ function ScoreCard() {
 function InterviewCard() {
 	return (
 		<div className="flex w-[230px] items-center gap-3 rounded-sm border border-foreground/12 bg-card/85 px-3.5 py-2.5 shadow-[var(--shadow-floating)] backdrop-blur-md">
-			<span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-marigold to-orange-600 text-background">
+			<span className="grid size-9 place-items-center rounded-full bg-marigold text-background">
 				<CalendarCheckIcon size={16} weight="fill" />
 			</span>
 			<div>
@@ -211,10 +211,7 @@ function InterviewCard() {
 function LiveMentorCard() {
 	return (
 		<div className="flex w-[250px] items-center gap-3 rounded-sm border border-foreground/12 bg-card/85 px-3.5 py-2.5 shadow-[var(--shadow-floating)] backdrop-blur-md">
-			<span
-				aria-hidden="true"
-				className="relative block size-9 shrink-0 rounded-full bg-gradient-to-br from-rose-200 to-rose-500"
-			>
+			<span aria-hidden="true" className="relative block size-9 shrink-0 rounded-full bg-oxblood/15">
 				<span className="absolute right-0 bottom-0 grid size-3 place-items-center rounded-full bg-card">
 					<span className="size-2 rounded-full bg-oxblood motion-safe:animate-[live-pulse_1.8s_ease-in-out_infinite]" />
 				</span>

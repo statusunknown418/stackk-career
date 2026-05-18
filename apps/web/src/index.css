@@ -339,22 +339,22 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.235 0.002 250);
-	--background: oklch(0.965 0.003 240); /* #f5f5f7 Apple gray */
-	--border: oklch(0.235 0.002 250 / 10%);
-	--card: oklch(1 0 0); /* #ffffff pure white card */
-	--card-foreground: oklch(0.235 0.002 250);
+	--accent-foreground: oklch(0.25 0 0);
+	--background: oklch(1 0 0); /* white */
+	--border: oklch(0.25 0 0 / 10%);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.25 0 0);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.235 0.002 250); /* #1d1d1f Apple text */
-	--input: oklch(0.235 0.002 250 / 12%);
-	--muted: oklch(0.235 0.002 250 / 5%);
-	--muted-foreground: oklch(0.5 0.005 250); /* #6e6e73 Apple secondary */
+	--foreground: oklch(0.25 0 0); /* #222222 Hof */
+	--input: oklch(0.25 0 0 / 12%);
+	--muted: oklch(0.25 0 0 / 5%);
+	--muted-foreground: oklch(0.55 0 0); /* #717171 Foggy */
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.235 0.002 250);
-	--primary: oklch(0.235 0.002 250); /* Apple dark text */
+	--popover-foreground: oklch(0.25 0 0);
+	--primary: oklch(0.65 0.245 18); /* Rausch pink-red */
 	--primary-foreground: oklch(1 0 0);
-	--ring: oklch(0.6 0.205 250); /* Apple Blue focus */
-	--secondary: oklch(0.6 0.205 250); /* #0071e3 Apple Blue */
+	--ring: oklch(0.65 0.245 18); /* Rausch focus */
+	--secondary: oklch(0.65 0.115 175); /* Babu teal */
 	--secondary-foreground: oklch(1 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
@@ -380,15 +380,15 @@
 }
 
 :root {
-	/* Apple — modern soft neutrals + Apple Blue accent */
-	--ink: oklch(0.235 0.002 250); /* #1d1d1f Apple text */
-	--paper: oklch(0.965 0.003 240); /* #f5f5f7 Apple soft gray */
-	--oxblood: oklch(0.235 0.002 250); /* #1d1d1f brand (dark text, buttons) */
-	--marigold: oklch(0.6 0.205 250); /* #0071e3 Apple Blue accent */
-	--rule: oklch(0.85 0.003 240); /* #d2d2d7 hairline */
-	--aurora-1: oklch(0.93 0.018 240); /* very soft blue tint */
-	--aurora-2: oklch(0.96 0.008 240); /* near-paper */
-	--aurora-3: oklch(0.94 0.012 230); /* cool soft */
+	/* Airbnb — Rausch pink-red brand + Babu teal accent on white */
+	--ink: oklch(0.25 0 0); /* #222222 Hof dark text */
+	--paper: oklch(1 0 0); /* #ffffff white */
+	--oxblood: oklch(0.65 0.245 18); /* #ff385c Rausch pink-red (brand) */
+	--marigold: oklch(0.65 0.115 175); /* #00a699 Babu teal (accent) */
+	--rule: oklch(0.87 0 0); /* #dddddd hairline */
+	--aurora-1: oklch(0.96 0.04 18); /* very soft pink tint */
+	--aurora-2: oklch(0.96 0.025 175); /* very soft teal tint */
+	--aurora-3: oklch(0.97 0.015 30); /* near-white warm */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:

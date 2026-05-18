@@ -29,7 +29,7 @@ const STEP_DAYS: readonly number[] = [0, 2, 7, 18, 30, 42];
 function getStepAccent(idx: number, total: number): { node: string; badge: string } {
 	if (idx === total - 1) {
 		return {
-			node: "bg-gradient-to-br from-marigold to-orange-500 text-background shadow-[0_0_24px_-4px_oklch(from_var(--marigold)_l_c_h/0.55)]",
+			node: "bg-marigold text-background shadow-[0_0_24px_-4px_oklch(from_var(--marigold)_l_c_h/0.55)]",
 			badge: "border-marigold/40 bg-marigold/10 text-foreground",
 		};
 	}
@@ -40,7 +40,7 @@ function getStepAccent(idx: number, total: number): { node: string; badge: strin
 		};
 	}
 	return {
-		node: "bg-gradient-to-br from-oxblood to-aurora-3 text-background",
+		node: "bg-oxblood text-background",
 		badge: "border-oxblood/25 bg-oxblood/8 text-oxblood",
 	};
 }
@@ -146,7 +146,7 @@ function ScoreBarVisual() {
 			<span className="font-medium font-mono text-[9px] text-foreground/70 uppercase tracking-[0.14em]">Score CV</span>
 			<span className="font-display text-[13px] text-foreground/40 tabular-nums">47</span>
 			<span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/8">
-				<span className="absolute inset-y-0 left-0 w-[95%] rounded-full bg-gradient-to-r from-oxblood to-aurora-3 motion-safe:animate-[score-fill_1.4s_cubic-bezier(.2,.7,.2,1)_0.2s_both]" />
+				<span className="absolute inset-y-0 left-0 w-[95%] rounded-full bg-oxblood motion-safe:animate-[score-fill_1.4s_cubic-bezier(.2,.7,.2,1)_0.2s_both]" />
 			</span>
 			<span className="font-display font-semibold text-[13px] text-oxblood tabular-nums">95</span>
 		</div>
@@ -192,10 +192,7 @@ function ToolsProgressVisual() {
 				<div className="flex flex-col gap-1.5" key={bar.label}>
 					<span className="font-mono text-[9px] text-foreground/70 uppercase tracking-[0.1em]">{bar.label}</span>
 					<span className="relative h-1 overflow-hidden rounded-full bg-foreground/8">
-						<span
-							className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-oxblood to-aurora-3"
-							style={{ width: `${bar.pct}%` }}
-						/>
+						<span className="absolute inset-y-0 left-0 rounded-full bg-oxblood" style={{ width: `${bar.pct}%` }} />
 					</span>
 				</div>
 			))}
@@ -223,10 +220,7 @@ function RubricVisual() {
 function OfferReceiptVisual() {
 	return (
 		<div className="mt-4 inline-flex max-w-full items-center gap-2.5 rounded-md border border-marigold/35 bg-marigold/10 px-3 py-2">
-			<span
-				aria-hidden="true"
-				className="grid size-5 place-items-center rounded-full bg-gradient-to-br from-marigold to-orange-500 text-background"
-			>
+			<span aria-hidden="true" className="grid size-5 place-items-center rounded-full bg-marigold text-background">
 				<CheckIcon size={11} weight="bold" />
 			</span>
 			<span className="font-display font-medium text-[13px] text-foreground">Día 42 · Entrevistas reales</span>
