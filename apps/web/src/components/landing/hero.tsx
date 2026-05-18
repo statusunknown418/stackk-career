@@ -158,8 +158,8 @@ export function Hero() {
 						</h1>
 
 						<p className="mt-7 max-w-[560px] text-[clamp(1rem,1.2vw,1.15rem)] text-foreground/65 leading-[1.55]">
-							IA que reescribe tu CV en 30 segundos. Coach senior que te prepara para destacar en cada entrevista. Con
-							Premium: si en 90 días no consigues entrevista, te devolvemos el 100%.
+							La IA reescribe tu CV en 30 segundos y un coach senior te prepara para destacar en cada entrevista. Con
+							Premium, si en 90 días no consigues entrevista, te devolvemos lo que pagaste.
 						</p>
 
 						<div className="pointer-events-auto mt-9 flex flex-col flex-wrap items-start gap-3 sm:flex-row sm:items-center">
@@ -213,7 +213,7 @@ export function Hero() {
 					<LogoMarqueeRows />
 					<p className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/65 uppercase tracking-[0.18em]">
 						<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-oxblood/60" />
-						<span>Empresas verificadas vía LinkedIn de cada talento</span>
+						<span>Empresas verificadas a través del LinkedIn de cada talento</span>
 					</p>
 				</div>
 			</section>

@@ -53,7 +53,7 @@ export function FinalCta() {
 					<p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-background/55 uppercase tracking-[0.16em] md:justify-center">
 						<span>Gratis · Sin tarjeta</span>
 						<span aria-hidden="true" className="size-1 rounded-full bg-marigold/70" />
-						<span>2,400+ talentos LATAM</span>
+						<span>Más de 2,400 talentos en LATAM</span>
 					</p>
 				</div>
 			</Reveal>

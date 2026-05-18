@@ -42,7 +42,8 @@ export function Pricing() {
 						<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						Score CV gratis, para siempre. Pro desde S/79. Premium incluye la garantía de entrevista en 90 días.
+						El Score CV es gratis para siempre. Pro arranca en S/79. Premium incluye la garantía de entrevista en 90
+						días.
 					</p>
 				</header>
 			</Reveal>
@@ -66,9 +67,8 @@ export function Pricing() {
 					¿Cumpliste tu objetivo?
 				</p>
 				<p className="mx-auto mt-5 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]">
-					Cancela cuando quieras. Sin retención agresiva.{" "}
-					<span className="text-foreground/90">Siempre estaremos aquí</span> cuando quieras volver a desarrollar tu
-					carrera.
+					Cancelas cuando quieras, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}
+					cuando decidas retomar tu carrera.
 				</p>
 			</div>
 		</section>

@@ -21,7 +21,7 @@ export function BentoGrid() {
 						<WordReveal>Todo lo que LATAM no tenía. En un solo plan.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[620px] text-[1rem] text-foreground/65 leading-[1.55]">
-						4 razones que importan. 6 herramientas en una sola suscripción.
+						Cuatro razones por las que funciona y seis herramientas en una sola suscripción.
 					</p>
 				</header>
 			</Reveal>
@@ -41,13 +41,13 @@ export function BentoGrid() {
 			<div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-3 [grid-auto-rows:minmax(180px,auto)] sm:grid-cols-2 md:grid-cols-6">
 				<BentoCellHero />
 				<BentoCellPlain
-					body="Sube tu CV o constrúyelo desde cero. La IA convierte tareas en logros con métricas. Score inmediato al terminar."
+					body="Subes tu CV o lo construyes desde cero. La IA convierte las tareas en logros medibles y al terminar tienes tu score al instante."
 					className="md:col-span-2"
 					icon={<FileTextIcon size={18} weight="duotone" />}
 					title="Constructor de CV"
 				/>
 				<BentoCellPlain
-					body="Pega la oferta + tu CV. Carta personalizada en 30 segundos. 1/mes en Gratuito, ilimitadas en Pro."
+					body="Pegas el anuncio del puesto junto a tu CV y en 30 segundos tienes una carta personalizada. Una al mes en Gratuito; ilimitadas en Pro."
 					className="md:col-span-2"
 					icon={<PaperPlaneTiltIcon size={18} weight="duotone" />}
 					iconClassName="bg-foreground/10 text-foreground"
@@ -129,11 +129,13 @@ function BentoCellHero() {
 				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> en una semana.
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				Sube tu CV. La IA evalúa estructura, logros con métricas, keywords del sector y compatibilidad con los filtros
-				automáticos de reclutadores. En 30 segundos recibes un puntaje de 0 a 100 y la lista exacta de qué mejorar.
+				Subes tu CV y la IA evalúa la estructura, los logros con métricas, las palabras clave del sector y la
+				compatibilidad con los filtros automáticos que usan los reclutadores. En 30 segundos tienes un puntaje del 0 al
+				100 y la lista exacta de lo que tienes que mejorar.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				En Pro: comparas tu CV contra la oferta específica y la IA reescribe las secciones débiles.
+				Con el plan Pro, además, comparas tu CV contra cada oferta concreta y la IA reescribe por ti las secciones
+				débiles.
 			</p>
 
 			<div className="relative z-10 mt-auto pt-8">
@@ -174,9 +176,9 @@ function BentoCellLinkedIn() {
 				Optimizador de LinkedIn
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
-				Titular, sección Acerca de y descripciones de cada experiencia con score del perfil. Los reclutadores LATAM
-				filtran por LinkedIn antes que por CV. Si tu perfil no destaca en los primeros segundos, tu CV no llega a manos
-				humanas.
+				Optimizamos tu titular, la sección Acerca de y la descripción de cada experiencia, todo con score del perfil. En
+				LATAM, los reclutadores miran tu LinkedIn antes que tu CV: si tu perfil no destaca en los primeros segundos,
+				ningún reclutador real llega a ver tu CV.
 			</p>
 
 			<div className="mt-auto pt-6">
@@ -204,7 +206,8 @@ function BentoCellNetwork() {
 				Mensajes a reclutadores
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
-				Mensajes que abren conversaciones, no que parecen plantilla. 1/mes en Gratuito, ilimitados en Pro.
+				Mensajes que abren conversaciones reales, no que parecen copia y pega. Uno al mes en Gratuito, ilimitados en
+				Pro.
 			</p>
 
 			<div className="mt-auto pt-6">
@@ -225,8 +228,8 @@ function BentoCellCoaching() {
 						Coaching humano. Incluido, no aparte.
 					</h3>
 					<p className="mt-4 max-w-[560px] text-[15px] text-foreground/65 leading-[1.55]">
-						Pro: una sesión 1:1 al mes con el tema que tú elijas. Premium: las tres sesiones del camino completo (mapeo
-						→ simulacro → refuerzo) más WhatsApp directo con tu coach.
+						Con Pro tienes una sesión 1:1 al mes sobre el tema que tú elijas. Con Premium llevas el camino completo:
+						mapeo de puesto, simulacro de entrevista y refuerzo posterior, además de WhatsApp directo con tu coach.
 					</p>
 				</div>
 

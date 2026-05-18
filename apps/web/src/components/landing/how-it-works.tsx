@@ -64,7 +64,7 @@ export function HowItWorks() {
 						<WordReveal>El camino. De Día 0 a entrevista conseguida.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						6 pasos. La IA hace el volumen. El coach hace que cada uno cuente.
+						Seis pasos. La IA se encarga del volumen; tu coach se asegura de que cada paso te acerque a la entrevista.
 					</p>
 				</header>
 			</Reveal>

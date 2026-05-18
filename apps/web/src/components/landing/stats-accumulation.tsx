@@ -12,8 +12,8 @@ interface StatLine {
 const STAT_LINES: readonly StatLine[] = [
 	{ value: "2,400+", label: "consiguieron entrevista el último año" },
 	{ value: "4.9★", label: "en 380 reseñas verificadas" },
-	{ value: "47 → 95", label: "salto promedio en su score CV", accent: "oxblood" },
-	{ value: "S/79", label: "tu coach al mes", accent: "marigold" },
+	{ value: "47 → 95", label: "es el salto promedio en el score CV", accent: "oxblood" },
+	{ value: "S/79", label: "al mes tienes tu coach", accent: "marigold" },
 ];
 
 const ACCENT_COLOR = {
