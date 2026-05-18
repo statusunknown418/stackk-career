@@ -339,23 +339,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.25 0 0);
-	--background: oklch(1 0 0); /* white */
-	--border: oklch(0.25 0 0 / 10%);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.25 0 0);
+	--accent-foreground: oklch(0.16 0.005 60);
+	--background: oklch(0.98 0.005 80); /* warm cream */
+	--border: oklch(0.16 0.005 60 / 10%);
+	--card: oklch(1 0 0); /* pure white card */
+	--card-foreground: oklch(0.16 0.005 60);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.25 0 0); /* #222222 Hof */
-	--input: oklch(0.25 0 0 / 12%);
-	--muted: oklch(0.25 0 0 / 5%);
-	--muted-foreground: oklch(0.55 0 0); /* #717171 Foggy */
+	--foreground: oklch(0.16 0.005 60); /* warm near-black */
+	--input: oklch(0.16 0.005 60 / 12%);
+	--muted: oklch(0.16 0.005 60 / 5%);
+	--muted-foreground: oklch(0.5 0.008 65); /* warm muted */
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.25 0 0);
-	--primary: oklch(0.65 0.245 18); /* Rausch pink-red */
+	--popover-foreground: oklch(0.16 0.005 60);
+	--primary: oklch(0.66 0.235 20); /* coral-red */
 	--primary-foreground: oklch(1 0 0);
-	--ring: oklch(0.65 0.245 18); /* Rausch focus */
-	--secondary: oklch(0.65 0.115 175); /* Babu teal */
-	--secondary-foreground: oklch(1 0 0);
+	--ring: oklch(0.66 0.235 20); /* coral focus */
+	--secondary: oklch(0.755 0.16 70); /* marigold gold */
+	--secondary-foreground: oklch(0.16 0.005 60);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -380,15 +380,15 @@
 }
 
 :root {
-	/* Airbnb — Rausch pink-red brand + Babu teal accent on white */
-	--ink: oklch(0.25 0 0); /* #222222 Hof dark text */
-	--paper: oklch(1 0 0); /* #ffffff white */
-	--oxblood: oklch(0.65 0.245 18); /* #ff385c Rausch pink-red (brand) */
-	--marigold: oklch(0.65 0.115 175); /* #00a699 Babu teal (accent) */
-	--rule: oklch(0.87 0 0); /* #dddddd hairline */
-	--aurora-1: oklch(0.96 0.04 18); /* very soft pink tint */
-	--aurora-2: oklch(0.96 0.025 175); /* very soft teal tint */
-	--aurora-3: oklch(0.97 0.015 30); /* near-white warm */
+	/* Impulso — coral-red brand + marigold gold accent on warm cream */
+	--ink: oklch(0.16 0.005 60); /* #0f0f10 warm near-black */
+	--paper: oklch(0.98 0.005 80); /* #fafaf7 warm cream */
+	--oxblood: oklch(0.66 0.235 20); /* #ff3d5a coral-red (brand) */
+	--marigold: oklch(0.755 0.16 70); /* #f59e0b marigold gold (accent) */
+	--rule: oklch(0.9 0.008 70); /* #e7e5e0 warm hairline */
+	--aurora-1: oklch(0.96 0.04 25); /* very soft coral tint */
+	--aurora-2: oklch(0.96 0.035 75); /* very soft gold tint */
+	--aurora-3: oklch(0.97 0.018 50); /* near-paper warm */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
