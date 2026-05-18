@@ -339,23 +339,23 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.16 0.005 60);
-	--background: oklch(0.98 0.005 80); /* warm cream */
-	--border: oklch(0.16 0.005 60 / 10%);
-	--card: oklch(1 0 0); /* pure white card */
-	--card-foreground: oklch(0.16 0.005 60);
+	--accent-foreground: oklch(0.13 0 0);
+	--background: oklch(1 0 0); /* pure white */
+	--border: oklch(0.13 0 0 / 10%);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.13 0 0);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.16 0.005 60); /* warm near-black */
-	--input: oklch(0.16 0.005 60 / 12%);
-	--muted: oklch(0.16 0.005 60 / 5%);
-	--muted-foreground: oklch(0.5 0.008 65); /* warm muted */
+	--foreground: oklch(0.13 0 0); /* deep black */
+	--input: oklch(0.13 0 0 / 12%);
+	--muted: oklch(0.13 0 0 / 5%);
+	--muted-foreground: oklch(0.45 0 0); /* neutral gray */
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.16 0.005 60);
+	--popover-foreground: oklch(0.13 0 0);
 	--primary: oklch(0.66 0.235 20); /* coral-red */
 	--primary-foreground: oklch(1 0 0);
 	--ring: oklch(0.66 0.235 20); /* coral focus */
-	--secondary: oklch(0.755 0.16 70); /* marigold gold */
-	--secondary-foreground: oklch(0.16 0.005 60);
+	--secondary: oklch(0.88 0.19 100); /* electric lemon yellow */
+	--secondary-foreground: oklch(0.13 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -380,15 +380,15 @@
 }
 
 :root {
-	/* Impulso — coral-red brand + marigold gold accent on warm cream */
-	--ink: oklch(0.16 0.005 60); /* #0f0f10 warm near-black */
-	--paper: oklch(0.98 0.005 80); /* #fafaf7 warm cream */
+	/* Impulso — coral-red + electric lemon yellow on pure white */
+	--ink: oklch(0.13 0 0); /* #0a0a0a pure deep black */
+	--paper: oklch(1 0 0); /* #ffffff pure white */
 	--oxblood: oklch(0.66 0.235 20); /* #ff3d5a coral-red (brand) */
-	--marigold: oklch(0.755 0.16 70); /* #f59e0b marigold gold (accent) */
-	--rule: oklch(0.9 0.008 70); /* #e7e5e0 warm hairline */
-	--aurora-1: oklch(0.96 0.04 25); /* very soft coral tint */
-	--aurora-2: oklch(0.96 0.035 75); /* very soft gold tint */
-	--aurora-3: oklch(0.97 0.018 50); /* near-paper warm */
+	--marigold: oklch(0.88 0.19 100); /* #f6e409 electric lemon yellow (accent) */
+	--rule: oklch(0.9 0 0); /* #e5e5e5 hairline */
+	--aurora-1: oklch(0.97 0.025 25); /* very soft coral tint */
+	--aurora-2: oklch(0.98 0.05 100); /* very soft lemon tint */
+	--aurora-3: oklch(0.97 0.02 60); /* near-paper warm */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
