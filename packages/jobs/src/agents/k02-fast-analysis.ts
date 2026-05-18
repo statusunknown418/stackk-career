@@ -5,7 +5,7 @@ import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis"
 import { type LanguageModel, Output, streamText } from "ai";
 import { eq } from "drizzle-orm";
 
-export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "xai/grok-4.1-fast-non-reasoning";
+export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis-fast";
 
 export interface RunK02FastAnalysisInput {

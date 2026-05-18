@@ -33,6 +33,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	blockIdFromFieldName,
 	buildDocumentFormValues,
@@ -49,14 +50,40 @@ const resumeSearchSchema = z.object({
 
 export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 	component: RouteComponent,
-	loader: ({ params }) =>
-		queryClient.ensureQueryData(
+	loader: ({ params, context }) =>
+		context.queryClient.ensureQueryData(
 			orpc.resumes.get.queryOptions({
 				input: { id: params.resumeId },
 			})
 		),
+	pendingComponent: ResumeEditorPending,
 	validateSearch: resumeSearchSchema,
 });
+
+function ResumeEditorPending() {
+	return (
+		<section className="flex h-full min-h-0 flex-col overflow-hidden">
+			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+				<article className="w-full max-w-xl space-y-2 pl-3">
+					<Skeleton className="h-4 w-40" />
+					<Skeleton className="h-7 w-64" />
+				</article>
+			</header>
+			<section className="relative flex flex-1 gap-2 overflow-y-auto bg-muted px-3 py-4">
+				<article className="sticky top-0 w-56 shrink-0 space-y-2 self-start rounded-lg bg-background p-2">
+					<Skeleton className="h-6 w-full" />
+					<Skeleton className="h-6 w-full" />
+					<Skeleton className="h-6 w-2/3" />
+				</article>
+				<article className="min-w-0 flex-1 space-y-3 self-start px-4 pb-16">
+					<Skeleton className="h-10 w-1/2" />
+					<Skeleton className="h-32 w-full" />
+					<Skeleton className="h-32 w-full" />
+				</article>
+			</section>
+		</section>
+	);
+}
 
 function RouteComponent() {
 	const params = Route.useParams();

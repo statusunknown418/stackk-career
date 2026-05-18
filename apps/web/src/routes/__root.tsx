@@ -53,7 +53,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Stackk Career",
+				title: "Assendia",
 			},
 		],
 		links: [

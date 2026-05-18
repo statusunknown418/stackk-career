@@ -68,7 +68,7 @@ export const InlineTextEditor = ({
 		editorProps: {
 			attributes: {
 				class: cn(
-					"rounded-sm px-1 py-0.5 outline-none transition-colors hover:bg-accent/40 focus:bg-accent/40",
+					"rounded-sm px-1 py-0.5 outline-none transition-colors hover:bg-accent/60 focus:bg-accent/60",
 					variant === "prose" && "min-h-6 whitespace-pre-wrap text-sm leading-relaxed",
 					variant === "heading" && "text-xl leading-tight",
 					variant === "subtitle" && "text-base leading-snug",

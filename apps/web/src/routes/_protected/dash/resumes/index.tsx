@@ -13,8 +13,32 @@ import { orpc, queryClient } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
-	beforeLoad: () => queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
+	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
+	pendingComponent: ResumesIndexPending,
 });
+
+function ResumesIndexPending() {
+	return (
+		<section className="space-y-4">
+			<section className="flex justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
+				<article className="grid gap-1">
+					<h1 className="font-light text-2xl">Curriculums</h1>
+					<FrameDescription>
+						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
+					</FrameDescription>
+				</article>
+			</section>
+
+			<section className="px-4 py-2">
+				<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+					{Array.from({ length: 6 }).map((_, i) => (
+						<ResumeCardSkeleton key={i.toString()} />
+					))}
+				</ul>
+			</section>
+		</section>
+	);
+}
 
 function RouteComponent() {
 	const listQuery = orpc.resumes.list.queryOptions();
