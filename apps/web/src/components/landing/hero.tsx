@@ -61,35 +61,35 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-					<div className="absolute top-[5%] left-[8%] size-[28%] animate-mesh-drift-1 rounded-full bg-oxblood/55 mix-blend-screen blur-[70px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[5%] left-[8%] size-[28%] animate-mesh-drift-1 rounded-full bg-oxblood/55 blur-[70px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[15%] right-[3%] size-[24%] animate-mesh-drift-2 rounded-full bg-oxblood/45 mix-blend-screen blur-[80px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[15%] right-[3%] size-[24%] animate-mesh-drift-2 rounded-full bg-oxblood/45 blur-[80px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div
-						className="absolute bottom-[8%] left-[20%] size-[30%] animate-mesh-drift-1 rounded-full bg-oxblood/50 mix-blend-screen blur-[80px] will-change-transform motion-reduce:animate-none"
+						className="absolute bottom-[8%] left-[20%] size-[30%] animate-mesh-drift-1 rounded-full bg-oxblood/50 blur-[80px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_3_DELAY}
 					/>
 					<div
-						className="absolute right-[10%] bottom-[12%] size-[22%] animate-mesh-drift-2 rounded-full bg-oxblood/40 mix-blend-screen blur-[70px] will-change-transform motion-reduce:animate-none"
+						className="absolute right-[10%] bottom-[12%] size-[22%] animate-mesh-drift-2 rounded-full bg-oxblood/40 blur-[70px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_4_DELAY}
 					/>
 					<div
 						aria-hidden="true"
-						className="absolute top-[35%] right-[20%] size-[22%] animate-mesh-drift-2 rounded-full mix-blend-screen blur-[80px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[35%] right-[20%] size-[22%] animate-mesh-drift-2 rounded-full blur-[80px] will-change-transform motion-reduce:animate-none"
 						style={{ ...MESH_BLOB_DEEP_DELAY, background: "oklch(0.52 0.16 138 / 0.55)" }}
 					/>
 					<div
 						aria-hidden="true"
-						className="absolute bottom-[20%] left-[5%] size-[18%] animate-mesh-drift-1 rounded-full mix-blend-screen blur-[60px] will-change-transform motion-reduce:animate-none"
+						className="absolute bottom-[20%] left-[5%] size-[18%] animate-mesh-drift-1 rounded-full blur-[60px] will-change-transform motion-reduce:animate-none"
 						style={{ animationDelay: "-4s", background: "oklch(0.58 0.18 145 / 0.5)" }}
 					/>
-					<div className="absolute top-[40%] left-[42%] size-[10%] animate-pulse-glow rounded-full bg-oxblood/70 mix-blend-screen blur-[35px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[40%] left-[42%] size-[10%] animate-pulse-glow rounded-full bg-oxblood/70 blur-[35px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[25%] right-[35%] size-[8%] animate-pulse-glow rounded-full bg-oxblood/60 mix-blend-screen blur-[30px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[25%] right-[35%] size-[8%] animate-pulse-glow rounded-full bg-oxblood/60 blur-[30px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
-					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent mix-blend-screen blur-2xl will-change-transform motion-reduce:hidden" />
+					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent blur-2xl will-change-transform motion-reduce:hidden" />
 					<div className="absolute inset-0 motion-reduce:hidden">
 						{PARTICLES.map((p) => (
 							<span
