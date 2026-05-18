@@ -17,19 +17,25 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-					<div className="absolute top-[5%] left-[10%] size-[50%] animate-aurora-1 rounded-full bg-oxblood/35 blur-[120px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[5%] left-[8%] size-[45%] animate-mesh-drift-1 rounded-full bg-oxblood/45 blur-[100px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[20%] right-[5%] size-[45%] animate-aurora-2 rounded-full bg-oxblood/28 blur-[140px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[15%] right-[3%] size-[40%] animate-mesh-drift-2 rounded-full bg-oxblood/35 blur-[110px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div
-						className="absolute bottom-[10%] left-[25%] size-[55%] animate-aurora-1 rounded-full bg-oxblood/30 blur-[150px] will-change-transform motion-reduce:animate-none"
+						className="absolute bottom-[8%] left-[20%] size-[50%] animate-mesh-drift-1 rounded-full bg-oxblood/40 blur-[120px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_3_DELAY}
 					/>
 					<div
-						className="absolute right-[15%] bottom-[20%] size-[40%] animate-aurora-2 rounded-full bg-oxblood/22 blur-[130px] will-change-transform motion-reduce:animate-none"
+						className="absolute right-[10%] bottom-[12%] size-[38%] animate-mesh-drift-2 rounded-full bg-oxblood/30 blur-[110px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_4_DELAY}
 					/>
+					<div className="absolute top-[40%] left-[42%] size-[18%] animate-pulse-glow rounded-full bg-oxblood/60 blur-[60px] will-change-transform motion-reduce:animate-none" />
+					<div
+						className="absolute top-[25%] right-[35%] size-[14%] animate-pulse-glow rounded-full bg-oxblood/50 blur-[50px] will-change-transform motion-reduce:animate-none"
+						style={MESH_BLOB_2_DELAY}
+					/>
+					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent blur-2xl will-change-transform motion-reduce:hidden" />
 				</div>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
 					<div className="min-w-0">
