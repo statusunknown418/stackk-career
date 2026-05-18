@@ -1,5 +1,46 @@
 # Resume Editor Refactor — Handoff
 
+## Session update (2026-05-18)
+
+### Suggestion popover polish + bug fixes
+
+**Findings:**
+- `useObject` partial-JSON parser was leaking `]}` into final suggestion's `html` field. Cause: `xai/grok-4.1-fast-non-reasoning` flaky on structured output via `streamText` + `Output.object` + `toTextStreamResponse()`. Pattern is the AI SDK v6 canonical setup (`streamObject` deprecated) — fault is the model, not the wiring.
+- Original popover had visual issues: weak option separation (just `border-t`), 3-bar skeleton looked stale, no slot labels.
+- After adding required `label` field to schema, render gate `!(html && label)` blocked all UI until both fields completed in partial JSON parse → looked like streaming was broken.
+- Handoff Critical #1 claim ("`suggestionsRouter` never called, delete it") is **partially wrong**. File-route at `routes/api/resume-suggestions.ts` calls `client.suggestions.prepareSuggestion` and `client.suggestions.recordSuggestionCompletion` via oRPC. Only the *stream* handler inside `suggestionsRouter` (the `ReadableStream.from` one) is dead. `prepareSuggestion` + `recordSuggestionCompletion` procedures are live and required.
+
+**Updates landed:**
+- `packages/api/src/lib/resume-suggestions.ts` — prompt hardening:
+  - Banned markdown code fences, demand complete 4 elements, well-formed html strings.
+  - Bumped `3 suggestions` → `4 suggestions`.
+  - Added AI-generated per-option `label` instructions (2–4 words, distinct, language-matched).
+  - Added Spanish-specific rules (Sustantivación for bullets, no third-person past-tense, anti-Spanglish list).
+  - Added guardrails block.
+- `packages/schemas/src/api/suggestions.ts` — `suggestionItemSchema` now `{ label: z.string().max(40), html: z.string().max(2000) }`. Label carried end-to-end (oRPC `recordSuggestionCompletion` persists it via the JSON `object` column, no DB schema change needed).
+- `apps/web/src/components/domains/resume-document/suggestion-popover.tsx`:
+  - Loading header uses `Shimmer` ("Generando sugerencias") instead of pulsing icon.
+  - 4-option `columns-2` masonry (break-inside-avoid) replaces single-column list.
+  - Each option card: bordered, hover bg-accent + shadow lift, AI-generated label uppercase tracking-wide.
+  - Per-option progressive streaming: skeleton when item undefined → Shimmer label + Classic spinner while fields stream → clickable card when both fields complete and stream done.
+  - Button `disabled={!ready}` prevents apply on partial html.
+
+**Remaining issues introduced/surfaced this session:**
+1. `routes/api/resume-suggestions.ts:72` — `let suggestions: { html: string }[] = []` is now wrong; should be `{ label: string; html: string }[]`. TS will complain.
+2. Handoff Critical #1 wording — update or delete depending on next agent's decision. Recommend keeping `suggestionsRouter` with `prepareSuggestion` + `recordSuggestionCompletion` + `recordSuggestionError`, deleting only the dead `streamSuggestions` handler with the `ReadableStream.from` TS error.
+3. `messages.object` JSON column now carries `label`. Any downstream consumer of `objectType: "resume-suggestion"` rows needs to be aware.
+
+**Steps forward (suggestion feature):**
+1. Fix `resume-suggestions.ts:72` type to include `label`.
+2. Trim `suggestionsRouter` to live procedures only — delete `streamSuggestions` handler + its TS error, keep `prepareSuggestion` / `recordSuggestionCompletion` / `recordSuggestionError`. Reword handoff Critical #1.
+3. Consider model swap if `]}` parser leak persists — `xai/grok-4.1-fast-non-reasoning` weak on structured streaming; `xai/grok-4` or `openai/gpt-4.1-mini` more reliable. Prompt hardening is band-aid, not root fix.
+4. Add e2e or unit test that asserts every streamed suggestion ends with a closing tag and never contains stray `]}`.
+5. Telemetry: count `finishReason !== "stop"` cases — surfaces silent model truncations.
+
+---
+
+
+
 ## Context
 
 Big refactor on `main` (uncommitted). Old `resume-editor/editors/*` + `fields/*` + `documents/*` stack deleted. Replaced with inline editing inside `resume-document/` and new AI suggestions system.
