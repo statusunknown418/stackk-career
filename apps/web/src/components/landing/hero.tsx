@@ -5,6 +5,10 @@ const FLOAT_DELAY_0: React.CSSProperties = { animationDelay: "0s" };
 const FLOAT_DELAY_2: React.CSSProperties = { animationDelay: "-2s" };
 const FLOAT_DELAY_4: React.CSSProperties = { animationDelay: "-4s" };
 
+const MESH_BLOB_2_DELAY: React.CSSProperties = { animationDelay: "-6s" };
+const MESH_BLOB_3_DELAY: React.CSSProperties = { animationDelay: "-12s" };
+const MESH_BLOB_4_DELAY: React.CSSProperties = { animationDelay: "-18s" };
+
 export function Hero() {
 	return (
 		<>
@@ -12,14 +16,21 @@ export function Hero() {
 				className="relative flex min-h-[88vh] flex-col justify-center overflow-hidden px-6 pt-24 pb-12 sm:pt-28 sm:pb-16"
 				id="top"
 			>
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute top-[15%] left-[10%] size-[60%] animate-aurora-1 rounded-full bg-oxblood/25 blur-[140px] will-change-transform motion-reduce:animate-none"
-				/>
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute right-[5%] bottom-[10%] size-[55%] animate-aurora-2 rounded-full bg-oxblood/15 blur-[160px] will-change-transform motion-reduce:animate-none"
-				/>
+				<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+					<div className="absolute top-[5%] left-[10%] size-[50%] animate-aurora-1 rounded-full bg-oxblood/35 blur-[120px] will-change-transform motion-reduce:animate-none" />
+					<div
+						className="absolute top-[20%] right-[5%] size-[45%] animate-aurora-2 rounded-full bg-oxblood/28 blur-[140px] will-change-transform motion-reduce:animate-none"
+						style={MESH_BLOB_2_DELAY}
+					/>
+					<div
+						className="absolute bottom-[10%] left-[25%] size-[55%] animate-aurora-1 rounded-full bg-oxblood/30 blur-[150px] will-change-transform motion-reduce:animate-none"
+						style={MESH_BLOB_3_DELAY}
+					/>
+					<div
+						className="absolute right-[15%] bottom-[20%] size-[40%] animate-aurora-2 rounded-full bg-oxblood/22 blur-[130px] will-change-transform motion-reduce:animate-none"
+						style={MESH_BLOB_4_DELAY}
+					/>
+				</div>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
 					<div className="min-w-0">
 						<div className="pointer-events-auto mb-7 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card/70 py-1.5 pr-3.5 pl-2.5 backdrop-blur-sm">
