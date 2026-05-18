@@ -55,7 +55,7 @@ export function Hero() {
 						</h1>
 
 						<p className="mt-7 max-w-[560px] text-[clamp(1rem,1.2vw,1.15rem)] text-foreground/65 leading-[1.55]">
-							IA que reescribe tu CV en 30 segundos. Coach senior que te prepara hasta pasar bien tus entrevistas. Con
+							IA que reescribe tu CV en 30 segundos. Coach senior que te prepara para destacar en cada entrevista. Con
 							Premium: si en 90 días no consigues entrevista, te devolvemos el 100%.
 						</p>
 

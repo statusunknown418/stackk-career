@@ -94,28 +94,28 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "01",
 		title: "Coach senior real,",
 		emphasis: "no IA disfrazada.",
-		body: "Persona con tu CV en mano que te dice qué decir el lunes en la entrevista. La IA hace el volumen; el coach acelera tus decisiones. Eso no lo automatiza nadie.",
+		body: "Una persona con tu CV en mano que te dice qué responder y cómo hacerlo en cada entrevista. La IA gestiona el volumen; tu coach acelera las decisiones que ningún algoritmo automatiza.",
 		receipt: { label: "Equipo de coaches", value: "3 a 5 senior · planilla · LATAM" },
 	},
 	{
 		number: "02",
 		title: "Un solo precio.",
-		emphasis: "Todo adentro.",
-		body: "CV, carta, LinkedIn, mensajes a reclutadores, score y coaching humano. Wonsulting te lo vende en paquetes de US$699 a US$2.299. Acá viene completo desde S/79.",
-		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin extras" },
+		emphasis: "Todo incluido.",
+		body: "CV, carta, LinkedIn, mensajes a reclutadores, score y coaching humano. Wonsulting los vende en paquetes de US$699 a US$2.299. En IMPULSA viene todo desde S/79.",
+		receipt: { label: "Herramientas integradas", value: "6 en 1 · sin sobrecargos" },
 	},
 	{
 		number: "03",
 		title: "Conocemos a",
-		emphasis: "tu recruiter.",
-		body: "Tu coach ya entrevistó en BCP, Yape, Rappi y Belcorp. Sabe las preguntas reales, los códigos de cada empresa y la jerga local. Nada de fórmulas gringas traducidas con Google Translate.",
+		emphasis: "tu reclutador.",
+		body: "Tu coach ya entrevistó en BCP, Yape, Rappi y Belcorp. Conoce las preguntas reales, los códigos de cada empresa y la jerga local. Nada de fórmulas extranjeras traducidas literalmente.",
 		receipt: { label: "Cobertura regional", value: "8 países · 100% español" },
 	},
 	{
 		number: "04",
 		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Mientras otras plataformas todavía revisan tu CV, tú ya estás en entrevistas reales.",
+		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Mientras otras plataformas siguen revisando tu CV, tú ya estarás en entrevistas reales.",
 		receipt: { label: "Días a primera entrevista", value: "18 promedio en Premium" },
 	},
 ];
@@ -123,7 +123,7 @@ export const WHY_REASONS: readonly WhyReason[] = [
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Sube tu CV. Score de 0 a 100 y lista exacta de qué arreglar. Gratis, sin tarjeta.",
+		body: "Sube tu CV. Score de 0 a 100 y la lista exacta de qué mejorar. Gratis, sin tarjeta.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
@@ -148,7 +148,7 @@ export const HOW_STEPS: readonly HowStep[] = [
 	},
 	{
 		title: "Entrevistas reales en mano",
-		body: "Día 42 promedio en Premium. Pasaste por simulacros, las hiciste en vivo y ya tienes el método para las siguientes. Cancelas la suscripción cuando quieras.",
+		body: "Día 42 promedio en Premium. Pasaste por simulacros, las atravesaste en vivo y dominas el método para las siguientes. Cancelas la suscripción cuando lo decidas.",
 		tag: "★ Resultado",
 	},
 ];
@@ -214,7 +214,7 @@ export const SINGLE_SESSION = {
 	priceUsd: 11,
 	duration: "45 min",
 	tagline: "Prueba el coaching sin suscribirte.",
-	body: "Cualquier coach del equipo, 45 minutos sobre tu caso real. Sin suscripción, sin compromiso.",
+	body: "Una sesión 1:1 con cualquier coach del equipo. 45 minutos enfocados en tu caso real. Sin suscripción ni compromiso.",
 	cta: "Reservar sesión única",
 } as const;
 
@@ -403,7 +403,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "UX Designer en Stori",
 		location: "CDMX",
 		quote:
-			"Antes probé plataformas gringas. Pagué dos veces y cero resultados. Acá la diferencia fue que mi coach conocía el mercado mexicano.",
+			"Antes probé plataformas extranjeras. Pagué dos veces y cero resultados. Aquí la diferencia fue que mi coach conocía el mercado mexicano.",
 		chip: "32 días",
 	},
 	{
@@ -452,7 +452,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Cuál es la diferencia con Wonsulting o ResumAI?",
-		a: "Wonsulting cobra el coaching humano aparte (entre US$699 y US$2.299). Acá las herramientas IA y el coaching vienen en el mismo plan. Pro te da 1 sesión 1:1 al mes (30 min, formato libre) por S/79; Premium te da el camino completo de 3 sesiones estructuradas + WhatsApp con tu coach por S/179. Sin paquetes inflados.",
+		a: "Wonsulting cobra el coaching humano aparte (entre US$699 y US$2.299). En IMPULSA, las herramientas de IA y el coaching vienen en el mismo plan. Pro incluye una sesión 1:1 al mes (30 minutos, formato libre) por S/79; Premium ofrece el camino completo de tres sesiones estructuradas más WhatsApp con tu coach por S/179. Sin sobrecargos ni paquetes adicionales.",
 	},
 	{
 		q: "¿Puedo probar sin suscribirme?",
@@ -468,7 +468,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Y si no consigo entrevistas?",
-		a: "Garantía Premium: si haces 3 meses seguidos de Premium completando el camino (3 sesiones de coaching + uso activo de las herramientas) y no conseguiste al menos 1 entrevista real, te devolvemos el 100% de lo pagado. Sin letra chica, sin retención agresiva. Solicítalo escribiéndole directo a tu coach.",
+		a: "Garantía Premium: si completas tres meses seguidos del plan Premium (las tres sesiones de coaching más uso activo de las herramientas) y no consigues al menos una entrevista real, te devolvemos el 100% de lo pagado. Sin letra chica ni retención agresiva. Lo solicitas escribiéndole directamente a tu coach.",
 	},
 	{
 		q: "¿En cuánto tiempo veo resultados?",

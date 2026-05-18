@@ -130,10 +130,10 @@ function BentoCellHero() {
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
 				Sube tu CV. La IA evalúa estructura, logros con métricas, keywords del sector y compatibilidad ATS. En 30
-				segundos: puntaje de 0 a 100 y la lista exacta de qué arreglar.
+				segundos recibes un puntaje de 0 a 100 y la lista exacta de qué mejorar.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				En Pro: comparas tu CV vs. la oferta específica y la IA reescribe las secciones débiles.
+				En Pro: comparas tu CV contra la oferta específica y la IA reescribe las secciones débiles.
 			</p>
 
 			<div className="relative z-10 mt-auto pt-8">
@@ -175,7 +175,8 @@ function BentoCellLinkedIn() {
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
 				Titular, sección Acerca de y descripciones de cada experiencia con score del perfil. Los reclutadores LATAM
-				filtran por LinkedIn antes que por CV. Si tu perfil no pasa el primer vistazo, tu CV nunca lo ve un humano.
+				filtran por LinkedIn antes que por CV. Si tu perfil no destaca en los primeros segundos, tu CV no llega a manos
+				humanas.
 			</p>
 
 			<div className="mt-auto pt-6">
@@ -224,8 +225,8 @@ function BentoCellCoaching() {
 						Coaching humano. Incluido, no aparte.
 					</h3>
 					<p className="mt-4 max-w-[560px] text-[15px] text-foreground/65 leading-[1.55]">
-						Pro: 1 sesión 1:1 al mes, los temas los eliges tú. Premium: las 3 sesiones del camino completo (mapeo →
-						simulacro → cierre) + WhatsApp directo con tu coach.
+						Pro: una sesión 1:1 al mes con el tema que tú elijas. Premium: las tres sesiones del camino completo (mapeo
+						→ simulacro → refuerzo) más WhatsApp directo con tu coach.
 					</p>
 				</div>
 
