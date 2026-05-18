@@ -9,6 +9,33 @@ const MESH_BLOB_2_DELAY: React.CSSProperties = { animationDelay: "-6s" };
 const MESH_BLOB_3_DELAY: React.CSSProperties = { animationDelay: "-12s" };
 const MESH_BLOB_4_DELAY: React.CSSProperties = { animationDelay: "-18s" };
 
+interface Particle {
+	delay: string;
+	duration: string;
+	left: string;
+	opacity: string;
+	size: string;
+}
+
+const PARTICLES: readonly Particle[] = [
+	{ left: "4%", duration: "13s", delay: "-1s", size: "size-1", opacity: "0.55" },
+	{ left: "9%", duration: "18s", delay: "-5s", size: "size-1.5", opacity: "0.7" },
+	{ left: "14%", duration: "15s", delay: "-9s", size: "size-1", opacity: "0.5" },
+	{ left: "21%", duration: "21s", delay: "-3s", size: "size-2", opacity: "0.65" },
+	{ left: "27%", duration: "12s", delay: "-12s", size: "size-1", opacity: "0.6" },
+	{ left: "33%", duration: "16s", delay: "-6s", size: "size-1.5", opacity: "0.7" },
+	{ left: "39%", duration: "19s", delay: "-14s", size: "size-1", opacity: "0.5" },
+	{ left: "46%", duration: "14s", delay: "-2s", size: "size-1.5", opacity: "0.65" },
+	{ left: "53%", duration: "22s", delay: "-10s", size: "size-1", opacity: "0.55" },
+	{ left: "59%", duration: "17s", delay: "-7s", size: "size-2", opacity: "0.75" },
+	{ left: "66%", duration: "13s", delay: "-11s", size: "size-1", opacity: "0.5" },
+	{ left: "72%", duration: "20s", delay: "-4s", size: "size-1.5", opacity: "0.7" },
+	{ left: "78%", duration: "15s", delay: "-13s", size: "size-1", opacity: "0.55" },
+	{ left: "84%", duration: "18s", delay: "-8s", size: "size-1.5", opacity: "0.6" },
+	{ left: "91%", duration: "12s", delay: "-2s", size: "size-1", opacity: "0.5" },
+	{ left: "96%", duration: "19s", delay: "-15s", size: "size-1.5", opacity: "0.65" },
+];
+
 export function Hero() {
 	return (
 		<>
@@ -36,6 +63,21 @@ export function Hero() {
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent blur-2xl will-change-transform motion-reduce:hidden" />
+					<div className="absolute inset-0 motion-reduce:hidden">
+						{PARTICLES.map((p) => (
+							<span
+								className={`absolute bottom-0 ${p.size} rounded-full bg-oxblood will-change-transform`}
+								key={`${p.left}-${p.delay}`}
+								style={{
+									left: p.left,
+									opacity: p.opacity,
+									animation: `particle-rise ${p.duration} linear infinite`,
+									animationDelay: p.delay,
+									boxShadow: "0 0 12px oklch(from var(--oxblood) l c h / 0.8)",
+								}}
+							/>
+						))}
+					</div>
 				</div>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
 					<div className="min-w-0">
