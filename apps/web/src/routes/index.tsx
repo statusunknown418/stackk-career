@@ -17,7 +17,7 @@ const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const SITE_NAME = "IMPULSA";
 const TITLE = "IMPULSA · Garantizamos tu próxima entrevista en menos de 3 meses";
 const DESCRIPTION =
-	"La IA reescribe tu CV en 30 segundos y un coach senior te prepara para destacar en cada entrevista. Con Premium: entrevista en 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
+	"CV reescrito por IA en 30 segundos. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
 
 const structuredData = {
 	"@context": "https://schema.org",

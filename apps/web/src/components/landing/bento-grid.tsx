@@ -41,13 +41,13 @@ export function BentoGrid() {
 			<div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-3 [grid-auto-rows:minmax(180px,auto)] sm:grid-cols-2 md:grid-cols-6">
 				<BentoCellHero />
 				<BentoCellPlain
-					body="Subes tu CV o lo construyes desde cero. La IA convierte las tareas en logros medibles y al terminar tienes tu score al instante."
+					body="Sube tu CV o constrúyelo de cero. La IA convierte tareas en logros medibles. Score al instante."
 					className="md:col-span-2"
 					icon={<FileTextIcon size={18} weight="duotone" />}
 					title="Constructor de CV"
 				/>
 				<BentoCellPlain
-					body="Pegas el anuncio del puesto junto a tu CV y en 30 segundos tienes una carta personalizada. Una al mes en Gratuito; ilimitadas en Pro."
+					body="Pega el anuncio + tu CV. Carta personalizada en 30 segundos. Una al mes en Gratuito, ilimitadas en Pro."
 					className="md:col-span-2"
 					icon={<PaperPlaneTiltIcon size={18} weight="duotone" />}
 					iconClassName="bg-foreground/10 text-foreground"
@@ -129,13 +129,11 @@ function BentoCellHero() {
 				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> en una semana.
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				Subes tu CV y la IA evalúa la estructura, los logros con métricas, las palabras clave del sector y la
-				compatibilidad con los filtros automáticos que usan los reclutadores. En 30 segundos tienes un puntaje del 0 al
-				100 y la lista exacta de lo que tienes que mejorar.
+				Sube tu CV. En 30 segundos: score de 0 a 100, lista exacta de qué cambiar y cómo pasar los filtros automáticos
+				de reclutadores.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				Con el plan Pro, además, comparas tu CV contra cada oferta concreta y la IA reescribe por ti las secciones
-				débiles.
+				En Pro, la IA reescribe las secciones débiles contra cada oferta concreta.
 			</p>
 
 			<div className="relative z-10 mt-auto pt-8">
@@ -206,8 +204,7 @@ function BentoCellNetwork() {
 				Mensajes a reclutadores
 			</h3>
 			<p className="mt-3 text-foreground/65 text-sm leading-[1.55]">
-				Mensajes que abren conversaciones reales, no que parecen copia y pega. Uno al mes en Gratuito, ilimitados en
-				Pro.
+				Mensajes que abren conversaciones, no copia y pega. Uno al mes en Gratuito, ilimitados en Pro.
 			</p>
 
 			<div className="mt-auto pt-6">

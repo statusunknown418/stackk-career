@@ -94,61 +94,61 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "01",
 		title: "Un coach real,",
 		emphasis: "no un chatbot.",
-		body: "Una persona senior te acompaña con tu CV en mano y te dice exactamente qué decir y cómo decirlo en cada entrevista. La IA se encarga del trabajo pesado; tu coach toma las decisiones que ningún algoritmo todavía sabe tomar.",
-		receipt: { label: "Equipo de coaches", value: "3 a 5 senior, en planilla, en LATAM" },
+		body: "Un humano senior con tu CV en mano te dice qué decir en cada entrevista. La IA hace el resto.",
+		receipt: { label: "Equipo de coaches", value: "3 a 5 senior, en planilla" },
 	},
 	{
 		number: "02",
 		title: "Un solo plan.",
 		emphasis: "Todo incluido.",
-		body: "CV, carta, LinkedIn, mensajes a reclutadores, score y coaching humano. Wonsulting vende cada cosa por separado entre US$699 y US$2.299. Aquí lo recibes todo junto desde S/79.",
-		receipt: { label: "Herramientas integradas", value: "6 en una sola suscripción" },
+		body: "CV, carta, LinkedIn, mensajes, score y coaching, todo junto desde S/79. Wonsulting cobra US$699 a US$2.299 por las mismas piezas, por separado.",
+		receipt: { label: "Herramientas", value: "6 en una sola suscripción" },
 	},
 	{
 		number: "03",
 		title: "Conocemos a",
 		emphasis: "tu reclutador.",
-		body: "Tu coach ya estuvo del otro lado de la mesa en BCP, Yape, Rappi o Belcorp. Conoce las preguntas que hacen, los códigos internos de cada empresa y la forma en que se habla aquí. Nada de plantillas traídas de afuera.",
-		receipt: { label: "Cobertura regional", value: "8 países de habla hispana" },
+		body: "Tu coach ya entrevistó en BCP, Yape, Rappi y Belcorp. Sabe qué preguntan y cómo se habla aquí.",
+		receipt: { label: "Cobertura", value: "8 países de habla hispana" },
 	},
 	{
 		number: "04",
 		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Tienes tu score en 30 segundos y tu primera entrevista entre dos y cuatro semanas. Mientras otras plataformas siguen revisando tu CV, tú ya estás sentado en entrevistas reales.",
-		receipt: { label: "Días a primera entrevista", value: "18 en promedio (Premium)" },
+		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Otras plataformas siguen revisando tu CV.",
+		receipt: { label: "A primera entrevista", value: "18 días en promedio" },
 	},
 ];
 
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Subes tu CV y la IA te devuelve un score de 0 a 100 con la lista exacta de lo que tienes que mejorar. Gratis, sin tarjeta.",
+		body: "Sube tu CV. Score de 0 a 100 y la lista exacta de qué cambiar. Gratis.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
 		title: "Mapeo del próximo puesto (Sesión 1)",
-		body: "45 minutos con tu coach. Revisan tu CV y LinkedIn juntos, definen roles realistas y arman la lista de empresas objetivo.",
+		body: "45 min con tu coach. Revisan CV y LinkedIn, definen roles realistas, arman la lista de empresas objetivo.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Pones el plan en marcha",
-		body: "Comparas tu CV contra cada oferta, generas cartas en 30 segundos, escribes mensajes a reclutadores y subes tu LinkedIn a 90 o más. La IA se encarga del volumen; el plan de tu coach marca la dirección.",
+		body: "CV contra cada oferta. Cartas en 30 segundos. Mensajes que no parecen plantilla. LinkedIn al 90+.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Dominas la entrevista (Sesión 2)",
-		body: "45 minutos de entrevista de prueba con tu coach, hecha a la medida del puesto al que apuntas. Recibes feedback directo y claves de lenguaje corporal.",
+		body: "45 min de simulacro real con tu coach. Feedback directo y claves de lenguaje corporal.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Refuerzo después de la entrevista (Sesión 3)",
-		body: "30 minutos para analizar con tu coach qué salió bien, qué pulir y cómo encarar los siguientes procesos con más seguridad.",
+		body: "30 min con tu coach. Qué salió bien, qué pulir, cómo encarar los siguientes procesos.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Entrevistas reales en mano",
-		body: "Día 42 en promedio con el plan Premium. Ya practicaste con simulacros, las hiciste en vivo y dominas el método para las siguientes. Cancelas la suscripción cuando lo decidas.",
+		body: "Día 42 en promedio con Premium. Simulacros, entrevistas reales y método para las siguientes. Cancelas cuando decidas.",
 		tag: "★ Resultado",
 	},
 ];
@@ -214,7 +214,7 @@ export const SINGLE_SESSION = {
 	priceUsd: 11,
 	duration: "45 min",
 	tagline: "Prueba el coaching sin suscribirte.",
-	body: "Una sesión 1:1 con cualquier coach del equipo, enfocada en tu caso real. Sin suscripción ni compromiso.",
+	body: "Sesión 1:1 con cualquier coach del equipo, sobre tu caso real. Sin compromiso.",
 	cta: "Reservar sesión única",
 } as const;
 
