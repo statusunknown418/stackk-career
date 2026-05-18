@@ -8,6 +8,7 @@ import { initiateResumeAnalysisInputSchema } from "@stackk-career/schemas/api/ag
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "../";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export const agentsRouter = {
 	initiateResumeAnalysis: protectedProcedure
@@ -76,6 +77,8 @@ export const agentsRouter = {
 				context.log?.set({ outcome: "pending_insert_failed" });
 				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to register analysis" });
 			}
+
+			await invalidateViewerUsage(context.db, userId, ["resume_analyses_per_cycle"]);
 
 			try {
 				const idempotencyKey = await idempotencyKeys.create(`analysis-${analysisId}`);

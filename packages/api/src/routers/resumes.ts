@@ -10,6 +10,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export const resumesRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {
@@ -178,6 +179,8 @@ export const resumesRouter = {
 				cause: "malformed_data_or_unknown",
 			});
 		}
+
+		await invalidateViewerUsage(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
 
 		context.log?.set({
 			outcome: "success",

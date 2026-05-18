@@ -12,6 +12,7 @@ import {
 import { and, asc, count, desc, eq } from "drizzle-orm";
 import { protectedProcedure } from "../index";
 import { createResumeAnalysisDiff } from "../lib/analysis.helpers";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 const MAX_GENERATIONS_PER_USER = 5;
 
@@ -59,6 +60,10 @@ export const generationsRouter = {
 			outcome: "created",
 			generation: { id: row.id },
 		});
+
+		await invalidateViewerUsage(context.db, userId, [
+			input.type === "conversation" ? "conversation_generations_per_cycle" : "resume_creation_generations_per_cycle",
+		]);
 
 		return row;
 	}),

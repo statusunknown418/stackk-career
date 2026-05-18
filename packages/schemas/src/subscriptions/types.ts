@@ -23,6 +23,25 @@ export const limitKeyEnum = [
 export const limitKeySchema = z.enum(limitKeyEnum);
 export type LimitKey = (typeof limitKeyEnum)[number];
 
+/**
+ * Subset of {@link LimitKey} that maps to a cached per-user counter on `viewer.usage`.
+ *
+ * Excludes `messages_per_generation` because that is a per-generation cap (counted from a
+ * specific generation's messages), not a per-cycle counter derived from a single table.
+ *
+ * Mapping to underlying tables:
+ * - `resumes_total` → `resumes` (all-time count, not period-scoped)
+ * - `resume_creation_generations_per_cycle` → `generations` WHERE `type = "resume-creation"` (per cycle)
+ * - `conversation_generations_per_cycle` → `generations` WHERE `type = "conversation"` (per cycle)
+ * - `resume_analyses_per_cycle` → `resume_analyses` (per cycle)
+ * - `coaching_sessions_per_cycle` → `coaching_sessions` (per cycle)
+ */
+export type CachedUsageLimitKey = Exclude<LimitKey, "messages_per_generation">;
+export const cachedUsageLimitKeys: readonly CachedUsageLimitKey[] = limitKeyEnum.filter(
+	(key): key is CachedUsageLimitKey => key !== "messages_per_generation"
+);
+export const cachedUsageLimitKeySchema = limitKeySchema.exclude(["messages_per_generation"]);
+
 export const unlimitedSentinel = "unlimited" as const;
 export type Unlimited = typeof unlimitedSentinel;
 
