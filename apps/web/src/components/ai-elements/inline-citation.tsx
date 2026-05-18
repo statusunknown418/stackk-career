@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { Badge } from "@/components/ui/badge";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { PreviewCard, PreviewCardPopup, PreviewCardTrigger } from "@/components/ui/preview-card";
 import { cn } from "@/lib/utils";
 
 export type InlineCitationProps = ComponentProps<"span">;
@@ -21,10 +21,10 @@ export const InlineCitationText = ({ className, ...props }: InlineCitationTextPr
 	<span className={cn("transition-colors group-hover:bg-accent", className)} {...props} />
 );
 
-export type InlineCitationCardProps = ComponentProps<typeof HoverCard>;
+export type InlineCitationCardProps = ComponentProps<typeof PreviewCard>;
 
 export const InlineCitationCard = (props: InlineCitationCardProps) => (
-	<HoverCard closeDelay={0} openDelay={0} {...props} />
+	<PreviewCard closeDelay={0} delay={0} {...props} />
 );
 
 export type InlineCitationCardTriggerProps = ComponentProps<typeof Badge> & {
@@ -32,23 +32,21 @@ export type InlineCitationCardTriggerProps = ComponentProps<typeof Badge> & {
 };
 
 export const InlineCitationCardTrigger = ({ sources, className, ...props }: InlineCitationCardTriggerProps) => (
-	<HoverCardTrigger asChild>
-		<Badge className={cn("ml-1 rounded-full", className)} variant="secondary" {...props}>
-			{sources[0] ? (
-				<>
-					{new URL(sources[0]).hostname} {sources.length > 1 && `+${sources.length - 1}`}
-				</>
-			) : (
-				"unknown"
-			)}
-		</Badge>
-	</HoverCardTrigger>
+	<PreviewCardTrigger render={<Badge className={cn("ml-1 rounded-full", className)} variant="secondary" {...props} />}>
+		{sources[0] ? (
+			<>
+				{new URL(sources[0]).hostname} {sources.length > 1 && `+${sources.length - 1}`}
+			</>
+		) : (
+			"unknown"
+		)}
+	</PreviewCardTrigger>
 );
 
-export type InlineCitationCardBodyProps = ComponentProps<"div">;
+export type InlineCitationCardBodyProps = ComponentProps<typeof PreviewCardPopup>;
 
 export const InlineCitationCardBody = ({ className, ...props }: InlineCitationCardBodyProps) => (
-	<HoverCardContent className={cn("relative w-80 p-0", className)} {...props} />
+	<PreviewCardPopup className={cn("relative w-80 p-0", className)} {...props} />
 );
 
 const CarouselApiContext = createContext<CarouselApi | undefined>(undefined);

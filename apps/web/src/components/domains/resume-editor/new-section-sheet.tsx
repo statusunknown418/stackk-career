@@ -1,11 +1,10 @@
-import { PlusCircleIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon, PlusCircleIcon } from "@phosphor-icons/react";
 import type { CreateBlockApiMutationInput } from "@stackk-career/schemas/api/blocks";
 import { blankResumeSections, SECTION_DEFINITIONS } from "@stackk-career/schemas/api/resumes";
 import { mapParseBlocks } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ComponentType } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -17,6 +16,14 @@ import { useCreateBlock } from "./use-block-mutations";
 
 interface NewSectionSheetProps {
 	form: ResumeFormApi;
+	// Insertion window. When omitted, falls back to header append-at-end.
+	nextPosition?: string | null;
+	// Controlled mode: caller drives open state (inline insertion zones).
+	onOpenChange?: (open: boolean) => void;
+	open?: boolean;
+	previousPosition?: string | null;
+	// When false, suppress the built-in header trigger button. Defaults to true.
+	showTrigger?: boolean;
 }
 
 interface SectionOption {
@@ -39,7 +46,14 @@ const sectionOptions: readonly SectionOption[] = SECTION_DEFINITIONS.map((defini
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
-export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
+export const NewSectionSheet = ({
+	form,
+	nextPosition,
+	onOpenChange,
+	open,
+	previousPosition,
+	showTrigger = true,
+}: NewSectionSheetProps) => {
 	const params = Route.useParams();
 	const { data } = useSuspenseQuery(orpc.resumes.get.queryOptions({ input: { id: params.resumeId } }));
 
@@ -55,6 +69,11 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 	);
 	const lastTopLevelBlock = topLevelBlocks.at(-1) ?? null;
 
+	// Caller-provided window wins. Otherwise header default = append-at-end.
+	const hasExplicitWindow = previousPosition !== undefined || nextPosition !== undefined;
+	const resolvedBefore = hasExplicitWindow ? (previousPosition ?? null) : (lastTopLevelBlock?.position ?? null);
+	const resolvedAfter = hasExplicitWindow ? (nextPosition ?? null) : null;
+
 	const handleCreateSection = async (option: SectionOption) => {
 		const defaultSection = blankResumeSections.find((section) => normalize(section.title) === normalize(option.title));
 		const title = defaultSection?.title ?? option.title;
@@ -62,8 +81,8 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 		const input: CreateBlockApiMutationInput = {
 			resumeId: params.resumeId,
 			parentBlockId: null,
-			before: lastTopLevelBlock?.position ?? null,
-			after: null,
+			before: resolvedBefore,
+			after: resolvedAfter,
 			blockType: "section",
 			content: {
 				title,
@@ -73,14 +92,17 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 		};
 
 		await createBlock.enqueue(input);
+		onOpenChange?.(false);
 	};
 
 	return (
-		<Sheet>
-			<Button render={<SheetTrigger />} variant="outline">
-				<PlusCircleIcon />
-				Agregar sección
-			</Button>
+		<Sheet onOpenChange={onOpenChange} open={open}>
+			{showTrigger && (
+				<Button render={<SheetTrigger />} variant="outline">
+					<PlusCircleIcon />
+					Agregar sección
+				</Button>
+			)}
 
 			<SheetContent variant="inset">
 				<SheetHeader>
@@ -117,9 +139,10 @@ export const NewSectionSheet = ({ form }: NewSectionSheetProps) => {
 											<ItemTitle>{option.title}</ItemTitle>
 											<ItemDescription>{option.description}</ItemDescription>
 										</ItemContent>
+
 										{isDisabled && (
 											<ItemActions>
-												<Badge>Ya agregada</Badge>
+												<CheckCircleIcon className="size-5" weight="fill" />
 											</ItemActions>
 										)}
 									</button>

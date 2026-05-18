@@ -3,18 +3,15 @@
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import type { SectionKind } from "@stackk-career/schemas/api/resumes";
 import {
-	type BlockNode,
 	buildLabeledOptions,
-	SKILL_CATEGORIES,
-	SKILL_CATEGORY_LABELS,
+	type SectionBlockNode,
 	SKILL_PROFICIENCY_LABELS,
-	type SkillCategory,
 	type SkillProficiency,
 } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { getBlockKey } from "@/components/domains/resume-editor/block-key-registry";
+import { type ReactNode, useMemo } from "react";
+import { getBlockKey } from "@/components/domains/resume-document/block-key-registry";
 import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,20 +20,34 @@ import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
 import { InlineTextEditor } from "./inline-text-editor";
 
-type SectionBlock = Extract<BlockNode, { blockType: "section" }>;
-
-const categoryOptions = buildLabeledOptions(SKILL_CATEGORIES, SKILL_CATEGORY_LABELS);
-
 const SKILL_PROFICIENCIES: readonly SkillProficiency[] = ["beginner", "intermediate", "advanced", "expert"];
 const LANGUAGE_PROFICIENCIES: readonly SkillProficiency[] = ["basic", "conversational", "fluent", "native"];
 
 const skillProficiencyOptions = buildLabeledOptions(SKILL_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
 const languageProficiencyOptions = buildLabeledOptions(LANGUAGE_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
 
+interface SkillChipProps {
+	children: ReactNode;
+	deleteLabel: string;
+	onDelete: () => void;
+}
+
+const SkillChip = ({ children, deleteLabel, onDelete }: SkillChipProps) => (
+	<li className="group/chip inline-flex h-8 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-1 transition-colors focus-within:border-border hover:border-border">
+		<div className="w-0 overflow-hidden opacity-0 transition-[width,opacity] duration-200 ease-out group-focus-within/chip:w-7 group-focus-within/chip:opacity-100 group-hover/chip:w-7 group-hover/chip:opacity-100 sm:group-hover/chip:w-6 sm:group-focus-within/chip:w-6">
+			<Button aria-label={deleteLabel} onClick={onDelete} size="icon-xs" type="button" variant="destructive-ghost">
+				<TrashIcon />
+			</Button>
+		</div>
+
+		{children}
+	</li>
+);
+
 export const InlineSkills = withForm({
 	defaultValues: resumeFormDefaults,
 	props: {
-		block: propType<SectionBlock>(),
+		block: propType<SectionBlockNode>(),
 		sectionKind: propType<SectionKind>(),
 	},
 	render: ({ form, block, sectionKind }) => {
@@ -100,7 +111,7 @@ export const InlineSkills = withForm({
 
 			return (
 				<div className="space-y-2">
-					<ul className="flex flex-wrap gap-x-4 gap-y-1">
+					<ul className="flex flex-wrap gap-1.5">
 						{items.map((item) => {
 							if (item.blockType !== "skill_item") {
 								return null;
@@ -110,10 +121,15 @@ export const InlineSkills = withForm({
 								return null;
 							}
 							return (
-								<li className="group/item flex items-center gap-1" key={getBlockKey(item.id)}>
+								<SkillChip
+									deleteLabel="Eliminar idioma"
+									key={getBlockKey(item.id)}
+									onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
+								>
 									<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 										{(field) => (
 											<InlineTextEditor
+												className="px-1 hover:bg-transparent focus:bg-transparent"
 												onBlur={() => field.handleBlur()}
 												onChange={(value) => field.handleChange(value)}
 												placeholder={itemPlaceholder}
@@ -131,9 +147,15 @@ export const InlineSkills = withForm({
 												}
 												value={(field.state.value ?? "") as string}
 											>
-												<SelectTrigger aria-label="Nivel" onBlur={field.handleBlur} size="sm">
+												<SelectTrigger
+													aria-label="Nivel"
+													className="h-6 min-h-0 w-24 gap-1 rounded-sm border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50"
+													onBlur={field.handleBlur}
+													size="sm"
+												>
 													<SelectValue placeholder="Nivel" />
 												</SelectTrigger>
+
 												<SelectPopup>
 													{proficiencyOptions.map((option) => (
 														<SelectItem key={option.value} value={option.value}>
@@ -144,17 +166,7 @@ export const InlineSkills = withForm({
 											</Select>
 										)}
 									</form.AppField>
-									<Button
-										aria-label="Eliminar idioma"
-										className="opacity-0 transition-opacity group-focus-within/item:opacity-100 group-hover/item:opacity-100"
-										onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-										size="icon-sm"
-										type="button"
-										variant="ghost"
-									>
-										<TrashIcon />
-									</Button>
-								</li>
+								</SkillChip>
 							);
 						})}
 					</ul>
@@ -209,41 +221,19 @@ export const InlineSkills = withForm({
 										/>
 									)}
 								</form.AppField>
-								<div className="flex items-center gap-1">
-									<form.AppField name={`blocks[${lineIndex}].content.category` as const}>
-										{(field) => (
-											<Select
-												items={categoryOptions}
-												onValueChange={(next) => field.handleChange(next as SkillCategory)}
-												value={(field.state.value ?? "") as string}
-											>
-												<SelectTrigger aria-label="Categoría" onBlur={field.handleBlur} size="sm">
-													<SelectValue />
-												</SelectTrigger>
-												<SelectPopup>
-													{categoryOptions.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectPopup>
-											</Select>
-										)}
-									</form.AppField>
-									<Button
-										aria-label="Eliminar categoría"
-										className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100"
-										onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
-										size="icon-sm"
-										type="button"
-										variant="ghost"
-									>
-										<TrashIcon />
-									</Button>
-								</div>
+								<Button
+									aria-label="Eliminar categoría"
+									className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100"
+									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
+									size="icon-sm"
+									type="button"
+									variant="destructive-ghost"
+								>
+									<TrashIcon />
+								</Button>
 							</div>
 
-							<ul className="flex flex-wrap gap-x-4 gap-y-1 pl-1">
+							<ul className="flex flex-wrap gap-1.5">
 								{items.map((item) => {
 									if (item.blockType !== "skill_item") {
 										return null;
@@ -253,10 +243,15 @@ export const InlineSkills = withForm({
 										return null;
 									}
 									return (
-										<li className="group/item flex items-center gap-1" key={getBlockKey(item.id)}>
+										<SkillChip
+											deleteLabel="Eliminar habilidad"
+											key={getBlockKey(item.id)}
+											onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
+										>
 											<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 												{(field) => (
 													<InlineTextEditor
+														className="px-1 hover:bg-transparent focus:bg-transparent"
 														onBlur={() => field.handleBlur()}
 														onChange={(value) => field.handleChange(value)}
 														placeholder={itemPlaceholder}
@@ -274,7 +269,12 @@ export const InlineSkills = withForm({
 														}
 														value={(field.state.value ?? "") as string}
 													>
-														<SelectTrigger aria-label="Nivel" onBlur={field.handleBlur} size="sm">
+														<SelectTrigger
+															aria-label="Nivel"
+															className="h-6 min-h-0 w-28 gap-1 rounded-sm border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50"
+															onBlur={field.handleBlur}
+															size="sm"
+														>
 															<SelectValue placeholder="Nivel" />
 														</SelectTrigger>
 														<SelectPopup>
@@ -287,17 +287,7 @@ export const InlineSkills = withForm({
 													</Select>
 												)}
 											</form.AppField>
-											<Button
-												aria-label="Eliminar habilidad"
-												className="opacity-0 transition-opacity group-focus-within/item:opacity-100 group-hover/item:opacity-100"
-												onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-												size="icon-sm"
-												type="button"
-												variant="ghost"
-											>
-												<TrashIcon />
-											</Button>
-										</li>
+										</SkillChip>
 									);
 								})}
 							</ul>

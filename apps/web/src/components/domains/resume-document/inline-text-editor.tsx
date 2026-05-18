@@ -1,16 +1,23 @@
 "use client";
 
 import { ListBulletsIcon, ListNumbersIcon, TextBolderIcon, TextItalicIcon } from "@phosphor-icons/react";
+import type { SuggestResumeBlockInput } from "@stackk-career/schemas/api/suggestions";
 import Placeholder from "@tiptap/extension-placeholder";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, GroupSeparator } from "@/components/ui/group";
 import { cn } from "@/lib/utils";
+import { SuggestionPopover } from "./suggestion-popover";
 
 export type InlineTextEditorVariant = "prose" | "heading" | "subtitle" | "plain";
+
+interface SuggestionConfig {
+	input: SuggestResumeBlockInput;
+	onApply: (html: string) => void;
+}
 
 interface InlineTextEditorProps {
 	autoFocus?: boolean;
@@ -20,6 +27,7 @@ interface InlineTextEditorProps {
 	onEnterEmpty?: () => void;
 	placeholder?: string;
 	readOnly?: boolean;
+	suggestion?: SuggestionConfig;
 	value: string;
 	variant: InlineTextEditorVariant;
 }
@@ -45,10 +53,12 @@ export const InlineTextEditor = ({
 	onEnterEmpty,
 	placeholder,
 	readOnly = false,
+	suggestion,
 	value,
 	variant,
 }: InlineTextEditorProps) => {
 	const [isFocused, setIsFocused] = useState(false);
+	const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
 	const isProse = variant === "prose";
 
 	const editor = useEditor({
@@ -101,7 +111,6 @@ export const InlineTextEditor = ({
 				showOnlyWhenEditable: true,
 				showOnlyCurrent: false,
 				includeChildren: false,
-				emptyEditorClass: "is-editor-empty",
 			}),
 		],
 		immediatelyRender: false,
@@ -132,13 +141,13 @@ export const InlineTextEditor = ({
 		return null;
 	}
 
-	const showToolbar = isProse && !readOnly && isFocused;
+	const showToolbar = isProse && !readOnly && (isFocused || isSuggestionOpen);
 
 	return (
 		<div className="relative">
 			<EditorContent
 				className={cn(
-					"[&_.ProseMirror>.is-empty]:before:pointer-events-none [&_.ProseMirror>.is-empty]:before:float-left [&_.ProseMirror>.is-empty]:before:h-0 [&_.ProseMirror>.is-empty]:before:text-muted-foreground/60 [&_.ProseMirror>.is-empty]:before:content-[attr(data-placeholder)]",
+					"[&_.ProseMirror_.is-editor-empty]:before:pointer-events-none [&_.ProseMirror_.is-editor-empty]:before:float-left [&_.ProseMirror_.is-editor-empty]:before:h-0 [&_.ProseMirror_.is-editor-empty]:before:text-muted-foreground/60 [&_.ProseMirror_.is-editor-empty]:before:content-[attr(data-placeholder)]",
 					isProse &&
 						"[&_.ProseMirror_li_p]:my-0 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5",
 					readOnly && "pointer-events-none"
@@ -148,63 +157,83 @@ export const InlineTextEditor = ({
 
 			<AnimatePresence>
 				{showToolbar && (
-					<motion.div
-						animate={{ opacity: 1, y: 0 }}
-						className="absolute top-full left-0 z-20 mt-1"
-						exit={{ opacity: 0, y: -4 }}
-						initial={{ opacity: 0, y: -4 }}
-						transition={{ duration: 0.15, ease: "easeOut" }}
-					>
-						<div className="rounded-xl border bg-popover p-0.5 shadow-md">
-							<ButtonGroup>
-								<Button
-									aria-label="Alternar negrita"
-									className={cn(editor.isActive("bold") && "bg-accent text-foreground")}
-									onClick={() => editor.chain().focus().toggleBold().run()}
-									onMouseDown={(event) => event.preventDefault()}
-									size="icon"
-									variant="ghost"
-								>
-									<TextBolderIcon />
-								</Button>
-								<GroupSeparator />
-								<Button
-									aria-label="Alternar cursiva"
-									className={cn(editor.isActive("italic") && "bg-accent text-foreground")}
-									onClick={() => editor.chain().focus().toggleItalic().run()}
-									onMouseDown={(event) => event.preventDefault()}
-									size="icon"
-									variant="ghost"
-								>
-									<TextItalicIcon />
-								</Button>
-								<GroupSeparator />
-								<Button
-									aria-label="Alternar lista con viñetas"
-									className={cn(editor.isActive("bulletList") && "bg-accent text-foreground")}
-									onClick={() => editor.chain().focus().toggleBulletList().run()}
-									onMouseDown={(event) => event.preventDefault()}
-									size="icon"
-									variant="ghost"
-								>
-									<ListBulletsIcon />
-								</Button>
-								<GroupSeparator />
-								<Button
-									aria-label="Alternar lista numerada"
-									className={cn(editor.isActive("orderedList") && "bg-accent text-foreground")}
-									onClick={() => editor.chain().focus().toggleOrderedList().run()}
-									onMouseDown={(event) => event.preventDefault()}
-									size="icon"
-									variant="ghost"
-								>
-									<ListNumbersIcon />
-								</Button>
-							</ButtonGroup>
-						</div>
-					</motion.div>
+					<ProseToolbar editor={editor} onSuggestionOpenChange={setIsSuggestionOpen} suggestion={suggestion} />
 				)}
 			</AnimatePresence>
 		</div>
 	);
 };
+
+interface ProseToolbarProps {
+	editor: Editor;
+	onSuggestionOpenChange: (open: boolean) => void;
+	suggestion?: SuggestionConfig;
+}
+
+const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolbarProps) => (
+	<motion.div
+		animate={{ opacity: 1, y: 0 }}
+		className="absolute top-full left-0 z-20 mt-1"
+		exit={{ opacity: 0, y: -4 }}
+		initial={{ opacity: 0, y: -4 }}
+		transition={{ duration: 0.15, ease: "easeOut" }}
+	>
+		<div className="rounded-xl border bg-popover p-0.5 shadow-md">
+			<ButtonGroup>
+				<Button
+					aria-label="Alternar negrita"
+					className={cn(editor.isActive("bold") && "bg-accent text-foreground")}
+					onClick={() => editor.chain().focus().toggleBold().run()}
+					onMouseDown={(event) => event.preventDefault()}
+					size="icon"
+					variant="ghost"
+				>
+					<TextBolderIcon />
+				</Button>
+				<GroupSeparator />
+				<Button
+					aria-label="Alternar cursiva"
+					className={cn(editor.isActive("italic") && "bg-accent text-foreground")}
+					onClick={() => editor.chain().focus().toggleItalic().run()}
+					onMouseDown={(event) => event.preventDefault()}
+					size="icon"
+					variant="ghost"
+				>
+					<TextItalicIcon />
+				</Button>
+				<GroupSeparator />
+				<Button
+					aria-label="Alternar lista con viñetas"
+					className={cn(editor.isActive("bulletList") && "bg-accent text-foreground")}
+					onClick={() => editor.chain().focus().toggleBulletList().run()}
+					onMouseDown={(event) => event.preventDefault()}
+					size="icon"
+					variant="ghost"
+				>
+					<ListBulletsIcon />
+				</Button>
+				<GroupSeparator />
+				<Button
+					aria-label="Alternar lista numerada"
+					className={cn(editor.isActive("orderedList") && "bg-accent text-foreground")}
+					onClick={() => editor.chain().focus().toggleOrderedList().run()}
+					onMouseDown={(event) => event.preventDefault()}
+					size="icon"
+					variant="ghost"
+				>
+					<ListNumbersIcon />
+				</Button>
+				{suggestion && (
+					<>
+						<GroupSeparator />
+						<SuggestionPopover
+							input={suggestion.input}
+							onApply={suggestion.onApply}
+							onOpenChange={onSuggestionOpenChange}
+						/>
+					</>
+				)}
+			</ButtonGroup>
+		</div>
+	</motion.div>
+);

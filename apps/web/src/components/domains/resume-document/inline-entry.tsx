@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { TrashIcon } from "@phosphor-icons/react";
 import {
 	ENTRY_LABELS,
 	getSectionKind,
@@ -10,9 +10,9 @@ import {
 import { type EntryBlockNode, proseContentToHtml, sectionContentSchema } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef } from "react";
-import { getBlockKey } from "@/components/domains/resume-editor/block-key-registry";
-import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
+import { useMemo } from "react";
+import { getBlockKey } from "@/components/domains/resume-document/block-key-registry";
+import { useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
@@ -28,9 +28,8 @@ export const InlineEntry = withForm({
 	props: {
 		block: propType<EntryBlockNode>(),
 		blockIndex: 0,
-		shouldAutoFocus: false,
 	},
-	render: ({ form, block, blockIndex, shouldAutoFocus }) => {
+	render: ({ form, block, blockIndex }) => {
 		const params = Route.useParams();
 		const { data } = useSuspenseQuery(orpc.resumes.get.queryOptions({ input: { id: params.resumeId } }));
 
@@ -39,9 +38,7 @@ export const InlineEntry = withForm({
 			[data.blocks]
 		);
 
-		const createBlock = useCreateBlock({ form });
 		const deleteBlock = useDeleteBlock({ form });
-		const rootRef = useRef<HTMLElement>(null);
 
 		const sectionKind: SectionKind = useMemo(() => {
 			if (block.parentBlockId === null) {
@@ -60,13 +57,6 @@ export const InlineEntry = withForm({
 		const isCurrent = block.content.isCurrent ?? false;
 		const isExperience = sectionKind === "experience";
 
-		useEffect(() => {
-			if (!shouldAutoFocus) {
-				return;
-			}
-			rootRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-		}, [shouldAutoFocus]);
-
 		const bullets = sortLexoPositions(
 			block.children.filter((child) => child.blockType === "bullet"),
 			(child) => child.position
@@ -81,26 +71,12 @@ export const InlineEntry = withForm({
 			deleteBlock.mutate({ id: block.id, resumeId: params.resumeId });
 		};
 
-		const handleAddBullet = () => {
-			const trailing = bullets.at(-1)?.position ?? null;
-			createBlock
-				.enqueue({
-					resumeId: params.resumeId,
-					parentBlockId: block.id,
-					before: trailing,
-					after: null,
-					blockType: "bullet",
-					content: { text: "", format: "html", aiSuggested: false },
-				})
-				.catch(() => undefined);
-		};
-
 		return (
-			<article className="group/entry relative flex gap-3" data-current={isCurrent} ref={rootRef}>
+			<article className={"group/entry relative flex gap-3"} data-current={isCurrent}>
 				{showRailDot && (
 					<div aria-hidden="true" className="relative w-2 flex-none">
 						<span className="absolute -top-3 -bottom-3 left-1/2 w-px -translate-x-1/2 bg-border/60" />
-						<span className="absolute top-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-muted-foreground/40 bg-background transition-colors group-focus-within/entry:border-primary group-focus-within/entry:bg-primary group-data-[current]/entry:border-foreground group-data-[current]/entry:bg-foreground" />
+						<span className="absolute top-3 left-1/2 size-2 -translate-x-1/2 rounded-full border border-muted-foreground/40 bg-background transition-colors group-focus-within/entry:border-primary group-focus-within/entry:bg-primary group-data-current/entry:border-foreground group-data-current/entry:bg-foreground" />
 					</div>
 				)}
 
@@ -110,7 +86,6 @@ export const InlineEntry = withForm({
 							<form.AppField name={`blocks[${blockIndex}].content.title` as const}>
 								{(field) => (
 									<InlineTextEditor
-										autoFocus={shouldAutoFocus}
 										onBlur={() => field.handleBlur()}
 										onChange={(value) => field.handleChange(value)}
 										placeholder={labels.title}
@@ -138,7 +113,7 @@ export const InlineEntry = withForm({
 							onClick={handleRemoveEntry}
 							size="icon-sm"
 							type="button"
-							variant="ghost"
+							variant="destructive-ghost"
 						>
 							<TrashIcon />
 						</Button>
@@ -166,6 +141,7 @@ export const InlineEntry = withForm({
 									>
 										<Checkbox
 											checked={Boolean(field.state.value)}
+											id={`blocks[${blockIndex}].content.isRemote`}
 											onBlur={field.handleBlur}
 											onCheckedChange={(next) => field.handleChange(next === true)}
 										/>
@@ -221,6 +197,12 @@ export const InlineEntry = withForm({
 										const textValue = (textField.state.value ?? "") as string;
 										const formatValue = (formatField.state.value ?? "html") as "html" | "plain";
 										const html = proseContentToHtml(textValue, formatValue);
+										const applyDescriptor = (nextHtml: string) => {
+											textField.handleChange(nextHtml);
+											if (formatValue !== "html") {
+												formatField.handleChange("html");
+											}
+										};
 										return (
 											<InlineTextEditor
 												onBlur={() => textField.handleBlur()}
@@ -231,6 +213,16 @@ export const InlineEntry = withForm({
 													}
 												}}
 												placeholder="Describe alcance, contexto o impacto"
+												suggestion={{
+													input: {
+														resumeId: params.resumeId,
+														blockId: block.id,
+														blockType: "entry",
+														field: "descriptor",
+														existingContent: html,
+													},
+													onApply: applyDescriptor,
+												}}
 												value={html}
 												variant="prose"
 											/>
@@ -284,13 +276,6 @@ export const InlineEntry = withForm({
 							})}
 						</div>
 					)}
-
-					<div className="opacity-0 transition-opacity group-focus-within/entry:opacity-100 [@media(hover:hover)]:group-hover/entry:opacity-100">
-						<Button disabled={createBlock.isPending} onClick={handleAddBullet} size="sm" type="button" variant="ghost">
-							<PlusIcon />
-							Añadir viñeta
-						</Button>
-					</div>
 				</div>
 			</article>
 		);

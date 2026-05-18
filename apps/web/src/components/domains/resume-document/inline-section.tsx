@@ -2,12 +2,11 @@
 
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { ENTRY_LABELS, getSectionKind, isTimelineSectionKind } from "@stackk-career/schemas/api/resumes";
-import { type BlockNode, type SectionBlockNode, sortEntriesByTimeline } from "@stackk-career/schemas/db/resume-blocks";
+import { type SectionBlockNode, sortEntriesByTimeline } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useMemo, useState } from "react";
-import { getBlockKey } from "@/components/domains/resume-editor/block-key-registry";
+import { useMemo } from "react";
+import { getBlockKey } from "@/components/domains/resume-document/block-key-registry";
 import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
@@ -17,8 +16,6 @@ import { InlineEntry } from "./inline-entry";
 import { InlineParagraph } from "./inline-paragraph";
 import { InlineSkills } from "./inline-skills";
 import { InlineTextEditor } from "./inline-text-editor";
-
-type SectionBlock = Extract<BlockNode, { blockType: "section" }>;
 
 export const InlineSection = withForm({
 	defaultValues: resumeFormDefaults,
@@ -36,8 +33,6 @@ export const InlineSection = withForm({
 
 		const createBlock = useCreateBlock({ form });
 		const deleteBlock = useDeleteBlock({ form });
-		const reduceMotion = useReducedMotion();
-		const [focusedEntryId, setFocusedEntryId] = useState<number | null>(null);
 
 		const sectionKind = getSectionKind(block.content);
 		const labels = ENTRY_LABELS[sectionKind];
@@ -61,37 +56,28 @@ export const InlineSection = withForm({
 		);
 
 		const handleAddEntry = () => {
-			const trailingPosition = sortLexoPositions(rawEntries, (child) => child.position).at(-1)?.position ?? null;
-			createBlock
-				.enqueue({
-					resumeId: params.resumeId,
-					parentBlockId: block.id,
-					before: trailingPosition,
-					after: null,
-					blockType: "entry",
-					content: {
-						title: "",
-						subtitle: "",
-						descriptor: "",
-						descriptorFormat: "html",
-						entryStyle: "standard",
-						isCurrent: false,
-						isRemote: false,
-					},
-				})
-				.then((created) => {
-					if (created && typeof created === "object" && "id" in created) {
-						setFocusedEntryId((created as { id: number }).id);
-					}
-				})
-				.catch(() => undefined);
+			const leadingPosition = sortLexoPositions(rawEntries, (child) => child.position).at(0)?.position ?? null;
+			createBlock.enqueue({
+				resumeId: params.resumeId,
+				parentBlockId: block.id,
+				before: null,
+				after: leadingPosition,
+				blockType: "entry",
+				content: {
+					title: "",
+					subtitle: "",
+					descriptor: "",
+					descriptorFormat: "html",
+					entryStyle: "standard",
+					isCurrent: false,
+					isRemote: false,
+				},
+			});
 		};
 
 		const handleDeleteSection = () => {
 			deleteBlock.mutate({ id: block.id, resumeId: params.resumeId });
 		};
-
-		const entryTransition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.23, 1, 0.32, 1] as const };
 
 		return (
 			<div className="group/section flex flex-col gap-3">
@@ -111,11 +97,11 @@ export const InlineSection = withForm({
 						aria-label="Eliminar sección"
 						className="opacity-0 transition-opacity group-focus-within/section:opacity-100 [@media(hover:hover)]:group-hover/section:opacity-100"
 						onClick={handleDeleteSection}
-						size="icon-sm"
+						size="xs"
 						type="button"
-						variant="ghost"
+						variant="destructive-ghost"
 					>
-						<TrashIcon />
+						<TrashIcon /> Eliminar
 					</Button>
 				</div>
 
@@ -143,34 +129,16 @@ export const InlineSection = withForm({
 
 				{block.content.layout === "entries" && (
 					<div className="space-y-4">
-						<AnimatePresence initial={false} mode="popLayout">
-							{entries.map((entry) => {
-								if (entry.blockType !== "entry") {
-									return null;
-								}
-								const idx = blockIndexById.get(entry.id);
-								if (idx === undefined) {
-									return null;
-								}
-								return (
-									<motion.div
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
-										initial={{ opacity: 0, y: -4 }}
-										key={getBlockKey(entry.id)}
-										layout="position"
-										transition={entryTransition}
-									>
-										<InlineEntry
-											block={entry}
-											blockIndex={idx}
-											form={form}
-											shouldAutoFocus={entry.id === focusedEntryId}
-										/>
-									</motion.div>
-								);
-							})}
-						</AnimatePresence>
+						{entries.map((entry) => {
+							if (entry.blockType !== "entry") {
+								return null;
+							}
+							const idx = blockIndexById.get(entry.id);
+							if (idx === undefined) {
+								return null;
+							}
+							return <InlineEntry block={entry} blockIndex={idx} form={form} key={getBlockKey(entry.id)} />;
+						})}
 
 						<Button disabled={createBlock.isPending} onClick={handleAddEntry} size="sm" type="button" variant="ghost">
 							<PlusIcon />
@@ -179,9 +147,7 @@ export const InlineSection = withForm({
 					</div>
 				)}
 
-				{block.content.layout === "skills" && (
-					<InlineSkills block={block as SectionBlock} form={form} sectionKind={sectionKind} />
-				)}
+				{block.content.layout === "skills" && <InlineSkills block={block} form={form} sectionKind={sectionKind} />}
 			</div>
 		);
 	},

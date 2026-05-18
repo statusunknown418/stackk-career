@@ -101,7 +101,7 @@ export const InlineContact = withForm({
 										onClick={() => itemsField.removeValue(itemIndex)}
 										size="icon-sm"
 										type="button"
-										variant="ghost"
+										variant="destructive-ghost"
 									>
 										<TrashIcon />
 									</Button>
