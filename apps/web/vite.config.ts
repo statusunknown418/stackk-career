@@ -5,7 +5,22 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-	plugins: [tanstackStart(), viteReact(), tailwindcss(), nitro()],
+	plugins: [
+		tanstackStart({
+			prerender: {
+				filter: ({ path }) => path === "/",
+			},
+			pages: [
+				{
+					path: "/",
+					prerender: { enabled: true },
+				},
+			],
+		}),
+		viteReact(),
+		tailwindcss(),
+		nitro(),
+	],
 	envDir: "../../",
 	resolve: {
 		tsconfigPaths: true,
