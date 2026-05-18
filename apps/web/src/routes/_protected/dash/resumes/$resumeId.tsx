@@ -5,12 +5,12 @@ import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
-import { useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
+import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
-import { ResumeDocumentEditor } from "@/components/domains/resume-editor/resume-document-editor";
 import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
 import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";
@@ -25,8 +25,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
-import { Input } from "@/components/ui/input";
-import { InputGroup } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
 import {
 	DropdownMenu,
@@ -70,17 +68,6 @@ function RouteComponent() {
 	const { data } = useSuspenseQuery(resumeQuery);
 
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-	const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
-
-	const prefersReducedMotion = useReducedMotion();
-
-	const registerSection = useCallback((id: number, el: HTMLElement | null) => {
-		if (el) {
-			sectionRefs.current.set(id, el);
-		} else {
-			sectionRefs.current.delete(id);
-		}
-	}, []);
 
 	const handleSelectSection = (id: number | null) => {
 		navigate({
@@ -90,16 +77,6 @@ function RouteComponent() {
 			replace: true,
 		});
 	};
-
-	useEffect(() => {
-		if (focusedSectionId === null) {
-			return;
-		}
-		sectionRefs.current.get(focusedSectionId)?.scrollIntoView({
-			behavior: prefersReducedMotion ? "auto" : "smooth",
-			block: "start",
-		});
-	}, [focusedSectionId, prefersReducedMotion]);
 
 	const initialValues = useMemo(() => buildDocumentFormValues(data), [data]);
 
@@ -149,8 +126,8 @@ function RouteComponent() {
 
 	// Re-hydrate the form when the underlying resume snapshot changes (e.g. after
 	// adding a section, deleting blocks, or any external mutation that invalidates
-	// the query). Tree shape is keyed by id + updatedAt of every block + the resume
-	// itself, so per-keystroke saves don't trigger a reset.
+	// the query). Tree shape is keyed by resume id + each block's id/parent/position,
+	// so per-keystroke content saves don't trigger a reset.
 	const hydratedDataKeyRef = useRef<string | null>(null);
 	const nextHydrationKey = buildHydrationKey(data);
 
@@ -182,6 +159,7 @@ function RouteComponent() {
 	useStore(form.store, (state) =>
 		state.values.blocks.map((block) => `${block.id}:${block.parentBlockId ?? ""}:${block.position}`).join("|")
 	);
+
 	const rootBlocks = buildBlockTree(form.state.values.blocks);
 	const blockIndexById = new Map(form.state.values.blocks.map((block, index) => [block.id, index] as const));
 
@@ -231,8 +209,8 @@ function RouteComponent() {
 	const saveStatusLabel = SAVE_STATUS_LABELS[autosave.saveStatus];
 
 	return (
-		<section className="relative flex flex-col gap-4">
-			<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+		<section className="flex h-full min-h-0 flex-col overflow-hidden">
+			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -254,19 +232,15 @@ function RouteComponent() {
 
 					<form.AppField name="title">
 						{(field) => (
-							<InputGroup className="max-w-xs" variant="ghost">
-								<Input
-									className="text-lg!"
-									nativeInput
-									onBlur={field.handleBlur}
-									onChange={(event) => {
-										field.handleChange(event.currentTarget.value);
-									}}
-									size="lg"
-									value={field.state.value}
-									variant="ghost"
+							<div className="max-w-xs ps-2">
+								<InlineTextEditor
+									onBlur={() => field.handleBlur()}
+									onChange={(value) => field.handleChange(value)}
+									placeholder="Título del CV"
+									value={field.state.value ?? ""}
+									variant="subtitle"
 								/>
-							</InputGroup>
+							</div>
 						)}
 					</form.AppField>
 				</article>
@@ -319,8 +293,8 @@ function RouteComponent() {
 				</article>
 			</header>
 
-			<section className="relative flex gap-2 ps-3 pe-6">
-				<article>
+			<section className="relative flex flex-1 gap-2 overflow-y-auto bg-muted px-3 py-4">
+				<article className="sticky top-0 w-56 shrink-0 self-start rounded-lg bg-background p-2">
 					<SectionRail
 						activeId={focusedSectionId}
 						contactId={contactBlockId}
@@ -329,12 +303,11 @@ function RouteComponent() {
 					/>
 				</article>
 
-				<article className="max-h-full px-6 pb-10 md:px-8">
-					<ResumeDocumentEditor
+				<article className="min-w-0 flex-1 self-start px-4 pb-16">
+					<ResumeDocument
 						blockIndexById={blockIndexById}
 						focusedSectionId={focusedSectionId}
 						form={form}
-						registerSection={registerSection}
 						rootBlocks={rootBlocks}
 					/>
 				</article>

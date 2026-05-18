@@ -13,12 +13,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-suggestions'
 import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
 import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiEvlogIngestRouteImport } from './routes/api/_evlog/ingest'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
@@ -45,6 +45,11 @@ const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   path: '/api/uploadthing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiResumeSuggestionsRoute = ApiResumeSuggestionsRouteImport.update({
+  id: '/api/resume-suggestions',
+  path: '/api/resume-suggestions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedSetupRoute = ProtectedSetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -68,11 +73,6 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiEvlogIngestRoute = ApiEvlogIngestRouteImport.update({
-  id: '/api/_evlog/ingest',
-  path: '/api/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
@@ -113,11 +113,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
-  '/api/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash/': typeof ProtectedDashIndexRoute
@@ -129,11 +129,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
-  '/api/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash': typeof ProtectedDashIndexRoute
@@ -148,11 +148,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
   '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
-  '/api/_evlog/ingest': typeof ApiEvlogIngestRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
@@ -167,11 +167,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/dash'
     | '/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
     | '/dash/suggested'
-    | '/api/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash/'
@@ -183,11 +183,11 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
     | '/dash/suggested'
-    | '/api/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash'
@@ -201,11 +201,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/_protected/dash'
     | '/_protected/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/_protected/dash/agents'
     | '/_protected/dash/coaches'
     | '/_protected/dash/suggested'
-    | '/api/_evlog/ingest'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/_protected/dash/'
@@ -218,8 +218,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
-  ApiEvlogIngestRoute: typeof ApiEvlogIngestRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
   ApiWebhooksCalSplatRoute: typeof ApiWebhooksCalSplatRoute
@@ -255,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadthingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/resume-suggestions': {
+      id: '/api/resume-suggestions'
+      path: '/api/resume-suggestions'
+      fullPath: '/api/resume-suggestions'
+      preLoaderRoute: typeof ApiResumeSuggestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected/setup': {
       id: '/_protected/setup'
       path: '/setup'
@@ -288,13 +295,6 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/_evlog/ingest': {
-      id: '/api/_evlog/ingest'
-      path: '/api/ingest'
-      fullPath: '/api/ingest'
-      preLoaderRoute: typeof ApiEvlogIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/dash/suggested': {
@@ -381,8 +381,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
-  ApiEvlogIngestRoute: ApiEvlogIngestRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
   ApiWebhooksCalSplatRoute: ApiWebhooksCalSplatRoute,

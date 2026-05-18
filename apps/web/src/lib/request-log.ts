@@ -1,13 +1,12 @@
-import type { RequestLogger } from "evlog";
-import { useRequest as getNitroRequest } from "nitro/context";
+import "@tanstack/react-start/server-only";
 
-interface RequestWithLog {
-	context: {
-		log?: RequestLogger;
-	};
+import type { RequestLogger } from "evlog";
+
+interface RequestLogGlobal {
+	__readRequestLog?: () => RequestLogger | undefined;
 }
 
-export const readRequestLog = (): RequestLogger | undefined => (getNitroRequest() as RequestWithLog).context.log;
+export const readRequestLog = (): RequestLogger | undefined => (globalThis as RequestLogGlobal).__readRequestLog?.();
 
 export const getRequestLog = (): RequestLogger => {
 	const log = readRequestLog();

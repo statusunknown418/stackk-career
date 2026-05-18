@@ -3,21 +3,12 @@
 import { type ResumeDocumentWrapperForm, resumeDocumentWrapperFormSchema } from "@stackk-career/schemas/api/resumes";
 import type { Block } from "@stackk-career/schemas/db/resume-blocks";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { CheckboxField } from "@/components/domains/resume-editor/fields/checkbox-field";
-import { MonthField } from "@/components/domains/resume-editor/fields/month-field";
-import { SelectField } from "@/components/domains/resume-editor/fields/select-field";
-import { TextField } from "@/components/domains/resume-editor/fields/text-field";
 import type { SaveStatus } from "@/components/domains/resume-editor/use-resume-autosave";
 
 export const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts();
 
 export const { useAppForm, withForm } = createFormHook({
-	fieldComponents: {
-		CheckboxField,
-		MonthField,
-		SelectField,
-		TextField,
-	},
+	fieldComponents: {},
 	fieldContext,
 	formComponents: {},
 	formContext,

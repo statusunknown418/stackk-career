@@ -2,7 +2,6 @@ import {
 	ArrowCircleLeftIcon,
 	ArrowCircleRightIcon,
 	BriefcaseIcon,
-	ChatsIcon,
 	GearIcon,
 	SidebarSimpleIcon,
 } from "@phosphor-icons/react";
@@ -43,7 +42,7 @@ function DashLayout() {
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
 
-	const { data } = useSuspenseQuery(orpc.generations.list.queryOptions());
+	useSuspenseQuery(orpc.generations.list.queryOptions());
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
@@ -114,22 +113,10 @@ function DashLayout() {
 					<Tooltip>
 						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
 							<SidebarSimpleIcon weight="duotone" />
-							Nav
 						</SidebarTrigger>
 
 						<TooltipContent>
 							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
-						</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
-						<SidebarTrigger render={<TooltipTrigger />} side="right" size="sm" variant="ghost-muted">
-							<ChatsIcon weight="duotone" />
-							Chats
-						</SidebarTrigger>
-
-						<TooltipContent>
-							Abrir/cerrar panel derecho <Kbd>⌘ + J</Kbd>
 						</TooltipContent>
 					</Tooltip>
 
@@ -152,32 +139,6 @@ function DashLayout() {
 					<Outlet />
 				</div>
 			</SidebarInset>
-
-			<Sidebar className="py-3 pl-0" collapsible="offcanvas" side="right" variant="inset">
-				<SidebarContent>
-					<SidebarGroup className="p-0">
-						<SidebarGroupLabel>Recientes</SidebarGroupLabel>
-
-						<SidebarGroupContent>
-							<SidebarMenu className="gap-0">
-								{data.length === 0 ? (
-									<li className="px-2 py-1 text-muted-foreground text-xs">No hay chats</li>
-								) : (
-									data.map((gen) => (
-										<SidebarMenuItem key={gen.id}>
-											<SidebarMenuButton className="gap-1.5" tooltip={gen.summary ?? gen.title ?? "Sin titulo"}>
-												<span className="truncate">{gen.title ?? "Sin título"}</span>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									))
-								)}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				</SidebarContent>
-
-				<SidebarRail />
-			</Sidebar>
 		</SidebarProvider>
 	);
 }

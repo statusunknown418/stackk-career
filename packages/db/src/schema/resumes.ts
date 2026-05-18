@@ -16,7 +16,10 @@ export const resumes = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => `resume_${createId()}`),
 		templateId: t.text(),
-		generationId: t.text(),
+		generationId: t
+			.text()
+			.notNull()
+			.references(() => generations.id, { onDelete: "cascade" }),
 		userId: t.text().notNull(),
 
 		targetedCompanyIdentifier: t.text(),

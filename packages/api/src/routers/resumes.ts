@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/client";
+import { generations } from "@stackk-career/db/schema/generations";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { blankResumeSections, updateResumeTitleSchema } from "@stackk-career/schemas/api/resumes";
@@ -14,7 +15,7 @@ export const resumesRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {
 		const userId = context.session.user.id;
 
-		const userResumes = await context.db.select().from(resumes).where(eq(resumes.userId, userId));
+		const userResumes = await context.db.select().from(resumes).where(eq(resumes.userId, userId)).$withCache();
 
 		context.log?.set({
 			action: "get_resumes",
@@ -38,7 +39,8 @@ export const resumesRouter = {
 					eq(resumeBlocks.blockType, "contact"),
 					inArray(resumeBlocks.resumeId, resumeIds)
 				)
-			);
+			)
+			.$withCache();
 
 		context.log?.set({
 			action: "get_resume_blocks",
@@ -76,12 +78,28 @@ export const resumesRouter = {
 		const now = constructNow(new Date());
 		const firstChildPosition = generateLexoKeyBetween(null, null);
 
+		const title = `Nuevo CV - ${formatDate(now, "PPP")}`;
+
 		const newResume = await context.db.transaction(async (tx) => {
+			const [createdGeneration] = await tx
+				.insert(generations)
+				.values({
+					owner: userId,
+					type: "resume-creation",
+					title,
+				})
+				.returning({ id: generations.id });
+
+			if (!createdGeneration) {
+				return null;
+			}
+
 			const [createdResume] = await tx
 				.insert(resumes)
 				.values({
 					userId,
-					title: `Nuevo CV - ${formatDate(now, "PPP")}`,
+					title,
+					generationId: createdGeneration.id,
 				})
 				.returning({
 					id: resumes.id,

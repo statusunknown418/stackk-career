@@ -9,6 +9,7 @@ import { generationsRouter } from "./generations";
 import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
 import { resumesRouter } from "./resumes";
+import { suggestionsRouter } from "./suggestions";
 import { viewerRouter } from "./viewer";
 
 export const appRouter = {
@@ -28,6 +29,7 @@ export const appRouter = {
 	viewer: viewerRouter,
 	resumes: resumesRouter,
 	blocks: blocksRouter,
+	suggestions: suggestionsRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
