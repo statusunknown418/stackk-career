@@ -89,7 +89,7 @@ function PriceCard({ plan }: { plan: Plan }) {
 		el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
 	};
 
-	const spotlightColor = featured ? "rgba(255,255,255,0.10)" : "oklch(from var(--oxblood) l c h / 0.13)";
+	const spotlightColor = featured ? "oklch(0.98 0.005 130 / 0.1)" : "oklch(from var(--oxblood) l c h / 0.13)";
 
 	return (
 		<div

@@ -14,7 +14,7 @@ export function FinalCta() {
 		<section className="px-6 py-16 md:py-24">
 			<Reveal className="relative mx-auto max-w-[1200px] overflow-hidden rounded-3xl bg-foreground text-background">
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.06]">
-					<PixelGridShader amplitude={0.25} colorFg="#ffffff" pxSize={4} rings={6} shape="scan" speed={0.1} />
+					<PixelGridShader amplitude={0.25} colorFg="#fbfff2" pxSize={4} rings={6} shape="scan" speed={0.1} />
 				</div>
 				<div className="relative z-10 flex flex-col items-start gap-8 px-6 py-16 sm:px-10 sm:py-20 md:items-center md:px-16 md:py-24 md:text-center">
 					<h2 className="max-w-[20ch] text-balance break-words font-bold font-display text-[clamp(2rem,7vw,6rem)] leading-[1] tracking-[-0.04em] sm:leading-[0.95]">

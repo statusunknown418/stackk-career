@@ -99,14 +99,14 @@ function handleTiltLeave(e: React.MouseEvent<HTMLElement>) {
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 	return (
 		<article
-			className="group/tcard flex flex-col gap-4 rounded-2xl border border-foreground/10 bg-card/70 p-5 shadow-[0_1px_2px_-1px_rgba(0,0,0,0.05)] transition-[transform,border-color,background-color] duration-300 ease-out [transform:perspective(900px)_rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] hover:border-foreground/20 hover:bg-card hover:shadow-[0_18px_40px_-22px_rgba(0,0,0,0.35)] motion-reduce:transform-none"
+			className="group/tcard flex flex-col gap-4 rounded-2xl border border-foreground/10 bg-card/70 p-5 shadow-[0_1px_2px_-1px_oklch(0.13_0.005_250/0.5)] transition-[transform,border-color,background-color] duration-300 ease-out [transform:perspective(900px)_rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] hover:border-foreground/20 hover:bg-card hover:shadow-[0_18px_40px_-22px_oklch(0.13_0.005_250/0.55)] motion-reduce:transform-none"
 			onMouseLeave={handleTiltLeave}
 			onMouseMove={handleTiltMove}
 		>
 			<header className="flex items-center gap-3">
 				<span
 					aria-hidden="true"
-					className={`grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br ${testimonial.gradient} font-semibold text-[11px] text-white shadow-[0_4px_10px_-3px_rgba(0,0,0,0.25)]`}
+					className={`grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br ${testimonial.gradient} font-semibold text-[11px] text-[oklch(0.99_0.003_130)] shadow-[0_4px_10px_-3px_oklch(0.13_0.005_250/0.4)]`}
 				>
 					{testimonial.initials}
 				</span>
