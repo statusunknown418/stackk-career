@@ -178,7 +178,7 @@ function ScoreCard() {
 					<CheckIcon size={14} weight="bold" />
 				</span>
 				<div className="flex-1">
-					<p className="font-display font-medium text-foreground text-sm leading-tight">CV pasó el ATS</p>
+					<p className="font-display font-medium text-foreground text-sm leading-tight">CV pasó el filtro</p>
 					<p className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.12em]">Score 94 / 100</p>
 				</div>
 			</div>

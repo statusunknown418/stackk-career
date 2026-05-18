@@ -129,8 +129,8 @@ function BentoCellHero() {
 				De <CountUp className="tabular-nums" to={47} /> a <CountUp className="tabular-nums" to={95} /> en una semana.
 			</h3>
 			<p className="relative z-10 mt-4 max-w-[520px] text-background/70 text-sm leading-[1.55]">
-				Sube tu CV. La IA evalúa estructura, logros con métricas, keywords del sector y compatibilidad ATS. En 30
-				segundos recibes un puntaje de 0 a 100 y la lista exacta de qué mejorar.
+				Sube tu CV. La IA evalúa estructura, logros con métricas, keywords del sector y compatibilidad con los filtros
+				automáticos de reclutadores. En 30 segundos recibes un puntaje de 0 a 100 y la lista exacta de qué mejorar.
 			</p>
 			<p className="relative z-10 mt-3 max-w-[520px] text-background/70 text-sm leading-[1.55]">
 				En Pro: comparas tu CV contra la oferta específica y la IA reescribe las secciones débiles.

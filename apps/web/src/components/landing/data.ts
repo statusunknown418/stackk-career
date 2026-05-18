@@ -444,7 +444,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 export const FAQ_ITEMS: readonly FaqItem[] = [
 	{
 		q: "¿Cómo funciona el Score CV?",
-		a: "Subes tu CV y registras el rol al que apuntas. La IA analiza estructura, logros vs. tareas, keywords del sector y compatibilidad ATS. En menos de 30 segundos te devuelve un puntaje de 0 a 100 y la lista de qué mejorar. En el plan Gratuito, 1 análisis por mes; en Pro, ilimitado.",
+		a: "Subes tu CV y registras el rol al que apuntas. La IA analiza estructura, logros vs. tareas, keywords del sector y la compatibilidad con los filtros automáticos que usan los reclutadores para descartar CVs. En menos de 30 segundos te devuelve un puntaje de 0 a 100 y la lista de qué mejorar. En el plan Gratuito, 1 análisis por mes; en Pro, ilimitado.",
 	},
 	{
 		q: "¿Quiénes son los coaches?",
