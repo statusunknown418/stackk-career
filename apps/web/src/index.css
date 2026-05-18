@@ -287,20 +287,20 @@
 
 	@keyframes particle-rise {
 		0% {
-			transform: translateY(110%) scale(0.6);
+			transform: translateY(10vh) scale(0.5);
 			opacity: 0;
 		}
 
 		15% {
-			opacity: 1;
+			opacity: var(--peak-opacity, 0.6);
 		}
 
 		85% {
-			opacity: 1;
+			opacity: var(--peak-opacity, 0.6);
 		}
 
 		100% {
-			transform: translateY(-110%) scale(1.1);
+			transform: translateY(-90vh) scale(1.1);
 			opacity: 0;
 		}
 	}

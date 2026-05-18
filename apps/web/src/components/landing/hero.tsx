@@ -68,13 +68,16 @@ export function Hero() {
 							<span
 								className={`absolute bottom-0 ${p.size} rounded-full bg-oxblood will-change-transform`}
 								key={`${p.left}-${p.delay}`}
-								style={{
-									left: p.left,
-									opacity: p.opacity,
-									animation: `particle-rise ${p.duration} linear infinite`,
-									animationDelay: p.delay,
-									boxShadow: "0 0 12px oklch(from var(--oxblood) l c h / 0.8)",
-								}}
+								style={
+									{
+										left: p.left,
+										opacity: 0,
+										"--peak-opacity": p.opacity,
+										animation: `particle-rise ${p.duration} linear infinite`,
+										animationDelay: p.delay,
+										boxShadow: "0 0 12px oklch(from var(--oxblood) l c h / 0.8)",
+									} as React.CSSProperties
+								}
 							/>
 						))}
 					</div>
