@@ -14,12 +14,12 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.09]">
-					<PixelGridShader amplitude={0.2} colorFg="#1c1f23" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
+					<PixelGridShader amplitude={0.2} colorFg="#a4e635" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
 				</div>
 				<div className="absolute inset-0 opacity-[0.14]">
 					<PixelGridShader
 						amplitude={0.3}
-						colorFg="#1c1f23"
+						colorFg="#a4e635"
 						cursorMode="ripple"
 						cursorScale={0.4}
 						cursorSize={0.35}
