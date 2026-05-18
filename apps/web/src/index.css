@@ -339,22 +339,22 @@
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
 	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: oklch(0.13 0 0);
+	--accent-foreground: oklch(0.24 0.008 250);
 	--background: oklch(1 0 0); /* pure white */
-	--border: oklch(0.13 0 0 / 10%);
+	--border: oklch(0.24 0.008 250 / 10%);
 	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.13 0 0);
+	--card-foreground: oklch(0.24 0.008 250);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.13 0 0); /* deep black */
-	--input: oklch(0.13 0 0 / 12%);
-	--muted: oklch(0.13 0 0 / 5%);
-	--muted-foreground: oklch(0.45 0 0); /* neutral gray */
+	--foreground: oklch(0.24 0.008 250); /* Platzi dark */
+	--input: oklch(0.24 0.008 250 / 12%);
+	--muted: oklch(0.24 0.008 250 / 5%);
+	--muted-foreground: oklch(0.5 0.005 250);
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.13 0 0);
-	--primary: oklch(0.66 0.235 20); /* coral-red */
-	--primary-foreground: oklch(1 0 0);
-	--ring: oklch(0.66 0.235 20); /* coral focus */
-	--secondary: oklch(0.13 0 0); /* deep black */
+	--popover-foreground: oklch(0.24 0.008 250);
+	--primary: oklch(0.79 0.18 128); /* Platzi green */
+	--primary-foreground: oklch(0.24 0.008 250);
+	--ring: oklch(0.79 0.18 128); /* Platzi green focus */
+	--secondary: oklch(0.24 0.008 250); /* dark ink */
 	--secondary-foreground: oklch(1 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
@@ -380,15 +380,17 @@
 }
 
 :root {
-	/* Impulso — coral-red brand + deep black accent on pure white. Fashion-editorial. */
-	--ink: oklch(0.13 0 0); /* #0a0a0a pure deep black */
+	/* Platzi — iconic lime green brand + deep ink on pure white */
+	--ink: oklch(0.24 0.008 250); /* #1c1f23 Platzi dark gray-blue */
 	--paper: oklch(1 0 0); /* #ffffff pure white */
-	--oxblood: oklch(0.66 0.235 20); /* #ff3d5a coral-red (brand) */
-	--marigold: oklch(0.13 0 0); /* deep black accent — high-contrast editorial */
+	--oxblood: oklch(0.79 0.18 128); /* #98ca3f Platzi green (brand) */
+	--marigold: oklch(
+		0.24 0.008 250
+	); /* dark ink accent — high contrast vs green */
 	--rule: oklch(0.9 0 0); /* #e5e5e5 hairline */
-	--aurora-1: oklch(0.97 0.025 25); /* very soft coral tint */
+	--aurora-1: oklch(0.96 0.06 130); /* very soft green tint */
 	--aurora-2: oklch(0.97 0 0); /* paper white */
-	--aurora-3: oklch(0.96 0.02 20); /* near-paper warm */
+	--aurora-3: oklch(0.95 0.04 140); /* near-paper green-warm */
 
 	/* shadow tokens — never hardcode oklch in components */
 	--shadow-card-soft:
