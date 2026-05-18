@@ -42,6 +42,7 @@
 	--animate-pulse-glow: pulse-glow 6s ease-in-out infinite;
 	--animate-hero-sweep: hero-sweep 11s linear infinite;
 	--animate-particle-rise: particle-rise 14s linear infinite;
+	--animate-twinkle: twinkle 3s ease-in-out infinite;
 	--animate-orbit-slow: orbit 20s linear infinite;
 	--animate-float-slow: float 6s ease-in-out infinite;
 	--animate-marquee: marquee 42s linear infinite;
@@ -302,6 +303,19 @@
 		100% {
 			transform: translateY(-90vh) scale(1.1);
 			opacity: 0;
+		}
+	}
+
+	@keyframes twinkle {
+		0%,
+		100% {
+			opacity: 0;
+			transform: scale(0.6);
+		}
+
+		50% {
+			opacity: 1;
+			transform: scale(1.4);
 		}
 	}
 

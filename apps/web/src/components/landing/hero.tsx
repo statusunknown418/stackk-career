@@ -8,6 +8,23 @@ const FLOAT_DELAY_4: React.CSSProperties = { animationDelay: "-4s" };
 const MESH_BLOB_2_DELAY: React.CSSProperties = { animationDelay: "-6s" };
 const MESH_BLOB_3_DELAY: React.CSSProperties = { animationDelay: "-12s" };
 const MESH_BLOB_4_DELAY: React.CSSProperties = { animationDelay: "-18s" };
+const MESH_BLOB_DEEP_DELAY: React.CSSProperties = { animationDelay: "-9s" };
+
+interface Twinkle {
+	delay: string;
+	duration: string;
+	left: string;
+	top: string;
+}
+
+const TWINKLES: readonly Twinkle[] = [
+	{ left: "12%", top: "18%", duration: "3.2s", delay: "-0.4s" },
+	{ left: "78%", top: "22%", duration: "2.8s", delay: "-1.6s" },
+	{ left: "30%", top: "55%", duration: "3.5s", delay: "-2.2s" },
+	{ left: "68%", top: "62%", duration: "2.5s", delay: "-0.9s" },
+	{ left: "45%", top: "30%", duration: "3.8s", delay: "-1.2s" },
+	{ left: "88%", top: "48%", duration: "3s", delay: "-2.8s" },
+];
 
 interface Particle {
 	delay: string;
@@ -44,25 +61,35 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-					<div className="absolute top-[5%] left-[8%] size-[45%] animate-mesh-drift-1 rounded-full bg-oxblood/45 blur-[100px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[5%] left-[8%] size-[45%] animate-mesh-drift-1 rounded-full bg-oxblood/45 mix-blend-screen blur-[100px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[15%] right-[3%] size-[40%] animate-mesh-drift-2 rounded-full bg-oxblood/35 blur-[110px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[15%] right-[3%] size-[40%] animate-mesh-drift-2 rounded-full bg-oxblood/35 mix-blend-screen blur-[110px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div
-						className="absolute bottom-[8%] left-[20%] size-[50%] animate-mesh-drift-1 rounded-full bg-oxblood/40 blur-[120px] will-change-transform motion-reduce:animate-none"
+						className="absolute bottom-[8%] left-[20%] size-[50%] animate-mesh-drift-1 rounded-full bg-oxblood/40 mix-blend-screen blur-[120px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_3_DELAY}
 					/>
 					<div
-						className="absolute right-[10%] bottom-[12%] size-[38%] animate-mesh-drift-2 rounded-full bg-oxblood/30 blur-[110px] will-change-transform motion-reduce:animate-none"
+						className="absolute right-[10%] bottom-[12%] size-[38%] animate-mesh-drift-2 rounded-full bg-oxblood/30 mix-blend-screen blur-[110px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_4_DELAY}
 					/>
-					<div className="absolute top-[40%] left-[42%] size-[18%] animate-pulse-glow rounded-full bg-oxblood/60 blur-[60px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[25%] right-[35%] size-[14%] animate-pulse-glow rounded-full bg-oxblood/50 blur-[50px] will-change-transform motion-reduce:animate-none"
+						aria-hidden="true"
+						className="absolute top-[35%] right-[20%] size-[35%] animate-mesh-drift-2 rounded-full mix-blend-screen blur-[130px] will-change-transform motion-reduce:animate-none"
+						style={{ ...MESH_BLOB_DEEP_DELAY, background: "oklch(0.52 0.16 138 / 0.45)" }}
+					/>
+					<div
+						aria-hidden="true"
+						className="absolute bottom-[20%] left-[5%] size-[28%] animate-mesh-drift-1 rounded-full mix-blend-screen blur-[100px] will-change-transform motion-reduce:animate-none"
+						style={{ animationDelay: "-15s", background: "oklch(0.58 0.18 145 / 0.4)" }}
+					/>
+					<div className="absolute top-[40%] left-[42%] size-[18%] animate-pulse-glow rounded-full bg-oxblood/60 mix-blend-screen blur-[60px] will-change-transform motion-reduce:animate-none" />
+					<div
+						className="absolute top-[25%] right-[35%] size-[14%] animate-pulse-glow rounded-full bg-oxblood/50 mix-blend-screen blur-[50px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
-					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent blur-2xl will-change-transform motion-reduce:hidden" />
+					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent mix-blend-screen blur-2xl will-change-transform motion-reduce:hidden" />
 					<div className="absolute inset-0 motion-reduce:hidden">
 						{PARTICLES.map((p) => (
 							<span
@@ -81,6 +108,30 @@ export function Hero() {
 							/>
 						))}
 					</div>
+					<div className="absolute inset-0 motion-reduce:hidden">
+						{TWINKLES.map((t) => (
+							<span
+								className="absolute size-1.5 rounded-full bg-oxblood will-change-transform"
+								key={`${t.left}-${t.top}`}
+								style={{
+									left: t.left,
+									top: t.top,
+									animation: `twinkle ${t.duration} ease-in-out infinite`,
+									animationDelay: t.delay,
+									boxShadow:
+										"0 0 16px oklch(from var(--oxblood) l c h / 0.95), 0 0 32px oklch(from var(--oxblood) l c h / 0.55)",
+								}}
+							/>
+						))}
+					</div>
+					<div
+						aria-hidden="true"
+						className="pointer-events-none absolute inset-0"
+						style={{
+							background:
+								"radial-gradient(ellipse 80% 70% at 50% 45%, transparent 30%, oklch(from var(--paper) l c h / 0.55) 95%)",
+						}}
+					/>
 				</div>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
 					<div className="min-w-0">
