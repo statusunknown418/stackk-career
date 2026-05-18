@@ -1,6 +1,5 @@
 import { ArrowRightIcon, CalendarCheckIcon, CheckIcon, SparkleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { LogoMarqueeRows } from "@/components/ui/logo-marquee-rows";
-import { PixelGridShader } from "@/components/ui/pixelgrid-shader";
 
 const FLOAT_DELAY_0: React.CSSProperties = { animationDelay: "0s" };
 const FLOAT_DELAY_2: React.CSSProperties = { animationDelay: "-2s" };
@@ -13,23 +12,14 @@ export function Hero() {
 				className="relative flex min-h-[88vh] flex-col justify-center overflow-hidden px-6 pt-24 pb-12 sm:pt-28 sm:pb-16"
 				id="top"
 			>
-				<div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.09]">
-					<PixelGridShader amplitude={0.2} colorFg="#a4e635" frequency={0.7} pxSize={12} shape="noise" speed={0.05} />
-				</div>
-				<div className="absolute inset-0 opacity-[0.14]">
-					<PixelGridShader
-						amplitude={0.3}
-						colorFg="#a4e635"
-						cursorMode="ripple"
-						cursorScale={0.4}
-						cursorSize={0.35}
-						frequency={1.2}
-						pxSize={10}
-						rings={3}
-						shape="ripple"
-						speed={0.18}
-					/>
-				</div>
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute top-[15%] left-[10%] size-[60%] animate-aurora-1 rounded-full bg-oxblood/25 blur-[140px] will-change-transform motion-reduce:animate-none"
+				/>
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute right-[5%] bottom-[10%] size-[55%] animate-aurora-2 rounded-full bg-oxblood/15 blur-[160px] will-change-transform motion-reduce:animate-none"
+				/>
 				<div className="pointer-events-none relative z-10 mx-auto grid w-full min-w-0 max-w-[1200px] grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
 					<div className="min-w-0">
 						<div className="pointer-events-auto mb-7 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card/70 py-1.5 pr-3.5 pl-2.5 backdrop-blur-sm">
