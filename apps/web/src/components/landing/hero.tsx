@@ -61,17 +61,17 @@ export function Hero() {
 				id="top"
 			>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-					<div className="absolute top-[5%] left-[8%] size-[28%] animate-mesh-drift-1 rounded-full bg-oxblood/55 blur-[70px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[5%] left-[8%] size-[28%] animate-mesh-drift-1 rounded-full bg-oxblood/55 mix-blend-screen blur-[70px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[15%] right-[3%] size-[24%] animate-mesh-drift-2 rounded-full bg-oxblood/45 blur-[80px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[15%] right-[3%] size-[24%] animate-mesh-drift-2 rounded-full bg-oxblood/45 mix-blend-screen blur-[80px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div
-						className="absolute bottom-[8%] left-[20%] size-[30%] animate-mesh-drift-1 rounded-full bg-oxblood/50 blur-[80px] will-change-transform motion-reduce:animate-none"
+						className="absolute bottom-[8%] left-[20%] size-[30%] animate-mesh-drift-1 rounded-full bg-oxblood/50 mix-blend-screen blur-[80px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_3_DELAY}
 					/>
 					<div
-						className="absolute right-[10%] bottom-[12%] size-[22%] animate-mesh-drift-2 rounded-full bg-oxblood/40 blur-[70px] will-change-transform motion-reduce:animate-none"
+						className="absolute right-[10%] bottom-[12%] size-[22%] animate-mesh-drift-2 rounded-full bg-oxblood/40 mix-blend-screen blur-[70px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_4_DELAY}
 					/>
 					<div
@@ -84,16 +84,16 @@ export function Hero() {
 						className="absolute bottom-[20%] left-[5%] size-[18%] animate-mesh-drift-1 rounded-full blur-[60px] will-change-transform motion-reduce:animate-none"
 						style={{ animationDelay: "-4s", background: "oklch(0.58 0.18 145 / 0.5)" }}
 					/>
-					<div className="absolute top-[40%] left-[42%] size-[10%] animate-pulse-glow rounded-full bg-oxblood/70 blur-[35px] will-change-transform motion-reduce:animate-none" />
+					<div className="absolute top-[40%] left-[42%] size-[10%] animate-pulse-glow rounded-full bg-oxblood/70 mix-blend-screen blur-[35px] will-change-transform motion-reduce:animate-none" />
 					<div
-						className="absolute top-[25%] right-[35%] size-[8%] animate-pulse-glow rounded-full bg-oxblood/60 blur-[30px] will-change-transform motion-reduce:animate-none"
+						className="absolute top-[25%] right-[35%] size-[8%] animate-pulse-glow rounded-full bg-oxblood/60 mix-blend-screen blur-[30px] will-change-transform motion-reduce:animate-none"
 						style={MESH_BLOB_2_DELAY}
 					/>
 					<div className="absolute inset-0 animate-hero-sweep bg-gradient-to-r from-transparent via-oxblood/15 to-transparent blur-2xl will-change-transform motion-reduce:hidden" />
 					<div className="absolute inset-0 motion-reduce:hidden">
 						{PARTICLES.map((p) => (
 							<span
-								className={`absolute bottom-0 ${p.size} rounded-full bg-oxblood will-change-transform`}
+								className={`absolute bottom-0 ${p.size} rounded-full bg-oxblood mix-blend-screen will-change-transform`}
 								key={`${p.left}-${p.delay}`}
 								style={
 									{
@@ -111,7 +111,7 @@ export function Hero() {
 					<div className="absolute inset-0 motion-reduce:hidden">
 						{TWINKLES.map((t) => (
 							<span
-								className="absolute size-1.5 rounded-full bg-oxblood will-change-transform"
+								className="absolute size-1.5 rounded-full bg-oxblood mix-blend-screen will-change-transform"
 								key={`${t.left}-${t.top}`}
 								style={{
 									left: t.left,
@@ -137,8 +137,8 @@ export function Hero() {
 					<div className="min-w-0">
 						<div className="pointer-events-auto mb-7 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card/70 py-1.5 pr-3.5 pl-2.5 backdrop-blur-sm">
 							<span aria-hidden="true" className="relative grid size-2 place-items-center">
-								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/50" />
-								<span className="relative size-2 rounded-full bg-oxblood" />
+								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/50 mix-blend-screen" />
+								<span className="relative size-2 rounded-full bg-oxblood mix-blend-screen" />
 							</span>
 							<span className="font-medium text-[12px] text-foreground/75 tracking-[0.02em]">
 								Hecho en Perú, para LATAM
@@ -212,7 +212,7 @@ export function Hero() {
 					</p>
 					<LogoMarqueeRows />
 					<p className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/65 uppercase tracking-[0.18em]">
-						<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-oxblood/60" />
+						<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-oxblood/60 mix-blend-screen" />
 						<span>Empresas verificadas a través del LinkedIn de cada talento</span>
 					</p>
 				</div>
@@ -277,7 +277,7 @@ function ScoreCard() {
 	return (
 		<div className="w-[240px] rounded-sm border border-foreground/10 bg-card/85 p-3.5 shadow-[var(--shadow-floating)] backdrop-blur-md">
 			<div className="mb-2.5 flex items-center gap-2.5">
-				<span className="grid size-7 place-items-center rounded-full bg-oxblood text-background">
+				<span className="grid size-7 place-items-center rounded-full bg-oxblood text-background mix-blend-screen">
 					<CheckIcon size={14} weight="bold" />
 				</span>
 				<div className="flex-1">
@@ -286,7 +286,7 @@ function ScoreCard() {
 				</div>
 			</div>
 			<div className="h-1.5 overflow-hidden rounded-full bg-foreground/8">
-				<div className="h-full w-[94%] rounded-full bg-oxblood motion-safe:animate-[score-fill_1.6s_cubic-bezier(.2,.7,.2,1)_0.6s_both]" />
+				<div className="h-full w-[94%] rounded-full bg-oxblood mix-blend-screen motion-safe:animate-[score-fill_1.6s_cubic-bezier(.2,.7,.2,1)_0.6s_both]" />
 			</div>
 		</div>
 	);
@@ -314,9 +314,9 @@ function InterviewCard() {
 function LiveMentorCard() {
 	return (
 		<div className="flex w-[250px] items-center gap-3 rounded-sm border border-foreground/12 bg-card/85 px-3.5 py-2.5 shadow-[var(--shadow-floating)] backdrop-blur-md">
-			<span aria-hidden="true" className="relative block size-9 shrink-0 rounded-full bg-oxblood/15">
+			<span aria-hidden="true" className="relative block size-9 shrink-0 rounded-full bg-oxblood/15 mix-blend-screen">
 				<span className="absolute right-0 bottom-0 grid size-3 place-items-center rounded-full bg-card">
-					<span className="size-2 rounded-full bg-oxblood motion-safe:animate-[live-pulse_1.8s_ease-in-out_infinite]" />
+					<span className="size-2 rounded-full bg-oxblood mix-blend-screen motion-safe:animate-[live-pulse_1.8s_ease-in-out_infinite]" />
 				</span>
 			</span>
 			<div className="min-w-0 flex-1">
