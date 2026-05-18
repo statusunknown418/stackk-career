@@ -14,19 +14,20 @@ export function BentoGrid() {
 		<section className="px-6 py-16 md:py-24" id="features">
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">
-						Por qué + Producto
-					</span>
+					<div className="flex items-center gap-2 font-mono text-[11px] text-oxblood uppercase tracking-[0.22em]">
+						<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood shadow-[0_0_10px_var(--oxblood)]" />
+						<span>El producto</span>
+					</div>
 					<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
 						<WordReveal>Todo lo que LATAM no tenía. En un solo plan.</WordReveal>
 					</h2>
 					<p className="mt-5 max-w-[620px] text-[1rem] text-foreground/65 leading-[1.55]">
-						Cuatro razones por las que funciona y seis herramientas en una sola suscripción.
+						4 razones por las que funciona. 6 herramientas en una sola suscripción.
 					</p>
 				</header>
 			</Reveal>
 
-			<div className="mx-auto mb-12 grid max-w-[1200px] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="mx-auto mb-20 grid max-w-[1200px] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				{WHY_REASONS.map((reason, idx) => (
 					<Reveal delay={idx * 0.06} key={reason.number}>
 						<ReasonCompactCard reason={reason} />
@@ -34,8 +35,19 @@ export function BentoGrid() {
 				))}
 			</div>
 
-			<div className="mx-auto mb-6 max-w-[1200px]">
-				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.2em]">Las 6 herramientas</span>
+			<div className="mx-auto mb-8 flex max-w-[1200px] items-end justify-between gap-6 border-foreground/10 border-t pt-8">
+				<div>
+					<div className="flex items-center gap-2 font-mono text-[11px] text-oxblood uppercase tracking-[0.22em]">
+						<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood shadow-[0_0_10px_var(--oxblood)]" />
+						<span>Las 6 herramientas</span>
+					</div>
+					<p className="mt-3 max-w-[560px] font-display font-semibold text-[clamp(1.25rem,2vw,1.75rem)] text-foreground leading-[1.15] tracking-[-0.02em]">
+						Reemplaza 5 servicios sueltos por una sola suscripción.
+					</p>
+				</div>
+				<span className="hidden font-display-italic font-light text-[80px] text-foreground/8 leading-none md:block">
+					06
+				</span>
 			</div>
 
 			<div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-3 [grid-auto-rows:minmax(180px,auto)] sm:grid-cols-2 md:grid-cols-6">
@@ -63,24 +75,28 @@ export function BentoGrid() {
 
 function ReasonCompactCard({ reason }: { reason: WhyReason }) {
 	return (
-		<article className="group flex h-full flex-col gap-3.5 rounded-2xl border border-foreground/8 bg-card/50 p-5 transition-colors duration-300 hover:border-foreground/18 hover:bg-card/85">
-			<header className="flex items-baseline justify-between">
-				<span className="font-mono text-[10px] text-foreground/70 uppercase tracking-[0.18em]">
+		<article className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl border border-foreground/10 bg-card/60 p-6 transition-all duration-300 hover:border-oxblood/40 hover:bg-card/95 hover:shadow-[0_24px_60px_-30px_oklch(from_var(--oxblood)_l_c_h/0.6)]">
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute -top-6 -right-6 font-bold font-display text-[110px] text-oxblood/[0.08] leading-none tracking-[-0.05em] transition-all duration-500 group-hover:text-oxblood/20"
+			>
+				{reason.number}
+			</div>
+			<header className="relative flex items-center gap-2">
+				<span aria-hidden="true" className="size-1 rounded-full bg-oxblood" />
+				<span className="font-medium font-mono text-[10px] text-oxblood uppercase tracking-[0.22em]">
 					Razón {reason.number}
 				</span>
-				<span className="font-display-italic font-light text-[28px] text-foreground/15 leading-none">
-					{reason.number}
-				</span>
 			</header>
-			<h3 className="font-display font-semibold text-[1.05rem] text-foreground leading-[1.2] tracking-[-0.02em]">
+			<h3 className="relative font-display font-semibold text-[1.1rem] text-foreground leading-[1.2] tracking-[-0.02em]">
 				{reason.title} <span className="font-display-italic font-light text-oxblood">{reason.emphasis}</span>
 			</h3>
-			<p className="flex-1 text-[13px] text-foreground/65 leading-[1.55]">{reason.body}</p>
-			<footer className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-foreground/8 border-t pt-3">
-				<span className="font-mono text-[9px] text-foreground/70 uppercase tracking-[0.14em]">
+			<p className="relative flex-1 text-[13px] text-foreground/65 leading-[1.55]">{reason.body}</p>
+			<footer className="relative mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-foreground/10 border-t pt-3">
+				<span className="font-mono text-[9px] text-foreground/60 uppercase tracking-[0.14em]">
 					{reason.receipt.label}
 				</span>
-				<span className="font-display font-medium text-[11px] text-foreground tracking-tight">
+				<span className="font-display font-semibold text-[11px] text-foreground tracking-tight">
 					{reason.receipt.value}
 				</span>
 			</footer>
