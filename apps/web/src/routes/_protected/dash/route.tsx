@@ -5,7 +5,6 @@ import {
 	GearIcon,
 	SidebarSimpleIcon,
 } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
 import { Button } from "@/components/ui/button";
@@ -29,11 +28,9 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
-import { orpc, queryClient } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
 	component: DashLayout,
-	beforeLoad: async () => queryClient.ensureQueryData(orpc.generations.list.queryOptions()),
 	loader: () => getSidebarState(),
 });
 
@@ -41,8 +38,6 @@ function DashLayout() {
 	const matchRoute = useLocation();
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
-
-	useSuspenseQuery(orpc.generations.list.queryOptions());
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>

@@ -5,6 +5,10 @@ import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
+	headers: () => ({
+		"Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+	}),
+	staleTime: 2 * 60 * 60 * 1000, // Caching for 2 hours
 });
 
 const TITLE_TEXT = `

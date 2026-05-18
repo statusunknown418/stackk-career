@@ -24,6 +24,7 @@
     "@magicui": "https://magicui.design/r/{name}",
     "@ncdai": "https://chanhdai.com/r/{name}.json",
     "@arc": "https://witharc.co/r/{name}.json",
-    "@svgl": "https://svgl.app/r/{name}.json"
+    "@svgl": "https://svgl.app/r/{name}.json",
+    "@loading-ui": "https://loading-ui.com/r/{name}.json"
   }
 }
