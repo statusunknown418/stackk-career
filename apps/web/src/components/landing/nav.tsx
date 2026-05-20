@@ -62,18 +62,19 @@ export function LandingNav() {
 				style={{ scaleX: scrollYProgress }}
 			/>
 			<header className="sticky top-4 z-50 mx-auto mt-4 w-full max-w-[1200px] px-4">
-				<nav className="flex items-center gap-2 rounded-full border border-foreground/10 bg-background/80 py-2 pr-2 pl-3 shadow-[var(--shadow-nav)] backdrop-blur-xl backdrop-saturate-150">
+				<nav className="flex items-center gap-2 rounded-full border border-border bg-muted py-2 pr-2 pl-3 shadow-[var(--shadow-nav)] backdrop-blur-xl backdrop-saturate-150">
 					<a className="flex shrink-0 items-center gap-2 pr-3 text-foreground tracking-tight" href="#top">
-						<span
-							aria-hidden="true"
-							className="grid size-8 place-items-center rounded-lg bg-foreground font-bold font-display text-[14px] text-background leading-none"
-						>
-							i
-						</span>
-						<span className="font-bold font-display text-[1.05rem] leading-none tracking-[-0.02em]">IMPULSA</span>
+						<img
+							alt="ASSENDIA"
+							className="size-8 rounded-lg object-cover"
+							height={32}
+							src="/assendia-logo.png"
+							width={32}
+						/>
+						<span className="font-bold font-display text-[1.05rem] leading-none tracking-[-0.02em]">ASSENDIA</span>
 					</a>
 
-					<span aria-hidden="true" className="hidden h-5 w-px bg-foreground/10 md:block" />
+					<span aria-hidden="true" className="hidden h-5 w-px bg-muted md:block" />
 
 					<ul className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
 						{NAV_LINKS.map((link) => {
@@ -85,7 +86,7 @@ export function LandingNav() {
 										aria-current={isActive ? "true" : undefined}
 										className={cn(
 											"relative inline-flex items-center rounded-full px-3 py-1.5 font-medium text-[13px] transition-colors",
-											isActive ? "text-foreground" : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+											isActive ? "text-foreground" : "text-foreground/60 hover:bg-muted hover:text-foreground"
 										)}
 										href={link.href}
 									>
@@ -96,7 +97,7 @@ export function LandingNav() {
 						})}
 					</ul>
 
-					<span aria-hidden="true" className="hidden h-5 w-px bg-foreground/10 md:block" />
+					<span aria-hidden="true" className="hidden h-5 w-px bg-muted md:block" />
 
 					<div className="ml-auto flex items-center gap-1.5 md:ml-0">
 						<a
@@ -136,20 +137,21 @@ function MobileMenu() {
 		<Sheet>
 			<SheetTrigger
 				aria-label="Abrir menú"
-				className="grid size-9 place-items-center rounded-full border border-foreground/10 text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground md:hidden"
+				className="grid size-9 place-items-center rounded-full border border-border text-foreground/75 transition-colors hover:bg-muted hover:text-foreground md:hidden"
 			>
 				<ListIcon size={18} weight="bold" />
 			</SheetTrigger>
 			<SheetPopup className="w-[min(86vw,320px)]" side="right">
 				<div className="flex items-center gap-2 px-6 pt-6">
-					<span
-						aria-hidden="true"
-						className="grid size-8 place-items-center rounded-lg bg-foreground font-bold font-display text-[14px] text-background leading-none"
-					>
-						i
-					</span>
+					<img
+						alt="ASSENDIA"
+						className="size-8 rounded-lg object-cover"
+						height={32}
+						src="/assendia-logo.png"
+						width={32}
+					/>
 					<span className="font-bold font-display text-[1.05rem] text-foreground leading-none tracking-[-0.02em]">
-						IMPULSA
+						ASSENDIA
 					</span>
 				</div>
 				<SheetPanel>
@@ -159,7 +161,7 @@ function MobileMenu() {
 								<SheetClose
 									render={
 										<a
-											className="block rounded-lg px-3 py-2.5 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground"
+											className="block rounded-lg px-3 py-2.5 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
 											href={link.href}
 										>
 											{link.label}
@@ -170,11 +172,11 @@ function MobileMenu() {
 						))}
 					</ul>
 
-					<div className="mt-6 flex flex-col gap-2 border-foreground/10 border-t pt-6">
+					<div className="mt-6 flex flex-col gap-2 border-border border-t pt-6">
 						<SheetClose
 							render={
 								<a
-									className="rounded-lg px-3 py-2 font-medium text-[14px] text-foreground/75 transition-colors hover:bg-foreground/5 hover:text-foreground"
+									className="rounded-lg px-3 py-2 font-medium text-[14px] text-foreground/75 transition-colors hover:bg-muted hover:text-foreground"
 									href="/login"
 								>
 									Iniciar sesión

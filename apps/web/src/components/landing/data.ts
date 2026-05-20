@@ -15,7 +15,6 @@ export interface BentoChartBar {
 
 export interface Testimonial {
 	chip: string;
-	gradient: string;
 	id: string;
 	initials: string;
 	location: string;
@@ -101,7 +100,7 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "02",
 		title: "Un solo plan.",
 		emphasis: "Todo incluido.",
-		body: "CV, carta, LinkedIn, mensajes, score y coaching, todo junto desde S/79. Wonsulting cobra US$699 a US$2.299 por las mismas piezas, por separado.",
+		body: "CV, carta, LinkedIn, mensajes, score y coaching, todo junto desde S/79. Otras plataformas cobran S/250 por las mismas piezas, sueltas.",
 		receipt: { label: "Herramientas", value: "6 en una sola suscripción" },
 	},
 	{
@@ -115,7 +114,7 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "04",
 		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Otras plataformas siguen revisando tu CV.",
+		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Otras plataformas recién están revisando tu CV.",
 		receipt: { label: "A primera entrevista", value: "18 días en promedio" },
 	},
 ];
@@ -123,33 +122,33 @@ export const WHY_REASONS: readonly WhyReason[] = [
 export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Diagnóstico instantáneo",
-		body: "Sube tu CV. Score de 0 a 100 y la lista exacta de qué cambiar. Gratis.",
+		body: "Sin teoría. Ves dónde estás antes de mover nada y qué te separa de la siguiente entrevista.",
 		tag: "Gratuito / Pro / Premium",
 	},
 	{
-		title: "Mapeo del próximo puesto (Sesión 1)",
-		body: "45 min con tu coach. Revisan CV y LinkedIn, definen roles realistas, arman la lista de empresas objetivo.",
+		title: "Mapeo del próximo puesto",
+		body: "Tu coach define contigo los roles realistas y la lista de empresas objetivo. Sales con un plan concreto, no con motivación.",
+		tag: "Sesión 1 · Pro / Premium",
+	},
+	{
+		title: "Pones las herramientas a trabajar",
+		body: "La IA produce volumen contra cada oferta. Tu coach revisa antes de que algo importante salga a una empresa.",
 		tag: "Pro / Premium",
 	},
 	{
-		title: "Pones el plan en marcha",
-		body: "CV contra cada oferta. Cartas en 30 segundos. Mensajes que no parecen plantilla. LinkedIn al 90+.",
-		tag: "Pro / Premium",
+		title: "Dominas la entrevista",
+		body: "Simulacro 1:1 con preguntas reales del sector. Feedback directo sobre qué decir, qué evitar y dónde reforzar tu respuesta.",
+		tag: "Sesión 2 · Pro / Premium",
 	},
 	{
-		title: "Dominas la entrevista (Sesión 2)",
-		body: "45 min de simulacro real con tu coach. Feedback directo y claves de lenguaje corporal.",
-		tag: "Pro / Premium",
+		title: "Refuerzo post-entrevista",
+		body: "Repasan qué salió bien y qué pulir antes del siguiente proceso. Aprendizajes que se acumulan, no que se pierden.",
+		tag: "Sesión 3 · Pro / Premium",
 	},
 	{
-		title: "Refuerzo después de la entrevista (Sesión 3)",
-		body: "30 min con tu coach. Qué salió bien, qué pulir, cómo encarar los siguientes procesos.",
-		tag: "Pro / Premium",
-	},
-	{
-		title: "Entrevistas reales en mano",
-		body: "Día 42 en promedio con Premium. Simulacros, entrevistas reales y método para las siguientes. Cancelas cuando decidas.",
-		tag: "★ Resultado",
+		title: "Entrevistas reales en agenda",
+		body: "Día 42 en promedio con Premium. Entrevistas activas y un método que te sirve para las siguientes. Cancelas cuando tú decidas.",
+		tag: "Resultado",
 	},
 ];
 
@@ -193,7 +192,7 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "premium",
 		name: "Premium",
-		tagline: "El camino completo: tres sesiones y WhatsApp directo. Cinco veces más coaching que Pro.",
+		tagline: "El camino completo: tres sesiones estructuradas y WhatsApp directo con tu coach.",
 		priceSoles: 179,
 		priceUsd: 47,
 		per: "al mes, camino completo",
@@ -222,7 +221,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "valentina",
 		initials: "VN",
-		gradient: "from-emerald-300 to-emerald-600",
 		name: "Valentina Núñez",
 		role: "Analista en Yape",
 		location: "Lima",
@@ -233,7 +231,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "tomas",
 		initials: "TL",
-		gradient: "from-indigo-300 to-indigo-600",
 		name: "Tomás Larrañaga",
 		role: "Product Analyst en Rappi",
 		location: "Bogotá",
@@ -244,18 +241,16 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "martina",
 		initials: "MC",
-		gradient: "from-emerald-300 to-emerald-600",
 		name: "Martina Cifuentes",
 		role: "UX Designer en Crehana",
 		location: "Lima",
 		quote:
-			"La sesión de pre entrevista fue brutal, en el buen sentido. Me salvó de decir tres cosas que habrían matado el proceso.",
+			"La sesión de preentrevista fue brutal, en el buen sentido. Me salvó de decir tres cosas que habrían matado el proceso.",
 		chip: "2 meses",
 	},
 	{
 		id: "julian",
 		initials: "JR",
-		gradient: "from-indigo-200 to-indigo-700",
 		name: "Julián Rodríguez",
 		role: "Data Analyst en BCP",
 		location: "Arequipa",
@@ -266,7 +261,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "catalina",
 		initials: "CB",
-		gradient: "from-emerald-200 to-emerald-700",
 		name: "Catalina Bermúdez",
 		role: "Comms en Globant",
 		location: "Montevideo",
@@ -277,7 +271,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "diego",
 		initials: "DM",
-		gradient: "from-indigo-200 to-indigo-700",
 		name: "Diego Méndez",
 		role: "Backend Engineer en Belcorp",
 		location: "Lima",
@@ -288,7 +281,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "paula",
 		initials: "PV",
-		gradient: "from-emerald-200 to-emerald-700",
 		name: "Paula Villalba",
 		role: "Marketing en Kushki",
 		location: "Quito",
@@ -299,7 +291,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "sebastian",
 		initials: "SF",
-		gradient: "from-indigo-300 to-indigo-700",
 		name: "Sebastián Fontana",
 		role: "Project Manager en Joinnus",
 		location: "Lima",
@@ -310,7 +301,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "antonella",
 		initials: "AG",
-		gradient: "from-emerald-200 to-emerald-600",
 		name: "Antonella Greco",
 		role: "Customer Success en Tiendanube",
 		location: "Buenos Aires",
@@ -321,7 +311,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "renata",
 		initials: "RT",
-		gradient: "from-indigo-300 to-indigo-600",
 		name: "Renata Toledo",
 		role: "UX Researcher en Despegar",
 		location: "Santiago",
@@ -332,7 +321,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "camila",
 		initials: "CR",
-		gradient: "from-emerald-300 to-emerald-600",
 		name: "Camila Rodríguez",
 		role: "Product Designer en Yape",
 		location: "Lima",
@@ -343,7 +331,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "mateo",
 		initials: "MA",
-		gradient: "from-indigo-200 to-indigo-600",
 		name: "Mateo Aliaga",
 		role: "Data Engineer en Globant",
 		location: "Bogotá",
@@ -354,7 +341,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "florencia",
 		initials: "FR",
-		gradient: "from-emerald-200 to-emerald-600",
 		name: "Florencia Romero",
 		role: "Marketing Manager en Falabella",
 		location: "Santiago",
@@ -365,7 +351,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "andres",
 		initials: "AC",
-		gradient: "from-indigo-300 to-indigo-700",
 		name: "Andrés Calderón",
 		role: "Frontend Engineer en Kushki",
 		location: "Lima",
@@ -376,7 +361,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "lucia",
 		initials: "LM",
-		gradient: "from-emerald-300 to-emerald-700",
 		name: "Lucía Méndez",
 		role: "Customer Success en Despegar",
 		location: "Buenos Aires",
@@ -387,7 +371,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "joaquin",
 		initials: "JV",
-		gradient: "from-indigo-200 to-indigo-700",
 		name: "Joaquín Vega",
 		role: "Analyst en Rappi",
 		location: "Lima",
@@ -398,7 +381,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "sara",
 		initials: "SV",
-		gradient: "from-emerald-200 to-emerald-700",
 		name: "Sara Villanueva",
 		role: "UX Designer en Stori",
 		location: "CDMX",
@@ -409,7 +391,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "alejandra",
 		initials: "AS",
-		gradient: "from-indigo-300 to-indigo-600",
 		name: "Alejandra Suárez",
 		role: "Project Manager en Belcorp",
 		location: "Lima",
@@ -420,7 +401,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "bruno",
 		initials: "BL",
-		gradient: "from-emerald-200 to-emerald-600",
 		name: "Bruno Lazo",
 		role: "Marketing Digital en Niubiz",
 		location: "Lima",
@@ -431,7 +411,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 	{
 		id: "valeria",
 		initials: "VC",
-		gradient: "from-indigo-200 to-indigo-700",
 		name: "Valeria Castro",
 		role: "HR Business Partner en Crehana",
 		location: "Bogotá",
@@ -443,28 +422,12 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 
 export const FAQ_ITEMS: readonly FaqItem[] = [
 	{
-		q: "¿Cómo funciona el Score CV?",
-		a: "Subes tu CV y eliges el rol al que apuntas. La IA analiza la estructura, distingue logros de tareas, revisa las palabras clave del sector y mide la compatibilidad con los filtros automáticos que usan los reclutadores para descartar CVs. En menos de 30 segundos recibes un puntaje del 0 al 100 con la lista de lo que tienes que mejorar. En el plan Gratuito tienes un análisis al mes; en Pro, son ilimitados.",
-	},
-	{
 		q: "¿Quiénes son los coaches?",
-		a: "Un equipo reducido de 3 a 5 coaches senior, todos con experiencia contratando para tech, producto, datos y consultoría en empresas de la región. No trabajamos con freelancers de plataforma: nuestros coaches están en planilla con IMPULSA y los entrevistamos uno por uno antes de sumarlos al equipo.",
+		a: "Un equipo reducido de 3 a 5 coaches senior, todos con experiencia contratando para tech, producto, datos y consultoría en empresas de la región. No trabajamos con freelancers de plataforma: nuestros coaches están en planilla con ASSENDIA y los entrevistamos uno por uno antes de sumarlos al equipo.",
 	},
 	{
-		q: "¿Cuál es la diferencia con Wonsulting o ResumAI?",
-		a: "Wonsulting cobra el coaching humano por separado, entre US$699 y US$2.299. En IMPULSA, las herramientas de IA y el coaching vienen en el mismo plan. Pro incluye una sesión 1:1 al mes (30 minutos, sobre el tema que tú quieras) por S/79. Premium incluye el camino completo de tres sesiones estructuradas más WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
-	},
-	{
-		q: "¿Puedo probar sin suscribirme?",
-		a: "Sí. El Score CV y el constructor son gratis para siempre, con un análisis al mes en el plan Gratuito. Si prefieres probar el coaching humano antes de suscribirte, tienes la sesión única de S/40 por 45 minutos, sin compromiso, con cualquier coach del equipo.",
-	},
-	{
-		q: "¿En qué países funciona?",
-		a: "Estamos enfocados en LATAM. Hoy trabajamos con talentos en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal son soles peruanos, con equivalencias en dólares.",
-	},
-	{
-		q: "¿Puedo cancelar cuando quiera?",
-		a: "Sí. Pro y Premium son planes mensuales sin permanencia. Cancelas desde tu dashboard, sin llamadas y sin retención agresiva. Si cancelas antes del siguiente cobro, mantienes el acceso hasta que termine el periodo pagado.",
+		q: "¿Cuál es la diferencia con otras plataformas?",
+		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, las herramientas de IA y el coaching vienen en el mismo plan. Pro incluye una sesión 1:1 al mes (30 minutos, sobre el tema que tú quieras) por S/79. Premium incluye el camino completo de tres sesiones estructuradas más WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
 	},
 	{
 		q: "¿Y si no consigo entrevistas?",
@@ -472,7 +435,23 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿En cuánto tiempo veo resultados?",
-		a: "Tu score y tu CV mejorado los tienes el mismo día. La primera entrevista real suele llegar entre dos y cuatro semanas, según tu nivel y el rol al que apuntes. La garantía Premium cubre tu primera entrevista en 90 días.",
+		a: "Tu score y tu CV mejorado los tienes el mismo día. La primera entrevista real suele llegar entre dos y cuatro semanas, según tu nivel y el rol al que apuntas. La garantía Premium cubre tu primera entrevista en 90 días.",
+	},
+	{
+		q: "¿Cómo funciona el Score CV?",
+		a: "Subes tu CV y eliges el rol al que apuntas. La IA analiza la estructura, distingue logros de tareas, revisa las palabras clave del sector y mide la compatibilidad con los filtros automáticos que usan los reclutadores para descartar CVs. En menos de 30 segundos recibes un puntaje del 0 al 100 con la lista de lo que tienes que mejorar. En el plan Gratuito tienes un análisis al mes; en Pro, son ilimitados.",
+	},
+	{
+		q: "¿Puedo probar sin suscribirme?",
+		a: "Sí. El Score CV y el constructor son gratis para siempre, con un análisis al mes en el plan Gratuito. Si prefieres probar el coaching humano antes de suscribirte, tienes la sesión única de S/40 por 45 minutos, sin compromiso, con cualquier coach del equipo.",
+	},
+	{
+		q: "¿Puedo cancelar cuando quiera?",
+		a: "Sí. Pro y Premium son planes mensuales sin permanencia. Cancelas desde tu panel, sin llamadas y sin retención agresiva. Si cancelas antes del siguiente cobro, mantienes el acceso hasta que termine el periodo pagado.",
+	},
+	{
+		q: "¿En qué países funciona?",
+		a: "Estamos enfocados en LATAM. Hoy trabajamos con talentos en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal son soles peruanos, con equivalencias en dólares.",
 	},
 	{
 		q: "¿Funciona si no soy del rubro tech?",
@@ -480,7 +459,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Mis datos están seguros?",
-		a: "Tu CV no entrena modelos abiertos. Procesamos tus datos con proveedores que firmaron contratos de confidencialidad y puedes borrar todo desde tu dashboard cuando quieras. Cumplimos con la ley peruana de protección de datos personales (Ley 29733).",
+		a: "Tu CV no entrena modelos abiertos. Procesamos tus datos con proveedores que firmaron contratos de confidencialidad y puedes borrar todo desde tu panel cuando quieras. Cumplimos con la ley peruana de protección de datos personales (Ley 29733).",
 	},
 ];
 

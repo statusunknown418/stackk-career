@@ -436,24 +436,26 @@
 	--success-foreground: var(--color-emerald-700);
 	--warning: var(--color-amber-500);
 	--warning-foreground: var(--color-amber-700);
-	--accent: --alpha(var(--color-white) / 6%);
-	--accent-foreground: oklch(0.98 0.005 250);
-	--background: oklch(0.18 0.013 250); /* dark surface */
-	--border: oklch(0.98 0.005 250 / 10%);
-	--card: oklch(0.23 0.014 250); /* slightly lighter dark card */
-	--card-foreground: oklch(0.98 0.005 250);
+	--accent: oklch(0.94 0 0); /* solid pale gray accent */
+	--accent-foreground: oklch(0.13 0 0);
+	--background: oklch(1 0 0); /* pure white */
+	--border: oklch(0.85 0 0); /* darker hairline for definition */
+	--card: oklch(0.955 0 0); /* off-white card, clearer separation from paper */
+	--card-foreground: oklch(0.13 0 0);
 	--destructive: var(--color-red-500);
-	--foreground: oklch(0.98 0.005 250); /* near-white */
-	--input: oklch(0.98 0.005 250 / 12%);
-	--muted: oklch(0.98 0.005 250 / 5%);
-	--muted-foreground: oklch(0.7 0.008 250); /* muted gray on dark */
-	--popover: oklch(0.23 0.014 250);
-	--popover-foreground: oklch(0.98 0.005 250);
-	--primary: oklch(0.84 0.21 130); /* Platzi vibrant green */
-	--primary-foreground: oklch(0.18 0.013 250); /* dark text on green */
-	--ring: oklch(0.84 0.21 130);
-	--secondary: oklch(0.23 0.014 250); /* dark card variant */
-	--secondary-foreground: oklch(0.98 0.005 250);
+	--foreground: oklch(0.13 0 0); /* true near-black, no tint */
+	--input: oklch(0.9 0 0);
+	--muted: oklch(0.94 0 0);
+	--muted-foreground: oklch(0.4 0 0); /* deeper body gray */
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.13 0 0);
+	--primary: oklch(
+		0.7 0.19 142
+	); /* Platzi green, darkened for contrast on white */
+	--primary-foreground: oklch(0.15 0.01 155); /* dark text on green */
+	--ring: oklch(0.7 0.19 142);
+	--secondary: oklch(0.95 0 0); /* solid pale gray */
+	--secondary-foreground: oklch(0.13 0 0);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);
 	--chart-3: var(--color-cyan-900);
@@ -478,43 +480,37 @@
 }
 
 :root {
-	/* Platzi Dark — vibrant Platzi green on near-black, light text */
-	--ink: oklch(0.98 0.005 250);
-	--paper: oklch(0.18 0.013 250);
-	--oxblood: oklch(0.84 0.21 130);
-	--marigold: oklch(0.84 0.21 130);
-	--rule: oklch(0.98 0.005 250 / 10%);
-	--aurora-1: oklch(0.6 0.18 130 / 35%);
-	--aurora-2: oklch(0.18 0.013 250);
-	--aurora-3: oklch(0.55 0.16 140 / 25%);
+	/* ASSENDIA light — Platzi green accent on pure paper, true black ink */
+	--ink: oklch(0.13 0 0);
+	--paper: oklch(1 0 0);
+	--oxblood: oklch(0.7 0.19 142);
+	--marigold: oklch(0.7 0.19 142);
+	--rule: oklch(0.88 0 0); /* solid hairline gray */
+	--aurora-1: oklch(1 0 0);
+	--aurora-2: oklch(1 0 0);
+	--aurora-3: oklch(1 0 0);
 
-	/* shadow tokens — never hardcode oklch in components */
-	--shadow-card-soft:
-		0 1px 0 var(--rule), 0 18px 40px -20px oklch(from var(--ink) l c h / 0.18);
-	--shadow-card-hover: 0 24px 48px -16px oklch(from var(--ink) l c h / 0.22);
-	--shadow-pillar:
-		0 50px 100px -20px oklch(from var(--oxblood) l c h / 0.32),
-		0 30px 60px -30px oklch(from var(--ink) l c h / 0.5);
-	--shadow-glow-emerald: 0 0 24px oklch(from var(--oxblood) l c h / 0.5);
-	--shadow-featured: 0 30px 70px -20px oklch(from var(--oxblood) l c h / 0.45);
-	--shadow-nav:
-		0 1px 0 oklch(from var(--ink) l c h / 0.04),
-		0 20px 60px -30px oklch(from var(--ink) l c h / 0.35);
-	--shadow-logo:
-		inset 0 1px 0 oklch(1 0 0 / 0.25),
-		0 4px 12px -2px oklch(from var(--oxblood) l c h / 0.4);
-	--shadow-floating: 0 12px 32px -6px oklch(from var(--ink) l c h / 0.35);
+	/* minimal shadow tokens — flat first */
+	--shadow-card-soft: 0 1px 0 var(--rule);
+	--shadow-card-hover: 0 0 0 1px oklch(0.13 0 0 / 0.18);
+	--shadow-pillar: 0 1px 0 var(--rule);
+	--shadow-glow-emerald: 0 0 0 0 transparent;
+	--shadow-featured: 0 1px 0 var(--rule);
+	--shadow-nav: 0 1px 0 var(--rule);
+	--shadow-logo: 0 0 0 0 transparent;
+	--shadow-floating: 0 1px 0 var(--rule);
 }
 
 .dark {
-	--ink: oklch(0.96 0.012 165);
-	--paper: oklch(0.16 0.022 175);
-	--oxblood: oklch(0.72 0.16 162);
-	--marigold: oklch(0.7 0.18 285);
-	--rule: oklch(0.96 0.012 165 / 12%);
-	--aurora-1: oklch(0.78 0.15 162);
-	--aurora-2: oklch(0.62 0.2 285);
-	--aurora-3: oklch(0.7 0.16 200);
+	/* ASSENDIA dark — vibrant Platzi green accent on near-black, white logo. */
+	--ink: oklch(0.96 0.01 150);
+	--paper: oklch(0.15 0.01 155);
+	--oxblood: oklch(0.84 0.21 142);
+	--marigold: oklch(0.84 0.21 142);
+	--rule: oklch(0.96 0.01 150 / 12%);
+	--aurora-1: oklch(0.82 0.2 142);
+	--aurora-2: oklch(0.7 0.18 150);
+	--aurora-3: oklch(0.78 0.16 135);
 
 	--shadow-card-soft: 0 1px 0 var(--rule), 0 18px 40px -20px oklch(0 0 0 / 0.5);
 	--shadow-card-hover: 0 24px 48px -16px oklch(0 0 0 / 0.55);
@@ -535,10 +531,10 @@
 	--accent: --alpha(var(--color-white) / 4%);
 	--accent-foreground: oklch(0.94 0.01 78);
 
-	--background: oklch(0.16 0.022 175);
-	--border: oklch(0.96 0.012 165 / 8%);
-	--card: oklch(0.2 0.024 175);
-	--card-foreground: oklch(0.96 0.012 165);
+	--background: oklch(0.15 0.01 155);
+	--border: oklch(0.96 0.01 150 / 10%);
+	--card: oklch(0.19 0.012 155);
+	--card-foreground: oklch(0.96 0.01 150);
 	--destructive: color-mix(
 		in srgb,
 		var(--color-red-500) 90%,
@@ -554,9 +550,9 @@
 	);
 	--popover: color-mix(in srgb, var(--background) 98%, var(--color-white));
 	--popover-foreground: var(--color-neutral-100);
-	--primary: var(--color-neutral-100);
-	--primary-foreground: var(--color-neutral-800);
-	--ring: var(--color-neutral-500);
+	--primary: oklch(0.84 0.21 142);
+	--primary-foreground: oklch(0.15 0.01 155);
+	--ring: oklch(0.84 0.21 142);
 	--secondary: --alpha(var(--color-white) / 4%);
 	--secondary-foreground: var(--color-neutral-100);
 	--chart-1: var(--color-blue-700);

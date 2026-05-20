@@ -1,156 +1,155 @@
 "use client";
 
-import { ArrowRightIcon, CaretDownIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretDownIcon, CheckIcon, ShieldCheckIcon, SparkleIcon } from "@phosphor-icons/react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { CountUp } from "@/components/ui/count-up";
 import { Magnetic } from "@/components/ui/magnetic";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
 import { cn } from "@/lib/utils";
 import { PLANS, type Plan, SINGLE_SESSION } from "./data";
 
+const EASE_OUT_QUINT = [0.16, 1, 0.3, 1] as const;
 const HEADLINE_FEATURE_COUNT = 4;
-
-function featureDotColor(feature: string, featured: boolean): string {
-	const f = feature.toLowerCase();
-	if (f.includes("whatsapp")) {
-		return featured ? "bg-emerald-400" : "bg-emerald-500";
-	}
-	if (
-		f.includes("sesión") ||
-		f.includes("coach") ||
-		f.includes("revisión humana") ||
-		f.includes("mapea") ||
-		f.includes("domina") ||
-		f.includes("cierra")
-	) {
-		return "bg-marigold";
-	}
-	if (f.includes("todo lo del plan")) {
-		return featured ? "bg-background/40" : "bg-foreground/30";
-	}
-	return featured ? "bg-oxblood/90" : "bg-oxblood";
-}
 
 export function Pricing() {
 	return (
-		<section className="px-6 py-16 md:py-24" id="planes">
-			<Reveal>
-				<header className="mx-auto mb-14 max-w-[1200px]">
-					<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.18em]">Precios en soles</span>
-					<h2 className="mt-3 max-w-[820px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
-						<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
-					</h2>
-					<p className="mt-5 max-w-[580px] text-[1rem] text-foreground/65 leading-[1.55]">
-						Score CV gratis siempre. Pro desde S/79. Premium con garantía de entrevista en 90 días.
-					</p>
-				</header>
-			</Reveal>
-
-			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
-				{PLANS.map((plan, idx) => (
-					<Reveal className="h-full" delay={idx * 0.08} key={plan.id}>
-						<PriceCard plan={plan} />
-					</Reveal>
-				))}
-			</div>
-
-			<SingleSessionCard />
-
-			<div className="mx-auto mt-16 max-w-[820px] border-foreground/8 border-t pt-14 text-center">
-				<span
-					aria-hidden="true"
-					className="inline-block size-1.5 rounded-full bg-marigold shadow-[0_0_12px_oklch(from_var(--marigold)_l_c_h/0.6)]"
-				/>
-				<p className="mt-5 font-display-italic font-light text-[clamp(1.75rem,3.6vw,2.6rem)] text-foreground leading-[1.12] tracking-[-0.025em]">
-					¿Cumpliste tu objetivo?
-				</p>
-				<p className="mx-auto mt-5 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]">
-					Cancelas en un clic, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}
-					cuando vuelvas.
-				</p>
-			</div>
+		<section className="relative bg-background" id="planes">
+			<PricingHeader />
+			<PlanGrid />
+			<SingleSessionStrip />
+			<ClosingMoment />
 		</section>
 	);
 }
 
-function PriceCard({ plan }: { plan: Plan }) {
+function PricingHeader() {
+	return (
+		<div className="px-6 pt-20 pb-12 sm:pt-28 sm:pb-16">
+			<div className="mx-auto max-w-[1200px]">
+				<Reveal>
+					<LaunchBadge />
+				</Reveal>
+				<Reveal delay={0.05}>
+					<span className="mt-7 block font-mono text-[11px] text-foreground/60 uppercase tracking-[0.2em]">
+						Planes · precios en soles
+					</span>
+				</Reveal>
+				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-[0.96] tracking-[-0.045em]">
+					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
+				</h2>
+				<Reveal delay={0.2}>
+					<p className="mt-7 max-w-[60ch] text-[1.05rem] text-foreground/65 leading-[1.55]">
+						Empieza gratis con tu Score CV. Pasa a Pro cuando quieras IA ilimitada y tu coach. Premium suma el camino
+						completo con garantía de entrevista en 90 días.
+					</p>
+				</Reveal>
+			</div>
+		</div>
+	);
+}
+
+function LaunchBadge() {
+	const reduced = useReducedMotion();
+	return (
+		<motion.div
+			animate={reduced ? undefined : { opacity: 1, y: 0 }}
+			className="inline-flex items-center gap-2.5 rounded-full border border-oxblood/40 bg-oxblood/12 py-1.5 pr-3.5 pl-2"
+			initial={reduced ? false : { opacity: 0, y: -10 }}
+			transition={{ duration: 0.7, ease: EASE_OUT_QUINT }}
+		>
+			<span className="relative inline-flex size-5 items-center justify-center rounded-full bg-oxblood text-background">
+				{!reduced && <span aria-hidden="true" className="absolute inset-0 animate-ping rounded-full bg-oxblood/60" />}
+				<SparkleIcon className="relative" size={11} weight="fill" />
+			</span>
+			<span className="font-mono text-[10.5px] text-foreground uppercase tracking-[0.18em]">
+				Lanzamiento beta · precio fijo de por vida
+			</span>
+		</motion.div>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Three comparable tiers in one row. Pro is featured; all three read as plans.
+// ---------------------------------------------------------------------------
+function PlanGrid() {
+	return (
+		<div className="px-6 pb-16">
+			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-5">
+				{PLANS.map((plan, idx) => (
+					<PlanCard idx={idx} key={plan.id} plan={plan} />
+				))}
+			</div>
+		</div>
+	);
+}
+
+function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
+	const reduced = useReducedMotion();
 	const featured = plan.featured ?? false;
 	const isFree = plan.priceSoles === 0;
-	const cardRef = useRef<HTMLDivElement>(null);
-
-	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		const el = cardRef.current;
-		if (!el) {
-			return;
-		}
-		const r = el.getBoundingClientRect();
-		el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
-		el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
-	};
-
-	const spotlightColor = featured ? "oklch(0.98 0.005 130 / 0.1)" : "oklch(from var(--oxblood) l c h / 0.13)";
+	const isPremium = plan.id === "premium";
 
 	return (
-		<div
+		<motion.div
 			className={cn(
-				"group/price relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-transform duration-300 ease-out sm:p-9",
+				"group/price relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-all duration-300 ease-out sm:p-8",
 				featured
-					? "border-transparent bg-foreground text-background hover:-translate-y-1.5 hover:scale-[1.02]"
-					: "border-foreground/12 bg-card text-foreground hover:-translate-y-1 hover:border-foreground/25"
+					? "border-oxblood/55 bg-oxblood/[0.06] shadow-[0_24px_60px_-30px_oklch(from_var(--oxblood)_l_c_h/0.45)] hover:border-oxblood/80 lg:-translate-y-3"
+					: "border-border bg-card hover:-translate-y-1 hover:border-foreground/35"
 			)}
-			onMouseMove={handleMouseMove}
-			ref={cardRef}
+			initial={reduced ? false : { opacity: 0, y: 24 }}
+			transition={{ duration: 0.7, delay: idx * 0.08, ease: EASE_OUT_QUINT }}
+			viewport={{ margin: "-10% 0px", once: true }}
+			whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
 		>
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/price:opacity-100"
-				style={{
-					background: `radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 50%), ${spotlightColor}, transparent 60%)`,
-				}}
-			/>
-			<div className="flex items-center justify-between">
-				<h3 className="font-display font-semibold text-[1.6rem] tracking-[-0.025em]">{plan.name}</h3>
+			{featured && (
+				<div
+					aria-hidden="true"
+					className="absolute -top-px right-8 left-8 h-[2px] bg-gradient-to-r from-transparent via-oxblood to-transparent"
+				/>
+			)}
+
+			<div className="flex items-center justify-between gap-3">
+				<h3 className="font-display font-semibold text-[1.6rem] text-foreground tracking-[-0.025em]">{plan.name}</h3>
 				{featured && (
-					<span className="rounded-full bg-background/15 px-2.5 py-0.5 text-[11px] text-background/90">
-						Más popular
+					<span className="inline-flex items-center gap-1.5 rounded-full bg-oxblood px-2.5 py-0.5 font-medium text-[10.5px] text-background uppercase tracking-[0.12em]">
+						<SparkleIcon size={10} weight="fill" />
+						Más elegido
+					</span>
+				)}
+				{isPremium && (
+					<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/40 bg-oxblood/10 px-2.5 py-0.5 font-medium text-[10.5px] text-foreground/85 uppercase tracking-[0.12em]">
+						<ShieldCheckIcon size={11} weight="bold" />
+						Con garantía
 					</span>
 				)}
 			</div>
-			<p className={cn("mt-2 text-[14px] leading-[1.5]", featured ? "text-background/70" : "text-foreground/65")}>
-				{plan.tagline}
-			</p>
+			<p className="mt-2 text-[14px] text-foreground/65 leading-[1.5]">{plan.tagline}</p>
 
-			<div className="mt-8 flex items-baseline gap-1.5">
-				<span className={cn("font-medium text-base", featured ? "text-background/80" : "text-foreground/70")}>S/</span>
-				<span className="font-bold font-display text-[3.4rem] tabular-nums leading-[0.85] tracking-[-0.04em]">
-					{plan.priceSoles}
+			<div className="mt-7 flex items-baseline gap-1.5">
+				<span className="font-medium text-base text-foreground/70">S/</span>
+				<span className="font-bold font-display text-[3.4rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
+					<CountUp duration={1.0} once to={plan.priceSoles} />
 				</span>
-				<span className={cn("ml-1 text-sm", featured ? "text-background/60" : "text-foreground/70")}>
-					{isFree ? "" : "/ mes"}
-				</span>
+				<span className="ml-1 text-foreground/70 text-sm">{isFree ? "" : "/ mes"}</span>
 			</div>
-			<p className={cn("mt-2 text-[13px]", featured ? "text-background/55" : "text-foreground/70")}>
-				{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}
-			</p>
+			<p className="mt-2 text-[13px] text-foreground/65">{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}</p>
 
-			<div className={cn("my-7 h-px", featured ? "bg-background/15" : "bg-foreground/10")} />
+			<div className={cn("my-7 h-px", featured ? "bg-oxblood/20" : "bg-border")} />
 
 			<div className="flex flex-1 flex-col">
 				<ul className="flex flex-col gap-3">
-					{plan.features.slice(0, HEADLINE_FEATURE_COUNT).map((feat) => (
-						<FeatureItem feature={feat} featured={featured} key={feat} />
+					{plan.features.slice(0, HEADLINE_FEATURE_COUNT).map((feat, i) => (
+						<FeatureItem delay={idx * 0.08 + 0.2 + i * 0.05} feature={feat} key={feat} />
 					))}
 				</ul>
 
 				{plan.features.length > HEADLINE_FEATURE_COUNT && (
 					<details className="group/expand mt-3">
-						<summary
-							className={cn(
-								"flex cursor-pointer list-none items-center gap-1.5 font-medium text-[12.5px] transition-colors",
-								featured ? "text-background/60 hover:text-background/90" : "text-foreground/70 hover:text-foreground"
-							)}
-						>
+						<summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-[12.5px] text-foreground/70 transition-colors hover:text-foreground">
 							<CaretDownIcon
 								className="transition-transform duration-200 group-open/expand:rotate-180"
 								size={12}
@@ -161,76 +160,168 @@ function PriceCard({ plan }: { plan: Plan }) {
 						</summary>
 						<ul className="mt-3 flex flex-col gap-3">
 							{plan.features.slice(HEADLINE_FEATURE_COUNT).map((feat) => (
-								<FeatureItem feature={feat} featured={featured} key={feat} />
+								<FeatureItem feature={feat} key={feat} />
 							))}
 						</ul>
 					</details>
 				)}
 			</div>
 
+			{isPremium && (
+				<div className="mt-6 flex items-start gap-3 rounded-xl border border-oxblood/30 bg-oxblood/[0.06] p-4">
+					<span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-oxblood text-background">
+						<ShieldCheckIcon size={15} weight="bold" />
+					</span>
+					<div>
+						<p className="font-display font-semibold text-[13px] text-foreground leading-tight tracking-tight">
+							Garantía de entrevista en 90 días
+						</p>
+						<p className="mt-1 text-[12.5px] text-foreground/70 leading-[1.5]">
+							3 meses de Premium con uso activo. Si no llegas a una entrevista, te devolvemos el 100%.
+						</p>
+					</div>
+				</div>
+			)}
+
 			<Magnetic block className="mt-8" radius={120} strength={0.22}>
 				<a
 					className={cn(
 						buttonVariants({ size: "lg" }),
 						"w-full",
-						featured && "bg-background text-foreground hover:bg-background/90"
+						featured
+							? "bg-oxblood text-background hover:bg-oxblood/90"
+							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
 					)}
-					href="#planes"
+					href="/setup"
 				>
 					{plan.cta}
 					<ArrowRightIcon weight="bold" />
 				</a>
 			</Magnetic>
+		</motion.div>
+	);
+}
+
+function FeatureItem({ feature, delay = 0 }: { delay?: number; feature: string }) {
+	const reduced = useReducedMotion();
+	return (
+		<motion.li
+			className="flex items-start gap-3 text-[14px] leading-[1.5]"
+			initial={reduced ? false : { opacity: 0, x: -6 }}
+			transition={{ duration: 0.5, delay, ease: EASE_OUT_QUINT }}
+			viewport={{ margin: "-10% 0px", once: true }}
+			whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+		>
+			<span
+				aria-hidden="true"
+				className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-oxblood/15 text-oxblood"
+			>
+				<CheckIcon size={10} weight="bold" />
+			</span>
+			<span className="text-foreground/85">{feature}</span>
+		</motion.li>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Single session — palate cleanser, low key, intentionally undramatic.
+// ---------------------------------------------------------------------------
+function SingleSessionStrip() {
+	return (
+		<div className="px-6 pb-16 sm:pb-24">
+			<aside
+				className="mx-auto max-w-[1200px] overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
+				id="sesion-unica"
+			>
+				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
+					<div className="md:col-span-7">
+						<span className="font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.16em]">
+							Sin suscripción
+						</span>
+						<h3 className="mt-2 font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
+							Sesión única: {SINGLE_SESSION.tagline}
+						</h3>
+						<p className="mt-3 max-w-[560px] text-[14px] text-foreground/65 leading-[1.55]">{SINGLE_SESSION.body}</p>
+					</div>
+
+					<div className="flex items-center justify-between gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
+						<div>
+							<p className="flex items-baseline gap-1.5">
+								<span className="font-medium text-base text-foreground/70">S/</span>
+								<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
+									<CountUp duration={1.0} once to={SINGLE_SESSION.priceSoles} />
+								</span>
+							</p>
+							<p className="mt-1 text-foreground/70 text-xs">
+								≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
+							</p>
+						</div>
+						<Magnetic className="shrink-0" radius={100} strength={0.25}>
+							<a
+								className={cn(
+									buttonVariants({ size: "default" }),
+									"border-foreground bg-foreground text-background hover:bg-foreground/90"
+								)}
+								href="/setup"
+							>
+								{SINGLE_SESSION.cta}
+								<ArrowRightIcon weight="bold" />
+							</a>
+						</Magnetic>
+					</div>
+				</div>
+			</aside>
 		</div>
 	);
 }
 
-function FeatureItem({ feature, featured }: { feature: string; featured: boolean }) {
-	return (
-		<li className="flex items-start gap-3 text-[14px] leading-[1.5]">
-			<span
-				aria-hidden="true"
-				className={cn("mt-[7px] block size-1.5 shrink-0 rounded-full", featureDotColor(feature, featured))}
-			/>
-			<span className={cn(featured ? "text-background/90" : "text-foreground/85")}>{feature}</span>
-		</li>
-	);
-}
+// ---------------------------------------------------------------------------
+// Closing moment — scroll-driven scale on the italic line. The page's coda.
+// ---------------------------------------------------------------------------
+function ClosingMoment() {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const reduced = useReducedMotion();
 
-function SingleSessionCard() {
-	return (
-		<aside
-			className="mx-auto mt-6 max-w-[1200px] overflow-hidden rounded-2xl border border-foreground/10 bg-card"
-			id="sesion-unica"
-		>
-			<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
-				<div className="md:col-span-7">
-					<h3 className="font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
-						Sesión única: {SINGLE_SESSION.tagline}
-					</h3>
-					<p className="mt-3 max-w-[560px] text-[14px] text-foreground/65 leading-[1.55]">{SINGLE_SESSION.body}</p>
-				</div>
+	const { scrollYProgress } = useScroll({
+		target: containerRef,
+		offset: ["start end", "end start"],
+	});
+	const progress = useSpring(scrollYProgress, {
+		stiffness: 100,
+		damping: 26,
+		mass: 0.4,
+	});
 
-				<div className="flex items-center justify-between gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
-					<div>
-						<p className="flex items-baseline gap-1.5">
-							<span className="font-medium text-base text-foreground/70">S/</span>
-							<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
-								{SINGLE_SESSION.priceSoles}
-							</span>
-						</p>
-						<p className="mt-1 text-foreground/70 text-xs">
-							≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
-						</p>
-					</div>
-					<Magnetic className="shrink-0" radius={100} strength={0.25}>
-						<a className={buttonVariants({ size: "default" })} href="#planes">
-							{SINGLE_SESSION.cta}
-							<ArrowRightIcon weight="bold" />
-						</a>
-					</Magnetic>
-				</div>
+	const dotScale = useTransform(progress, [0.1, 0.45], [0.6, 1]);
+	const dotOpacity = useTransform(progress, [0.1, 0.45], [0, 1]);
+	const lineOpacity = useTransform(progress, [0.18, 0.5], [0, 1]);
+	const lineY = useTransform(progress, [0.18, 0.5], [40, 0]);
+	const lineScale = useTransform(progress, [0.25, 0.55], [0.94, 1]);
+	const bodyOpacity = useTransform(progress, [0.35, 0.7], [0, 1]);
+	const bodyY = useTransform(progress, [0.35, 0.7], [20, 0]);
+
+	return (
+		<div className="px-6 pt-10 pb-28 sm:pt-16 sm:pb-36" ref={containerRef}>
+			<div className="mx-auto max-w-[820px] border-border border-t pt-20 text-center sm:pt-28">
+				<motion.span
+					aria-hidden="true"
+					className="inline-block size-1.5 rounded-full bg-oxblood shadow-[0_0_16px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
+					style={reduced ? undefined : { opacity: dotOpacity, scale: dotScale }}
+				/>
+				<motion.p
+					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-[1.05] tracking-[-0.03em]"
+					style={reduced ? undefined : { opacity: lineOpacity, y: lineY, scale: lineScale }}
+				>
+					¿Cumpliste tu objetivo?
+				</motion.p>
+				<motion.p
+					className="mx-auto mt-6 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]"
+					style={reduced ? undefined : { opacity: bodyOpacity, y: bodyY }}
+				>
+					Cancelas en un clic, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}
+					cuando vuelvas.
+				</motion.p>
 			</div>
-		</aside>
+		</div>
 	);
 }

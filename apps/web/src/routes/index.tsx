@@ -2,20 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BentoGrid } from "@/components/landing/bento-grid";
 import { FAQ_ITEMS, PLANS } from "@/components/landing/data";
 import { Faq } from "@/components/landing/faq";
-import { FinalCta } from "@/components/landing/final-cta";
 import { LandingFooter } from "@/components/landing/footer";
+import { FounderMessage } from "@/components/landing/founder-message";
 import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
-import { StatsAccumulation } from "@/components/landing/stats-accumulation";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
+import { Tools } from "@/components/landing/tools";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 
-const SITE_URL = "https://impulsa.com";
+const SITE_URL = "https://assendia.com";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
-const SITE_NAME = "IMPULSA";
-const TITLE = "IMPULSA · Garantizamos tu próxima entrevista en menos de 3 meses";
+const SITE_NAME = "ASSENDIA";
+const TITLE = "ASSENDIA · Garantizamos tu próxima entrevista en menos de 3 meses";
 const DESCRIPTION =
 	"CV reescrito por IA en 30 segundos. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
 
@@ -44,7 +44,7 @@ const structuredData = {
 		{
 			"@type": "Service",
 			"@id": `${SITE_URL}#service`,
-			name: "IMPULSA · Coaching de carrera con IA",
+			name: "ASSENDIA · Coaching de carrera con IA",
 			provider: { "@id": `${SITE_URL}#organization` },
 			areaServed: "LATAM",
 			serviceType: "Career coaching, CV optimization, LinkedIn optimization, interview preparation",
@@ -57,7 +57,7 @@ const structuredData = {
 			},
 			offers: PLANS.map((plan) => ({
 				"@type": "Offer",
-				name: `IMPULSA ${plan.name}`,
+				name: `ASSENDIA ${plan.name}`,
 				description: plan.tagline,
 				price: plan.priceSoles.toFixed(2),
 				priceCurrency: "PEN",
@@ -142,13 +142,13 @@ function LandingPage() {
 			<LandingNav />
 			<main className="-mt-16">
 				<Hero />
-				<StatsAccumulation />
+				<Tools />
 				<BentoGrid />
 				<HowItWorks />
 				<TestimonialsCarousel />
+				<FounderMessage />
 				<Pricing />
 				<Faq />
-				<FinalCta />
 			</main>
 			<LandingFooter />
 		</div>
