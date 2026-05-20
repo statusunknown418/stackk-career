@@ -185,3 +185,16 @@ export function generateLexoKeyBetween(before?: string | null, after?: string | 
 		return candidateKey;
 	}
 }
+
+/** Assign monotonically increasing lexo positions to a list of items. */
+export function withLexoPositions<T>(
+	items: readonly T[],
+	start: string | null = null
+): { item: T; position: string }[] {
+	let previous = start;
+	return items.map((item) => {
+		const position = generateLexoKeyBetween(previous, null);
+		previous = position;
+		return { item, position };
+	});
+}

@@ -20,6 +20,7 @@
     "@stackk-career/schemas": "workspace:*",
     "@trigger.dev/sdk": "catalog:",
     "ai": "catalog:",
+    "date-fns": "catalog:",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {

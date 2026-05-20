@@ -9,7 +9,7 @@ import {
 	K02_FAST_ANALYSIS_OBJECT_TYPE,
 	runK02FastAnalysisAgent,
 } from "../../agents/k02-fast-analysis";
-import { assertPdfHostAllowed } from "../lib/utils";
+import { assertPdfHostAllowed } from "../../lib/utils";
 import { agentQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
 
