@@ -244,7 +244,7 @@ function SingleSessionStrip() {
 						<p className="mt-3 max-w-[560px] text-[14px] text-foreground/65 leading-[1.55]">{SINGLE_SESSION.body}</p>
 					</div>
 
-					<div className="flex items-center justify-between gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
+					<div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
 						<div>
 							<p className="flex items-baseline gap-1.5">
 								<span className="font-medium text-base text-foreground/70">S/</span>
@@ -256,11 +256,11 @@ function SingleSessionStrip() {
 								≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
 							</p>
 						</div>
-						<Magnetic className="shrink-0" radius={100} strength={0.25}>
+						<Magnetic className="w-full shrink-0 sm:w-auto" radius={100} strength={0.25}>
 							<a
 								className={cn(
 									buttonVariants({ size: "default" }),
-									"border-foreground bg-foreground text-background hover:bg-foreground/90"
+									"w-full justify-center border-foreground bg-foreground text-background hover:bg-foreground/90 sm:w-auto"
 								)}
 								href="/setup"
 							>

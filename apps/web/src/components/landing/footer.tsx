@@ -175,7 +175,7 @@ function SignatureMark({ dotScale, markOpacity, markScale, markY }: SignatureMar
 			>
 				<span
 					aria-hidden="true"
-					className="block w-full text-center font-bold font-display text-[clamp(4.5rem,18vw,17rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
+					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,17rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
 				>
 					ASSENDIA
 				</span>

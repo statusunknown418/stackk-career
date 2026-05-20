@@ -8,7 +8,7 @@ import {
 	useSpring,
 	useTransform,
 } from "motion/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
@@ -126,6 +126,7 @@ function useRangeFade(scroll: MotionValue<number>, enter: number, settle: number
 
 function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	const reduced = useReducedMotion() ?? false;
+	const isDesktop = useIsDesktop();
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const { scrollYProgress } = useScroll({
@@ -197,9 +198,12 @@ function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	// (not the spring) so it feels exactly tied to the wheel.
 	const railScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
-	// Reduced-motion fallback: render the whole composition statically, fully
-	// revealed, inside a normal (non-pinned) container. No scrub, no surprises.
-	if (reduced) {
+	// Reduced-motion + mobile/tablet fallback: render the whole composition
+	// statically, fully revealed, inside a normal (non-pinned) container. On
+	// touch/narrow viewports the scroll-scrub feels broken and the stacked
+	// content can clip inside the h-screen overflow-hidden card, so below the
+	// desktop breakpoint we use the same static composition. No scrub, no clip.
+	if (reduced || !isDesktop) {
 		return (
 			<div className="px-6 py-8">
 				<div className="mx-auto max-w-[1200px]">
@@ -494,6 +498,24 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 			</footer>
 		</article>
 	);
+}
+
+// matchMedia hook — drives the pinned/static split. Below 900px we drop the
+// scroll-pinned scrub for the static composition (mirrors how-it-works.tsx).
+// SSR-safe: starts false so the static fallback renders first, then syncs.
+function useIsDesktop(breakpoint = 900): boolean {
+	const [isDesktop, setIsDesktop] = useState(false);
+	useEffect(() => {
+		if (typeof window === "undefined") {
+			return;
+		}
+		const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
+		const sync = () => setIsDesktop(mq.matches);
+		sync();
+		mq.addEventListener("change", sync);
+		return () => mq.removeEventListener("change", sync);
+	}, [breakpoint]);
+	return isDesktop;
 }
 
 // =====================================================================

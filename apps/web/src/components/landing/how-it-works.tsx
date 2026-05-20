@@ -498,7 +498,7 @@ function HowItWorksStatic() {
 				})}
 			</ol>
 
-			<div className="mx-auto mt-10 flex max-w-[1200px] items-center justify-between border-foreground/[0.08] border-t pt-6 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.22em]">
+			<div className="mx-auto mt-10 flex max-w-[1200px] flex-col gap-3 border-foreground/[0.08] border-t pt-6 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.22em] sm:flex-row sm:items-center sm:justify-between">
 				<span>Sobre 2.400+ procesos · últimos 12 meses</span>
 				<span className="flex items-center gap-2 text-foreground/70">
 					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />

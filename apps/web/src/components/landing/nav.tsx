@@ -137,7 +137,7 @@ function MobileMenu() {
 		<Sheet>
 			<SheetTrigger
 				aria-label="Abrir menú"
-				className="grid size-9 place-items-center rounded-full border border-border text-foreground/75 transition-colors hover:bg-muted hover:text-foreground md:hidden"
+				className="grid size-11 place-items-center rounded-full border border-border text-foreground/75 transition-colors hover:bg-muted hover:text-foreground md:hidden"
 			>
 				<ListIcon size={18} weight="bold" />
 			</SheetTrigger>
@@ -161,7 +161,7 @@ function MobileMenu() {
 								<SheetClose
 									render={
 										<a
-											className="block rounded-lg px-3 py-2.5 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+											className="block rounded-lg px-3 py-3 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
 											href={link.href}
 										>
 											{link.label}
