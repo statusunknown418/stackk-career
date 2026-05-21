@@ -586,6 +586,12 @@
 		@apply border-border outline-ring/50;
 	}
 
+	html {
+		/* Non-static so motion's useScroll({ target }) can measure window-scroll
+		   offsets against a positioned container (silences a dev-only warning). */
+		position: relative;
+	}
+
 	body {
 		font-feature-settings: "ss01", "ss02", "cv11";
 		@apply bg-background text-foreground;

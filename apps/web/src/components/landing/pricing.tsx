@@ -301,7 +301,7 @@ function ClosingMoment() {
 	const bodyY = useTransform(progress, [0.35, 0.7], [20, 0]);
 
 	return (
-		<div className="px-6 pt-10 pb-28 sm:pt-16 sm:pb-36" ref={containerRef}>
+		<div className="relative px-6 pt-10 pb-28 sm:pt-16 sm:pb-36" ref={containerRef}>
 			<div className="mx-auto max-w-[820px] border-border border-t pt-20 text-center sm:pt-28">
 				<motion.span
 					aria-hidden="true"
