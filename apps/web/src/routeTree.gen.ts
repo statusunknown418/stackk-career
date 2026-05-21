@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,6 +28,16 @@ import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protect
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicyRoute = PolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -111,6 +123,8 @@ const ProtectedDashResumesResumeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/terms': typeof TermsRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -128,6 +142,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/terms': typeof TermsRoute
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -146,6 +162,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/terms': typeof TermsRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -165,6 +183,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/policy'
+    | '/terms'
     | '/dash'
     | '/setup'
     | '/api/resume-suggestions'
@@ -182,6 +202,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/policy'
+    | '/terms'
     | '/setup'
     | '/api/resume-suggestions'
     | '/api/uploadthing'
@@ -199,6 +221,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
+    | '/policy'
+    | '/terms'
     | '/_protected/dash'
     | '/_protected/setup'
     | '/api/resume-suggestions'
@@ -218,6 +242,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PolicyRoute: typeof PolicyRoute
+  TermsRoute: typeof TermsRoute
   ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -227,6 +253,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policy': {
+      id: '/policy'
+      path: '/policy'
+      fullPath: '/policy'
+      preLoaderRoute: typeof PolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -381,6 +421,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
+  PolicyRoute: PolicyRoute,
+  TermsRoute: TermsRoute,
   ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

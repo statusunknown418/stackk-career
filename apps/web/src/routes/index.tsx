@@ -1,3 +1,4 @@
+import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -6,26 +7,30 @@ import { orpc } from "@/utils/orpc";
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
 	headers: () => ({
-		"Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+		"Cache-Control": "public, max-age=86400, stale-while-revalidate=86400",
 	}),
-	staleTime: 2 * 60 * 60 * 1000, // Caching for 2 hours
+	staleTime: 24 * 60 * 60 * 1000, // Caching for 24 hours
+	head: () => ({
+		meta: [
+			{
+				title: "Assendia - Redefine profesionalismo",
+			},
+			{
+				name: "author",
+				content: "Stackk Studios",
+			},
+		],
+		links: [
+			{ rel: "cannonical", href: "https://assendia.com" },
+			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			{
+				rel: "preconnect",
+				href: "https://fonts.gstatic.com",
+				crossOrigin: "anonymous",
+			},
+		],
+	}),
 });
-
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
 
 function getStatusLabel(isLoading: boolean, isConnected: boolean): string {
 	if (isLoading) {
@@ -41,7 +46,7 @@ function HomeComponent() {
 
 	return (
 		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
+			<h1 className="overflow-x-auto font-mono text-sm">Assendia</h1>
 			<div className="grid gap-6">
 				<section className="rounded-lg border p-4">
 					<h2 className="mb-2 font-medium">API Status</h2>
@@ -55,6 +60,16 @@ function HomeComponent() {
 			<section>
 				<Button render={<Link to="/login" />}>Login</Button>
 			</section>
+
+			<footer>
+				<Button render={<Link to="/terms" />}>
+					Términos <ArrowSquareOutIcon />
+				</Button>
+
+				<Button render={<Link to="/policy" />}>
+					Politicas <ArrowSquareOutIcon />
+				</Button>
+			</footer>
 		</div>
 	);
 }
