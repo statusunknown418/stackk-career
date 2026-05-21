@@ -19,7 +19,7 @@ export const fileMetadata = sqliteTable(
 
 		name: t.text(),
 		url: t.text().notNull(),
-		metadata: t.blob({ mode: "json" }),
+		metadata: t.text({ mode: "json" }),
 		storageId: t.text(),
 
 		createdAt: t.integer({

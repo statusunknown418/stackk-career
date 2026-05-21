@@ -17,14 +17,14 @@ import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeParserInputSchema } from "@stackk-career/schemas/jobs/resume-parser";
 import { generateLexoKeyBetween, withLexoPositions } from "@stackk-career/schemas/utils/lexographical";
-import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
+import { AbortTaskRunError, logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { constructNow, formatDate } from "date-fns";
 import {
 	RESUME_PARSER_MODEL,
 	RESUME_PARSER_OBJECT_TYPE,
 	type ResumeParserEvent,
 	runResumeParserAgent,
-} from "../../agents/resume-parser";
+} from "../../agents/resume-parser.handler";
 import { fallbackContactFromName, insertSectionChildren } from "../../lib/resume-parser/insert-blocks";
 import { planSections } from "../../lib/resume-parser/plan-sections";
 import { resolveFile } from "../../lib/resume-parser/resolve-file";
@@ -45,9 +45,13 @@ export const resumeParserTask = schemaTask({
 			attempt: ctx.attempt.number,
 		});
 
-		// 1. Resolve PDF URL
+		// 1. Resolve PDF URL (verifies ownership when using fileId)
 		metadata.set("step", "resolving_file");
-		const resolved = await resolveFile(db, { fileId: payload.fileId, fileUrl: payload.fileUrl });
+		const resolved = await resolveFile(db, {
+			fileId: payload.fileId,
+			fileUrl: payload.fileUrl,
+			userId: payload.userId,
+		});
 
 		// 2. Run the agent — emits events into Trigger metadata as it goes
 		metadata.set("step", "running_agent");
@@ -55,7 +59,16 @@ export const resumeParserTask = schemaTask({
 			metadata.append("events", { ...event, at: Date.now() });
 			metadata.set(`phase.${event.kind}`, event.status);
 		};
-		const agentOutput = await runResumeParserAgent({ pdfUrl: resolved.pdfUrl, signal, onEvent });
+		let agentOutput: Awaited<ReturnType<typeof runResumeParserAgent>>;
+		try {
+			agentOutput = await runResumeParserAgent({ pdfUrl: resolved.pdfUrl, signal, onEvent });
+		} catch (err) {
+			// Validation gate failures are deterministic — do not retry & burn LLM cost.
+			if (err instanceof Error && err.message.startsWith("Not a resume:")) {
+				throw new AbortTaskRunError(err.message);
+			}
+			throw err;
+		}
 
 		logger.info("resume-parser = agent_done", {
 			confidence: agentOutput.validation.confidence,

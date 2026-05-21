@@ -1,6 +1,6 @@
 import { SECTION_DEFINITIONS, type SectionKind } from "@stackk-career/schemas/api/resumes";
 import type { EntriesSection, SkillsSection, SummarySection } from "@stackk-career/schemas/jobs/resume-parser";
-import type { runResumeParserAgent } from "../../agents/resume-parser";
+import type { runResumeParserAgent } from "../../agents/resume-parser.handler";
 
 type SectionDefinition = (typeof SECTION_DEFINITIONS)[number];
 type DefinedSectionKind = Exclude<SectionKind, "custom">;

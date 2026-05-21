@@ -3,10 +3,10 @@ import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import type { SuggestResumeBlockInput } from "@stackk-career/schemas/api/suggestions";
 import { type Block, parseBlock } from "@stackk-career/schemas/db/resume-blocks";
+import { toError } from "@stackk-career/schemas/utils/to-error";
 import type { LanguageModel } from "ai";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Context } from "../context";
-import { toError } from "../logging";
 
 export const RESUME_SUGGESTIONS_MODEL_SLUG = "xai/grok-4.1-fast-non-reasoning" satisfies LanguageModel;
 

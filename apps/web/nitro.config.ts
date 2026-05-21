@@ -9,9 +9,7 @@ export default defineConfig({
 	plugins: ["./server/plugins/evlog-drain.ts"],
 	modules: [
 		evlog({
-			env: {
-				service: "stackk-career-web",
-			},
+			env: { service: "stackk-career-web" },
 		}),
 	],
 });

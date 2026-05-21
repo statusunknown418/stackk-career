@@ -4,6 +4,7 @@ import { onboardingProfile } from "@stackk-career/db/schema/onboarding-profile";
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { type LanguageModel, Output, streamText } from "ai";
 import { eq } from "drizzle-orm";
+import { pdfUserMessage } from "../lib/ai/pdf-message";
 
 export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis-fast";
@@ -92,19 +93,7 @@ export async function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02
 		abortSignal: signal,
 		system: SYSTEM_PROMPT,
 		messages: [
-			{
-				role: "user",
-				content: [
-					{ type: "text", text: userContextText },
-					{ type: "text", text: "Analyze the attached resume PDF and return structured suggestions." },
-					{
-						type: "file",
-						data: new URL(pdfUrl),
-						mediaType: "application/pdf",
-						filename: "resume.pdf",
-					},
-				],
-			},
+			pdfUserMessage(pdfUrl, userContextText, "Analyze the attached resume PDF and return structured suggestions."),
 		],
 	});
 }

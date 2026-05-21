@@ -1,16 +1,12 @@
-import type { RequestLogger } from "evlog";
+import { env } from "@stackk-career/env/server";
+import { createAxiomDrain } from "evlog/axiom";
 import { definePlugin } from "nitro";
-import { useRequest } from "nitro/context";
-import { drain } from "../utils/axiom-drain";
-
-interface RequestLogGlobal {
-	__readRequestLog?: () => RequestLogger | undefined;
-}
 
 export default definePlugin((nitroApp) => {
+	const drain = createAxiomDrain({
+		apiKey: env.AXIOM_API_TOKEN,
+		dataset: env.AXIOM_DATASET,
+	});
+
 	nitroApp.hooks.hook("evlog:drain", drain);
-	(globalThis as RequestLogGlobal).__readRequestLog = () => {
-		const req = useRequest() as { context?: { log?: RequestLogger } } | undefined;
-		return req?.context?.log;
-	};
 });
