@@ -65,7 +65,7 @@ export const billingEvents = sqliteTable(
 		provider: t.text({ enum: subscriptionProviderEnum }).notNull(),
 		providerEventId: t.text(),
 		eventType: t.text().notNull(),
-		payload: t.blob({ mode: "json" }),
+		payload: t.text({ mode: "json" }),
 		processedAt: t.integer({ mode: "timestamp" }),
 		error: t.text(),
 		createdAt: t

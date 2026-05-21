@@ -24,7 +24,7 @@ export const resumes = sqliteTable(
 
 		targetedCompanyIdentifier: t.text(),
 		isPrimary: t.integer({ mode: "boolean" }).notNull().default(false),
-		aiMetadata: t.blob({ mode: "json" }).$type<{ agentScore: number; agentCreated: boolean }>(),
+		aiMetadata: t.text({ mode: "json" }).$type<{ agentScore: number; agentCreated: boolean }>(),
 		status: t.text({ enum: resumeStatusEnum }).default("draft").notNull(),
 		displayName: t.text().notNull().default("Nuevo CV"),
 		title: t.text().notNull().default("Jon Doe"),
