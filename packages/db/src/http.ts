@@ -39,7 +39,7 @@ export function createTriggerDb() {
 	});
 }
 
-type TriggerDb = ReturnType<typeof createTriggerDb>;
+export type TriggerDb = ReturnType<typeof createTriggerDb>;
 
 let triggerDb: TriggerDb | undefined;
 

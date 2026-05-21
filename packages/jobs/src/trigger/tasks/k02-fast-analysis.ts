@@ -2,13 +2,14 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { k02FastAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-fast-analysis";
+import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { and, eq, ne } from "drizzle-orm";
 import {
 	K02_FAST_ANALYSIS_MODEL,
 	K02_FAST_ANALYSIS_OBJECT_TYPE,
 	runK02FastAnalysisAgent,
-} from "../../agents/k02-fast-analysis";
+} from "../../agents/k02-fast-analysis.handler";
 import { assertPdfHostAllowed } from "../../lib/utils";
 import { agentQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
@@ -83,7 +84,7 @@ export const k02FastAnalysisTask = schemaTask({
 
 	onFailure: async ({ payload, error, ctx }) => {
 		const db = getTriggerDb();
-		const message = error instanceof Error ? error.message : String(error);
+		const message = toError(error).message;
 
 		logger.error("k02-fast-analysis = failed", {
 			analysisId: payload.analysisId,

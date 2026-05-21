@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
 	head: () => ({
 		meta: [
 			{
-				title: "Assendia - Redefine profesionalismo",
+				title: "Assendia",
 			},
 			{
 				name: "author",
@@ -21,7 +21,10 @@ export const Route = createFileRoute("/")({
 			},
 		],
 		links: [
-			{ rel: "cannonical", href: "https://assendia.com" },
+			{ rel: "canonical", href: "https://assendia.com" },
+			{ rel: "alternate", href: "https://assendia.com", hrefLang: "es" },
+			{ rel: "alternate", href: "https://assendia.com", hrefLang: "x-default" },
+			{ rel: "icon", href: "/favicon.ico" },
 			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
 			{
 				rel: "preconnect",

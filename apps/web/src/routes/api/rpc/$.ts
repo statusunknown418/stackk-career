@@ -5,11 +5,10 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createContext } from "@stackk-career/api/context";
 import { appRouter } from "@stackk-career/api/routers/index";
+import { toError } from "@stackk-career/schemas/utils/to-error";
 import { createFileRoute } from "@tanstack/react-router";
 import { createError } from "evlog";
 import { readRequestLog } from "@/lib/request-log";
-
-const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(String(error)));
 
 const rpcHandler = new RPCHandler(appRouter, {
 	interceptors: [

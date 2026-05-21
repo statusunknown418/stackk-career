@@ -7,10 +7,10 @@ import {
 	recordSuggestionErrorInputSchema,
 	suggestResumeBlockInputSchema,
 } from "@stackk-career/schemas/api/suggestions";
+import { toError } from "@stackk-career/schemas/utils/to-error";
 import { eq } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { buildSuggestionPrompt, loadResumeContext, RESUME_SUGGESTIONS_MODEL_SLUG } from "../lib/resume-suggestions";
-import { toError } from "../logging";
 
 const MAX_ERROR_LEN = 1000;
 

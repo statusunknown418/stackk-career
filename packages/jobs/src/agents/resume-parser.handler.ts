@@ -21,6 +21,7 @@ import {
 } from "@stackk-career/schemas/jobs/resume-parser";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { generateText, Output } from "ai";
+import { pdfUserMessage } from "../lib/ai/pdf-message";
 
 // ─── Public surface ────────────────────────────────────────────────────────
 
@@ -98,20 +99,7 @@ const baseRequest = (pdfUrl: string, system: string, userText: string, signal: A
 	model: RESUME_PARSER_MODEL,
 	abortSignal: signal,
 	system,
-	messages: [
-		{
-			role: "user" as const,
-			content: [
-				{ type: "text" as const, text: userText },
-				{
-					type: "file" as const,
-					data: new URL(pdfUrl),
-					mediaType: "application/pdf" as const,
-					filename: "resume.pdf",
-				},
-			],
-		},
-	],
+	messages: [pdfUserMessage(pdfUrl, userText)],
 });
 
 /** Wrap an async extraction so it emits running/complete/failed events. Generic in T → type flows from inner generateText through to caller. */

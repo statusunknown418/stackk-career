@@ -1,5 +1,40 @@
 # Resume Editor Refactor — Handoff
 
+## Session update (2026-05-21)
+
+### Logging infra + jobs hardening
+
+**Logging — back to official evlog/nitro/v3 primitives:**
+- `apps/web/nitro.config.ts` — restored `evlog/nitro/v3` module. Removed custom plugin hack.
+- `apps/web/server/plugins/evlog-drain.ts` — recreated; hooks `evlog:drain` for Axiom (per official adapter pattern).
+- `apps/web/server/plugins/evlog.ts` — deleted (was reinventing the official plugin with manual `event.req.context` casts).
+- `packages/api/src/logging.ts` — deleted. Replaced with: shared `@stackk-career/schemas/utils/to-error` + evlog's built-in `log` + `RequestLogger` via Nitro `useRequest()`.
+- `apps/web/src/lib/request-log.ts` — reads `useRequest()?.context?.log` (the canonical path the evlog Nitro v3 plugin writes to). No globalThis hack.
+
+**packages/jobs — security + scale fixes:**
+- `lib/resume-parser/resolve-file.ts` — now requires `userId` and adds `eq(fileMetadata.userId, userId)` to the lookup. Prevents fileId enumeration / cross-user parsing of arbitrary uploads. Caller in `trigger/tasks/resume-parser.ts` passes `payload.userId`.
+- `trigger/tasks/resume-parser.ts` — wraps validation-gate failures with `AbortTaskRunError`. "Not a resume" no longer retries 3× and burns LLM cost.
+- `trigger/tasks/k02-fast-analysis.ts` — `onFailure` uses `toError(error).message` instead of inline ternary (respects `[[feedback_use_toerror]]`).
+- `lib/ai/pdf-message.ts` — new. Single helper `pdfUserMessage(pdfUrl, ...texts)` used by both resume agents. Genuine 2-caller extraction; replaces 12 lines of duplicated `{type:"file",data:new URL(),...}` payload at each site.
+- Kept `agents/{resume-parser,k02-fast-analysis}.handler.ts` suffix (clearer distinction from task wrappers). Updated importers in `trigger/tasks/*` + `lib/resume-parser/plan-sections.ts` to use `.handler` path explicitly — pre-existing typecheck failure resolved.
+
+**Pre-existing typecheck failures NOT fixed (still pending from earlier handoff):**
+- `ai-elements/*` — widespread `asChild`/`className`/`closeDelay` errors. Cosmetic library mismatch with coss/Base UI primitives. Not touched.
+- `header.tsx:16` — `to: "/dashboard"` stale.
+- `dash/route.tsx:63` — `to: "/dash/resumes/"` trailing slash mismatch.
+- `messages.ts:36` — Drizzle `model: unknown` mismatch.
+- `spinner.tsx:5` — `Loader2Icon` not imported.
+- `snippet.tsx:9` — imports nonexistent `InputGroupButton`.
+- `hover-card` module missing (attachments.tsx).
+
+**Scale notes (documented, not yet implemented):**
+- `agentQueue` concurrency tied to `AGENT_QUEUE_CONCURRENCY` env (default 10). Raise per load.
+- Resume parser fires 9 parallel `generateText` calls per resume. At 1000 concurrent users that's 9000 in-flight gateway calls — confirm gateway quotas before launch.
+- `resumeParserTask` has no `onFailure` to mark a user-facing generation row as failed. `k02-fast-analysis` does. Consider parity once generations gain a status field.
+- Per-user queue would prevent one user starving the shared `ai-agents` queue. Skipped for now.
+
+---
+
 ## Session update (2026-05-18)
 
 ### Suggestion popover polish + bug fixes
