@@ -127,6 +127,25 @@ function useRangeFade(scroll: MotionValue<number>, enter: number, settle: number
 function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	const reduced = useReducedMotion() ?? false;
 	const isDesktop = useIsDesktop();
+
+	// Gate BEFORE any useScroll-with-target hook. The scrub lives in its own
+	// child so useScroll only runs when its target element is actually mounted.
+	// Calling useScroll here and then returning the static branch (no ref)
+	// makes motion throw "Target ref is defined but not hydrated".
+	if (reduced || !isDesktop) {
+		return (
+			<div className="px-6 py-8">
+				<div className="mx-auto max-w-[1200px]">
+					<StaticPriceComposition reason={reason} />
+				</div>
+			</div>
+		);
+	}
+
+	return <PinnedPriceScrub reason={reason} />;
+}
+
+function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const { scrollYProgress } = useScroll({
@@ -197,21 +216,6 @@ function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	// Bottom rail — the scrubbing progress indicator. Tracks raw scrollYProgress
 	// (not the spring) so it feels exactly tied to the wheel.
 	const railScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-	// Reduced-motion + mobile/tablet fallback: render the whole composition
-	// statically, fully revealed, inside a normal (non-pinned) container. On
-	// touch/narrow viewports the scroll-scrub feels broken and the stacked
-	// content can clip inside the h-screen overflow-hidden card, so below the
-	// desktop breakpoint we use the same static composition. No scrub, no clip.
-	if (reduced || !isDesktop) {
-		return (
-			<div className="px-6 py-8">
-				<div className="mx-auto max-w-[1200px]">
-					<StaticPriceComposition reason={reason} />
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		// Tall container — its height determines how long the section stays pinned.
