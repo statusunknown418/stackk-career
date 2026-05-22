@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const initiateResumeAnalysisInputSchema = z.object({
+export const triggerResumeAnalysisInputSchema = z.object({
 	generationId: z.string().nonempty(),
 	parentAnalysisId: z.string().optional(),
 });
-export type InitiateResumeAnalysisInput = z.infer<typeof initiateResumeAnalysisInputSchema>;
+export type InitiateResumeAnalysisInput = z.infer<typeof triggerResumeAnalysisInputSchema>;
 
-export const initiateResumeParserInputSchema = z
+export const triggerResumeParserInputSchema = z
 	.object({
 		fileId: z.string().optional(),
 		fileUrl: z.url().optional(),
@@ -15,4 +15,4 @@ export const initiateResumeParserInputSchema = z
 	.refine((value) => Boolean(value.fileId) !== Boolean(value.fileUrl), {
 		message: "Provide exactly one of fileId or fileUrl",
 	});
-export type InitiateResumeParserInput = z.infer<typeof initiateResumeParserInputSchema>;
+export type InitiateResumeParserInput = z.infer<typeof triggerResumeParserInputSchema>;

@@ -5,7 +5,7 @@ import { generations } from "@stackk-career/db/schema/generations";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
-import { initiateResumeAnalysisInputSchema, initiateResumeParserInputSchema } from "@stackk-career/schemas/api/agents";
+import { triggerResumeAnalysisInputSchema, triggerResumeParserInputSchema } from "@stackk-career/schemas/api/agents";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "../";
@@ -13,7 +13,7 @@ import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export const agentsRouter = {
 	triggerK02FastAnalysis: protectedProcedure
-		.input(initiateResumeAnalysisInputSchema)
+		.input(triggerResumeAnalysisInputSchema)
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
 
@@ -122,7 +122,7 @@ export const agentsRouter = {
 		}),
 
 	triggerK02ParseResume: protectedProcedure
-		.input(initiateResumeParserInputSchema)
+		.input(triggerResumeParserInputSchema)
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
 

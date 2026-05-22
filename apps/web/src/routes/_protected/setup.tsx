@@ -111,7 +111,7 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 	const cachedAnalysis = useQuery(cachedAnalysisOptions);
 
 	const initiateAnalysis = useMutation(
-		orpc.agents.initiateResumeAnalysis.mutationOptions({
+		orpc.agents.triggerK02FastAnalysis.mutationOptions({
 			onSuccess: ({ runId, publicAccessToken }) => {
 				setRunHandle({ runId, accessToken: publicAccessToken });
 			},
