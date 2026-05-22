@@ -20,7 +20,10 @@ export const resumes = sqliteTable(
 			.text()
 			.notNull()
 			.references(() => generations.id, { onDelete: "cascade" }),
-		userId: t.text().notNull(),
+		userId: t
+			.text()
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		targetedCompanyIdentifier: t.text(),
 		isPrimary: t.integer({ mode: "boolean" }).notNull().default(false),

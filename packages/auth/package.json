@@ -13,9 +13,11 @@
   "dependencies": {
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
+    "@stackk-career/schemas": "workspace:*",
     "better-auth": "catalog:",
     "better-call": "catalog:",
     "dotenv": "catalog:",
+    "evlog": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

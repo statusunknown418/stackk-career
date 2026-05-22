@@ -1,5 +1,50 @@
 # Resume Editor Refactor — Handoff
 
+## Session update (2026-05-21 — scalability pass)
+
+### Queues split per task (#1)
+- `packages/jobs/src/trigger/queues.ts` — replaced single `agentQueue` with:
+  - `resumeParserQueue` (default 5, env `RESUME_PARSER_QUEUE_CONCURRENCY`)
+  - `k02Queue` (default 10, env `K02_QUEUE_CONCURRENCY`)
+- `trigger/tasks/resume-parser.ts` + `trigger/tasks/k02-fast-analysis.ts` wired to new queues.
+- `src/index.ts` exports `k02Queue` + `resumeParserQueue` (was `agentQueue`).
+- `k02FastAnalysisTask` triggers already pass `concurrencyKey: userId` (`packages/api/src/routers/agents.ts:94`) → per-user fairness within queue cap.
+
+### LLM call bundling — 10 → 4 calls (#2)
+- `packages/schemas/src/jobs/resume-parser.ts` — added bundle schemas:
+  - `extractedHeaderSchema` ({ contact, summary }) — each nullable
+  - `extractedEntriesBundleSchema` ({ experience, education, certifications, projects, volunteering }) — each nullable
+  - `extractedSkillsBundleSchema` ({ skills, languages }) — each nullable
+- `packages/jobs/src/agents/resume-parser.handler.ts` — 4 LLM calls instead of 10:
+  1. validation gate
+  2. header bundle (contact + summary)
+  3. entries bundle (5 entries-shaped sections in one call)
+  4. skills bundle (2 skills-shaped sections in one call)
+- Return shape unchanged → `planSections` + `insert-blocks` untouched (per-kind fields populated from unpacked bundles).
+- ~60% LLM gateway call reduction per resume. Cuts plan compute-seconds + gateway quota usage.
+- Gateway tags added (`feature:resume-parser`, `env:*`) on every call for per-user spend tracking.
+
+### Per-call LLM timeouts (#3)
+- `AbortSignal.any([outer, AbortSignal.timeout(ms)])` wraps every `generateText` / `streamText` so one stuck call can't hold the run open for the full `maxDuration`.
+- Parser: `VALIDATION_TIMEOUT_MS = 30 * 1000` (30s), `BUNDLE_TIMEOUT_MS = 4 * 60 * 1000` (4 min). Envs: `RESUME_PARSER_VALIDATION_TIMEOUT_MS`, `RESUME_PARSER_BUNDLE_TIMEOUT_MS`.
+- k02: `K02_TIMEOUT_MS = 3 * 60 * 1000` (3 min). Env: `K02_FAST_ANALYSIS_TIMEOUT_MS`. Gateway tags also added (`feature:k02-fast-analysis`).
+
+### Scalability follow-ups still open
+- **#4 onFailure parity on parser** — `resumeParserTask` still has no `onFailure` to mark user-facing row failed. Required before user-facing wiring of parser.
+- **#5 DB batching** — `resumeParserTask` does 3 sequential RTTs (generation → resume → roots) then N parallel child inserts. Collapse to `db.batch(...)` for atomic 1-RTT inserts.
+- **#6 `$withCache()` invalidation** on `resolveFile` and `getUserMetadata` — confirm cache eviction on file/user updates so deleted/changed rows don't resurface.
+- **#7 Host check before DB write** in k02 — move `assertPdfHostAllowed` ahead of `resume_analyses` status flip to avoid churn rows on bad input.
+- **#8 Suggestions persist after stream close** — `apps/web/src/routes/api/resume-suggestions.ts:65` calls `recordSuggestionCompletion` inside `onFinish`. Client disconnect mid-stream loses persistence. Move to fire-and-forget Trigger task or `waitUntil`.
+- **#10 Parser idempotency** — wire `idempotencyKey` + `concurrencyKey: userId` at the future `resumeParserTask.trigger` call site (same pattern as k02 in `routers/agents.ts:85`).
+
+### Trigger plan-limit notes
+- Parser compute per run dropped ~60% (4 calls vs 10, max 4 min cap vs 600s task budget).
+- Stuck calls now abort at 30s / 4 min / 3 min instead of holding their slot for the full task `maxDuration`.
+- Conservative queue concurrency (parser=5, k02=10) prevents compute-second spikes.
+- Raise via env when gateway + plan headroom confirmed.
+
+---
+
 ## Session update (2026-05-21)
 
 ### Logging infra + jobs hardening

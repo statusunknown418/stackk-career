@@ -1,8 +1,8 @@
 import { createClient } from "@libsql/client";
 import { env } from "@stackk-career/env/server";
-import { upstashCache } from "drizzle-orm/cache/upstash";
 import { drizzle } from "drizzle-orm/libsql";
 
+import { safeUpstashCache } from "./safe-cache";
 import * as schema from "./schema";
 
 /**
@@ -17,7 +17,7 @@ export function createDb() {
 	return drizzle({
 		client,
 		schema,
-		cache: upstashCache({
+		cache: safeUpstashCache({
 			url: env.UPSTASH_REDIS_REST_URL,
 			token: env.UPSTASH_REDIS_REST_TOKEN,
 		}),

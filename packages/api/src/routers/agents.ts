@@ -4,14 +4,15 @@ import { fileMetadata } from "@stackk-career/db/schema/file-metadata";
 import { generations } from "@stackk-career/db/schema/generations";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
-import { initiateResumeAnalysisInputSchema } from "@stackk-career/schemas/api/agents";
+import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
+import { initiateResumeAnalysisInputSchema, initiateResumeParserInputSchema } from "@stackk-career/schemas/api/agents";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "../";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export const agentsRouter = {
-	initiateResumeAnalysis: protectedProcedure
+	triggerK02FastAnalysis: protectedProcedure
 		.input(initiateResumeAnalysisInputSchema)
 		.handler(async ({ context, input }) => {
 			const userId = context.session.user.id;
@@ -117,6 +118,68 @@ export const agentsRouter = {
 				throw new ORPCError("INTERNAL_SERVER_ERROR", {
 					message: "Failed to trigger agent run",
 				});
+			}
+		}),
+
+	triggerK02ParseResume: protectedProcedure
+		.input(initiateResumeParserInputSchema)
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+
+			context.log?.set({
+				action: "trigger_resume_parser",
+				user: { id: userId },
+				fileId: input.fileId ?? null,
+				hasFileUrl: Boolean(input.fileUrl),
+			});
+
+			if (input.fileId) {
+				const [file] = await context.db
+					.select({ id: fileMetadata.id, url: fileMetadata.url })
+					.from(fileMetadata)
+					.where(and(eq(fileMetadata.id, input.fileId), eq(fileMetadata.userId, userId)))
+					.limit(1)
+					.$withCache();
+
+				if (!file) {
+					context.log?.set({ outcome: "file_not_found" });
+					throw new ORPCError("NOT_FOUND", { message: "File not found" });
+				}
+			}
+
+			const idempotencySeed = input.fileId ?? input.fileUrl;
+			if (!idempotencySeed) {
+				throw new ORPCError("BAD_REQUEST", { message: "Missing fileId or fileUrl" });
+			}
+
+			try {
+				const idempotencyKey = await idempotencyKeys.create(`parser-${userId}-${idempotencySeed}`);
+
+				const handle = await tasks.trigger<typeof resumeParserTask>(
+					"resume-parser",
+					{
+						userId,
+						fileId: input.fileId,
+						fileUrl: input.fileUrl,
+						displayName: input.displayName,
+					},
+					{
+						concurrencyKey: userId,
+						idempotencyKey,
+						idempotencyKeyTTL: "24h",
+						tags: [`user:${userId}`, ...(input.fileId ? [`file:${input.fileId}`] : []), "agent:resume-parser"],
+					}
+				);
+
+				context.log?.set({ outcome: "triggered", run: { id: handle.id } });
+
+				return {
+					runId: handle.id,
+					publicAccessToken: handle.publicAccessToken,
+				};
+			} catch {
+				context.log?.set({ outcome: "trigger_failed" });
+				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to trigger resume parser" });
 			}
 		}),
 };

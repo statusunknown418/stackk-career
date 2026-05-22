@@ -39,7 +39,7 @@ const STEP_CONTENT: Record<CoachingStage, { description: string; label: string }
 	},
 };
 
-const STAGE_ORDER: readonly CoachingStage[] = coachingStageEnum;
+const STAGE_ORDER = coachingStageEnum;
 
 function pickRecommendedStage(completedStages: Set<CoachingStage>): CoachingStage {
 	const next = STAGE_ORDER.find((stage) => !completedStages.has(stage));

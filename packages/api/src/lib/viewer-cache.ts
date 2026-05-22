@@ -1,21 +1,7 @@
 import type { db } from "@stackk-career/db";
-import { type CachedUsageLimitKey, cachedUsageLimitKeys } from "@stackk-career/schemas/subscriptions";
+import { type CachedUsageLimitKey, cachedUsageLimitKeys, viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 
-/**
- * Build the Drizzle cache tag for a specific user's usage counter.
- *
- * @description Use this when you need to **read** or **invalidate** a single cached counter by name.
- * Read side already uses it inside `viewer.ts` via `.$withCache({ tag: viewerUsageTag(...) })`.
- * Most write paths should call {@link invalidateViewerUsage} instead of touching this helper directly.
- *
- * @example
- * await db.select({ value: count() }).from(resumes)
- *   .where(eq(resumes.userId, userId))
- *   .$withCache({ tag: viewerUsageTag(userId, "resumes_total"), config: { ex: 300 } });
- */
-export function viewerUsageTag(userId: string, metric: CachedUsageLimitKey): string {
-	return `viewer:usage:${userId}:${metric}`;
-}
+export { viewerUsageTag };
 
 /**
  * Build the Drizzle cache tag for a specific user's subscription row.
