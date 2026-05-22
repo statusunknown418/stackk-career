@@ -1,0 +1,1 @@
+ALTER TABLE `resumes` ALTER COLUMN "userId" TO "userId" text NOT NULL REFERENCES user(id) ON DELETE cascade ON UPDATE no action;
