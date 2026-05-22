@@ -7,12 +7,12 @@ import {
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { createFileRoute } from "@tanstack/react-router";
 import { gateway, Output, streamText } from "ai";
-import { log } from "evlog";
-import { readRequestLog } from "@/lib/request-log";
+import { createAILogger } from "evlog/ai";
+import { getRequestLog } from "@/lib/request-log";
 import { client } from "@/utils/orpc";
 
 const handlePost = async ({ request }: { request: Request }) => {
-	const requestLog = readRequestLog();
+	const requestLog = getRequestLog();
 
 	const json = await request.json();
 	const parsed = suggestResumeBlockInputSchema.safeParse(json);
@@ -42,8 +42,10 @@ const handlePost = async ({ request }: { request: Request }) => {
 		prep: { durationMs: prepDurationMs },
 	});
 
+	const ai = createAILogger(requestLog);
+
 	const result = streamText({
-		model: gateway(prep.model),
+		model: ai.wrap(gateway(prep.model)),
 		system: prep.system,
 		prompt: prep.prompt,
 		output: Output.object({ schema: suggestResumeBlockOutputSchema }),
@@ -68,14 +70,11 @@ const handlePost = async ({ request }: { request: Request }) => {
 				usage,
 				finishReason,
 			});
-			log.info({
-				operation: "ai.suggestResumeBlockContent.completed",
-				user: { id: prep.userId },
-				generation: { id: prep.generationId },
-				resume: { id: parsed.data.resumeId },
-				usage,
+			requestLog.set({
+				ai: ai.getMetadata(),
 				finishReason,
 				outcome: suggestions.length > 0 ? "completed" : "empty_object",
+				suggestions: { count: suggestions.length },
 			});
 		},
 		onError: async ({ error }) => {
@@ -84,12 +83,15 @@ const handlePost = async ({ request }: { request: Request }) => {
 				generationId: prep.generationId,
 				errorMessage: err.message,
 			});
-			log.error({
-				operation: "ai.suggestResumeBlockContent.stream_error",
-				user: { id: prep.userId },
-				generation: { id: prep.generationId },
-				resume: { id: parsed.data.resumeId },
-				error: { name: err.name, message: err.message, stack: err.stack },
+			requestLog.error(err, {
+				ai: ai.getMetadata(),
+				outcome: "stream_error",
+			});
+		},
+		onAbort: () => {
+			requestLog.set({
+				ai: ai.getMetadata(),
+				outcome: "aborted",
 			});
 		},
 	});

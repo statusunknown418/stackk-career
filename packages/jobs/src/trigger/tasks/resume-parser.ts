@@ -61,6 +61,7 @@ export const resumeParserTask = schemaTask({
 			metadata.set(`phase.${event.kind}`, event.status);
 		};
 		let agentOutput: Awaited<ReturnType<typeof runResumeParserAgent>>;
+
 		try {
 			agentOutput = await runResumeParserAgent({ pdfUrl: resolved.pdfUrl, signal, onEvent });
 		} catch (err) {
@@ -78,6 +79,7 @@ export const resumeParserTask = schemaTask({
 
 		// 3. Create generation + resume rows
 		metadata.set("step", "creating_records");
+
 		const baseTitle =
 			payload.displayName ??
 			agentOutput.validation.candidateName ??
@@ -93,6 +95,7 @@ export const resumeParserTask = schemaTask({
 				model: RESUME_PARSER_MODEL,
 			})
 			.returning({ id: generations.id });
+
 		if (!createdGeneration) {
 			throw new Error("Failed to create generation row");
 		}
