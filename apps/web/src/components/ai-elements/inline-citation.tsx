@@ -23,9 +23,7 @@ export const InlineCitationText = ({ className, ...props }: InlineCitationTextPr
 
 export type InlineCitationCardProps = ComponentProps<typeof PreviewCard>;
 
-export const InlineCitationCard = (props: InlineCitationCardProps) => (
-	<PreviewCard closeDelay={0} delay={0} {...props} />
-);
+export const InlineCitationCard = (props: InlineCitationCardProps) => <PreviewCard {...props} />;
 
 export type InlineCitationCardTriggerProps = ComponentProps<typeof Badge> & {
 	sources: string[];

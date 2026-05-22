@@ -6,7 +6,7 @@ export default defineConfig({
 		asyncContext: true,
 	},
 	preset: "vercel",
-	plugins: ["./server/plugins/evlog-drain.ts"],
+	plugins: ["./server/plugins/evlog-drain.ts", "./server/plugins/evlog-auth.ts"],
 	modules: [
 		evlog({
 			env: { service: "stackk-career-web" },

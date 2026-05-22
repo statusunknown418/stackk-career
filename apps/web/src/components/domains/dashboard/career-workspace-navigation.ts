@@ -6,7 +6,7 @@ export interface CareerWorkspaceNavigationItem {
 	icon: Icon;
 	id: string;
 	label: string;
-	to?: FileRouteTypes["fullPaths"];
+	to?: FileRouteTypes["to"];
 }
 
 export const careerWorkspaceNavigation = [
@@ -21,7 +21,7 @@ export const careerWorkspaceNavigation = [
 		icon: FilesIcon,
 		id: "curriculums",
 		label: "Curriculums",
-		to: "/dash/resumes/",
+		to: "/dash/resumes",
 	},
 	{
 		disabled: true,

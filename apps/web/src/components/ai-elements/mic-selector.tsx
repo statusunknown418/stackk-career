@@ -201,16 +201,15 @@ export const MicSelectorTrigger = ({ children, ...props }: MicSelectorTriggerPro
 	}, [setWidth]);
 
 	return (
-		<PopoverTrigger asChild>
-			<Button variant="outline" {...props} ref={ref}>
-				{children}
-				<ChevronsUpDownIcon className="shrink-0 text-muted-foreground" size={16} />
-			</Button>
+		<PopoverTrigger render={<Button ref={ref} variant="outline" {...props} />}>
+			{children}
+			<ChevronsUpDownIcon className="shrink-0 text-muted-foreground" size={16} />
 		</PopoverTrigger>
 	);
 };
 
 export type MicSelectorContentProps = ComponentProps<typeof Command> & {
+	className?: string;
 	popoverOptions?: ComponentProps<typeof PopoverContent>;
 };
 
@@ -253,15 +252,11 @@ export const MicSelectorEmpty = ({ children = "No microphone found.", ...props }
 export type MicSelectorItemProps = ComponentProps<typeof CommandItem>;
 
 export const MicSelectorItem = (props: MicSelectorItemProps) => {
-	const { onValueChange, onOpenChange } = useContext(MicSelectorContext);
+	const { onOpenChange } = useContext(MicSelectorContext);
 
-	const handleSelect = useCallback(
-		(currentValue: string) => {
-			onValueChange?.(currentValue);
-			onOpenChange?.(false);
-		},
-		[onValueChange, onOpenChange]
-	);
+	const handleSelect = useCallback(() => {
+		onOpenChange?.(false);
+	}, [onOpenChange]);
 
 	return <CommandItem onSelect={handleSelect} {...props} />;
 };

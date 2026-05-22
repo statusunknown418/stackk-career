@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/performance/noImgElement: tanstack start */
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ComponentType, type SVGProps, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -253,14 +252,14 @@ function LogoSlot({
 					{disableLinks || !logo.url ? (
 						visualEl
 					) : (
-						<Link
+						<a
 							aria-label={`${logo.name} (opens in new tab)`}
+							href={`${logo.url}?ref=arc`}
 							rel="noopener noreferrer"
 							target="_blank"
-							to={`${logo.url}?ref=arc`}
 						>
 							{visualEl}
-						</Link>
+						</a>
 					)}
 				</motion.div>
 			</AnimatePresence>
