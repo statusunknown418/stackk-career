@@ -11,12 +11,12 @@ import {
 	runK02FastAnalysisAgent,
 } from "../../agents/k02-fast-analysis.handler";
 import { assertPdfHostAllowed } from "../../lib/utils";
-import { agentQueue } from "../queues";
+import { k02Queue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
 
 export const k02FastAnalysisTask = schemaTask({
 	id: "k02-fast-analysis",
-	queue: agentQueue,
+	queue: k02Queue,
 	schema: k02FastAnalysisInputSchema,
 	maxDuration: 300,
 	run: async ({ analysisId, generationId, userId, pdfUrl }, { ctx, signal }) => {

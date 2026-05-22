@@ -2,21 +2,24 @@
  * Resume parser agent.
  *
  * Phase 1: validate the PDF is a resume (gate — throws if not).
- * Phase 2: extract every section in parallel via independent generateText calls
- *          with Output.object schemas. Emits a progress event around each call
- *          via the optional onEvent callback (task layer pipes them to Trigger
- *          metadata).
+ * Phase 2: extract everything in 3 parallel bundled `generateText` calls:
+ *          - header   (contact + summary)
+ *          - entries  (experience, education, certifications, projects, volunteering)
+ *          - skills   (skills, languages)
+ *          Each call emits running/complete/failed events forwarded to Trigger metadata.
  *
- * Per-section types flow from the concrete schema at the call site — no `as`
- * casts. Failed sections fall back to null and never block siblings.
+ * Every call has a per-bundle timeout layered on top of the outer task signal so a
+ * single stuck section can't hold the run open — siblings free compute immediately.
+ *
+ * Returned shape stays identical to the per-section version so `planSections` and
+ * `insert-blocks` are untouched.
  */
 
 import type { SectionKind } from "@stackk-career/schemas/api/resumes";
-import { contactContentSchema } from "@stackk-career/schemas/db/resume-blocks";
 import {
-	extractedEntriesSectionSchema,
-	extractedSkillsSectionSchema,
-	extractedSummarySchema,
+	extractedEntriesBundleSchema,
+	extractedHeaderSchema,
+	extractedSkillsBundleSchema,
 	resumeValidationSchema,
 } from "@stackk-career/schemas/jobs/resume-parser";
 import { toError } from "@stackk-career/schemas/utils/to-error";
@@ -28,12 +31,16 @@ import { pdfUserMessage } from "../lib/ai/pdf-message";
 export const RESUME_PARSER_MODEL = "google/gemini-3.1-flash";
 export const RESUME_PARSER_OBJECT_TYPE = "resume-parser";
 
-// "custom" is editor-only — agent never produces it. "contact" is its own top-level block
-// (not part of SECTION_KINDS). "validation" is the gate phase.
-type ExtractableKind = "validation" | "contact" | Exclude<SectionKind, "custom">;
+// Bundled phases. "validation" is the gate, others run in parallel after the gate passes.
+type Phase = "validation" | "header" | "entries" | "skills";
+
+// Per-call timeouts. Cap stuck calls so siblings free their share of the task slot.
+// Validation is a small bool+name output — fast. Bundles emit multi-section JSON — heavier output tokens.
+const VALIDATION_TIMEOUT_MS = Number(process.env.RESUME_PARSER_VALIDATION_TIMEOUT_MS ?? 30 * 1000); // 30s
+const BUNDLE_TIMEOUT_MS = Number(process.env.RESUME_PARSER_BUNDLE_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
 
 export interface ResumeParserEvent {
-	kind: ExtractableKind;
+	kind: Phase | Exclude<SectionKind, "custom"> | "contact";
 	reason?: string;
 	status: "running" | "complete" | "failed";
 }
@@ -58,22 +65,32 @@ Return JSON conforming to the schema:
 Reject (isResume=false) for: invoices, contracts, articles, syllabi, generic documents, blank PDFs.
 `.trim();
 
-const CONTACT_SYSTEM = `
-Extract the candidate's contact block from the attached resume PDF.
+const HEADER_SYSTEM = `
+Extract the candidate's header info from the attached resume PDF. Return BOTH fields in one JSON object:
+
+contact:
 - firstName / lastName: split the full name. Empty string if missing.
 - items: array of {kind, value, label?} where kind ∈ {address,email,phone,linkedin,website,other}.
 - Do not invent data not present in the PDF.
-`.trim();
+- If no contact info found, return null.
 
-const SUMMARY_SYSTEM = `
-Extract the professional summary / objective paragraph from the attached resume PDF.
+summary:
 - paragraphs: one or more paragraph blocks (text + format, default format "html").
 - Wrap each paragraph's text in a single <p>...</p> when format is "html".
-- If no summary exists, return paragraphs: [].
+- If no summary / objective exists, return null (not an empty paragraphs array — null).
 `.trim();
 
-const ENTRIES_SYSTEM = `
-Extract every entry from the requested section of the attached resume PDF.
+const ENTRIES_BUNDLE_SYSTEM = `
+Extract every entries-based section from the attached resume PDF in ONE JSON object.
+
+Sections to extract independently into their respective fields:
+- experience: WORK EXPERIENCE (jobs, roles, internships).
+- education: EDUCATION (degrees, schools, formal studies).
+- certifications: CERTIFICATIONS.
+- projects: PROJECTS.
+- volunteering: VOLUNTEERING / community involvement.
+
+Each section's value is { entries: [...] } or null if the section is not present in the PDF.
 
 Each entry fields:
 - title, subtitle, location (optional), isRemote (default false).
@@ -82,27 +99,50 @@ Each entry fields:
 - descriptor: the entry's body as HTML. If the source has bullet points, emit them as a SINGLE <ul><li>...</li><li>...</li></ul> here — do NOT wrap individual bullets in <p>. Free-form prose paragraphs go in <p>...</p> tags BEFORE the list, in document order.
 
 Allowed HTML tags only: p, ul, ol, li, strong, em, b, i, br.
-If the section is not present, return entries: [].
+Return null (not an empty entries array) for sections absent from the PDF.
 `.trim();
 
-const SKILLS_SYSTEM = `
-Extract every skill grouping from the requested section of the attached resume PDF.
-- lines[]: each {label, category, items[]}. category ∈ {technical, languages, laboratory, interests, certifications, other}.
-- items[]: each {value, proficiency?, skillKind?}. proficiency ∈ {basic, conversational, fluent, native, beginner, intermediate, advanced, expert}.
-- If section not present, return lines: [].
+const SKILLS_BUNDLE_SYSTEM = `
+Extract every skills-based section from the attached resume PDF in ONE JSON object.
+
+Sections:
+- skills: technical / tools / frameworks. Use any of {technical, laboratory, interests, certifications, other} per line.category.
+- languages: spoken languages. Every line.category MUST be "languages".
+
+Each section's value is { lines: [...] } or null if the section is not present.
+
+lines[]: each { label, category, items[] }. items[]: each { value, proficiency?, skillKind? }.
+proficiency ∈ {basic, conversational, fluent, native, beginner, intermediate, advanced, expert}.
+
+Return null (not an empty lines array) for sections absent from the PDF.
 `.trim();
 
 // ─── Internal helpers ──────────────────────────────────────────────────────
 
-/** Common `generateText` arguments shared by every extraction call. */
-const baseRequest = (pdfUrl: string, system: string, userText: string, signal: AbortSignal | undefined) => ({
+/** Race an outer signal with a per-call timeout so one bundle can't hold the run open. */
+const withTimeout = (outer: AbortSignal | undefined, timeoutMs: number): AbortSignal => {
+	const timeout = AbortSignal.timeout(timeoutMs);
+	return outer ? AbortSignal.any([outer, timeout]) : timeout;
+};
+
+const baseRequest = (
+	pdfUrl: string,
+	system: string,
+	userText: string,
+	signal: AbortSignal | undefined,
+	timeoutMs: number
+) => ({
 	model: RESUME_PARSER_MODEL,
-	abortSignal: signal,
+	abortSignal: withTimeout(signal, timeoutMs),
 	system,
 	messages: [pdfUserMessage(pdfUrl, userText)],
+	providerOptions: {
+		gateway: {
+			tags: ["feature:resume-parser", `env:${process.env.NODE_ENV ?? "development"}`],
+		},
+	},
 });
 
-/** Wrap an async extraction so it emits running/complete/failed events. Generic in T → type flows from inner generateText through to caller. */
 async function withEvents<T>(
 	kind: ResumeParserEvent["kind"],
 	onEvent: RunResumeParserInput["onEvent"],
@@ -119,15 +159,21 @@ async function withEvents<T>(
 	}
 }
 
-const fulfilledOrNull = <T>(result: PromiseSettledResult<T>): T | null =>
-	result.status === "fulfilled" ? result.value : null;
+const fulfilledOr = <T, F>(result: PromiseSettledResult<T>, fallback: F): T | F =>
+	result.status === "fulfilled" ? result.value : fallback;
 
 // ─── Main entry ────────────────────────────────────────────────────────────
 
 export async function runResumeParserAgent({ pdfUrl, signal, onEvent }: RunResumeParserInput) {
 	const validation = await withEvents("validation", onEvent, async () => {
 		const { output } = await generateText({
-			...baseRequest(pdfUrl, VALIDATE_SYSTEM, "Decide if the attached PDF is a resume / CV.", signal),
+			...baseRequest(
+				pdfUrl,
+				VALIDATE_SYSTEM,
+				"Decide if the attached PDF is a resume / CV.",
+				signal,
+				VALIDATION_TIMEOUT_MS
+			),
 			output: Output.object({ schema: resumeValidationSchema }),
 		});
 		return output;
@@ -137,106 +183,62 @@ export async function runResumeParserAgent({ pdfUrl, signal, onEvent }: RunResum
 		throw new Error(`Not a resume: ${validation.reason}`);
 	}
 
-	const [contact, summary, experience, education, skills, languages, certifications, projects, volunteering] =
-		await Promise.allSettled([
-			withEvents("contact", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, CONTACT_SYSTEM, "Extract the contact block.", signal),
-					output: Output.object({ schema: contactContentSchema }),
-				});
-				return output;
-			}),
-			withEvents("summary", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, SUMMARY_SYSTEM, "Extract the professional summary.", signal),
-					output: Output.object({ schema: extractedSummarySchema }),
-				});
+	const [headerResult, entriesResult, skillsResult] = await Promise.allSettled([
+		withEvents("header", onEvent, async () => {
+			const { output } = await generateText({
+				...baseRequest(
+					pdfUrl,
+					HEADER_SYSTEM,
+					"Extract the contact block and professional summary.",
+					signal,
+					BUNDLE_TIMEOUT_MS
+				),
+				output: Output.object({ schema: extractedHeaderSchema }),
+			});
+			return output;
+		}),
+		withEvents("entries", onEvent, async () => {
+			const { output } = await generateText({
+				...baseRequest(
+					pdfUrl,
+					ENTRIES_BUNDLE_SYSTEM,
+					"Extract every entries-based section.",
+					signal,
+					BUNDLE_TIMEOUT_MS
+				),
+				output: Output.object({ schema: extractedEntriesBundleSchema }),
+			});
+			return output;
+		}),
+		withEvents("skills", onEvent, async () => {
+			const { output } = await generateText({
+				...baseRequest(pdfUrl, SKILLS_BUNDLE_SYSTEM, "Extract every skills-based section.", signal, BUNDLE_TIMEOUT_MS),
+				output: Output.object({ schema: extractedSkillsBundleSchema }),
+			});
+			return output;
+		}),
+	]);
 
-				return output;
-			}),
-			withEvents("experience", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(
-						pdfUrl,
-						ENTRIES_SYSTEM,
-						"Extract the WORK EXPERIENCE section (jobs, roles, internships).",
-						signal
-					),
-					output: Output.object({ schema: extractedEntriesSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("education", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(
-						pdfUrl,
-						ENTRIES_SYSTEM,
-						"Extract the EDUCATION section (degrees, schools, formal studies).",
-						signal
-					),
-					output: Output.object({ schema: extractedEntriesSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("skills", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, SKILLS_SYSTEM, "Extract the SKILLS section (technical, tools, frameworks).", signal),
-					output: Output.object({ schema: extractedSkillsSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("languages", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(
-						pdfUrl,
-						SKILLS_SYSTEM,
-						'Extract the LANGUAGES section. Use category "languages" for every line.',
-						signal
-					),
-					output: Output.object({ schema: extractedSkillsSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("certifications", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, ENTRIES_SYSTEM, "Extract the CERTIFICATIONS section.", signal),
-					output: Output.object({ schema: extractedEntriesSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("projects", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, ENTRIES_SYSTEM, "Extract the PROJECTS section.", signal),
-					output: Output.object({ schema: extractedEntriesSectionSchema }),
-				});
-
-				return output;
-			}),
-			withEvents("volunteering", onEvent, async () => {
-				const { output } = await generateText({
-					...baseRequest(pdfUrl, ENTRIES_SYSTEM, "Extract the VOLUNTEERING / community involvement section.", signal),
-					output: Output.object({ schema: extractedEntriesSectionSchema }),
-				});
-
-				return output;
-			}),
-		]);
+	const header = fulfilledOr(headerResult, { contact: null, summary: null });
+	const entries = fulfilledOr(entriesResult, {
+		experience: null,
+		education: null,
+		certifications: null,
+		projects: null,
+		volunteering: null,
+	});
+	const skills = fulfilledOr(skillsResult, { skills: null, languages: null });
 
 	return {
 		validation,
-		contact: fulfilledOrNull(contact),
-		summary: fulfilledOrNull(summary),
-		experience: fulfilledOrNull(experience),
-		education: fulfilledOrNull(education),
-		skills: fulfilledOrNull(skills),
-		languages: fulfilledOrNull(languages),
-		certifications: fulfilledOrNull(certifications),
-		projects: fulfilledOrNull(projects),
-		volunteering: fulfilledOrNull(volunteering),
+		contact: header.contact,
+		summary: header.summary,
+		experience: entries.experience,
+		education: entries.education,
+		certifications: entries.certifications,
+		projects: entries.projects,
+		volunteering: entries.volunteering,
+		skills: skills.skills,
+		languages: skills.languages,
 	};
 }

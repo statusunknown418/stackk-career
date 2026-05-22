@@ -42,6 +42,14 @@ export const cachedUsageLimitKeys: readonly CachedUsageLimitKey[] = limitKeyEnum
 );
 export const cachedUsageLimitKeySchema = limitKeySchema.exclude(["messages_per_generation"]);
 
+/**
+ * Drizzle cache tag for a single user's usage counter. Source of truth for both api reads
+ * (`.$withCache({ tag })`) and job-side invalidations (`db.$cache.invalidate({ tags })`).
+ */
+export function viewerUsageTag(userId: string, metric: CachedUsageLimitKey): string {
+	return `viewer:usage:${userId}:${metric}`;
+}
+
 export const unlimitedSentinel = "unlimited" as const;
 export type Unlimited = typeof unlimitedSentinel;
 

@@ -9,6 +9,13 @@ import { pdfUserMessage } from "../lib/ai/pdf-message";
 export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis-fast";
 
+const K02_TIMEOUT_MS = Number(process.env.K02_FAST_ANALYSIS_TIMEOUT_MS ?? 3 * 60 * 1000); // 3 min
+
+const withTimeout = (outer: AbortSignal | undefined, timeoutMs: number): AbortSignal => {
+	const timeout = AbortSignal.timeout(timeoutMs);
+	return outer ? AbortSignal.any([outer, timeout]) : timeout;
+};
+
 export interface RunK02FastAnalysisInput {
 	pdfUrl: string;
 	signal?: AbortSignal;
@@ -90,10 +97,16 @@ export async function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02
 	return streamText({
 		model: K02_FAST_ANALYSIS_MODEL,
 		output: Output.object({ schema: resumeAnalysisSchema }),
-		abortSignal: signal,
+		abortSignal: withTimeout(signal, K02_TIMEOUT_MS),
 		system: SYSTEM_PROMPT,
 		messages: [
 			pdfUserMessage(pdfUrl, userContextText, "Analyze the attached resume PDF and return structured suggestions."),
 		],
+		providerOptions: {
+			gateway: {
+				user: userId,
+				tags: ["feature:k02-fast-analysis", `env:${process.env.NODE_ENV ?? "development"}`],
+			},
+		},
 	});
 }

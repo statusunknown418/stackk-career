@@ -16,6 +16,7 @@ import { generations } from "@stackk-career/db/schema/generations";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeParserInputSchema } from "@stackk-career/schemas/jobs/resume-parser";
+import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { generateLexoKeyBetween, withLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { AbortTaskRunError, logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { constructNow, formatDate } from "date-fns";
@@ -28,11 +29,11 @@ import {
 import { fallbackContactFromName, insertSectionChildren } from "../../lib/resume-parser/insert-blocks";
 import { planSections } from "../../lib/resume-parser/plan-sections";
 import { resolveFile } from "../../lib/resume-parser/resolve-file";
-import { agentQueue } from "../queues";
+import { resumeParserQueue } from "../queues";
 
 export const resumeParserTask = schemaTask({
 	id: "resume-parser",
-	queue: agentQueue,
+	queue: resumeParserQueue,
 	schema: resumeParserInputSchema,
 	maxDuration: 600,
 	run: async (payload, { ctx, signal }) => {
@@ -162,6 +163,14 @@ export const resumeParserTask = schemaTask({
 		}
 
 		metadata.set("step", "complete");
+
+		// Bust viewer-cache counters now that resume + generation rows exist.
+		await db.$cache.invalidate({
+			tags: [
+				viewerUsageTag(payload.userId, "resumes_total"),
+				viewerUsageTag(payload.userId, "resume_creation_generations_per_cycle"),
+			],
+		});
 
 		logger.info("resume-parser = completed", {
 			resumeId: createdResume.id,
