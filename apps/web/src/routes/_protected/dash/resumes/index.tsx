@@ -2,10 +2,9 @@ import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { RouteIcon } from "lucide-react";
-import { z } from "zod";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
-import { ResumeCreateDialog } from "@/components/domains/resumes/resume-create-dialog";
+import { ResumeCreateDialog, resumeCreateSearchSchema } from "@/components/domains/resumes/resume-create-dialog";
 import { ResumePendingCards } from "@/components/domains/resumes/resume-pending-cards";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -14,14 +13,9 @@ import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/com
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
 
-const resumesSearchSchema = z.object({
-	create: z.literal(1).optional(),
-	parserRunId: z.string().optional(),
-});
-
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
-	validateSearch: resumesSearchSchema,
+	validateSearch: resumeCreateSearchSchema,
 	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
 	pendingComponent: ResumesIndexPending,
 });
@@ -53,7 +47,6 @@ function RouteComponent() {
 	const listQuery = orpc.resumes.list.queryOptions();
 	const { data } = useSuspenseQuery(listQuery);
 	const navigate = useNavigate({ from: Route.fullPath });
-	const search = Route.useSearch();
 	const { data: session } = authClient.useSession();
 	const userId = session?.user?.id;
 
@@ -64,9 +57,6 @@ function RouteComponent() {
 	});
 
 	const openDialog = () => navigate({ search: (prev) => ({ ...prev, create: 1 }) });
-	const closeDialog = () => navigate({ search: () => ({}) });
-	const setParserRunId = (parserRunId: string | undefined) =>
-		navigate({ search: (prev) => ({ ...prev, parserRunId, create: 1 }) });
 
 	const hasResumeContent = data.length > 0;
 
@@ -139,12 +129,7 @@ function RouteComponent() {
 				)}
 			</section>
 
-			<ResumeCreateDialog
-				onClose={closeDialog}
-				onParserRunChange={setParserRunId}
-				open={search.create === 1}
-				parserRunId={search.parserRunId}
-			/>
+			<ResumeCreateDialog />
 		</section>
 	);
 }

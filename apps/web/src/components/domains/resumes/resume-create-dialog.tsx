@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { z } from "zod";
 import {
 	Dialog,
 	DialogClose,
@@ -14,23 +15,24 @@ import { orpc } from "@/utils/orpc";
 import { ResumeCreateForm } from "./resume-create-form";
 import { ResumeImportProgress } from "./resume-import-progress";
 
-interface ResumeCreateDialogProps {
-	onClose: () => void;
-	onParserRunChange: (runId: string | undefined) => void;
-	open: boolean;
-	parserRunId: string | undefined;
-}
+export const resumeCreateSearchSchema = z.object({
+	create: z.literal(1).optional(),
+	parserRunId: z.string().optional(),
+});
 
 const REALTIME_TOKEN_STALE_MS = 29 * 60 * 1000;
 
-export function ResumeCreateDialog({
-	onClose,
-	onParserRunChange,
-	open,
-	parserRunId,
-}: ResumeCreateDialogProps): React.ReactElement {
+export function ResumeCreateDialog(): React.ReactElement {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const rawSearch = useSearch({ strict: false });
+	const search = resumeCreateSearchSchema.parse(rawSearch);
+	const open = search.create === 1;
+	const parserRunId = search.parserRunId;
+
+	const closeDialog = () => navigate({ to: ".", search: () => ({}) });
+	const setParserRunId = (runId: string | undefined) =>
+		navigate({ to: ".", search: () => ({ create: 1, parserRunId: runId }) });
 
 	const tokenQuery = useQuery({
 		...orpc.viewer.realtimeToken.queryOptions(),
@@ -43,7 +45,7 @@ export function ResumeCreateDialog({
 		orpc.resumes.create.mutationOptions({
 			onSuccess: ({ resumeId }) => {
 				queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
-				onClose();
+				closeDialog();
 				navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });
 			},
 			onError: (err) => toast.error(err.message),
@@ -52,24 +54,24 @@ export function ResumeCreateDialog({
 
 	const parseMutation = useMutation(
 		orpc.agents.triggerK02ParseResume.mutationOptions({
-			onSuccess: ({ runId }) => onParserRunChange(runId),
+			onSuccess: ({ runId }) => setParserRunId(runId),
 			onError: (err) => toast.error(err.message),
 		})
 	);
 
 	const handleComplete = (resumeId: string) => {
 		queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
-		onParserRunChange(undefined);
-		onClose();
+		setParserRunId(undefined);
+		closeDialog();
 		navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });
 	};
 
 	const handleTerminal = () => {
-		onParserRunChange(undefined);
+		setParserRunId(undefined);
 	};
 
 	const handleRetry = () => {
-		onParserRunChange(undefined);
+		setParserRunId(undefined);
 	};
 
 	const isMutating = createBlankMutation.isPending || parseMutation.isPending;
@@ -99,7 +101,7 @@ export function ResumeCreateDialog({
 	};
 
 	return (
-		<Dialog onOpenChange={(next) => (next ? null : onClose())} open={open}>
+		<Dialog onOpenChange={(next) => (next ? null : closeDialog())} open={open}>
 			<DialogPopup>
 				<DialogHeader>
 					<DialogTitle>{parserRunId ? "Importando CV" : "Nuevo CV"}</DialogTitle>
