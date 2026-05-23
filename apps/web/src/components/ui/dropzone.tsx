@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 type DropzoneEndpoint = keyof UploadRouter;
 
 export interface DropzoneProps<T> extends Omit<React.ComponentProps<"div">, "onChange" | "onDrop"> {
+	autoUpload?: boolean;
 	disabled?: boolean;
 	endpoint: DropzoneEndpoint;
 	input: T;
@@ -28,6 +29,7 @@ export interface DropzoneProps<T> extends Omit<React.ComponentProps<"div">, "onC
 }
 
 export function Dropzone<T extends Record<string, unknown>>({
+	autoUpload,
 	endpoint,
 	onClientUploadComplete,
 	onUploadError,
@@ -58,8 +60,11 @@ export function Dropzone<T extends Record<string, unknown>>({
 		(accepted: File[]) => {
 			setFiles(accepted);
 			onChange?.(accepted);
+			if (autoUpload && accepted.length > 0) {
+				startUpload(accepted, input);
+			}
 		},
-		[onChange]
+		[autoUpload, input, onChange, startUpload]
 	);
 
 	const handleRemove = React.useCallback((index: number) => {
@@ -132,7 +137,7 @@ export function Dropzone<T extends Record<string, unknown>>({
 
 			{isUploading && <Progress className="w-full" value={progress} />}
 
-			{files.length > 0 && !isUploading && (
+			{!autoUpload && files.length > 0 && !isUploading && (
 				<Button
 					className="tabular-nums"
 					loading={isUploading}

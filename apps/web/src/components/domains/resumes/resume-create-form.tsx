@@ -57,6 +57,7 @@ export function ResumeCreateForm({ disabled, onCreateBlank, onParse }: ResumeCre
 				</p>
 
 				<Dropzone<{ generationId: string | undefined }>
+					autoUpload
 					disabled={disabled || !isLabelValid}
 					endpoint="resumeUploader"
 					input={{ generationId: undefined }}
