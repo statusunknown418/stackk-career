@@ -10,7 +10,7 @@ export const triggerResumeParserInputSchema = z
 	.object({
 		fileId: z.string().optional(),
 		fileUrl: z.url().optional(),
-		displayName: z.string().optional(),
+		displayName: z.string().trim().min(1).max(120).optional(),
 	})
 	.refine((value) => Boolean(value.fileId) !== Boolean(value.fileUrl), {
 		message: "Provide exactly one of fileId or fileUrl",

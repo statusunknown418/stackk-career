@@ -2,10 +2,13 @@ import { ORPCError } from "@orpc/client";
 import { generations } from "@stackk-career/db/schema/generations";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { blankResumeSections, updateResumeTitleSchema } from "@stackk-career/schemas/api/resumes";
+import {
+	blankResumeSections,
+	createResumeInputSchema,
+	updateResumeTitleSchema,
+} from "@stackk-career/schemas/api/resumes";
 import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
-import { constructNow, formatDate } from "date-fns";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
@@ -73,13 +76,12 @@ export const resumesRouter = {
 		}));
 	}),
 
-	create: protectedProcedure.handler(async ({ context }) => {
+	create: protectedProcedure.input(createResumeInputSchema).handler(async ({ context, input }) => {
 		const { email, id: userId, name } = context.session.user;
 
-		const now = constructNow(new Date());
 		const firstChildPosition = generateLexoKeyBetween(null, null);
 
-		const title = `Nuevo CV - ${formatDate(now, "PPP")}`;
+		const title = input.label;
 
 		const newResume = await context.db.transaction(async (tx) => {
 			const [createdGeneration] = await tx
@@ -100,6 +102,7 @@ export const resumesRouter = {
 				.values({
 					userId,
 					title,
+					displayName: title,
 					generationId: createdGeneration.id,
 				})
 				.returning({

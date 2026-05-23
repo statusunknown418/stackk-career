@@ -20,6 +20,8 @@ import {
 	extractedEntriesBundleSchema,
 	extractedHeaderSchema,
 	extractedSkillsBundleSchema,
+	type ResumeParserPhase,
+	type ResumeParserPhaseStatus,
 	resumeValidationSchema,
 } from "@stackk-career/schemas/jobs/resume-parser";
 import { toError } from "@stackk-career/schemas/utils/to-error";
@@ -31,18 +33,15 @@ import { pdfUserMessage } from "../lib/ai/pdf-message";
 export const RESUME_PARSER_MODEL = "google/gemini-3.1-flash";
 export const RESUME_PARSER_OBJECT_TYPE = "resume-parser";
 
-// Bundled phases. "validation" is the gate, others run in parallel after the gate passes.
-type Phase = "validation" | "header" | "entries" | "skills";
-
 // Per-call timeouts. Cap stuck calls so siblings free their share of the task slot.
 // Validation is a small bool+name output — fast. Bundles emit multi-section JSON — heavier output tokens.
 const VALIDATION_TIMEOUT_MS = Number(process.env.RESUME_PARSER_VALIDATION_TIMEOUT_MS ?? 30 * 1000); // 30s
 const BUNDLE_TIMEOUT_MS = Number(process.env.RESUME_PARSER_BUNDLE_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
 
 export interface ResumeParserEvent {
-	kind: Phase | Exclude<SectionKind, "custom"> | "contact";
+	kind: ResumeParserPhase | Exclude<SectionKind, "custom"> | "contact";
 	reason?: string;
-	status: "running" | "complete" | "failed";
+	status: ResumeParserPhaseStatus;
 }
 
 export interface RunResumeParserInput {

@@ -46,6 +46,8 @@ export const resumeParserTask = schemaTask({
 			attempt: ctx.attempt.number,
 		});
 
+		metadata.set("displayName", payload.displayName ?? null);
+
 		// 1. Resolve PDF URL (verifies ownership when using fileId)
 		metadata.set("step", "resolving_file");
 		const resolved = await resolveFile(db, {

@@ -1,18 +1,27 @@
 import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { RouteIcon } from "lucide-react";
+import { z } from "zod";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
-import Loader from "@/components/loader";
+import { ResumeCreateDialog } from "@/components/domains/resumes/resume-create-dialog";
+import { ResumePendingCards } from "@/components/domains/resumes/resume-pending-cards";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
 import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/components/ui/meter";
-import { orpc, queryClient } from "@/utils/orpc";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/utils/orpc";
+
+const resumesSearchSchema = z.object({
+	create: z.literal(1).optional(),
+	parserRunId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
+	validateSearch: resumesSearchSchema,
 	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
 	pendingComponent: ResumesIndexPending,
 });
@@ -43,26 +52,23 @@ function ResumesIndexPending() {
 function RouteComponent() {
 	const listQuery = orpc.resumes.list.queryOptions();
 	const { data } = useSuspenseQuery(listQuery);
+	const navigate = useNavigate({ from: Route.fullPath });
+	const search = Route.useSearch();
+	const { data: session } = authClient.useSession();
+	const userId = session?.user?.id;
 
-	const navigate = useNavigate();
+	const tokenQuery = useQuery({
+		...orpc.viewer.realtimeToken.queryOptions(),
+		enabled: Boolean(userId),
+		staleTime: 29 * 60 * 1000,
+	});
 
-	const { mutateAsync, isPending } = useMutation(
-		orpc.resumes.create.mutationOptions({
-			onSuccess(data) {
-				navigate({
-					to: "/dash/resumes/$resumeId",
-					params: {
-						resumeId: data.resumeId,
-					},
-				});
-			},
-			onSettled() {
-				queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
-			},
-		})
-	);
+	const openDialog = () => navigate({ search: (prev) => ({ ...prev, create: 1 }) });
+	const closeDialog = () => navigate({ search: () => ({}) });
+	const setParserRunId = (parserRunId: string | undefined) =>
+		navigate({ search: (prev) => ({ ...prev, parserRunId, create: 1 }) });
 
-	const hasResumeContent = data.length > 0 || isPending;
+	const hasResumeContent = data.length > 0;
 
 	return (
 		<section className="space-y-4">
@@ -74,8 +80,8 @@ function RouteComponent() {
 						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
 					</FrameDescription>
 
-					<Button className="mt-4 max-w-max" disabled={isPending || data.length >= 5} onClick={() => mutateAsync({})}>
-						{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
+					<Button className="mt-4 max-w-max" disabled={data.length >= 5} onClick={openDialog}>
+						<PlusCircleIcon />
 						Crear nuevo
 					</Button>
 				</article>
@@ -95,6 +101,12 @@ function RouteComponent() {
 				</Meter>
 			</section>
 
+			{userId && tokenQuery.data?.token && (
+				<section className="px-4 py-2">
+					<ResumePendingCards accessToken={tokenQuery.data.token} userId={userId} />
+				</section>
+			)}
+
 			<section aria-labelledby="resumes-list-heading" className="px-4 py-2">
 				{hasResumeContent ? (
 					<article className="flex flex-col gap-4">
@@ -102,7 +114,6 @@ function RouteComponent() {
 							{data.map((resume) => (
 								<ResumeCard key={resume.id} resume={resume} />
 							))}
-							{isPending && <ResumeCardSkeleton />}
 						</ul>
 					</article>
 				) : (
@@ -119,14 +130,21 @@ function RouteComponent() {
 						</EmptyHeader>
 
 						<EmptyContent>
-							<Button disabled={isPending} onClick={() => mutateAsync({})} size="sm">
-								{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
+							<Button onClick={openDialog} size="sm">
+								<PlusCircleIcon />
 								Crear CV
 							</Button>
 						</EmptyContent>
 					</Empty>
 				)}
 			</section>
+
+			<ResumeCreateDialog
+				onClose={closeDialog}
+				onParserRunChange={setParserRunId}
+				open={search.create === 1}
+				parserRunId={search.parserRunId}
+			/>
 		</section>
 	);
 }

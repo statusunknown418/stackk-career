@@ -19,7 +19,7 @@ Optimize for: **performance**, **maintainability**, **scalability**. All schemas
 - **Single source of truth for progress**: Trigger.dev realtime feed, subscribed by tag. No parallel local optimistic store.
 - **Schemas are centralized**: every Zod schema added by this work lives under `packages/schemas/src/{api,jobs}/...`. Never inline in routes/handlers.
 - **No backwards-compat shims**: extend `resumes.create` input to require `label` (breaking change is fine — DB resettable).
-- **Pure mappers** for UI state derivation (testable, no React).
+- **Pure mappers** for UI state derivation (no React).
 - **No premature extraction**: split files only where there are two distinct concerns (form vs. progress vs. pending list).
 - **No custom hook wrappers around existing primitives.** If TanStack Query (`useQuery`, `useMutation`, `useSuspenseQuery`, `queryClient.invalidateQueries`) or Trigger React (`useRealtimeRun`, `useRealtimeRunsWithTag`, `useRealtimeRunWithStreams`) already covers the need, call it inline at the component. Wrap **only** when adding non-trivial logic (derived state, multiple primitives composed, complex memoization) that would otherwise duplicate across components.
 
@@ -254,7 +254,7 @@ No fallback list-scanning. If `output.resumeId` is missing → bug, surface expl
 ## Maintainability
 
 - Schemas centralized → one place to evolve types.
-- Pure phase mapper (`map-parser-phase.ts`) → unit-testable golden-table tests, no React.
+- Pure phase mapper (`map-parser-phase.ts`) → no React.
 - No custom hooks. Components call Trigger React (`useRealtimeRun`, `useRealtimeRunsWithTag`) and TanStack Query (`useMutation`, `useQuery`, `useSuspenseQuery`) primitives directly.
 - Dialog/form/progress split → swap or extend without touching route.
 - No `className` constants; keep Tailwind inline per project convention.
@@ -269,40 +269,6 @@ No fallback list-scanning. If `output.resumeId` is missing → bug, surface expl
 - Parser already idempotent (`idempotencyKey = parser-${userId}-${idempotencySeed}`, 24h TTL).
 - Per-user `concurrencyKey: userId` already on the queue → no DoS from one user.
 - This orchestration pattern (dialog → upload → trigger → tag subscription → auto-nav) is reusable for future long-running flows (cover-letter generation, bulk imports, etc.). The split files become the template.
-
----
-
-## Test Plan
-
-### Unit (pure functions)
-
-- `map-parser-phase`: golden table of metadata snapshots → expected `PhaseUi`. Covers all `step` values, `phase.*` statuses, mixed/missing fields.
-- `createResumeInputSchema`: trim, min/max length, unicode boundaries.
-
-### Web component
-
-- Dialog opens via search param, closes cleanly, persists across navigation.
-- Blank flow: submits `{ label }`, calls `resumes.create`, navigates to editor.
-- Import flow: waits for upload to resolve **before** calling `triggerK02ParseResume`.
-- Closing dialog during parse: `parserRunId` stays in URL, pending card renders in grid.
-- Reopening with `parserRunId` in URL: progress view restored from realtime alone (no local state needed).
-- Two concurrent imports: two cards; completion of one does not drop the other.
-- Completion: pending card removed, list invalidated, navigation fires once.
-- Terminal failure (`CANCELED`): shows non-retryable copy with `validation.reason`.
-- Recoverable failure (`FAILED`): retry button re-triggers with fresh idempotency seed.
-
-### API
-
-- `resumes.create` rejects missing/empty/oversized label.
-- `resumes.create` stores `label` as both `title` and `displayName`.
-- `triggerK02ParseResume` rejects missing or foreign `fileId` (ownership check).
-- Shared realtime-token procedure: token scoped to `user:${userId}` tags only.
-
-### Integration
-
-- Upload PDF → trigger parser → realtime metadata updates → list invalidates → editor opens.
-- Invalid PDF → validation abort → terminal error state → no phantom resume row in DB.
-- Refresh mid-parse → cold start with `parserRunId` in URL → progress fully recovered from realtime.
 
 ---
 
@@ -323,7 +289,6 @@ No fallback list-scanning. If `output.resumeId` is missing → bug, surface expl
 4. **Pure helper**: `map-parser-phase.ts` (no hook).
 5. **Web components**: `resume-create-form`, `resume-import-progress`, `resume-pending-cards`, `resume-create-dialog` — each calls Trigger React / TanStack primitives inline.
 6. **Route integration**: wire dialog into resumes index, remove old direct-create button.
-7. **Tests**: mapper goldens, schema validation, integration smoke.
 
 ---
 
@@ -348,18 +313,12 @@ Concrete checklist. Each step lists touched files, what changes, what to verify 
 - Replace local `coachingRealtimeTokenSchema` with re-export from `./realtime`. Keep `CoachingRealtimeToken` type alias pointing to `RealtimeToken` to avoid wide ripple, OR rename consumers — pick rename since no backwards-compat constraint.
 
 **1.5** `packages/schemas/src/jobs/resume-parser.ts`
-- Add `resumeParserOutputSchema`:
-  ```ts
-  export const resumeParserOutputSchema = z.object({
-    resumeId: z.string(),
-    generationId: z.string(),
-    fileId: z.string().nullable(),
-    objectType: z.string(),
-    validation: resumeValidationSchema,
-  });
-  ```
-  Keep all current return fields — UI primary reads `resumeId`, but downstream consumers (analytics, retry flows, debugging) may want `fileId`/`objectType`/`validation`.
-- Add `resumeParserStepSchema`, `resumeParserPhaseStatusSchema`, `resumeParserPhaseKindSchema` (enum values must match `ResumeParserEvent.kind` in `packages/jobs/src/agents/resume-parser.handler.ts` — cross-check before committing).
+- **No output schema.** Trigger infers task return types via `typeof task`. UI consumes `run.output.*` directly.
+- Move existing `Phase` TS union + status union from `packages/jobs/src/agents/resume-parser.handler.ts` into schemas as the single source of truth:
+  - `resumeParserPhaseSchema = z.enum(["validation", "header", "entries", "skills"])`
+  - `resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed"])`
+  - `resumeParserStepSchema = z.enum(["resolving_file", "running_agent", "creating_records", "inserting_blocks", "complete"])` (new — was only inline string in task file).
+- Handler imports the types back; section-kind portion of `ResumeParserEvent.kind` already reuses existing `SectionKind` from `schemas/api/resumes.ts` — do not duplicate.
 - Export inferred types.
 
 **Verify**: `pnpm --filter @stackk-career/schemas typecheck` (or root `pnpm -r typecheck`) green.
@@ -368,17 +327,7 @@ Concrete checklist. Each step lists touched files, what changes, what to verify 
 
 **2.1** `packages/jobs/src/trigger/tasks/resume-parser.ts` (task already exists — modify only)
 - Right after `logger.info("resume-parser = start", …)`, add `metadata.set("displayName", payload.displayName ?? null)`.
-- Wrap existing return in `resumeParserOutputSchema.parse(...)` — keep all current fields:
-  ```ts
-  return resumeParserOutputSchema.parse({
-    resumeId: createdResume.id,
-    generationId: createdGeneration.id,
-    fileId: resolved.fileId,
-    objectType: RESUME_PARSER_OBJECT_TYPE,
-    validation: agentOutput.validation,
-  });
-  ```
-  Schema enforces shape; runtime parse fails fast if drift.
+- Keep existing return shape as plain object (no schema parse — Trigger infers via `typeof resumeParserTask`).
 
 **Verify**: `grep -rn "resumeParserTask" packages apps` — every consumer compiles. `pnpm --filter @stackk-career/jobs typecheck`.
 
@@ -406,10 +355,6 @@ Concrete checklist. Each step lists touched files, what changes, what to verify 
 - `PhaseUi` shape: `{ step: ResumeParserStep, label: string, progress: 0..1, validationReason: string | null, displayName: string | null }`.
 - Pure. No React. No imports from `@trigger.dev/*`.
 - Read `metadata.step`, `metadata["phase.<kind>"]`, `metadata.displayName`, `metadata.events`.
-- Co-locate small unit test `map-parser-phase.test.ts` (golden table of metadata snapshots → expected `PhaseUi`).
-
-**Verify**: `pnpm --filter web test map-parser-phase`.
-
 ### Step 5 — Web components (split files, no custom hooks)
 
 **5.1** `apps/web/src/components/domains/resumes/resume-create-form.tsx`
@@ -456,15 +401,6 @@ Concrete checklist. Each step lists touched files, what changes, what to verify 
 
 **Verify**: empty state still works; existing data renders; Meter still shows count; cap at 5 still enforced.
 
-### Step 7 — Tests
-
-**7.1** Mapper goldens — covered in 4.1.
-**7.2** `createResumeInputSchema` validation tests (trim, min/max, unicode).
-**7.3** API: `resumes.create` rejects empty/oversized label (add to existing router test file if present, else inline minimal test).
-**7.4** Web: `resume-create-dialog.test.tsx` — open/close via search param, blank submit, parse path triggers in correct order, pending card persists across dialog close.
-
-**Verify**: `pnpm test` green.
-
 ### Step 8 — Cleanup pass
 
 - Grep for `coachingRealtimeTokenSchema` — must be zero hits.
@@ -473,10 +409,6 @@ Concrete checklist. Each step lists touched files, what changes, what to verify 
 - Confirm no new custom hook files (`use-*.ts`) exist in `apps/web/src/components/domains/resumes/`.
 - Run `pnpm dlx ultracite fix` before commit.
 
-### Step 9 — Commit slicing (separate PRs for easier review)
+### Step 9 — Single commit / single PR
 
-1. **PR-1**: schemas + parser task output (steps 1–2). Backend-only, no UI.
-2. **PR-2**: `resumes.create` label requirement + shared realtime token (step 3).
-3. **PR-3**: web flow — mapper, components, dialog, route wiring, tests (steps 4–7).
-
-Each PR is independently revertable. PR-1 + PR-2 ship behind feature absence (UI doesn't call them yet beyond existing onboarding-chat path).
+Ship as one PR. Schemas, API, parser task, and web flow land together — the feature is cohesive and PR-1/PR-2 alone provide no user-visible value. Keep the diff in one working tree.

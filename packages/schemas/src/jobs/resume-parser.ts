@@ -75,3 +75,21 @@ export const extractedSkillsBundleSchema = z.object({
 export type HeaderBundle = z.infer<typeof extractedHeaderSchema>;
 export type EntriesBundle = z.infer<typeof extractedEntriesBundleSchema>;
 export type SkillsBundle = z.infer<typeof extractedSkillsBundleSchema>;
+
+// Trigger metadata vocabulary — single source of truth, imported by both the
+// handler (`packages/jobs/src/agents/resume-parser.handler.ts`) and the task
+// (`packages/jobs/src/trigger/tasks/resume-parser.ts`).
+export const resumeParserStepSchema = z.enum([
+	"resolving_file",
+	"running_agent",
+	"creating_records",
+	"inserting_blocks",
+	"complete",
+]);
+
+export const resumeParserPhaseSchema = z.enum(["validation", "header", "entries", "skills"]);
+export const resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed"]);
+
+export type ResumeParserStep = z.infer<typeof resumeParserStepSchema>;
+export type ResumeParserPhase = z.infer<typeof resumeParserPhaseSchema>;
+export type ResumeParserPhaseStatus = z.infer<typeof resumeParserPhaseStatusSchema>;

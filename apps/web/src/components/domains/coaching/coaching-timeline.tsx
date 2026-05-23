@@ -96,7 +96,7 @@ export function CoachingTimeline() {
 	);
 
 	const { data: realtime } = useQuery({
-		...orpc.coaching.realtimeToken.queryOptions(),
+		...orpc.viewer.realtimeToken.queryOptions(),
 		enabled: Boolean(userId),
 		refetchInterval: 25 * 60 * 1000,
 		staleTime: 25 * 60 * 1000,

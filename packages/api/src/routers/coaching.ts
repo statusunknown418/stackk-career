@@ -3,18 +3,10 @@ import { user } from "@stackk-career/db/schema/auth";
 import { type CoachingStage, coachingSessions, coachingStageEnum } from "@stackk-career/db/schema/coaching-sessions";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import {
-	type CoachingStepSummary,
-	coachingDashboardSchema,
-	coachingRealtimeTokenSchema,
-} from "@stackk-career/schemas/api/coaching";
-import { auth as triggerAuth } from "@trigger.dev/sdk";
+import { type CoachingStepSummary, coachingDashboardSchema } from "@stackk-career/schemas/api/coaching";
 import { count, desc, eq } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
 import { protectedProcedure } from "..";
-
-const REALTIME_TOKEN_TTL_MS = 30 * 60 * 1000;
-const REALTIME_TOKEN_EXPIRATION = "30m";
 
 const STEP_CONTENT: Record<CoachingStage, { description: string; label: string }> = {
 	"cv-analysis": {
@@ -134,21 +126,6 @@ export const coachingRouter = {
 			resumeCount,
 			steps,
 			viewer,
-		};
-	}),
-
-	realtimeToken: protectedProcedure.output(coachingRealtimeTokenSchema).handler(async ({ context }) => {
-		const userId = context.session.user.id;
-		const token = await triggerAuth.createPublicToken({
-			expirationTime: REALTIME_TOKEN_EXPIRATION,
-			scopes: { read: { tags: [`user:${userId}`] } },
-		});
-		context.log?.set({
-			coaching: { action: "realtime_token", userId },
-		});
-		return {
-			expiresAtMs: Date.now() + REALTIME_TOKEN_TTL_MS,
-			token,
 		};
 	}),
 };

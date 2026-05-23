@@ -4,6 +4,7 @@ import { generations } from "@stackk-career/db/schema/generations";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { userSubscriptions } from "@stackk-career/db/schema/subscriptions";
+import { realtimeTokenSchema } from "@stackk-career/schemas/api/realtime";
 import {
 	getEntitlements,
 	type LimitValue,
@@ -11,12 +12,15 @@ import {
 	remainingQuota,
 	type unlimitedSentinel,
 } from "@stackk-career/schemas/subscriptions";
+import { auth as triggerAuth } from "@trigger.dev/sdk";
 import { and, between, eq } from "drizzle-orm";
 import { count } from "drizzle-orm/sql";
 import { protectedProcedure } from "..";
 import { viewerSubscriptionTag, viewerUsageTag } from "../lib/viewer-cache";
 
 const CACHE_TTL_SECONDS = 300;
+const REALTIME_TOKEN_TTL_MS = 30 * 60 * 1000;
+const REALTIME_TOKEN_EXPIRATION = "30m";
 
 export const viewerRouter = {
 	/**
@@ -173,6 +177,21 @@ export const viewerRouter = {
 			entitlements,
 			usage,
 			remaining,
+		};
+	}),
+
+	realtimeToken: protectedProcedure.output(realtimeTokenSchema).handler(async ({ context }) => {
+		const userId = context.session.user.id;
+		const token = await triggerAuth.createPublicToken({
+			expirationTime: REALTIME_TOKEN_EXPIRATION,
+			scopes: { read: { tags: [`user:${userId}`] } },
+		});
+		context.log?.set({
+			viewer: { action: "realtime_token", userId },
+		});
+		return {
+			expiresAtMs: Date.now() + REALTIME_TOKEN_TTL_MS,
+			token,
 		};
 	}),
 };
