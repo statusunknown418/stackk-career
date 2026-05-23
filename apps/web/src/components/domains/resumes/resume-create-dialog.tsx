@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -11,6 +10,7 @@ import {
 	DialogPopup,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Route } from "@/routes/_protected/dash/resumes/index";
 import { orpc } from "@/utils/orpc";
 import { ResumeCreateForm } from "./resume-create-form";
 import { ResumeImportProgress } from "./resume-import-progress";
@@ -23,16 +23,14 @@ export const resumeCreateSearchSchema = z.object({
 const REALTIME_TOKEN_STALE_MS = 29 * 60 * 1000;
 
 export function ResumeCreateDialog(): React.ReactElement {
-	const navigate = useNavigate();
+	const navigate = Route.useNavigate();
+	const search = Route.useSearch();
 	const queryClient = useQueryClient();
-	const rawSearch = useSearch({ strict: false });
-	const search = resumeCreateSearchSchema.parse(rawSearch);
 	const open = search.create === 1;
 	const parserRunId = search.parserRunId;
 
-	const closeDialog = () => navigate({ to: ".", search: () => ({}) });
-	const setParserRunId = (runId: string | undefined) =>
-		navigate({ to: ".", search: () => ({ create: 1, parserRunId: runId }) });
+	const closeDialog = () => navigate({ search: () => ({}) });
+	const setParserRunId = (runId: string | undefined) => navigate({ search: () => ({ create: 1, parserRunId: runId }) });
 
 	const tokenQuery = useQuery({
 		...orpc.viewer.realtimeToken.queryOptions(),

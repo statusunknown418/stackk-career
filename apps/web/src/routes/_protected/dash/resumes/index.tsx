@@ -91,11 +91,7 @@ function RouteComponent() {
 				</Meter>
 			</section>
 
-			{userId && tokenQuery.data?.token && (
-				<section className="px-4 py-2">
-					<ResumePendingCards accessToken={tokenQuery.data.token} userId={userId} />
-				</section>
-			)}
+			{userId && tokenQuery.data?.token && <ResumePendingCards accessToken={tokenQuery.data.token} userId={userId} />}
 
 			<section aria-labelledby="resumes-list-heading" className="px-4 py-2">
 				{hasResumeContent ? (

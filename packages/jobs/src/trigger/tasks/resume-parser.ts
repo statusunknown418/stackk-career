@@ -94,7 +94,7 @@ export const resumeParserTask = schemaTask({
 				type: "resume-creation",
 				title: baseTitle,
 				summary: agentOutput.validation.reason,
-				model: RESUME_PARSER_MODEL,
+				model: typeof RESUME_PARSER_MODEL === "string" ? RESUME_PARSER_MODEL : RESUME_PARSER_MODEL.modelId,
 			})
 			.returning({ id: generations.id });
 

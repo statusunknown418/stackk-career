@@ -25,12 +25,12 @@ import {
 	resumeValidationSchema,
 } from "@stackk-career/schemas/jobs/resume-parser";
 import { toError } from "@stackk-career/schemas/utils/to-error";
-import { generateText, Output } from "ai";
+import { generateText, type LanguageModel, Output } from "ai";
 import { pdfUserMessage } from "../lib/ai/pdf-message";
 
 // ─── Public surface ────────────────────────────────────────────────────────
 
-export const RESUME_PARSER_MODEL = "google/gemini-3.1-flash";
+export const RESUME_PARSER_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const RESUME_PARSER_OBJECT_TYPE = "resume-parser";
 
 // Per-call timeouts. Cap stuck calls so siblings free their share of the task slot.
