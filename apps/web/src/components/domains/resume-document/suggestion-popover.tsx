@@ -48,8 +48,8 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 		<Popover onOpenChange={handleOpenChange} open={open}>
 			<PopoverTrigger
 				render={
-					<Button aria-label="Mejorar con IA" type="button" variant="ghost">
-						<SparkleIcon /> Mejorar
+					<Button aria-label="Mejorar con IA" size="sm" type="button" variant="ghost">
+						<SparkleIcon /> Generar
 					</Button>
 				}
 			/>
@@ -77,7 +77,7 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 				{error ? (
 					<p className="px-2 pb-3 text-muted-foreground text-xs">No se pudieron generar sugerencias.</p>
 				) : (
-					<div className="columns-2 gap-1.5 [&>*]:mb-1.5">
+					<div className="columns-2 gap-1.5 *:mb-1.5">
 						{SUGGESTION_SLOTS.map((slot) => {
 							const item = suggestions[slot];
 

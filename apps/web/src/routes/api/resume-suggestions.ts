@@ -7,12 +7,14 @@ import {
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { createFileRoute } from "@tanstack/react-router";
 import { gateway, Output, streamText } from "ai";
+import { createRequestLogger } from "evlog";
 import { createAILogger } from "evlog/ai";
-import { getRequestLog } from "@/lib/request-log";
+import { getRequestLog, readRequestMeta } from "@/lib/request-log";
 import { client } from "@/utils/orpc";
 
 const handlePost = async ({ request }: { request: Request }) => {
 	const requestLog = getRequestLog();
+	const { requestId, waitUntil } = readRequestMeta();
 
 	const json = await request.json();
 	const parsed = suggestResumeBlockInputSchema.safeParse(json);
@@ -42,7 +44,37 @@ const handlePost = async ({ request }: { request: Request }) => {
 		prep: { durationMs: prepDurationMs },
 	});
 
-	const ai = createAILogger(requestLog);
+	const streamLog = createRequestLogger({
+		method: request.method,
+		path: new URL(request.url).pathname,
+		requestId: requestId ? `${requestId}:ai` : crypto.randomUUID(),
+		waitUntil,
+	});
+
+	streamLog.set({
+		operation: "ai.suggestResumeBlockContent.stream",
+		parentRequestId: requestId,
+		user: { id: prep.userId },
+		generation: { id: prep.generationId },
+		resume: { id: parsed.data.resumeId },
+		prep: { durationMs: prepDurationMs },
+	});
+
+	const ai = createAILogger(streamLog);
+	let emitted = false;
+
+	const finalizeStreamLog = (context?: Record<string, unknown>) => {
+		if (emitted) {
+			return;
+		}
+
+		if (context) {
+			streamLog.set(context);
+		}
+
+		streamLog.emit();
+		emitted = true;
+	};
 
 	const result = streamText({
 		model: ai.wrap(gateway(prep.model)),
@@ -70,7 +102,7 @@ const handlePost = async ({ request }: { request: Request }) => {
 				usage,
 				finishReason,
 			});
-			requestLog.set({
+			finalizeStreamLog({
 				ai: ai.getMetadata(),
 				finishReason,
 				outcome: suggestions.length > 0 ? "completed" : "empty_object",
@@ -83,13 +115,14 @@ const handlePost = async ({ request }: { request: Request }) => {
 				generationId: prep.generationId,
 				errorMessage: err.message,
 			});
-			requestLog.error(err, {
+			streamLog.error(err, {
 				ai: ai.getMetadata(),
 				outcome: "stream_error",
 			});
+			finalizeStreamLog();
 		},
 		onAbort: () => {
-			requestLog.set({
+			finalizeStreamLog({
 				ai: ai.getMetadata(),
 				outcome: "aborted",
 			});

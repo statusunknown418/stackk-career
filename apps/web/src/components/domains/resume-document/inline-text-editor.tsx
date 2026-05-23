@@ -185,7 +185,7 @@ const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolb
 					className={cn(editor.isActive("bold") && "bg-accent text-foreground")}
 					onClick={() => editor.chain().focus().toggleBold().run()}
 					onMouseDown={(event) => event.preventDefault()}
-					size="icon"
+					size="icon-sm"
 					variant="ghost"
 				>
 					<TextBolderIcon />
@@ -196,7 +196,7 @@ const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolb
 					className={cn(editor.isActive("italic") && "bg-accent text-foreground")}
 					onClick={() => editor.chain().focus().toggleItalic().run()}
 					onMouseDown={(event) => event.preventDefault()}
-					size="icon"
+					size="icon-sm"
 					variant="ghost"
 				>
 					<TextItalicIcon />
@@ -207,7 +207,7 @@ const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolb
 					className={cn(editor.isActive("bulletList") && "bg-accent text-foreground")}
 					onClick={() => editor.chain().focus().toggleBulletList().run()}
 					onMouseDown={(event) => event.preventDefault()}
-					size="icon"
+					size="icon-sm"
 					variant="ghost"
 				>
 					<ListBulletsIcon />
@@ -218,7 +218,7 @@ const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolb
 					className={cn(editor.isActive("orderedList") && "bg-accent text-foreground")}
 					onClick={() => editor.chain().focus().toggleOrderedList().run()}
 					onMouseDown={(event) => event.preventDefault()}
-					size="icon"
+					size="icon-sm"
 					variant="ghost"
 				>
 					<ListNumbersIcon />
