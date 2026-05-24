@@ -27,20 +27,28 @@ const skillProficiencyOptions = buildLabeledOptions(SKILL_PROFICIENCIES, SKILL_P
 const languageProficiencyOptions = buildLabeledOptions(LANGUAGE_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
 
 interface SkillChipProps {
-	children: ReactNode;
 	deleteLabel: string;
 	onDelete: () => void;
+	proficiencyControl: ReactNode;
+	valueEditor: ReactNode;
 }
 
-const SkillChip = ({ children, deleteLabel, onDelete }: SkillChipProps) => (
-	<li className="group/chip inline-flex h-8 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-1 transition-colors focus-within:border-border hover:border-border">
-		<div className="w-0 overflow-hidden opacity-0 transition-[width,opacity] duration-200 ease-out group-focus-within/chip:w-7 group-focus-within/chip:opacity-100 group-hover/chip:w-7 group-hover/chip:opacity-100 sm:group-hover/chip:w-6 sm:group-focus-within/chip:w-6">
-			<Button aria-label={deleteLabel} onClick={onDelete} size="icon-xs" type="button" variant="destructive-ghost">
-				<TrashIcon />
-			</Button>
+const SkillChip = ({ deleteLabel, onDelete, proficiencyControl, valueEditor }: SkillChipProps) => (
+	<li className="group/chip relative grid min-w-0 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 transition-colors focus-within:border-border hover:border-border sm:grid-cols-[minmax(0,1fr)_7rem] sm:items-center">
+		<div className="min-w-0">{valueEditor}</div>
+		<div className="min-w-0 transition-transform duration-200 ease-out sm:justify-self-end sm:group-focus-within/chip:-translate-x-8 [@media(hover:hover)]:sm:group-hover/chip:-translate-x-8">
+			{proficiencyControl}
 		</div>
-
-		{children}
+		<Button
+			aria-label={deleteLabel}
+			className="pointer-events-none absolute top-2 right-2 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/chip:pointer-events-auto group-focus-within/chip:translate-x-0 group-focus-within/chip:opacity-100 sm:top-1/2 sm:-translate-y-1/2 sm:group-focus-within/chip:-translate-y-1/2 [@media(hover:hover)]:group-hover/chip:pointer-events-auto [@media(hover:hover)]:group-hover/chip:translate-x-0 [@media(hover:hover)]:group-hover/chip:opacity-100 [@media(hover:hover)]:sm:group-hover/chip:-translate-y-1/2"
+			onClick={onDelete}
+			size="icon-sm"
+			type="button"
+			variant="destructive-ghost"
+		>
+			<TrashIcon />
+		</Button>
 	</li>
 );
 
@@ -111,7 +119,7 @@ export const InlineSkills = withForm({
 
 			return (
 				<div className="space-y-2">
-					<ul className="flex flex-wrap gap-1.5">
+					<ul className="grid gap-2 lg:grid-cols-2">
 						{items.map((item) => {
 							if (item.blockType !== "skill_item") {
 								return null;
@@ -125,48 +133,51 @@ export const InlineSkills = withForm({
 									deleteLabel="Eliminar idioma"
 									key={getBlockKey(item.id)}
 									onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-								>
-									<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
-										{(field) => (
-											<InlineTextEditor
-												className="px-1 hover:bg-transparent focus:bg-transparent"
-												onBlur={() => field.handleBlur()}
-												onChange={(value) => field.handleChange(value)}
-												placeholder={itemPlaceholder}
-												value={(field.state.value ?? "") as string}
-												variant="plain"
-											/>
-										)}
-									</form.AppField>
-									<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
-										{(field) => (
-											<Select
-												items={proficiencyOptions}
-												onValueChange={(next) =>
-													field.handleChange(next === "" || next === null ? undefined : (next as SkillProficiency))
-												}
-												value={(field.state.value ?? "") as string}
-											>
-												<SelectTrigger
-													aria-label="Nivel"
-													className="h-6 min-h-0 w-24 gap-1 rounded-sm border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50"
-													onBlur={field.handleBlur}
-													size="sm"
+									proficiencyControl={
+										<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
+											{(field) => (
+												<Select
+													items={proficiencyOptions}
+													onValueChange={(next) =>
+														field.handleChange(next === "" || next === null ? undefined : (next as SkillProficiency))
+													}
+													value={(field.state.value ?? "") as string}
 												>
-													<SelectValue placeholder="Nivel" />
-												</SelectTrigger>
+													<SelectTrigger
+														aria-label="Nivel"
+														className="h-8 min-h-0 w-full min-w-0 gap-1 rounded-md border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50 sm:w-28"
+														onBlur={field.handleBlur}
+														size="sm"
+													>
+														<SelectValue placeholder="Nivel" />
+													</SelectTrigger>
 
-												<SelectPopup>
-													{proficiencyOptions.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectPopup>
-											</Select>
-										)}
-									</form.AppField>
-								</SkillChip>
+													<SelectPopup>
+														{proficiencyOptions.map((option) => (
+															<SelectItem key={option.value} value={option.value}>
+																{option.label}
+															</SelectItem>
+														))}
+													</SelectPopup>
+												</Select>
+											)}
+										</form.AppField>
+									}
+									valueEditor={
+										<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
+											{(field) => (
+												<InlineTextEditor
+													className="w-full min-w-0 break-words px-1 hover:bg-transparent focus:bg-transparent"
+													onBlur={() => field.handleBlur()}
+													onChange={(value) => field.handleChange(value)}
+													placeholder={itemPlaceholder}
+													value={(field.state.value ?? "") as string}
+													variant="plain"
+												/>
+											)}
+										</form.AppField>
+									}
+								/>
 							);
 						})}
 					</ul>
@@ -208,22 +219,25 @@ export const InlineSkills = withForm({
 					};
 
 					return (
-						<div className="group/line flex flex-col gap-1" key={getBlockKey(line.id)}>
-							<div className="flex items-center justify-between gap-2">
+						<div className="group/line flex flex-col gap-2" key={getBlockKey(line.id)}>
+							<div className="relative min-w-0">
 								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
 									{(field) => (
-										<InlineTextEditor
-											onBlur={() => field.handleBlur()}
-											onChange={(value) => field.handleChange(value)}
-											placeholder="Categoría"
-											value={(field.state.value ?? "") as string}
-											variant="subtitle"
-										/>
+										<div className="min-w-0">
+											<InlineTextEditor
+												className="w-full min-w-0"
+												onBlur={() => field.handleBlur()}
+												onChange={(value) => field.handleChange(value)}
+												placeholder="Categoría"
+												value={(field.state.value ?? "") as string}
+												variant="subtitle"
+											/>
+										</div>
 									)}
 								</form.AppField>
 								<Button
 									aria-label="Eliminar categoría"
-									className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100"
+									className="pointer-events-none absolute top-0 right-0 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/line:pointer-events-auto group-focus-within/line:translate-x-0 group-focus-within/line:opacity-100 [@media(hover:hover)]:group-hover/line:pointer-events-auto [@media(hover:hover)]:group-hover/line:translate-x-0 [@media(hover:hover)]:group-hover/line:opacity-100"
 									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
 									size="icon-sm"
 									type="button"
@@ -233,7 +247,7 @@ export const InlineSkills = withForm({
 								</Button>
 							</div>
 
-							<ul className="flex flex-wrap gap-1.5">
+							<ul className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
 								{items.map((item) => {
 									if (item.blockType !== "skill_item") {
 										return null;
@@ -247,52 +261,57 @@ export const InlineSkills = withForm({
 											deleteLabel="Eliminar habilidad"
 											key={getBlockKey(item.id)}
 											onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-										>
-											<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
-												{(field) => (
-													<InlineTextEditor
-														className="px-1 hover:bg-transparent focus:bg-transparent"
-														onBlur={() => field.handleBlur()}
-														onChange={(value) => field.handleChange(value)}
-														placeholder={itemPlaceholder}
-														value={(field.state.value ?? "") as string}
-														variant="plain"
-													/>
-												)}
-											</form.AppField>
-											<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
-												{(field) => (
-													<Select
-														items={proficiencyOptions}
-														onValueChange={(next) =>
-															field.handleChange(next === "" || next === null ? undefined : (next as SkillProficiency))
-														}
-														value={(field.state.value ?? "") as string}
-													>
-														<SelectTrigger
-															aria-label="Nivel"
-															className="h-6 min-h-0 w-28 gap-1 rounded-sm border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50"
-															onBlur={field.handleBlur}
-															size="sm"
+											proficiencyControl={
+												<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
+													{(field) => (
+														<Select
+															items={proficiencyOptions}
+															onValueChange={(next) =>
+																field.handleChange(
+																	next === "" || next === null ? undefined : (next as SkillProficiency)
+																)
+															}
+															value={(field.state.value ?? "") as string}
 														>
-															<SelectValue placeholder="Nivel" />
-														</SelectTrigger>
-														<SelectPopup>
-															{proficiencyOptions.map((option) => (
-																<SelectItem key={option.value} value={option.value}>
-																	{option.label}
-																</SelectItem>
-															))}
-														</SelectPopup>
-													</Select>
-												)}
-											</form.AppField>
-										</SkillChip>
+															<SelectTrigger
+																aria-label="Nivel"
+																className="h-8 min-h-0 w-full min-w-0 gap-1 rounded-md border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50 sm:w-28"
+																onBlur={field.handleBlur}
+																size="sm"
+															>
+																<SelectValue placeholder="Nivel" />
+															</SelectTrigger>
+															<SelectPopup>
+																{proficiencyOptions.map((option) => (
+																	<SelectItem key={option.value} value={option.value}>
+																		{option.label}
+																	</SelectItem>
+																))}
+															</SelectPopup>
+														</Select>
+													)}
+												</form.AppField>
+											}
+											valueEditor={
+												<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
+													{(field) => (
+														<InlineTextEditor
+															className="w-full min-w-0 break-words px-1 hover:bg-transparent focus:bg-transparent"
+															onBlur={() => field.handleBlur()}
+															onChange={(value) => field.handleChange(value)}
+															placeholder={itemPlaceholder}
+															value={(field.state.value ?? "") as string}
+															variant="plain"
+														/>
+													)}
+												</form.AppField>
+											}
+										/>
 									);
 								})}
 							</ul>
 
-							<div className="opacity-0 transition-opacity group-focus-within/line:opacity-100 group-hover/line:opacity-100">
+							<div className="transition-opacity group-focus-within/line:opacity-100 [@media(hover:hover)]:group-hover/line:opacity-100">
 								<Button
 									disabled={createBlock.isPending}
 									onClick={handleAddItem}

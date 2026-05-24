@@ -173,12 +173,12 @@ interface ProseToolbarProps {
 const ProseToolbar = ({ editor, onSuggestionOpenChange, suggestion }: ProseToolbarProps) => (
 	<motion.div
 		animate={{ opacity: 1, y: 0 }}
-		className="absolute top-full left-0 z-20 mt-1"
+		className="absolute top-full left-1/2 z-20 mt-1 -translate-x-1/2"
 		exit={{ opacity: 0, y: -4 }}
 		initial={{ opacity: 0, y: -4 }}
 		transition={{ duration: 0.15, ease: "easeOut" }}
 	>
-		<div className="rounded-xl border bg-popover p-0.5 shadow-md">
+		<div className="rounded-lg border bg-popover shadow-md">
 			<ButtonGroup>
 				<Button
 					aria-label="Alternar negrita"

@@ -33,82 +33,104 @@ export const InlineContact = withForm({
 		const itemsName = `blocks[${blockIndex}].content.items` as const;
 
 		return (
-			<header className="group/contact flex flex-col gap-2">
-				<div className="flex flex-wrap items-baseline gap-x-2">
+			<header className="group/contact flex flex-col gap-4">
+				<div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
 					<form.AppField name={`blocks[${blockIndex}].content.firstName` as const}>
 						{(field) => (
-							<InlineTextEditor
-								onBlur={() => field.handleBlur()}
-								onChange={(value) => field.handleChange(value)}
-								placeholder="Nombre"
-								value={(field.state.value ?? "") as string}
-								variant="heading"
-							/>
+							<div className="min-w-0">
+								<InlineTextEditor
+									className="w-full min-w-0"
+									onBlur={() => field.handleBlur()}
+									onChange={(value) => field.handleChange(value)}
+									placeholder="Nombre"
+									value={(field.state.value ?? "") as string}
+									variant="heading"
+								/>
+							</div>
 						)}
 					</form.AppField>
 					<form.AppField name={`blocks[${blockIndex}].content.lastName` as const}>
 						{(field) => (
-							<InlineTextEditor
-								onBlur={() => field.handleBlur()}
-								onChange={(value) => field.handleChange(value)}
-								placeholder="Apellido"
-								value={(field.state.value ?? "") as string}
-								variant="heading"
-							/>
+							<div className="min-w-0">
+								<InlineTextEditor
+									className="w-full min-w-0"
+									onBlur={() => field.handleBlur()}
+									onChange={(value) => field.handleChange(value)}
+									placeholder="Apellido"
+									value={(field.state.value ?? "") as string}
+									variant="heading"
+								/>
+							</div>
 						)}
 					</form.AppField>
 				</div>
 
 				<form.Field mode="array" name={itemsName}>
 					{(itemsField) => (
-						<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+						<div className="space-y-2">
 							{itemsField.state.value.map((item, itemIndex) => (
-								<div className="group/item flex items-center gap-1" key={itemIndex.toString()}>
-									<form.AppField name={`${itemsName}[${itemIndex}].kind` as const}>
-										{(field) => (
-											<Select
-												items={contactKindOptions}
-												onValueChange={(next) => field.handleChange(next as ContactItemKind)}
-												value={field.state.value as string}
-											>
-												<SelectTrigger aria-label="Tipo de contacto" onBlur={field.handleBlur} size="sm">
-													<SelectValue />
-												</SelectTrigger>
-												<SelectPopup>
-													{contactKindOptions.map((option) => (
-														<SelectItem key={option.value} value={option.value}>
-															{option.label}
-														</SelectItem>
-													))}
-												</SelectPopup>
-											</Select>
-										)}
-									</form.AppField>
-									<form.AppField name={`${itemsName}[${itemIndex}].value` as const}>
-										{(field) => (
-											<InlineTextEditor
-												onBlur={() => field.handleBlur()}
-												onChange={(value) => field.handleChange(value)}
-												placeholder={CONTACT_ITEM_LABELS[item.kind]}
-												value={(field.state.value ?? "") as string}
-												variant="plain"
-											/>
-										)}
-									</form.AppField>
-									<Button
-										aria-label="Eliminar contacto"
-										className="opacity-0 transition-opacity group-focus-within/item:opacity-100 group-hover/item:opacity-100"
-										onClick={() => itemsField.removeValue(itemIndex)}
-										size="icon-sm"
-										type="button"
-										variant="destructive-ghost"
-									>
-										<TrashIcon />
-									</Button>
+								<div
+									className="group/item grid min-w-0 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 transition-colors focus-within:border-border hover:border-border sm:grid-cols-[11rem_minmax(0,1fr)_2rem] sm:items-start"
+									key={itemIndex.toString()}
+								>
+									<div className="min-w-0">
+										<form.AppField name={`${itemsName}[${itemIndex}].kind` as const}>
+											{(field) => (
+												<Select
+													items={contactKindOptions}
+													onValueChange={(next) => field.handleChange(next as ContactItemKind)}
+													value={field.state.value as string}
+												>
+													<SelectTrigger
+														aria-label="Tipo de contacto"
+														className="w-full min-w-0"
+														onBlur={field.handleBlur}
+														size="sm"
+													>
+														<SelectValue />
+													</SelectTrigger>
+													<SelectPopup>
+														{contactKindOptions.map((option) => (
+															<SelectItem key={option.value} value={option.value}>
+																{option.label}
+															</SelectItem>
+														))}
+													</SelectPopup>
+												</Select>
+											)}
+										</form.AppField>
+									</div>
+									<div className="min-w-0 pt-0.5">
+										<form.AppField name={`${itemsName}[${itemIndex}].value` as const}>
+											{(field) => (
+												<InlineTextEditor
+													className="w-full min-w-0 break-words"
+													onBlur={() => field.handleBlur()}
+													onChange={(value) => field.handleChange(value)}
+													placeholder={CONTACT_ITEM_LABELS[item.kind]}
+													value={(field.state.value ?? "") as string}
+													variant="plain"
+												/>
+											)}
+										</form.AppField>
+									</div>
+									<div className="flex h-8 items-start justify-end">
+										<Button
+											aria-label="Eliminar contacto"
+											className="opacity-0 transition-opacity group-focus-within/item:opacity-100 [@media(hover:hover)]:group-hover/item:opacity-100"
+											onClick={() => itemsField.removeValue(itemIndex)}
+											size="icon-sm"
+											type="button"
+											variant="destructive-ghost"
+										>
+											<TrashIcon />
+										</Button>
+									</div>
 								</div>
 							))}
 
 							<Button
+								className="w-max"
 								onClick={() => itemsField.pushValue(createEmptyContactItem())}
 								size="sm"
 								type="button"

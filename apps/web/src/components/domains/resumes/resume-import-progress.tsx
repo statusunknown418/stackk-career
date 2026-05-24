@@ -3,7 +3,8 @@ import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
-import { mapParserPhase } from "./lib/map-parser-phase";
+import { mapParserPhase, mergeResumeParserEvents } from "./lib/map-parser-phase";
+import { ResumeParserTrace } from "./resume-parser-trace";
 
 interface ResumeImportProgressProps {
 	accessToken: string;
@@ -13,6 +14,8 @@ interface ResumeImportProgressProps {
 	parserRunId: string;
 }
 
+const FAILURE_STATUSES = new Set<string>(["FAILED", "CRASHED", "SYSTEM_FAILURE", "TIMED_OUT", "EXPIRED"]);
+
 export function ResumeImportProgress({
 	accessToken,
 	onComplete,
@@ -21,7 +24,8 @@ export function ResumeImportProgress({
 	parserRunId,
 }: ResumeImportProgressProps): React.ReactElement {
 	const { run } = useRealtimeRun<typeof resumeParserTask>(parserRunId, { accessToken });
-	const phase = mapParserPhase(run?.metadata as Record<string, unknown> | null | undefined);
+	const traceEvents = mergeResumeParserEvents(run?.metadata as Record<string, unknown> | null | undefined);
+	const phase = mapParserPhase(run?.metadata as Record<string, unknown> | null | undefined, traceEvents);
 	const status = run?.status;
 
 	useEffect(() => {
@@ -39,6 +43,7 @@ export function ResumeImportProgress({
 					<h3 className="font-medium text-lg">No pudimos detectar un CV en este PDF</h3>
 					{phase.validationReason && <p className="text-muted-foreground text-sm">{phase.validationReason}</p>}
 				</header>
+				<ResumeParserTrace autoScroll className="bg-background" events={traceEvents} />
 				<Button onClick={onTerminal} type="button">
 					Subir otro archivo
 				</Button>
@@ -46,13 +51,14 @@ export function ResumeImportProgress({
 		);
 	}
 
-	if (status === "FAILED") {
+	if (status && FAILURE_STATUSES.has(status)) {
 		return (
 			<section className="flex flex-col gap-4">
 				<header className="flex flex-col gap-1">
 					<h3 className="font-medium text-lg">Algo falló al procesar</h3>
 					<p className="text-muted-foreground text-sm">Intenta nuevamente.</p>
 				</header>
+				<ResumeParserTrace autoScroll className="bg-background" events={traceEvents} />
 				<Button onClick={onRetry} type="button">
 					Reintentar
 				</Button>
@@ -64,7 +70,7 @@ export function ResumeImportProgress({
 		<section className="flex flex-col gap-4">
 			<header className="flex flex-col gap-1">
 				<h3 className="font-medium text-lg">{phase.displayName ?? "Importando CV"}</h3>
-				<p className="text-muted-foreground text-sm">{phase.label}</p>
+				<p className="text-muted-foreground text-sm">{phase.currentLabel ?? phase.label}</p>
 			</header>
 
 			<Progress max={100} value={progressPct}>
@@ -73,7 +79,12 @@ export function ResumeImportProgress({
 				</ProgressTrack>
 			</Progress>
 
-			<p className="text-muted-foreground text-xs tabular-nums">{progressPct}%</p>
+			<div className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
+				<span>{phase.label}</span>
+				<span className="tabular-nums">{progressPct}%</span>
+			</div>
+
+			<ResumeParserTrace autoScroll events={traceEvents} />
 		</section>
 	);
 }
