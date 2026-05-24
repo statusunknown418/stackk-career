@@ -88,7 +88,7 @@ export const resumeParserStepSchema = z.enum([
 ]);
 
 export const resumeParserPhaseSchema = z.enum(["validation", "header", "entries", "skills"]);
-export const resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed"]);
+export const resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed", "canceled"]);
 
 export type ResumeParserStep = z.infer<typeof resumeParserStepSchema>;
 export type ResumeParserPhase = z.infer<typeof resumeParserPhaseSchema>;

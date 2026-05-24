@@ -6,6 +6,12 @@ export const triggerResumeAnalysisInputSchema = z.object({
 });
 export type InitiateResumeAnalysisInput = z.infer<typeof triggerResumeAnalysisInputSchema>;
 
+export const triggerDetailedResumeAnalysisInputSchema = z.object({
+	resumeId: z.string().nonempty(),
+	parentAnalysisId: z.string().optional(),
+});
+export type InitiateDetailedResumeAnalysisInput = z.infer<typeof triggerDetailedResumeAnalysisInputSchema>;
+
 export const triggerResumeParserInputSchema = z
 	.object({
 		fileId: z.string().optional(),

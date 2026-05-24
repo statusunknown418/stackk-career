@@ -181,6 +181,11 @@ export const createResumeInputSchema = z.object({
 	label: z.string().trim().min(1).max(120),
 });
 
+export const getResumeAnalysisInputSchema = z.object({
+	resumeId: z.string().nonempty(),
+});
+export type GetResumeAnalysisInput = z.infer<typeof getResumeAnalysisInputSchema>;
+
 export type ResumeDocumentWrapperForm = z.infer<typeof resumeDocumentWrapperFormSchema>;
 export type UpdateResumeTitleInput = z.infer<typeof updateResumeTitleSchema>;
 export type CreateResumeInput = z.infer<typeof createResumeInputSchema>;
