@@ -713,16 +713,21 @@ function HowItWorksStatic() {
 								</div>
 							)}
 							<div className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-8">
-								<div className="flex items-baseline gap-2 md:w-[180px] md:shrink-0">
-									<span className="font-mono text-[11px] text-foreground/40 uppercase tabular-nums tracking-[0.12em]">
-										{step.index}
-									</span>
-									<span className="flex items-baseline gap-1.5">
-										<span className="font-mono text-[11px] text-foreground/40 uppercase tracking-[0.1em]">Día</span>
-										<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-[-0.05em]">
-											{step.day}
+								<div className="flex items-center justify-between gap-3 md:w-[180px] md:shrink-0 md:items-baseline md:justify-start">
+									<div className="flex items-baseline gap-2">
+										<span className="font-mono text-[11px] text-foreground/40 uppercase tabular-nums tracking-[0.12em]">
+											{step.index}
 										</span>
-									</span>
+										<span className="flex items-baseline gap-1.5">
+											<span className="font-mono text-[11px] text-foreground/40 uppercase tracking-[0.1em]">Día</span>
+											<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-[-0.05em]">
+												{step.day}
+											</span>
+										</span>
+									</div>
+									<div aria-hidden="true" className="size-[clamp(3rem,13vw,4.5rem)] shrink-0 text-oxblood md:hidden">
+										<StepGraphic idx={idx} reduced />
+									</div>
 								</div>
 								<div className="flex max-w-[52ch] flex-1 flex-col">
 									{step.tag && (
@@ -747,6 +752,11 @@ function HowItWorksStatic() {
 											Meta
 										</div>
 									)}
+								</div>
+								<div aria-hidden="true" className="hidden shrink-0 self-center text-oxblood md:block">
+									<div className="size-[clamp(5.5rem,11vw,8rem)]">
+										<StepGraphic idx={idx} reduced />
+									</div>
 								</div>
 							</div>
 						</li>

@@ -393,7 +393,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 					{/* The math — three columns: Ellos / vs / Nosotros */}
 					<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-8 md:mt-14 md:grid-cols-[1fr_auto_1fr]">
 						{/* ELLOS — Wonsulting side */}
-						<div className="flex flex-col items-end text-right">
+						<div className="flex flex-col items-start text-left md:items-end md:text-right">
 							{/* Both prices with a single strike that sweeps across them */}
 							<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4 gap-y-1">
 								<motion.span
@@ -431,7 +431,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 						</motion.span>
 
 						{/* NOSOTROS — ASSENDIA side */}
-						<div className="flex flex-col">
+						<div className="flex flex-col items-end text-right md:items-start md:text-left">
 							<div className="mt-3 flex items-baseline gap-2">
 								<motion.span
 									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-[-0.045em]"
@@ -551,7 +551,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 			</h3>
 
 			<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-6 md:grid-cols-[1fr_auto_1fr]">
-				<div className="flex flex-col items-end text-right">
+				<div className="flex flex-col items-start text-left md:items-end md:text-right">
 					<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4">
 						<span className="relative flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-[-0.04em]">
 							<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
@@ -571,7 +571,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 					vs
 				</span>
 
-				<div className="flex flex-col">
+				<div className="flex flex-col items-end text-right md:items-start md:text-left">
 					<div className="mt-3 flex items-baseline gap-2">
 						<span className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-[-0.045em]">
 							S/
