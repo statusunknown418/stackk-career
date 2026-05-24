@@ -16,3 +16,12 @@ export const k02Queue = queue({
 	name: "k02-fast-analysis",
 	concurrencyLimit: Number(process.env.K02_QUEUE_CONCURRENCY ?? 10),
 });
+
+/**
+ * k02 detailed analysis runs over the persisted resume block tree.
+ * Larger context window per call, so keep concurrency tighter than fast.
+ */
+export const k02DetailedQueue = queue({
+	name: "k02-detailed-analysis",
+	concurrencyLimit: Number(process.env.K02_DETAILED_QUEUE_CONCURRENCY ?? 5),
+});

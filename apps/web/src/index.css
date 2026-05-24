@@ -198,7 +198,7 @@
 	--primary: var(--color-neutral-800);
 	--primary-foreground: var(--color-neutral-50);
 	--ring: var(--color-neutral-400);
-	--secondary: --alpha(var(--color-black) / 4%);
+	--secondary: --alpha(var(--color-black) / 5%);
 	--secondary-foreground: var(--color-neutral-800);
 	--chart-1: var(--color-orange-600);
 	--chart-2: var(--color-teal-600);

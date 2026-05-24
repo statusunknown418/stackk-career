@@ -92,6 +92,16 @@ function DashLayout() {
 			<SidebarInset className="grid h-[calc(100svh-1rem)] grid-rows-[auto_1fr] overflow-hidden rounded-sm border">
 				<nav className="flex border-b px-2 py-1">
 					<Tooltip>
+						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
+							<SidebarSimpleIcon weight="duotone" />
+						</SidebarTrigger>
+
+						<TooltipContent>
+							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
 						<Button
 							disabled={!router.history.canGoBack()}
 							onClick={() => router.history.back()}
@@ -103,16 +113,6 @@ function DashLayout() {
 						</Button>
 
 						<TooltipContent>Regresar</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
-						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
-							<SidebarSimpleIcon weight="duotone" />
-						</SidebarTrigger>
-
-						<TooltipContent>
-							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
-						</TooltipContent>
 					</Tooltip>
 
 					<Tooltip>

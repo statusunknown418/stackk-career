@@ -1,65 +1,17 @@
-import { getTriggerDb } from "@stackk-career/db/http";
-import { user } from "@stackk-career/db/schema/auth";
-import { onboardingProfile } from "@stackk-career/db/schema/onboarding-profile";
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { type LanguageModel, Output, streamText } from "ai";
-import { eq } from "drizzle-orm";
 import { pdfUserMessage } from "../lib/ai/pdf-message";
+import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
 export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const K02_FAST_ANALYSIS_OBJECT_TYPE = "resume-analysis-fast";
 
 const K02_TIMEOUT_MS = Number(process.env.K02_FAST_ANALYSIS_TIMEOUT_MS ?? 3 * 60 * 1000); // 3 min
 
-const withTimeout = (outer: AbortSignal | undefined, timeoutMs: number): AbortSignal => {
-	const timeout = AbortSignal.timeout(timeoutMs);
-	return outer ? AbortSignal.any([outer, timeout]) : timeout;
-};
-
 export interface RunK02FastAnalysisInput {
 	pdfUrl: string;
 	signal?: AbortSignal;
 	userId: string;
-}
-
-interface UserMetadata {
-	profile: {
-		experience: string | null;
-		industry: string | null;
-		targetRole: string | null;
-		urgency: string | null;
-		location: string | null;
-	} | null;
-	user: { id: string; name: string | null; email: string | null };
-}
-
-async function getUserMetadata(userId: string): Promise<UserMetadata | null> {
-	const db = getTriggerDb();
-
-	const [row] = await db
-		.select()
-		.from(user)
-		.where(eq(user.id, userId))
-		.leftJoin(onboardingProfile, eq(onboardingProfile.userId, userId))
-		.limit(1)
-		.$withCache();
-
-	if (!row?.user.id) {
-		return null;
-	}
-
-	return {
-		user: { id: row.user.id, name: row.user.name ?? null, email: row.user.email ?? null },
-		profile: row.onboarding_profile
-			? {
-					experience: row.onboarding_profile.experience ?? null,
-					industry: row.onboarding_profile.industry ?? null,
-					targetRole: row.onboarding_profile.targetRole ?? null,
-					urgency: row.onboarding_profile.urgency ?? null,
-					location: row.onboarding_profile.location ?? null,
-				}
-			: null,
-	};
 }
 
 const SYSTEM_PROMPT = `

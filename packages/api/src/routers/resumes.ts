@@ -1,15 +1,18 @@
 import { ORPCError } from "@orpc/client";
 import { generations } from "@stackk-career/db/schema/generations";
+import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import {
 	blankResumeSections,
 	createResumeInputSchema,
+	getResumeAnalysisInputSchema,
 	updateResumeTitleSchema,
 } from "@stackk-career/schemas/api/resumes";
 import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
@@ -273,6 +276,43 @@ export const resumesRouter = {
 		});
 
 		return { deleted, blocks };
+	}),
+
+	getResumeAnalysis: protectedProcedure.input(getResumeAnalysisInputSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+
+		context.log?.set({
+			action: "get_resume_analysis",
+			user: { id: userId },
+			resume: { id: input.resumeId },
+		});
+
+		const [row] = await context.db
+			.select({ id: resumeAnalyses.id, object: resumeAnalyses.object })
+			.from(resumeAnalyses)
+			.where(
+				and(
+					eq(resumeAnalyses.resumeId, input.resumeId),
+					eq(resumeAnalyses.userId, userId),
+					eq(resumeAnalyses.status, "ready")
+				)
+			)
+			.orderBy(desc(resumeAnalyses.createdAt))
+			.limit(1);
+
+		if (!row?.object) {
+			context.log?.set({ outcome: "not_found" });
+			return null;
+		}
+
+		const parsed = resumeAnalysisSchema.safeParse(row.object);
+		if (!parsed.success) {
+			context.log?.set({ outcome: "invalid", analysis: { id: row.id } });
+			return null;
+		}
+
+		context.log?.set({ outcome: "found", analysis: { id: row.id } });
+		return { id: row.id, analysis: parsed.data };
 	}),
 
 	updateTitle: protectedProcedure.input(updateResumeTitleSchema).handler(async ({ context, input }) => {

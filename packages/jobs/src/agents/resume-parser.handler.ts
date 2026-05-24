@@ -22,6 +22,7 @@ import {
 	extractedSkillsBundleSchema,
 	type ResumeParserPhase,
 	type ResumeParserPhaseStatus,
+	type ResumeParserStep,
 	resumeValidationSchema,
 } from "@stackk-career/schemas/jobs/resume-parser";
 import { toError } from "@stackk-career/schemas/utils/to-error";
@@ -32,6 +33,10 @@ import { pdfUserMessage } from "../lib/ai/pdf-message";
 
 export const RESUME_PARSER_MODEL = "google/gemini-3.1-flash-lite" satisfies LanguageModel;
 export const RESUME_PARSER_OBJECT_TYPE = "resume-parser";
+export const RESUME_VALIDATOR_TOOL = "resume_validator";
+export const HEADER_EXTRACTOR_TOOL = "header_extractor";
+export const ENTRIES_BUNDLE_EXTRACTOR_TOOL = "entries_bundle_extractor";
+export const SKILLS_BUNDLE_EXTRACTOR_TOOL = "skills_bundle_extractor";
 
 // Per-call timeouts. Cap stuck calls so siblings free their share of the task slot.
 // Validation is a small bool+name output — fast. Bundles emit multi-section JSON — heavier output tokens.
@@ -39,9 +44,15 @@ const VALIDATION_TIMEOUT_MS = Number(process.env.RESUME_PARSER_VALIDATION_TIMEOU
 const BUNDLE_TIMEOUT_MS = Number(process.env.RESUME_PARSER_BUNDLE_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
 
 export interface ResumeParserEvent {
-	kind: ResumeParserPhase | Exclude<SectionKind, "custom"> | "contact";
+	at?: number;
+	detail?: string;
+	kind: ResumeParserStep | ResumeParserPhase | Exclude<SectionKind, "custom"> | "contact";
+	mock?: boolean;
+	progress?: number;
 	reason?: string;
 	status: ResumeParserPhaseStatus;
+	title?: string;
+	toolName?: string;
 }
 
 export interface RunResumeParserInput {
@@ -143,17 +154,17 @@ const baseRequest = (
 });
 
 async function withEvents<T>(
-	kind: ResumeParserEvent["kind"],
+	baseEvent: Omit<ResumeParserEvent, "status">,
 	onEvent: RunResumeParserInput["onEvent"],
 	fn: () => Promise<T>
 ): Promise<T> {
-	onEvent?.({ kind, status: "running" });
+	onEvent?.({ ...baseEvent, status: "running" });
 	try {
 		const value = await fn();
-		onEvent?.({ kind, status: "complete" });
+		onEvent?.({ ...baseEvent, status: "complete" });
 		return value;
 	} catch (err) {
-		onEvent?.({ kind, status: "failed", reason: toError(err).message });
+		onEvent?.({ ...baseEvent, status: "failed", reason: toError(err).message });
 		throw err;
 	}
 }
@@ -164,59 +175,132 @@ const fulfilledOr = <T, F>(result: PromiseSettledResult<T>, fallback: F): T | F 
 // ─── Main entry ────────────────────────────────────────────────────────────
 
 export async function runResumeParserAgent({ pdfUrl, signal, onEvent }: RunResumeParserInput) {
-	const validation = await withEvents("validation", onEvent, async () => {
-		const { output } = await generateText({
-			...baseRequest(
-				pdfUrl,
-				VALIDATE_SYSTEM,
-				"Decide if the attached PDF is a resume / CV.",
-				signal,
-				VALIDATION_TIMEOUT_MS
-			),
-			output: Output.object({ schema: resumeValidationSchema }),
-		});
-		return output;
+	onEvent?.({
+		kind: "validation",
+		status: "running",
+		title: "Inspeccionando PDF",
+		detail: "Revisando estructura y contenido base del documento",
+		progress: 0.12,
+		mock: true,
 	});
+
+	const validation = await withEvents(
+		{
+			kind: "validation",
+			title: "Validando que PDF sea CV",
+			detail: "Confirmando formato de resume antes de extraer datos",
+			progress: 0.18,
+			toolName: RESUME_VALIDATOR_TOOL,
+		},
+		onEvent,
+		async () => {
+			const { output } = await generateText({
+				...baseRequest(
+					pdfUrl,
+					VALIDATE_SYSTEM,
+					"Decide if the attached PDF is a resume / CV.",
+					signal,
+					VALIDATION_TIMEOUT_MS
+				),
+				output: Output.object({ schema: resumeValidationSchema }),
+			});
+			return output;
+		}
+	);
 
 	if (!validation.isResume) {
 		throw new Error(`Not a resume: ${validation.reason}`);
 	}
 
+	onEvent?.({
+		kind: "header",
+		status: "running",
+		title: "Eligiendo estrategia de extracción",
+		detail: "Separando encabezado, trayectorias y habilidades en lotes",
+		progress: 0.24,
+		mock: true,
+	});
+
 	const [headerResult, entriesResult, skillsResult] = await Promise.allSettled([
-		withEvents("header", onEvent, async () => {
-			const { output } = await generateText({
-				...baseRequest(
-					pdfUrl,
-					HEADER_SYSTEM,
-					"Extract the contact block and professional summary.",
-					signal,
-					BUNDLE_TIMEOUT_MS
-				),
-				output: Output.object({ schema: extractedHeaderSchema }),
-			});
-			return output;
-		}),
-		withEvents("entries", onEvent, async () => {
-			const { output } = await generateText({
-				...baseRequest(
-					pdfUrl,
-					ENTRIES_BUNDLE_SYSTEM,
-					"Extract every entries-based section.",
-					signal,
-					BUNDLE_TIMEOUT_MS
-				),
-				output: Output.object({ schema: extractedEntriesBundleSchema }),
-			});
-			return output;
-		}),
-		withEvents("skills", onEvent, async () => {
-			const { output } = await generateText({
-				...baseRequest(pdfUrl, SKILLS_BUNDLE_SYSTEM, "Extract every skills-based section.", signal, BUNDLE_TIMEOUT_MS),
-				output: Output.object({ schema: extractedSkillsBundleSchema }),
-			});
-			return output;
-		}),
+		withEvents(
+			{
+				kind: "header",
+				title: "Extrayendo encabezado",
+				detail: "Buscando nombre, contacto y resumen profesional",
+				progress: 0.34,
+				toolName: HEADER_EXTRACTOR_TOOL,
+			},
+			onEvent,
+			async () => {
+				const { output } = await generateText({
+					...baseRequest(
+						pdfUrl,
+						HEADER_SYSTEM,
+						"Extract the contact block and professional summary.",
+						signal,
+						BUNDLE_TIMEOUT_MS
+					),
+					output: Output.object({ schema: extractedHeaderSchema }),
+				});
+				return output;
+			}
+		),
+		withEvents(
+			{
+				kind: "entries",
+				title: "Extrayendo trayectoria",
+				detail: "Agrupando experiencia, educacion, certificaciones y proyectos",
+				progress: 0.42,
+				toolName: ENTRIES_BUNDLE_EXTRACTOR_TOOL,
+			},
+			onEvent,
+			async () => {
+				const { output } = await generateText({
+					...baseRequest(
+						pdfUrl,
+						ENTRIES_BUNDLE_SYSTEM,
+						"Extract every entries-based section.",
+						signal,
+						BUNDLE_TIMEOUT_MS
+					),
+					output: Output.object({ schema: extractedEntriesBundleSchema }),
+				});
+				return output;
+			}
+		),
+		withEvents(
+			{
+				kind: "skills",
+				title: "Extrayendo habilidades",
+				detail: "Agrupando stack tecnico, herramientas e idiomas",
+				progress: 0.5,
+				toolName: SKILLS_BUNDLE_EXTRACTOR_TOOL,
+			},
+			onEvent,
+			async () => {
+				const { output } = await generateText({
+					...baseRequest(
+						pdfUrl,
+						SKILLS_BUNDLE_SYSTEM,
+						"Extract every skills-based section.",
+						signal,
+						BUNDLE_TIMEOUT_MS
+					),
+					output: Output.object({ schema: extractedSkillsBundleSchema }),
+				});
+				return output;
+			}
+		),
 	]);
+
+	onEvent?.({
+		kind: "summary",
+		status: "running",
+		title: "Normalizando perfil",
+		detail: "Consolidando datos detectados en formato de resume editable",
+		progress: 0.58,
+		mock: true,
+	});
 
 	const header = fulfilledOr(headerResult, { contact: null, summary: null });
 	const entries = fulfilledOr(entriesResult, {
@@ -227,6 +311,15 @@ export async function runResumeParserAgent({ pdfUrl, signal, onEvent }: RunResum
 		volunteering: null,
 	});
 	const skills = fulfilledOr(skillsResult, { skills: null, languages: null });
+
+	onEvent?.({
+		kind: "summary",
+		status: "complete",
+		title: "Perfil normalizado",
+		detail: "Contenido listo para persistirse como grafo de resume",
+		progress: 0.62,
+		mock: true,
+	});
 
 	return {
 		validation,

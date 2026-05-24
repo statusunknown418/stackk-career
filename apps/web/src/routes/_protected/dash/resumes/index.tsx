@@ -1,10 +1,11 @@
 import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { RouteIcon } from "lucide-react";
+import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
-import { ResumeCreateDialog, resumeCreateSearchSchema } from "@/components/domains/resumes/resume-create-dialog";
+import { ResumeCreateDialog } from "@/components/domains/resumes/resume-create-dialog";
 import { ResumePendingCards } from "@/components/domains/resumes/resume-pending-cards";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -15,7 +16,6 @@ import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
-	validateSearch: resumeCreateSearchSchema,
 	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
 	pendingComponent: ResumesIndexPending,
 });
@@ -46,9 +46,9 @@ function ResumesIndexPending() {
 function RouteComponent() {
 	const listQuery = orpc.resumes.list.queryOptions();
 	const { data } = useSuspenseQuery(listQuery);
-	const navigate = useNavigate({ from: Route.fullPath });
 	const { data: session } = authClient.useSession();
 	const userId = session?.user?.id;
+	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
 	const tokenQuery = useQuery({
 		...orpc.viewer.realtimeToken.queryOptions(),
@@ -56,7 +56,7 @@ function RouteComponent() {
 		staleTime: 29 * 60 * 1000,
 	});
 
-	const openDialog = () => navigate({ search: (prev) => ({ ...prev, create: 1 }) });
+	const openDialog = () => setIsCreateDialogOpen(true);
 
 	const hasResumeContent = data.length > 0;
 
@@ -125,7 +125,7 @@ function RouteComponent() {
 				)}
 			</section>
 
-			<ResumeCreateDialog />
+			<ResumeCreateDialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen} />
 		</section>
 	);
 }
