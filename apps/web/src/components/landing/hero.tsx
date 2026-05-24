@@ -2,6 +2,7 @@ import { ArrowRightIcon, ShieldCheckIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { CountUp } from "@/components/ui/count-up";
 import { LogoMarqueeRows } from "@/components/ui/logo-marquee-rows";
+import { HeroAuroraShader } from "./hero-aurora-shader";
 
 const EASE_OUT_QUINT = [0.16, 1, 0.3, 1] as const;
 
@@ -19,11 +20,8 @@ export function Hero() {
 				className="relative isolate flex min-h-[88vh] flex-col justify-center overflow-hidden bg-background px-6 pt-28 pb-20 sm:pt-32 sm:pb-24"
 				id="top"
 			>
-				{/* faint grid floor, very subtle on white */}
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute inset-0 -z-10 opacity-[0.04] [background-image:linear-gradient(to_right,var(--color-foreground)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-foreground)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
-				/>
+				{/* Flowing green mesh gradient behind the headline (replaces the grid) */}
+				<HeroAuroraShader />
 
 				<div className="relative z-10 mx-auto w-full max-w-[1180px]">
 					{/* live badge */}
@@ -47,7 +45,7 @@ export function Hero() {
 
 					{/* Headline, single bold weight, near-black */}
 					<motion.h1
-						className="max-w-[14ch] font-bold font-display text-[clamp(2.5rem,8vw,6rem)] text-foreground leading-[0.95] tracking-[-0.04em]"
+						className="max-w-[14ch] font-display font-semibold text-[clamp(2.5rem,8vw,6rem)] text-foreground leading-[0.95] tracking-[-0.04em]"
 						initial={fadeUp}
 						transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.1 }}
 						viewport={viewport}
@@ -69,13 +67,14 @@ export function Hero() {
 
 					{/* Supporting line */}
 					<motion.p
-						className="mt-8 max-w-[560px] text-[clamp(1.05rem,1.3vw,1.2rem)] text-muted-foreground leading-[1.5]"
+						className="mt-8 max-w-[560px] text-[clamp(1.05rem,1.3vw,1.2rem)] text-foreground leading-[1.5]"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.3 }}
 						viewport={viewport}
 						whileInView={fadeIn}
 					>
-						CV reescrito por IA en 30 segundos. Coach senior real hasta tu próxima entrevista.
+						Tu CV potenciado con un Agente especializado de IA. Y un coach que ya pasó por lo mismo, contigo hasta la
+						entrevista.
 					</motion.p>
 
 					{/* CTAs */}
@@ -87,7 +86,7 @@ export function Hero() {
 						whileInView={fadeIn}
 					>
 						<a
-							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-[15px] text-background tracking-tight shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_8px_24px_-12px_oklch(from_var(--oxblood)_l_c_h/0.5)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_14px_30px_-12px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
+							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-[#0c140e] text-[15px] tracking-tight shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_8px_24px_-12px_oklch(from_var(--oxblood)_l_c_h/0.5)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_14px_30px_-12px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
 							href="/setup"
 						>
 							Analiza mi CV gratis
@@ -106,7 +105,7 @@ export function Hero() {
 
 					{/* risk-reversal chips */}
 					<motion.ul
-						className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.18em]"
+						className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.1em]"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.5 }}
 						viewport={viewport}
@@ -122,49 +121,69 @@ export function Hero() {
 						<li>Cancelas cuando quieras</li>
 					</motion.ul>
 
-					{/* Outcome cards cluster — concard signature, adapted */}
+					{/* Outcome cards — one featured metric + three supporting (not a flat
+					    grid of identical cards). */}
 					<motion.div
-						className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+						className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2"
 						initial="hidden"
 						transition={{ staggerChildren: 0.1, delayChildren: 0.6 }}
 						viewport={viewport}
 						whileInView="visible"
 					>
-						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">Score CV</p>
-							<div className="mt-3 flex items-baseline gap-2">
-								<span className="font-bold font-display text-[28px] text-foreground/40 tabular-nums leading-none tracking-[-0.03em] line-through decoration-2">
-									47
-								</span>
-								<ArrowRightIcon className="text-foreground/40" size={14} weight="bold" />
-								<span className="font-bold font-display text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
-									95
+						{/* FEATURED — Score CV, the headline proof, big and tinted */}
+						<OutcomeCard
+							className="justify-between p-6 sm:col-span-2 lg:col-span-2 lg:row-span-2"
+							reducedMotion={motionDisabled}
+						>
+							<div className="relative flex items-center justify-between">
+								<p className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.11em]">
+									Puntaje de tu CV <span className="text-foreground/35">/ 100</span>
+								</p>
+								<span className="rounded-full bg-oxblood/15 px-2 py-0.5 font-medium font-mono text-[9.5px] text-oxblood uppercase tracking-[0.09em]">
+									+48 pts
 								</span>
 							</div>
-							<div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-foreground/[0.08]">
-								<motion.div
-									className="h-full rounded-full bg-oxblood"
-									initial={motionDisabled ? false : { width: "0%" }}
-									transition={{ duration: 1.1, ease: EASE_OUT_QUINT, delay: 0.9 }}
-									viewport={viewport}
-									whileInView={motionDisabled ? undefined : { width: "95%" }}
-								/>
+							<div className="relative mt-auto pt-8">
+								<div className="flex items-baseline gap-3">
+									<span className="font-display font-semibold text-[34px] text-foreground/35 tabular-nums leading-none tracking-[-0.03em] line-through decoration-2">
+										47
+									</span>
+									<ArrowRightIcon className="text-foreground/40" size={18} weight="bold" />
+									<span className="font-display font-semibold text-[clamp(3.5rem,7vw,5rem)] text-foreground tabular-nums leading-[0.85] tracking-[-0.05em]">
+										95
+									</span>
+									<span className="font-display font-medium text-[20px] text-foreground/30 tabular-nums tracking-tight">
+										/100
+									</span>
+								</div>
+								<div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-foreground/[0.08]">
+									<motion.div
+										className="h-full rounded-full bg-oxblood"
+										initial={motionDisabled ? false : { width: "0%" }}
+										transition={{ duration: 1.1, ease: EASE_OUT_QUINT, delay: 0.9 }}
+										viewport={viewport}
+										whileInView={motionDisabled ? undefined : { width: "95%" }}
+									/>
+								</div>
+								<p className="mt-3 text-[13px] text-foreground/60 leading-snug">
+									Reescrito por IA y revisado por tu coach, listo para reclutadores.
+								</p>
 							</div>
 						</OutcomeCard>
 
-						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">Coach 1:1 senior</p>
-							<p className="mt-3 font-bold font-display text-[28px] text-foreground leading-[1] tracking-[-0.03em]">
-								Real, no IA
+						<OutcomeCard className="lg:col-span-2" reducedMotion={motionDisabled}>
+							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Juega de tu lado</p>
+							<p className="mt-3 font-display font-semibold text-[28px] text-foreground leading-[1] tracking-[-0.03em]">
+								Coach 1:1 senior
 							</p>
-							<p className="mt-4 font-mono text-[10.5px] text-foreground/70 uppercase tracking-[0.16em]">
-								ex-BCP <span className="text-foreground/30">·</span> ex-Yape
+							<p className="mt-4 font-mono text-[10.5px] text-foreground/70 uppercase tracking-[0.09em]">
+								Hoy trabajan en las top 25 empresas peruanas y latinoamericanas
 							</p>
 						</OutcomeCard>
 
 						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">Primera entrevista</p>
-							<p className="mt-3 font-bold font-display text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Primera entrevista</p>
+							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
 								Día 18
 							</p>
 							<div className="mt-4 flex items-center gap-1">
@@ -182,20 +201,23 @@ export function Hero() {
 										whileInView={motionDisabled ? undefined : { scaleY: 1 }}
 									/>
 								))}
-								<span className="ml-2 font-mono text-[9.5px] text-foreground/45 uppercase tracking-[0.18em]">
+								<span className="ml-2 font-mono text-[9.5px] text-foreground/55 uppercase tracking-[0.1em]">
 									promedio
 								</span>
 							</div>
 						</OutcomeCard>
 
 						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.2em]">Tu inversión</p>
-							<p className="mt-3 font-bold font-display text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Tu inversión</p>
+							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
 								S/79
 								<span className="font-medium text-[16px] text-foreground/50 tracking-tight">/mes</span>
+								<span className="ml-2 font-medium font-mono text-[11px] text-foreground/55 tracking-tight">
+									≈ US$23
+								</span>
 							</p>
-							<p className="mt-4 font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.16em]">
-								desde <span className="text-foreground/35 line-through">S/250</span> por sesión suelta
+							<p className="mt-4 font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.09em]">
+								o S/40 (≈ US$11) la sesión única, sin suscripción
 							</p>
 						</OutcomeCard>
 					</motion.div>
@@ -205,23 +227,23 @@ export function Hero() {
 			<section className="relative border-border border-y bg-muted/40 px-6 pt-14 pb-16">
 				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12">
 					<motion.dl
-						className="flex flex-wrap items-baseline justify-center gap-x-12 gap-y-4 text-center"
+						className="hidden flex-wrap items-baseline justify-center gap-x-12 gap-y-4 text-center"
 						initial="hidden"
 						transition={{ staggerChildren: 0.12 }}
 						viewport={{ once: true, margin: "-15% 0px" }}
 						whileInView="visible"
 					>
 						<HeroStat
-							countTo={2400}
-							label="entrevistas el último año"
+							countTo={240}
+							label="entrevistas conseguidas"
 							reducedMotion={motionDisabled}
 							suffix="+"
-							value="2.400+"
+							value="240+"
 						/>
 						<HeroStat
 							countTo={4.9}
 							decimals={1}
-							label="en 380 reseñas verificadas"
+							label="en 90 reseñas verificadas"
 							reducedMotion={motionDisabled}
 							suffix="★"
 							value="4.9★"
@@ -229,11 +251,11 @@ export function Hero() {
 						<HeroStat countTo={18} label="días a tu primera entrevista" reducedMotion={motionDisabled} value="18" />
 					</motion.dl>
 					<div className="flex w-full flex-col items-center gap-6 border-border border-t pt-10">
-						<p className="font-mono text-[10px] text-foreground/65 uppercase tracking-[0.22em]">
+						<p className="font-mono text-[10px] text-foreground/65 uppercase tracking-[0.12em]">
 							Nuestros talentos ya trabajan en
 						</p>
 						<LogoMarqueeRows />
-						<p className="flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/60 uppercase tracking-[0.18em]">
+						<p className="hidden max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/60 uppercase tracking-[0.1em]">
 							<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-foreground/20" />
 							<span>Empresas verificadas a través del LinkedIn de cada talento</span>
 						</p>
@@ -249,10 +271,18 @@ const outcomeCardVariants = {
 	visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE_OUT_QUINT } },
 };
 
-function OutcomeCard({ children, reducedMotion }: { children: React.ReactNode; reducedMotion: boolean }) {
+function OutcomeCard({
+	children,
+	reducedMotion,
+	className = "",
+}: {
+	children: React.ReactNode;
+	className?: string;
+	reducedMotion: boolean;
+}) {
 	return (
 		<motion.div
-			className="group relative flex flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-oxblood/50 hover:shadow-[0_12px_32px_-12px_oklch(0.13_0_0_/_0.12)]"
+			className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-oxblood/50 hover:shadow-[0_12px_32px_-12px_oklch(0.13_0_0_/_0.12)] ${className}`}
 			variants={reducedMotion ? undefined : outcomeCardVariants}
 			whileHover={reducedMotion ? undefined : { rotate: -0.4 }}
 		>
@@ -287,14 +317,14 @@ function HeroStat({
 }) {
 	return (
 		<motion.div className="flex flex-col items-center gap-1" variants={reducedMotion ? undefined : heroStatVariants}>
-			<dt className="font-bold font-display text-[clamp(2rem,3.5vw,2.75rem)] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+			<dt className="font-display font-semibold text-[clamp(2rem,3.5vw,2.75rem)] text-foreground tabular-nums leading-none tracking-[-0.04em]">
 				{countTo === undefined ? (
 					value
 				) : (
 					<CountUp decimals={decimals} duration={1.2} once suffix={suffix} to={countTo} />
 				)}
 			</dt>
-			<dd className="max-w-[18ch] font-mono text-[10px] text-foreground/60 uppercase tracking-[0.16em]">{label}</dd>
+			<dd className="max-w-[18ch] font-mono text-[10px] text-foreground/60 uppercase tracking-[0.09em]">{label}</dd>
 		</motion.div>
 	);
 }

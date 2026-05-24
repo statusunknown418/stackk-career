@@ -9,6 +9,9 @@ const loginSearchSchema = z.object({
 export const Route = createFileRoute("/login")({
 	component: RouteComponent,
 	validateSearch: loginSearchSchema,
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
 });
 
 function RouteComponent() {

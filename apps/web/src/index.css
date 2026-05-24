@@ -23,7 +23,7 @@
 	--font-display:
 		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
 	--font-mono: "JetBrains Mono", "Geist Mono Variable", ui-monospace, monospace;
-	--font-sans: "Inter Variable", "Inter", -apple-system, sans-serif;
+	--font-sans: "Geist", "Inter Variable", "Inter", -apple-system, sans-serif;
 	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
 	--color-aurora-1: var(--aurora-1);
@@ -504,7 +504,7 @@
 .dark {
 	/* ASSENDIA dark — vibrant Platzi green accent on near-black, white logo. */
 	--ink: oklch(0.96 0.01 150);
-	--paper: oklch(0.15 0.01 155);
+	--paper: oklch(0 0 0);
 	--oxblood: oklch(0.84 0.21 142);
 	--marigold: oklch(0.84 0.21 142);
 	--rule: oklch(0.96 0.01 150 / 12%);
@@ -531,9 +531,9 @@
 	--accent: --alpha(var(--color-white) / 4%);
 	--accent-foreground: oklch(0.94 0.01 78);
 
-	--background: oklch(0.15 0.01 155);
+	--background: oklch(0 0 0);
 	--border: oklch(0.96 0.01 150 / 10%);
-	--card: oklch(0.19 0.012 155);
+	--card: oklch(0.16 0 0);
 	--card-foreground: oklch(0.96 0.01 150);
 	--destructive: color-mix(
 		in srgb,
@@ -590,6 +590,11 @@
 		/* Non-static so motion's useScroll({ target }) can measure window-scroll
 		   offsets against a positioned container (silences a dev-only warning). */
 		position: relative;
+	}
+
+	.grain-overlay {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+		background-size: 160px 160px;
 	}
 
 	body {

@@ -53,7 +53,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Stackk Career",
+				title: "ASSENDIA · Tu próxima entrevista, garantizada",
+			},
+			{
+				name: "description",
+				content:
+					"Plataforma de empleo con IA + coaching humano para LATAM. CV reescrito por IA y coach senior real hasta tu próxima entrevista.",
 			},
 		],
 		links: [
@@ -61,6 +66,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				rel: "stylesheet",
 				href: appCss,
 			},
+			{ rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+			{ rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+			{ rel: "manifest", href: "/site.webmanifest" },
 		],
 	}),
 	server: {

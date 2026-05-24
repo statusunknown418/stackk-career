@@ -1,13 +1,13 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import { WordReveal } from "@/components/ui/word-reveal";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
 import { TESTIMONIALS, type Testimonial } from "./data";
 
-const FEATURED = TESTIMONIALS[0];
 const REST = TESTIMONIALS.slice(1);
 
 const EASE_OUT_QUINT = [0.16, 1, 0.3, 1] as const;
+const ROTATE_INTERVAL_MS = 5000;
 
 interface ColumnConfig {
 	durationClass: string;
@@ -36,61 +36,124 @@ function distributeIntoColumns(items: readonly Testimonial[], cols: number): Tes
 
 const TESTIMONIAL_COLUMNS = distributeIntoColumns(REST, COLUMN_COUNT);
 
-export function TestimonialsCarousel() {
+function FeaturedTestimonial() {
 	const reduced = useReducedMotion();
+	const [activeIndex, setActiveIndex] = useState(0);
+	const [paused, setPaused] = useState(false);
+
+	const goTo = useCallback((index: number) => {
+		setActiveIndex(((index % TESTIMONIALS.length) + TESTIMONIALS.length) % TESTIMONIALS.length);
+	}, []);
+
+	useEffect(() => {
+		if (reduced || paused) {
+			return;
+		}
+		const id = setInterval(() => {
+			setActiveIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+		}, ROTATE_INTERVAL_MS);
+		return () => clearInterval(id);
+	}, [reduced, paused]);
+
+	const active = TESTIMONIALS[activeIndex];
 
 	return (
-		<section className="overflow-hidden px-6 py-16 md:py-24" id="casos">
-			<div className="mx-auto max-w-[1200px]">
-				<header className="mx-auto mb-14 max-w-[920px] text-center">
-					<motion.span
-						className="inline-block font-mono text-[11px] text-foreground/55 uppercase tracking-[0.22em]"
-						initial={reduced ? false : { opacity: 0, y: 8 }}
-						transition={reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_OUT_QUINT }}
-						viewport={{ margin: "-15% 0px", once: true }}
-						whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-					>
-						Casos verificados
-					</motion.span>
+		<header
+			className="mx-auto mb-14 max-w-[920px] text-center"
+			onMouseEnter={() => setPaused(true)}
+			onMouseLeave={() => setPaused(false)}
+		>
+			<motion.span
+				className="inline-block font-mono text-[11px] text-foreground/55 uppercase tracking-[0.12em]"
+				initial={reduced ? false : { opacity: 0, y: 8 }}
+				transition={reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_OUT_QUINT }}
+				viewport={{ margin: "-15% 0px", once: true }}
+				whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+			>
+				Casos verificados
+			</motion.span>
 
-					<blockquote className="mt-6 text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-[1.15] tracking-[-0.025em]">
-						<motion.span
-							aria-hidden="true"
-							className="inline-block font-display-italic text-foreground/55"
-							initial={reduced ? false : { opacity: 0, scale: 0.85 }}
-							style={{ transformOrigin: "50% 70%" }}
-							transition={reduced ? { duration: 0 } : { delay: 0.25, duration: 0.7, ease: EASE_OUT_QUINT }}
-							viewport={{ margin: "-15% 0px", once: true }}
-							whileInView={reduced ? undefined : { opacity: 1, scale: 1 }}
-						>
+			<div className="relative mt-6 min-h-[clamp(7rem,16vw,12rem)]">
+				<AnimatePresence initial={false} mode="wait">
+					<motion.blockquote
+						animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+						className="text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-[1.15] tracking-[-0.025em]"
+						exit={reduced ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(8px)" }}
+						initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16, filter: "blur(8px)" }}
+						key={active.id}
+						transition={reduced ? { duration: 0.2 } : { duration: 0.6, ease: EASE_OUT_QUINT }}
+					>
+						<span aria-hidden="true" className="font-display-italic text-foreground/55">
 							“
-						</motion.span>
-						<WordReveal delayStart={0.35} stagger={0.035}>
-							{FEATURED.quote}
-						</WordReveal>
-						<motion.span
-							aria-hidden="true"
-							className="inline-block font-display-italic text-foreground/55"
-							initial={reduced ? false : { opacity: 0, scale: 0.85 }}
-							style={{ transformOrigin: "50% 70%" }}
-							transition={reduced ? { duration: 0 } : { delay: 0.55, duration: 0.7, ease: EASE_OUT_QUINT }}
-							viewport={{ margin: "-15% 0px", once: true }}
-							whileInView={reduced ? undefined : { opacity: 1, scale: 1 }}
-						>
+						</span>
+						{active.quote}
+						<span aria-hidden="true" className="font-display-italic text-foreground/55">
 							”
-						</motion.span>
-					</blockquote>
+						</span>
+					</motion.blockquote>
+				</AnimatePresence>
+			</div>
 
-					<motion.p
-						className="mt-6 font-mono text-[11px] text-foreground/65 uppercase tracking-[0.16em]"
-						initial={reduced ? false : { opacity: 0, y: 12 }}
-						transition={reduced ? { duration: 0 } : { delay: 0.7, duration: 0.7, ease: EASE_OUT_QUINT }}
-						viewport={{ margin: "-15% 0px", once: true }}
-						whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-					>
-						{FEATURED.name} · {FEATURED.role} · {FEATURED.location}
-					</motion.p>
-				</header>
+			<AnimatePresence initial={false} mode="wait">
+				<motion.p
+					animate={{ opacity: 1, y: 0 }}
+					className="mt-6 font-mono text-[11px] text-foreground/65 uppercase tracking-[0.09em]"
+					exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+					initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+					key={`${active.id}-meta`}
+					transition={reduced ? { duration: 0.2 } : { duration: 0.5, ease: EASE_OUT_QUINT }}
+				>
+					{active.name} · {active.role} · {active.location}
+				</motion.p>
+			</AnimatePresence>
+
+			<div className="mt-8 flex items-center justify-center gap-4">
+				<button
+					aria-label="Caso anterior"
+					className="grid size-9 place-items-center rounded-full border border-border bg-card text-foreground/70 transition-colors hover:border-foreground/30 hover:text-foreground"
+					onClick={() => goTo(activeIndex - 1)}
+					type="button"
+				>
+					<span aria-hidden="true">‹</span>
+				</button>
+
+				<div className="flex items-center gap-2" role="tablist">
+					{TESTIMONIALS.map((t, idx) => {
+						const isActive = idx === activeIndex;
+						return (
+							<button
+								aria-label={`Ver caso de ${t.name}`}
+								aria-selected={isActive}
+								className={`h-1.5 rounded-full transition-all duration-300 ${
+									isActive ? "w-6 bg-foreground" : "w-1.5 bg-foreground/25 hover:bg-foreground/45"
+								}`}
+								key={t.id}
+								onClick={() => goTo(idx)}
+								role="tab"
+								type="button"
+							/>
+						);
+					})}
+				</div>
+
+				<button
+					aria-label="Caso siguiente"
+					className="grid size-9 place-items-center rounded-full border border-border bg-card text-foreground/70 transition-colors hover:border-foreground/30 hover:text-foreground"
+					onClick={() => goTo(activeIndex + 1)}
+					type="button"
+				>
+					<span aria-hidden="true">›</span>
+				</button>
+			</div>
+		</header>
+	);
+}
+
+export function TestimonialsCarousel() {
+	return (
+		<section className="overflow-hidden border-border border-y bg-foreground/[0.025] px-6 py-16 md:py-24" id="casos">
+			<div className="mx-auto max-w-[1200px]">
+				<FeaturedTestimonial />
 
 				<div className="relative h-[640px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)] md:h-[760px]">
 					<div className="grid h-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -104,8 +167,8 @@ export function TestimonialsCarousel() {
 					</div>
 				</div>
 
-				<p className="mt-8 text-center font-mono text-[10px] text-foreground/45 uppercase tracking-[0.18em]">
-					Una muestra de las 380 reseñas · pasa el cursor para pausar
+				<p className="mt-8 text-center font-mono text-[10px] text-foreground/55 uppercase tracking-[0.1em]">
+					Una muestra de las 90 reseñas · pasa el cursor para pausar
 				</p>
 			</div>
 		</section>

@@ -131,7 +131,7 @@ function HowItWorksScrub() {
 			className="relative bg-background"
 			id="camino"
 			ref={sectionRef}
-			style={{ height: `${PANEL_COUNT * 50}vh` }}
+			style={{ height: `${PANEL_COUNT * 42}vh` }}
 		>
 			<div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden">
 				<ScrubHeader activeIdx={activeIdx} dayText={dayText} progress={progress} />
@@ -173,22 +173,25 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 	return (
 		<header className="relative z-20 mx-auto flex w-full max-w-[1400px] items-end justify-between px-6 pt-10 pb-6 md:px-12 md:pt-14">
 			<div className="flex flex-col gap-3">
-				<div className="flex items-center gap-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.24em]">
+				<div className="flex items-center gap-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.13em]">
 					<span aria-hidden="true" className="h-px w-8 bg-foreground/30" />
 					<span>El camino</span>
 				</div>
 				<h2
-					className="flex items-baseline gap-3 font-bold font-display text-foreground leading-none tracking-[-0.045em]"
+					className="flex items-baseline gap-2 font-bold font-display text-foreground leading-none tracking-[-0.045em]"
 					id="how-heading"
 				>
-					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">D0</span>
-					<span className="font-display-italic font-light text-[0.45em] text-foreground/50">a</span>
-					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">D42</span>
+					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">0</span>
+					<span className="font-display-italic font-light text-[clamp(2rem,4vw,3.4rem)] text-foreground/50">→</span>
+					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">42</span>
+					<span className="mb-2 self-end font-mono text-[clamp(0.7rem,0.9vw,0.95rem)] text-foreground/50 uppercase tracking-[0.1em]">
+						días
+					</span>
 				</h2>
 			</div>
 
 			<div className="hidden flex-col items-end gap-2 md:flex">
-				<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.22em]">
+				<div className="flex items-center gap-2 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em]">
 					<span className="font-display-italic font-light text-base text-foreground/65 leading-none">
 						{activePhase.roman}
 					</span>
@@ -196,17 +199,15 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 					<span className="text-oxblood">{activePhase.label}</span>
 				</div>
 				<div className="flex items-baseline gap-1.5 leading-none">
-					<span className="font-mono text-[12px] text-foreground/40 leading-none">D</span>
+					<span className="font-mono text-[11px] text-foreground/55 uppercase leading-none tracking-[0.1em]">Día</span>
 					<motion.span
 						aria-live="polite"
-						className="font-bold font-display text-[clamp(3.5rem,7vw,6rem)] text-oxblood tabular-nums leading-none tracking-[-0.05em]"
+						className="font-bold font-display text-[clamp(1.75rem,3vw,2.75rem)] text-oxblood tabular-nums leading-none tracking-[-0.04em]"
 						style={{ scale: counterScale }}
 					>
 						{dayText}
 					</motion.span>
-					<span className="ml-1 font-mono text-[11px] text-foreground/35 uppercase tracking-[0.18em]">
-						/ {TOTAL_DAYS}
-					</span>
+					<span className="font-mono text-[11px] text-foreground/35 uppercase tracking-[0.1em]">de {TOTAL_DAYS}</span>
 				</div>
 			</div>
 		</header>
@@ -246,10 +247,8 @@ function Panel({ idx, progress, step }: PanelProps) {
 	const bodyOpacity = useTransform(local, [0.25, 0.9], [0, 1]);
 	const bodyY = useTransform(local, [0.25, 0.9], [22, 0]);
 
-	// The huge ghost day number behind the content — parallaxes opposite the
-	// scroll direction so it feels weighted, like a fixed landmark you pass.
+	// Gauge parallaxes opposite the scroll direction so it feels weighted.
 	const ghostX = useTransform(local, [0, 1], [80, -40]);
-	const ghostOpacity = useTransform(local, [0, 0.5, 1], [0, 0.06, 0.08]);
 
 	// Index pill — barely scales in, never bounces.
 	const pillScale = useTransform(local, [0, 0.6], [0.96, 1]);
@@ -257,34 +256,26 @@ function Panel({ idx, progress, step }: PanelProps) {
 
 	return (
 		<li aria-label={`Día ${step.day}: ${step.title}`} className="relative flex h-full w-screen shrink-0 items-center">
-			{/* Ghost background day — anchors the panel to its number */}
-			<motion.span
-				aria-hidden="true"
-				className="pointer-events-none absolute right-[-2vw] bottom-[8vh] select-none font-bold font-display text-foreground tabular-nums leading-[0.8] tracking-[-0.07em]"
-				style={{
-					fontSize: "clamp(20rem, 42vw, 44rem)",
-					opacity: ghostOpacity,
-					x: ghostX,
-				}}
-			>
-				{step.day}
-			</motion.span>
+			{/* A distinct abstract graphic per step, matched to its copy (replaces
+			    the old repeated ghost number). */}
+			<StepVisual ghostX={ghostX} idx={idx} local={local} />
 
 			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] items-center gap-12 px-6 md:px-12">
 				<div className="grid w-full grid-cols-12 items-end gap-8">
 					{/* Left: index + day */}
 					<div className="col-span-12 flex flex-col gap-6 md:col-span-5">
 						<motion.div
-							className="inline-flex w-fit items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.22em] backdrop-blur-sm"
+							className="inline-flex w-fit items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.12em]"
 							style={{ opacity: pillOpacity, scale: pillScale }}
 						>
 							<span aria-hidden="true" className="size-1 rounded-full bg-oxblood" />
+							<span className="text-foreground/55">Paso</span>
 							<span className="text-foreground tabular-nums">{step.index}</span>
 							<span className="text-foreground/30">/ 0{PANEL_COUNT}</span>
 						</motion.div>
 
-						<motion.div className="flex items-baseline gap-2" style={{ opacity: tagOpacity, y: tagY }}>
-							<span className="font-mono text-[11px] text-foreground/50 uppercase tracking-[0.22em]">Día</span>
+						<motion.div className="flex items-baseline gap-1" style={{ opacity: tagOpacity, y: tagY }}>
+							<span className="font-mono text-[11px] text-foreground/50 uppercase tracking-[0.12em]">Día</span>
 							<span className="font-bold font-display text-[clamp(6rem,14vw,12rem)] text-foreground tabular-nums leading-[0.82] tracking-[-0.065em]">
 								{step.day}
 							</span>
@@ -295,7 +286,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 					<div className="col-span-12 flex max-w-[44ch] flex-col md:col-span-7 md:col-start-7">
 						{step.tag && (
 							<motion.div
-								className="mb-5 inline-flex w-fit items-center gap-2 font-mono text-[10px] text-foreground/60 uppercase tracking-[0.22em]"
+								className="mb-5 inline-flex w-fit items-center gap-2 font-mono text-[10px] text-foreground/60 uppercase tracking-[0.12em]"
 								style={{ opacity: tagOpacity, y: tagY }}
 							>
 								<span aria-hidden="true" className="h-px w-6 bg-oxblood" />
@@ -326,7 +317,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 
 						{isLast && (
 							<motion.div
-								className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3.5 py-1.5 font-mono text-[10px] text-background uppercase tracking-[0.18em]"
+								className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3.5 py-1.5 font-mono text-[#0c140e] text-[10px] uppercase tracking-[0.1em]"
 								style={{ opacity: bodyOpacity, y: bodyY }}
 							>
 								<span aria-hidden="true" className="size-1.5 rounded-full bg-background" />
@@ -337,6 +328,255 @@ function Panel({ idx, progress, step }: PanelProps) {
 				</div>
 			</div>
 		</li>
+	);
+}
+
+/* -------------------------------------------------------------------------- */
+/* STEP VISUAL — a distinct abstract graphic per step, matched to its copy:    */
+/* radar (diagnose) · target (map roles) · volume bars (tools produce) ·       */
+/* equalizer (interview sim) · checklist (reinforce) · calendar (booked).      */
+/* Abstract data-viz, never fake product UI.                                   */
+/* -------------------------------------------------------------------------- */
+
+const VOLUME_BARS = [
+	{ id: "v1", h: 70 },
+	{ id: "v2", h: 120 },
+	{ id: "v3", h: 92 },
+	{ id: "v4", h: 150 },
+];
+const EQ_BARS = [
+	{ delay: 0, id: "e1", peak: 0.5 },
+	{ delay: 0.15, id: "e2", peak: 0.85 },
+	{ delay: 0.3, id: "e3", peak: 1 },
+	{ delay: 0.1, id: "e4", peak: 0.65 },
+	{ delay: 0.25, id: "e5", peak: 0.9 },
+	{ delay: 0.05, id: "e6", peak: 0.55 },
+	{ delay: 0.2, id: "e7", peak: 0.8 },
+];
+const CHECK_ROWS = [
+	{ id: "c1", w: 150 },
+	{ id: "c2", w: 110 },
+	{ id: "c3", w: 132 },
+];
+const CAL_CELLS = Array.from({ length: 30 }, (_, i) => ({
+	id: `cal-${i}`,
+	marked: i === 5 || i === 12 || i === 19,
+	target: i === 27,
+}));
+
+function StepVisual({ idx, local, ghostX }: { ghostX: MotionValue<number>; idx: number; local: MotionValue<number> }) {
+	const reduced = useReducedMotion();
+	const opacity = useTransform(local, [0.15, 0.6], [0, 1]);
+	const scale = useTransform(local, [0.15, 0.8], [0.92, 1]);
+
+	return (
+		<motion.div
+			aria-hidden="true"
+			className="pointer-events-none absolute right-[2vw] bottom-[15vh] hidden text-oxblood md:block"
+			style={reduced ? { opacity: 0.85 } : { x: ghostX, opacity, scale }}
+		>
+			<div className="size-[clamp(15rem,24vw,22rem)]">
+				<StepGraphic idx={idx} reduced={!!reduced} />
+			</div>
+		</motion.div>
+	);
+}
+
+function StepGraphic({ idx, reduced }: { idx: number; reduced: boolean }) {
+	// 0 — Score gauge: the instant CV diagnosis (a 0→100 dial)
+	if (idx === 0) {
+		return (
+			<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+				{/* Dial track — the 0 → 100 score range */}
+				<path
+					d="M 28 150 A 92 92 0 0 1 212 150"
+					stroke="currentColor"
+					strokeLinecap="round"
+					strokeOpacity={0.18}
+					strokeWidth="3"
+				/>
+				{/* Score fill — where the diagnosis lands on the dial */}
+				<path
+					d="M 28 150 A 92 92 0 0 1 190 91"
+					stroke="currentColor"
+					strokeLinecap="round"
+					strokeOpacity={0.7}
+					strokeWidth="5"
+				/>
+				{/* Major ticks around the dial */}
+				<g stroke="currentColor" strokeLinecap="round" strokeOpacity={0.3} strokeWidth="2">
+					<line x1="28" x2="44" y1="150" y2="150" />
+					<line x1="55" x2="66" y1="85" y2="96" />
+					<line x1="120" x2="120" y1="58" y2="74" />
+					<line x1="185" x2="174" y1="85" y2="96" />
+					<line x1="212" x2="196" y1="150" y2="150" />
+				</g>
+				{/* Needle — settles on the score with a subtle live sweep */}
+				<motion.g
+					animate={reduced ? undefined : { rotate: [-5, 5, -5] }}
+					style={{ transformOrigin: "120px 150px" }}
+					transition={reduced ? undefined : { duration: 4, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+				>
+					<line
+						stroke="currentColor"
+						strokeLinecap="round"
+						strokeOpacity={0.9}
+						strokeWidth="4"
+						x1="120"
+						x2="180"
+						y1="150"
+						y2="100"
+					/>
+				</motion.g>
+				{/* Score marker on the dial */}
+				<circle cx="190" cy="91" fill="currentColor" r="5" />
+				{/* Hub */}
+				<circle cx="120" cy="150" fill="currentColor" r="9" />
+				<circle cx="120" cy="150" fill="var(--paper)" r="3.5" />
+			</svg>
+		);
+	}
+	// 1 — Target: realistic roles + target companies converging on the bullseye
+	if (idx === 1) {
+		return (
+			<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+				{[110, 76, 44].map((r, i) => (
+					<circle
+						cx="120"
+						cy="120"
+						key={`t-${r}`}
+						r={r}
+						stroke="currentColor"
+						strokeOpacity={0.14 + i * 0.12}
+						strokeWidth="1.5"
+					/>
+				))}
+				<line stroke="currentColor" strokeOpacity={0.2} x1="120" x2="120" y1="8" y2="232" />
+				<line stroke="currentColor" strokeOpacity={0.2} x1="8" x2="232" y1="120" y2="120" />
+				<circle cx="120" cy="120" fill="currentColor" r="11" />
+				<circle cx="120" cy="120" fill="var(--paper)" r="4" />
+				<circle cx="168" cy="72" fill="currentColor" fillOpacity={0.6} r="4" />
+				<circle cx="74" cy="158" fill="currentColor" fillOpacity={0.4} r="3" />
+			</svg>
+		);
+	}
+	// 2 — Volume bars: the AI producing output against every offer
+	if (idx === 2) {
+		return (
+			<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+				<line stroke="currentColor" strokeOpacity={0.2} x1="30" x2="210" y1="200" y2="200" />
+				{VOLUME_BARS.map((b, i) => (
+					<motion.rect
+						animate={reduced ? undefined : { scaleY: [0, 1] }}
+						fill="currentColor"
+						fillOpacity={0.35 + i * 0.18}
+						height={b.h}
+						initial={reduced ? undefined : { scaleY: 0 }}
+						key={b.id}
+						rx="6"
+						style={{ transformOrigin: `${57 + i * 44}px 200px` }}
+						transition={
+							reduced
+								? undefined
+								: {
+										duration: 1.1,
+										ease: [0.22, 1, 0.36, 1],
+										delay: i * 0.16,
+										repeat: Number.POSITIVE_INFINITY,
+										repeatType: "reverse",
+										repeatDelay: 0.9,
+									}
+						}
+						width="30"
+						x={42 + i * 44}
+						y={200 - b.h}
+					/>
+				))}
+			</svg>
+		);
+	}
+	// 3 — Equalizer: the 1:1 interview simulation (live voice)
+	if (idx === 3) {
+		return (
+			<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+				{EQ_BARS.map((b, i) => (
+					<motion.rect
+						animate={reduced ? undefined : { scaleY: [0.35, b.peak, 0.35] }}
+						fill="currentColor"
+						fillOpacity={0.5 + (b.peak - 0.5) * 0.6}
+						height="150"
+						key={b.id}
+						rx="5"
+						style={{ transformOrigin: "center 120px" }}
+						transition={
+							reduced
+								? undefined
+								: { duration: 1.4, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY, delay: b.delay }
+						}
+						width="14"
+						x={26 + i * 28}
+						y="45"
+					/>
+				))}
+			</svg>
+		);
+	}
+	// 4 — Checklist: reviewing what went well, what to polish
+	if (idx === 4) {
+		return (
+			<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+				{CHECK_ROWS.map((row, i) => (
+					<g key={row.id} transform={`translate(40 ${72 + i * 44})`}>
+						<circle cx="12" cy="12" fill="currentColor" fillOpacity={0.18} r="14" />
+						<path
+							d="M5 12 L10 17 L19 7"
+							stroke="currentColor"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth="2.5"
+						/>
+						<rect fill="currentColor" fillOpacity={0.22} height="5" rx="2.5" width={row.w} x="42" y="9" />
+					</g>
+				))}
+			</svg>
+		);
+	}
+	// 5 — Calendar: real interviews booked on the agenda
+	return (
+		<svg aria-hidden="true" className="size-full" fill="none" role="presentation" viewBox="0 0 240 240">
+			<rect
+				height="160"
+				rx="14"
+				stroke="currentColor"
+				strokeOpacity={0.25}
+				strokeWidth="1.5"
+				width="180"
+				x="30"
+				y="44"
+			/>
+			<line stroke="currentColor" strokeOpacity={0.25} x1="30" x2="210" y1="74" y2="74" />
+			<circle cx="48" cy="59" fill="currentColor" r="3" />
+			<circle cx="62" cy="59" fill="currentColor" fillOpacity={0.5} r="3" />
+			{CAL_CELLS.map((c, i) => {
+				const col = i % 6;
+				const rowi = Math.floor(i / 6);
+				const cx = 52 + col * 28;
+				const cy = 96 + rowi * 22;
+				if (c.target) {
+					return <circle cx={cx} cy={cy} fill="currentColor" key={c.id} r="7" />;
+				}
+				return (
+					<circle
+						cx={cx}
+						cy={cy}
+						fill="currentColor"
+						fillOpacity={c.marked ? 0.55 : 0.14}
+						key={c.id}
+						r={c.marked ? 5 : 3.5}
+					/>
+				);
+			})}
+		</svg>
 	);
 }
 
@@ -355,10 +595,10 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 
 	return (
 		<div className="relative z-20 mx-auto w-full max-w-[1400px] px-6 pb-10 md:px-12 md:pb-14">
-			<div className="mb-3 flex items-center justify-between font-mono text-[10px] text-foreground/45 uppercase tracking-[0.22em]">
-				<span>Promedio Premium · sobre 2.400+ procesos</span>
+			<div className="mb-3 flex items-center justify-between font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em]">
+				<span>Promedio plan Premium</span>
 				<span className="hidden tabular-nums md:inline">
-					{STEP_INDICES[activeIdx]} / 0{PANEL_COUNT}
+					Días · {STEP_INDICES[activeIdx]} de 0{PANEL_COUNT}
 				</span>
 			</div>
 
@@ -388,16 +628,27 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 								key={step.index}
 								style={{ alignItems: idx === PANEL_COUNT - 1 ? "flex-end" : "flex-start" }}
 							>
+								{/* Connector node sitting on the rail line — lights up green once passed */}
 								<span
-									className={`font-mono text-[11px] uppercase tabular-nums tracking-[0.22em] transition-colors duration-300 ${
+									aria-hidden="true"
+									className={`absolute -top-[1.45rem] size-2.5 rounded-full border-2 transition-colors duration-300 ${
+										active ? "border-oxblood bg-oxblood" : "border-foreground/30 bg-background"
+									}`}
+									style={{
+										left: idx === PANEL_COUNT - 1 ? "auto" : "-1px",
+										right: idx === PANEL_COUNT - 1 ? "-1px" : "auto",
+									}}
+								/>
+								<span
+									className={`font-mono text-[11px] uppercase tabular-nums tracking-[0.12em] transition-colors duration-300 ${
 										active ? "text-foreground" : "text-foreground/35"
 									}`}
 								>
-									D{step.day}
+									{step.day}
 								</span>
 								<span
 									aria-hidden="true"
-									className={`mt-1 font-mono text-[9px] uppercase tracking-[0.18em] transition-colors duration-300 ${
+									className={`mt-1 font-mono text-[9px] uppercase tracking-[0.1em] transition-colors duration-300 ${
 										active ? "text-oxblood" : "text-foreground/25"
 									}`}
 								>
@@ -421,20 +672,23 @@ function HowItWorksStatic() {
 		<section aria-labelledby="how-heading-static" className="relative bg-background px-6 py-20 md:py-28" id="camino">
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-[1200px]">
-					<div className="mb-6 flex items-center gap-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.24em]">
+					<div className="mb-6 flex items-center gap-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.13em]">
 						<span aria-hidden="true" className="h-px w-8 bg-foreground/30" />
 						<span>El camino</span>
 					</div>
 					<h2
-						className="flex flex-wrap items-baseline gap-x-4 gap-y-2 font-bold font-display text-[clamp(3rem,10vw,7rem)] text-foreground leading-[0.9] tracking-[-0.05em]"
+						className="flex flex-wrap items-baseline gap-x-2 gap-y-2 font-bold font-display text-[clamp(3rem,10vw,7rem)] text-foreground leading-[0.9] tracking-[-0.05em]"
 						id="how-heading-static"
 					>
-						<span className="tabular-nums">D0</span>
-						<span className="font-display-italic font-light text-[0.45em] text-foreground/50 leading-none">a</span>
-						<span className="tabular-nums">D42</span>
+						<span className="tabular-nums">0</span>
+						<span className="font-display-italic font-light text-[0.85em] text-foreground/50 leading-none">→</span>
+						<span className="tabular-nums">42</span>
+						<span className="self-end pb-2 font-mono text-[clamp(0.7rem,1.4vw,1rem)] text-foreground/50 uppercase tracking-[0.1em]">
+							días
+						</span>
 					</h2>
 					<p className="mt-5 max-w-[520px] text-foreground/65 leading-[1.55]">
-						El camino, día por día. Tiempos medidos sobre los más de 2.400 procesos del último año.
+						El camino, día por día. Tiempos medidos sobre los procesos reales de nuestros primeros usuarios.
 					</p>
 				</header>
 			</Reveal>
@@ -450,7 +704,7 @@ function HowItWorksStatic() {
 							key={step.index}
 						>
 							{isFirstOfPhase && (
-								<div className="mb-4 flex items-center gap-2 font-mono text-[10px] text-oxblood uppercase tracking-[0.24em]">
+								<div className="mb-4 flex items-center gap-2 font-mono text-[10px] text-oxblood uppercase tracking-[0.13em]">
 									<span className="font-display-italic font-light text-base text-foreground/65 leading-none">
 										{step.phase.roman}
 									</span>
@@ -459,18 +713,20 @@ function HowItWorksStatic() {
 								</div>
 							)}
 							<div className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-8">
-								<div className="flex items-baseline gap-3 md:w-[180px] md:shrink-0">
-									<span className="font-mono text-[11px] text-foreground/40 uppercase tabular-nums tracking-[0.22em]">
+								<div className="flex items-baseline gap-2 md:w-[180px] md:shrink-0">
+									<span className="font-mono text-[11px] text-foreground/40 uppercase tabular-nums tracking-[0.12em]">
 										{step.index}
 									</span>
-									<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-[-0.05em]">
-										<span className="text-foreground/30">D</span>
-										{step.day}
+									<span className="flex items-baseline gap-1.5">
+										<span className="font-mono text-[11px] text-foreground/40 uppercase tracking-[0.1em]">Día</span>
+										<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-[-0.05em]">
+											{step.day}
+										</span>
 									</span>
 								</div>
 								<div className="flex max-w-[52ch] flex-1 flex-col">
 									{step.tag && (
-										<span className="mb-2 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.22em]">
+										<span className="mb-2 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em]">
 											{step.tag}
 										</span>
 									)}
@@ -486,7 +742,7 @@ function HowItWorksStatic() {
 									</h3>
 									<p className="mt-3 text-[15px] text-foreground/70 leading-[1.6]">{step.body}</p>
 									{isLast && (
-										<div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3 py-1 font-mono text-[10px] text-background uppercase tracking-[0.18em]">
+										<div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3 py-1 font-mono text-[#0c140e] text-[10px] uppercase tracking-[0.1em]">
 											<span aria-hidden="true" className="size-1.5 rounded-full bg-background" />
 											Meta
 										</div>
@@ -498,11 +754,11 @@ function HowItWorksStatic() {
 				})}
 			</ol>
 
-			<div className="mx-auto mt-10 flex max-w-[1200px] flex-col gap-3 border-foreground/[0.08] border-t pt-6 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.22em] sm:flex-row sm:items-center sm:justify-between">
-				<span>Sobre 2.400+ procesos · últimos 12 meses</span>
+			<div className="mx-auto mt-10 flex max-w-[1200px] flex-col gap-3 border-foreground/[0.08] border-t pt-6 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.12em] sm:flex-row sm:items-center sm:justify-between">
+				<span>Sobre 240+ procesos reales</span>
 				<span className="flex items-center gap-2 text-foreground/70">
 					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-					D42 · entrevistas reales
+					Día 42 · entrevistas reales
 				</span>
 			</div>
 		</section>

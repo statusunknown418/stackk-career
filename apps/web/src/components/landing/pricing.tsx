@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon, CaretDownIcon, CheckIcon, ShieldCheckIcon, SparkleIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,10 +30,7 @@ function PricingHeader() {
 		<div className="px-6 pt-20 pb-12 sm:pt-28 sm:pb-16">
 			<div className="mx-auto max-w-[1200px]">
 				<Reveal>
-					<LaunchBadge />
-				</Reveal>
-				<Reveal delay={0.05}>
-					<span className="mt-7 block font-mono text-[11px] text-foreground/60 uppercase tracking-[0.2em]">
+					<span className="block font-mono text-[11px] text-foreground/60 uppercase tracking-[0.11em]">
 						Planes · precios en soles
 					</span>
 				</Reveal>
@@ -42,32 +39,12 @@ function PricingHeader() {
 				</h2>
 				<Reveal delay={0.2}>
 					<p className="mt-7 max-w-[60ch] text-[1.05rem] text-foreground/65 leading-[1.55]">
-						Empieza gratis con tu Score CV. Pasa a Pro cuando quieras IA ilimitada y tu coach. Premium suma el camino
-						completo con garantía de entrevista en 90 días.
+						Empieza gratis con tu Score CV. Pasa a Pro para usar todas las herramientas de IA sin límite. Premium suma
+						tu coach y el camino completo con garantía de entrevista en 90 días.
 					</p>
 				</Reveal>
 			</div>
 		</div>
-	);
-}
-
-function LaunchBadge() {
-	const reduced = useReducedMotion();
-	return (
-		<motion.div
-			animate={reduced ? undefined : { opacity: 1, y: 0 }}
-			className="inline-flex items-center gap-2.5 rounded-full border border-oxblood/40 bg-oxblood/12 py-1.5 pr-3.5 pl-2"
-			initial={reduced ? false : { opacity: 0, y: -10 }}
-			transition={{ duration: 0.7, ease: EASE_OUT_QUINT }}
-		>
-			<span className="relative inline-flex size-5 items-center justify-center rounded-full bg-oxblood text-background">
-				{!reduced && <span aria-hidden="true" className="absolute inset-0 animate-ping rounded-full bg-oxblood/60" />}
-				<SparkleIcon className="relative" size={11} weight="fill" />
-			</span>
-			<span className="font-mono text-[10.5px] text-foreground uppercase tracking-[0.18em]">
-				Lanzamiento beta · precio fijo de por vida
-			</span>
-		</motion.div>
 	);
 }
 
@@ -90,7 +67,6 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 	const reduced = useReducedMotion();
 	const featured = plan.featured ?? false;
 	const isFree = plan.priceSoles === 0;
-	const isPremium = plan.id === "premium";
 
 	return (
 		<motion.div
@@ -114,18 +90,6 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 
 			<div className="flex items-center justify-between gap-3">
 				<h3 className="font-display font-semibold text-[1.6rem] text-foreground tracking-[-0.025em]">{plan.name}</h3>
-				{featured && (
-					<span className="inline-flex items-center gap-1.5 rounded-full bg-oxblood px-2.5 py-0.5 font-medium text-[10.5px] text-background uppercase tracking-[0.12em]">
-						<SparkleIcon size={10} weight="fill" />
-						Más elegido
-					</span>
-				)}
-				{isPremium && (
-					<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/40 bg-oxblood/10 px-2.5 py-0.5 font-medium text-[10.5px] text-foreground/85 uppercase tracking-[0.12em]">
-						<ShieldCheckIcon size={11} weight="bold" />
-						Con garantía
-					</span>
-				)}
 			</div>
 			<p className="mt-2 text-[14px] text-foreground/65 leading-[1.5]">{plan.tagline}</p>
 
@@ -167,29 +131,13 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 				)}
 			</div>
 
-			{isPremium && (
-				<div className="mt-6 flex items-start gap-3 rounded-xl border border-oxblood/30 bg-oxblood/[0.06] p-4">
-					<span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-oxblood text-background">
-						<ShieldCheckIcon size={15} weight="bold" />
-					</span>
-					<div>
-						<p className="font-display font-semibold text-[13px] text-foreground leading-tight tracking-tight">
-							Garantía de entrevista en 90 días
-						</p>
-						<p className="mt-1 text-[12.5px] text-foreground/70 leading-[1.5]">
-							3 meses de Premium con uso activo. Si no llegas a una entrevista, te devolvemos el 100%.
-						</p>
-					</div>
-				</div>
-			)}
-
-			<Magnetic block className="mt-8" radius={120} strength={0.22}>
+			<Magnetic block className="mt-8" strength={0.22}>
 				<a
 					className={cn(
 						buttonVariants({ size: "lg" }),
 						"w-full",
 						featured
-							? "bg-oxblood text-background hover:bg-oxblood/90"
+							? "bg-oxblood text-[#0c140e] hover:bg-oxblood/90"
 							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
 					)}
 					href="/setup"
@@ -235,7 +183,7 @@ function SingleSessionStrip() {
 			>
 				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
 					<div className="md:col-span-7">
-						<span className="font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.16em]">
+						<span className="font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.09em]">
 							Sin suscripción
 						</span>
 						<h3 className="mt-2 font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
@@ -256,7 +204,7 @@ function SingleSessionStrip() {
 								≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
 							</p>
 						</div>
-						<Magnetic className="w-full shrink-0 sm:w-auto" radius={100} strength={0.25}>
+						<Magnetic className="w-full shrink-0 sm:w-auto" strength={0.25}>
 							<a
 								className={cn(
 									buttonVariants({ size: "default" }),

@@ -93,28 +93,28 @@ export const WHY_REASONS: readonly WhyReason[] = [
 		number: "01",
 		title: "Un coach real,",
 		emphasis: "no un chatbot.",
-		body: "Un humano senior con tu CV en mano te dice qué decir en cada entrevista. La IA hace el resto.",
-		receipt: { label: "Equipo de coaches", value: "3 a 5 senior, en planilla" },
+		body: "Un Agente especializado de IA redacta tu CV. Tu coach te ayuda a decidir qué resaltar, qué dejar fuera y cómo contar tu historia en la entrevista.",
+		receipt: { label: "Equipo de coaches", value: "3 a 5 senior, contratados" },
 	},
 	{
 		number: "02",
 		title: "Un solo plan.",
 		emphasis: "Todo incluido.",
-		body: "CV, carta, LinkedIn, mensajes, score y coaching, todo junto desde S/79. Otras plataformas cobran S/250 por las mismas piezas, sueltas.",
+		body: "CV, carta, LinkedIn y score, todo con IA en una sola suscripción desde S/79. Otras plataformas cobran S/250 por las mismas piezas, sueltas.",
 		receipt: { label: "Herramientas", value: "6 en una sola suscripción" },
 	},
 	{
 		number: "03",
-		title: "Conocemos a",
-		emphasis: "tu reclutador.",
-		body: "Tu coach ya entrevistó en BCP, Yape, Rappi y Belcorp. Sabe qué preguntan y cómo se habla aquí.",
-		receipt: { label: "Cobertura", value: "8 países de habla hispana" },
+		title: "Estuvieron en",
+		emphasis: "tu lugar.",
+		body: "No somos reclutadores. Tu coach es un senior que consiguió su puesto en empresas internacionales y pasó las mismas entrevistas técnicas que tú vas a dar.",
+		receipt: { label: "Experiencia", value: "Empresas internacionales" },
 	},
 	{
 		number: "04",
 		title: "Velocidad real.",
 		emphasis: "Semanas, no meses.",
-		body: "Score en 30 segundos. Primera entrevista en 2 a 4 semanas. Otras plataformas recién están revisando tu CV.",
+		body: "Score en 1 minuto. Primera entrevista en 2 a 4 semanas. Otras plataformas recién están revisando tu CV.",
 		receipt: { label: "A primera entrevista", value: "18 días en promedio" },
 	},
 ];
@@ -128,26 +128,26 @@ export const HOW_STEPS: readonly HowStep[] = [
 	{
 		title: "Mapeo del próximo puesto",
 		body: "Tu coach define contigo los roles realistas y la lista de empresas objetivo. Sales con un plan concreto, no con motivación.",
-		tag: "Sesión 1 · Pro / Premium",
+		tag: "Sesión 1 · Premium",
 	},
 	{
 		title: "Pones las herramientas a trabajar",
-		body: "La IA produce volumen contra cada oferta. Tu coach revisa antes de que algo importante salga a una empresa.",
+		body: "El Agente especializado de IA arma una postulación a medida por cada oferta. Tu coach revisa lo importante antes de que llegue al reclutador.",
 		tag: "Pro / Premium",
 	},
 	{
 		title: "Dominas la entrevista",
 		body: "Simulacro 1:1 con preguntas reales del sector. Feedback directo sobre qué decir, qué evitar y dónde reforzar tu respuesta.",
-		tag: "Sesión 2 · Pro / Premium",
+		tag: "Sesión 2 · Premium",
 	},
 	{
 		title: "Refuerzo post-entrevista",
 		body: "Repasan qué salió bien y qué pulir antes del siguiente proceso. Aprendizajes que se acumulan, no que se pierden.",
-		tag: "Sesión 3 · Pro / Premium",
+		tag: "Sesión 3 · Premium",
 	},
 	{
 		title: "Entrevistas reales en agenda",
-		body: "Día 42 en promedio con Premium. Entrevistas activas y un método que te sirve para las siguientes. Cancelas cuando tú decidas.",
+		body: "Día 42: respuestas reales y ofertas de trabajo sobre la mesa. Pasaste de buscar a elegir. Cancelas cuando quieras.",
 		tag: "Resultado",
 	},
 ];
@@ -163,9 +163,6 @@ export const PLANS: readonly Plan[] = [
 		features: [
 			"Score CV de 0 a 100 por rol, una vez al mes",
 			"Lista detallada de qué tienes que mejorar",
-			"Un CV generado con IA al mes",
-			"Una carta de presentación al mes",
-			"Un mensaje para networking al mes",
 			"Score básico de tu perfil de LinkedIn",
 		],
 		cta: "Empezar gratis",
@@ -173,9 +170,9 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "pro",
 		name: "Pro",
-		tagline: "IA ilimitada y una sesión 1:1 al mes.",
+		tagline: "Todas las herramientas de IA, sin límite.",
 		priceSoles: 79,
-		priceUsd: 21,
+		priceUsd: 23,
 		per: "al mes, cancelas cuando quieras",
 		features: [
 			"Score CV ilimitado, con comparación directa contra cada oferta",
@@ -183,8 +180,6 @@ export const PLANS: readonly Plan[] = [
 			"CVs ilimitados, una versión distinta por cada puesto",
 			"Cartas de presentación ilimitadas",
 			"Optimizador completo para tu LinkedIn",
-			"Mensajes ilimitados para reclutadores",
-			"Una sesión 1:1 con tu coach (30 min) al mes, sobre el tema que tú elijas",
 		],
 		cta: "Empezar Pro",
 		featured: true,
@@ -194,17 +189,18 @@ export const PLANS: readonly Plan[] = [
 		name: "Premium",
 		tagline: "El camino completo: tres sesiones estructuradas y WhatsApp directo con tu coach.",
 		priceSoles: 179,
-		priceUsd: 47,
+		priceUsd: 51,
 		per: "al mes, camino completo",
 		features: [
 			"Todo lo que incluye el plan Pro",
+			"Mensajes ilimitados para reclutadores",
 			"Sesión 1: Mapeo del próximo puesto (45 min)",
 			"Sesión 2: Dominas la entrevista (45 min)",
 			"Sesión 3: Refuerzo después de la entrevista (30 min)",
 			"Revisión humana de tu CV y tu LinkedIn",
 			"WhatsApp directo con tu coach (respuesta en 24 horas)",
 		],
-		cta: "Reservar Premium",
+		cta: "Empezar Premium",
 	},
 ];
 
@@ -214,7 +210,7 @@ export const SINGLE_SESSION = {
 	duration: "45 min",
 	tagline: "Prueba el coaching sin suscribirte.",
 	body: "Sesión 1:1 con cualquier coach del equipo, sobre tu caso real. Sin compromiso.",
-	cta: "Reservar sesión única",
+	cta: "Empezar sesión única",
 } as const;
 
 export const TESTIMONIALS: readonly Testimonial[] = [
@@ -225,8 +221,8 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Analista en Yape",
 		location: "Lima",
 		quote:
-			"Subí mi CV y el score me dio 41. Después de la reescritura con la IA y la sesión 1, salté a 95. Tres semanas después ya tenía dos entrevistas agendadas.",
-		chip: "41 → 95",
+			"Subí mi CV y mi puntaje fue 41 de 100. Después de la reescritura con IA y la primera sesión, subió a 95. Tres semanas después ya tenía dos entrevistas agendadas.",
+		chip: "41 → 95 / 100",
 	},
 	{
 		id: "tomas",
@@ -235,7 +231,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Product Analyst en Rappi",
 		location: "Bogotá",
 		quote:
-			"El coach me hizo escribir logros con números por primera vez. Suena obvio, pero no lo era para mí. Cambió todo.",
+			"El coach me hizo escribir mis logros con números por primera vez. Suena obvio, pero para mí no lo era. Cambió por completo cómo me presento.",
 		chip: "1er empleo",
 	},
 	{
@@ -245,7 +241,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "UX Designer en Crehana",
 		location: "Lima",
 		quote:
-			"La sesión de preentrevista fue brutal, en el buen sentido. Me salvó de decir tres cosas que habrían matado el proceso.",
+			"La sesión de preparación para la entrevista fue exigente, en el buen sentido. Me evitó decir tres cosas que habrían arruinado el proceso.",
 		chip: "2 meses",
 	},
 	{
@@ -255,7 +251,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Data Analyst en BCP",
 		location: "Arequipa",
 		quote:
-			"Venía de tres meses tirando CVs sin respuesta. Después de Premium entré como Data Analyst Jr. No entiendo cómo no lo hice antes.",
+			"Llevaba tres meses enviando CVs sin una sola respuesta. Después de Premium entré como Data Analyst Jr. Ojalá lo hubiera hecho antes.",
 		chip: "36 días",
 	},
 	{
@@ -275,7 +271,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Backend Engineer en Belcorp",
 		location: "Lima",
 		quote:
-			"Hice Premium pensando que era mucho. La sesión 2 me cambió cómo me preparo: entré a la entrevista con seguridad y la pasé al primer intento.",
+			"Hice Premium pensando que era caro. La sesión 2 me cambió cómo me preparo: entré a la entrevista con seguridad y la pasé al primer intento.",
 		chip: "Pasé al primer intento",
 	},
 	{
@@ -315,7 +311,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "UX Researcher en Despegar",
 		location: "Santiago",
 		quote:
-			"Tenía miedo de que fuera otra cosa de coaching genérico. Es lo opuesto: feedback durísimo y concreto sobre mi caso real.",
+			"Temía que fuera otro coaching genérico más. Es lo contrario: feedback directo y concreto sobre mi caso real.",
 		chip: "42 días",
 	},
 	{
@@ -395,8 +391,8 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 		role: "Project Manager en Belcorp",
 		location: "Lima",
 		quote:
-			"Tenía 6 años de experiencia pero mi CV parecía de 2. Lo reordenamos por impacto, no por orden cronológico. Otra historia.",
-		chip: "Score 95",
+			"Tenía 6 años de experiencia pero mi CV parecía de 2. Lo reordenamos por impacto, no por fecha. La diferencia fue inmediata.",
+		chip: "Puntaje 95 / 100",
 	},
 	{
 		id: "bruno",
@@ -423,11 +419,11 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 export const FAQ_ITEMS: readonly FaqItem[] = [
 	{
 		q: "¿Quiénes son los coaches?",
-		a: "Un equipo reducido de 3 a 5 coaches senior, todos con experiencia contratando para tech, producto, datos y consultoría en empresas de la región. No trabajamos con freelancers de plataforma: nuestros coaches están en planilla con ASSENDIA y los entrevistamos uno por uno antes de sumarlos al equipo.",
+		a: "Un equipo reducido de 3 a 5 coaches senior: profesionales que construyeron su carrera en tech, producto, datos y consultoría en empresas de la región, y que pasaron por las mismas búsquedas y entrevistas que tú. No trabajamos con freelancers de plataforma: nuestros coaches son parte del equipo de ASSENDIA, contratados directamente, y los entrevistamos uno por uno antes de sumarlos.",
 	},
 	{
 		q: "¿Cuál es la diferencia con otras plataformas?",
-		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, las herramientas de IA y el coaching vienen en el mismo plan. Pro incluye una sesión 1:1 al mes (30 minutos, sobre el tema que tú quieras) por S/79. Premium incluye el camino completo de tres sesiones estructuradas más WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
+		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, el plan Pro te da todas las herramientas de IA sin límite por S/79. Premium suma el coaching humano: el camino completo de tres sesiones estructuradas y WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
 	},
 	{
 		q: "¿Y si no consigo entrevistas?",
@@ -439,7 +435,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Cómo funciona el Score CV?",
-		a: "Subes tu CV y eliges el rol al que apuntas. La IA analiza la estructura, distingue logros de tareas, revisa las palabras clave del sector y mide la compatibilidad con los filtros automáticos que usan los reclutadores para descartar CVs. En menos de 30 segundos recibes un puntaje del 0 al 100 con la lista de lo que tienes que mejorar. En el plan Gratuito tienes un análisis al mes; en Pro, son ilimitados.",
+		a: "Subes tu CV y eliges el rol al que apuntas. La IA analiza la estructura, distingue logros de tareas, revisa las palabras clave del sector y mide la compatibilidad con los filtros automáticos que usan los reclutadores para descartar CVs. En menos de 1 minuto recibes un puntaje del 0 al 100 con la lista de lo que tienes que mejorar. En el plan Gratuito tienes un análisis al mes; en Pro, son ilimitados.",
 	},
 	{
 		q: "¿Puedo probar sin suscribirme?",
@@ -454,8 +450,8 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 		a: "Estamos enfocados en LATAM. Hoy trabajamos con talentos en Perú, Colombia, México, Argentina, Chile, Uruguay, Ecuador y España. El producto está en español neutro y la moneda principal son soles peruanos, con equivalencias en dólares.",
 	},
 	{
-		q: "¿Funciona si no soy del rubro tech?",
-		a: "Sí. Tenemos casos en marketing, comunicaciones, gestión de proyectos, atención al cliente, diseño y consultoría. Nuestros coaches han contratado para BCP, Belcorp, Globant y agencias de la región; no solo para tech.",
+		q: "¿Funciona si no soy del sector tech?",
+		a: "Sí. Tenemos casos en marketing, comunicaciones, gestión de proyectos, atención al cliente, diseño y consultoría. Nuestros coaches construyeron su carrera en empresas como BCP, Belcorp y Globant; no solo en tech.",
 	},
 	{
 		q: "¿Mis datos están seguros?",

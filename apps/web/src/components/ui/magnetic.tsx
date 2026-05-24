@@ -9,7 +9,7 @@ interface UseMagneticOptions {
 }
 
 const DEFAULT_STRENGTH = 0.28;
-const DEFAULT_RADIUS = 96;
+const DEFAULT_RADIUS = 28;
 const SPRING_CONFIG = { stiffness: 220, damping: 18, mass: 0.4 } as const;
 
 export function useMagnetic(
@@ -35,18 +35,20 @@ export function useMagnetic(
 
 		const handleMove = (e: MouseEvent) => {
 			const r = el.getBoundingClientRect();
-			const cx = r.left + r.width / 2;
-			const cy = r.top + r.height / 2;
-			const dx = e.clientX - cx;
-			const dy = e.clientY - cy;
-			const reach = radius + Math.max(r.width, r.height) / 2;
-			if (Math.hypot(dx, dy) < reach) {
-				x.set(dx * strength);
-				y.set(dy * strength);
-			} else {
+			// Distance from the cursor to the button's edges — 0 when inside the
+			// button, growing only once the cursor leaves it. The magnet engages
+			// only within `radius` px of the edge, not a wide halo around it.
+			const dxEdge = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+			const dyEdge = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+			if (Math.hypot(dxEdge, dyEdge) > radius) {
 				x.set(0);
 				y.set(0);
+				return;
 			}
+			const cx = r.left + r.width / 2;
+			const cy = r.top + r.height / 2;
+			x.set((e.clientX - cx) * strength);
+			y.set((e.clientY - cy) * strength);
 		};
 
 		const handleReset = () => {

@@ -42,7 +42,6 @@ export function LandingFooter() {
 	const markScale = useTransform(smoothScroll, [0, 0.55], [0.92, 1]);
 	const markOpacity = useTransform(smoothScroll, [0, 0.4, 0.9], [0.15, 1, 1]);
 	const markY = useTransform(smoothScroll, [0, 0.55], [42, 0]);
-	const dotScale = useTransform(smoothScroll, [0.45, 0.85], [0.85, 1]);
 
 	return (
 		<footer className="relative mt-16 overflow-hidden border-border border-t bg-foreground/[0.015]" ref={footerRef}>
@@ -51,7 +50,7 @@ export function LandingFooter() {
 
 			<div className="mx-auto max-w-[1200px] px-6 pt-16 pb-10 md:pt-20">
 				{/* SIGNATURE — giant ASSENDIA wordmark, scroll-scrubbed */}
-				<SignatureMark dotScale={dotScale} markOpacity={markOpacity} markScale={markScale} markY={markY} />
+				<SignatureMark markOpacity={markOpacity} markScale={markScale} markY={markY} />
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
@@ -61,8 +60,8 @@ export function LandingFooter() {
 					viewport={{ once: true, margin: "-10% 0px" }}
 					whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
 				>
-					Hecho en Lima. Pensado para LATAM.{" "}
-					<span className="text-foreground">Tu próxima entrevista no se espera, se construye.</span>
+					Hecho en Lima para toda LATAM.
+					<span className="mt-1 block text-foreground">De dónde estás, a dónde quieres llegar.</span>
 				</motion.p>
 
 				{/* COLUMNS */}
@@ -87,10 +86,6 @@ export function LandingFooter() {
 						<p className="mt-4 max-w-[300px] text-[14px] text-foreground/70 leading-[1.6]">
 							Score CV, IA y coaching humano en una sola suscripción. Hecho en Perú para LATAM.
 						</p>
-						<div className="mt-5 inline-flex items-center gap-2 font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.18em]">
-							<span aria-hidden="true" className="size-1 rounded-full bg-oxblood" />
-							Lima · Bogotá · CDMX
-						</div>
 					</div>
 
 					{FOOTER_COLUMNS.map((col, colIdx) => (
@@ -101,13 +96,13 @@ export function LandingFooter() {
 				{/* LEGAL ROW */}
 				<div className="mt-14 flex flex-col-reverse items-start justify-between gap-7 border-border border-t pt-7 md:flex-row md:items-center">
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-						<p className="font-mono text-[11px] text-foreground/65 uppercase tracking-[0.14em]">© 2026 ASSENDIA SAC</p>
+						<p className="font-mono text-[11px] text-foreground/65 uppercase tracking-[0.08em]">© 2026 ASSENDIA SAC</p>
 						<LegalDot />
 						<ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
 							{LEGAL_LINKS.map((link, idx) => (
 								<li className="flex items-center gap-3" key={link.href}>
 									<a
-										className="group/legal relative font-mono text-[11px] text-foreground/65 uppercase tracking-[0.14em] transition-colors duration-200 hover:text-foreground"
+										className="group/legal relative font-mono text-[11px] text-foreground/65 uppercase tracking-[0.08em] transition-colors duration-200 hover:text-foreground"
 										href={link.href}
 									>
 										{link.label}
@@ -140,22 +135,21 @@ export function LandingFooter() {
 }
 
 interface SignatureMarkProps {
-	dotScale: MotionValue<number>;
 	markOpacity: MotionValue<number>;
 	markScale: MotionValue<number>;
 	markY: MotionValue<number>;
 }
 
-function SignatureMark({ dotScale, markOpacity, markScale, markY }: SignatureMarkProps) {
+function SignatureMark({ markOpacity, markScale, markY }: SignatureMarkProps) {
 	const reduced = useReducedMotion();
 
 	return (
 		<div className="relative">
 			<div className="flex items-center justify-between gap-4">
-				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.22em]">
+				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.12em]">
 					Tu carrera, en serio.
 				</span>
-				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tabular-nums tracking-[0.22em]">
+				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tabular-nums tracking-[0.12em]">
 					Est. 2026 · Perú
 				</span>
 			</div>
@@ -175,16 +169,10 @@ function SignatureMark({ dotScale, markOpacity, markScale, markY }: SignatureMar
 			>
 				<span
 					aria-hidden="true"
-					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,17rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
+					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
 				>
 					ASSENDIA
 				</span>
-				{/* Green dot — printer's signature */}
-				<motion.span
-					aria-hidden="true"
-					className="absolute right-[2%] bottom-0 size-[clamp(0.5rem,1.4vw,1.1rem)] -translate-y-[10%] rounded-full bg-oxblood shadow-[0_0_24px_oklch(from_var(--oxblood)_l_c_h/0.65)]"
-					style={reduced ? undefined : { scale: dotScale }}
-				/>
 			</motion.div>
 		</div>
 	);
@@ -204,7 +192,7 @@ function FooterColumn({ col, colIdx }: FooterColumnProps) {
 			viewport={{ once: true, margin: "-5% 0px" }}
 			whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
 		>
-			<h2 className="mb-5 font-mono text-[10px] text-foreground/75 uppercase tracking-[0.22em]">{col.heading}</h2>
+			<h2 className="mb-5 font-mono text-[10px] text-foreground/75 uppercase tracking-[0.12em]">{col.heading}</h2>
 			<ul className="flex flex-col gap-2.5">
 				{col.links.map((link) => (
 					<li key={link.label}>
@@ -237,7 +225,7 @@ function LegalDot() {
 
 function DataProtectionPill() {
 	return (
-		<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/35 bg-oxblood/10 px-2.5 py-1 font-mono text-[10.5px] text-foreground/85 uppercase tracking-[0.14em]">
+		<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/35 bg-oxblood/10 px-2.5 py-1 font-mono text-[10.5px] text-foreground/85 uppercase tracking-[0.08em]">
 			<ShieldCheckIcon className="text-oxblood" size={11} weight="fill" />
 			Datos protegidos · Ley 29733 PE
 		</span>

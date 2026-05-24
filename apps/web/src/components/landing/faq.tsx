@@ -32,7 +32,11 @@ export function Faq() {
 	const railScaleY = useTransform(smoothScroll, [0.05, 0.55], [0, 1]);
 
 	return (
-		<section className="relative px-6 py-20 md:py-28" id="faq" ref={sectionRef}>
+		<section
+			className="relative border-border border-y bg-foreground/[0.025] px-6 py-20 md:py-28"
+			id="faq"
+			ref={sectionRef}
+		>
 			<div className="mx-auto grid max-w-[1200px] gap-12 md:grid-cols-12 md:gap-16">
 				{/* LEFT — sticky scroll-driven header */}
 				<div className="md:col-span-5">
@@ -48,7 +52,7 @@ export function Faq() {
 								<span className="absolute inset-0 animate-[live-pulse_2.4s_ease-in-out_infinite] rounded-full bg-oxblood" />
 								<span className="relative size-2 rounded-full bg-oxblood" />
 							</span>
-							<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.22em]">
+							<span className="font-mono text-[11px] text-foreground/70 uppercase tracking-[0.12em]">
 								FAQ · Respuestas humanas
 							</span>
 						</motion.div>
@@ -168,7 +172,7 @@ function FaqRow({ idx, isOpen, item, onToggle }: FaqRowProps) {
 				onClick={onToggle}
 				type="button"
 			>
-				<span className="mt-1 font-mono text-[10.5px] text-foreground/45 tabular-nums tracking-[0.14em]">
+				<span className="mt-1 font-mono text-[10.5px] text-foreground/55 tabular-nums tracking-[0.08em]">
 					{(idx + 1).toString().padStart(2, "0")}
 				</span>
 				<span className="flex-1 font-display font-medium text-[1.08rem] text-foreground leading-[1.35] tracking-[-0.018em] transition-colors duration-200 group-hover/row:text-foreground">
@@ -237,7 +241,7 @@ function WhatsappCloser() {
 				aria-hidden="true"
 				className="pointer-events-none absolute -top-px -left-px h-10 w-10 origin-top-left rounded-tl-2xl bg-oxblood/15 transition-all duration-400 ease-out group-hover/wa:h-12 group-hover/wa:w-12 group-hover/wa:bg-oxblood/25"
 			/>
-			<span className="relative grid size-11 shrink-0 place-items-center rounded-xl bg-oxblood text-background shadow-[0_6px_18px_-8px_oklch(from_var(--oxblood)_l_c_h/0.7)]">
+			<span className="relative grid size-11 shrink-0 place-items-center rounded-xl bg-oxblood text-[#0c140e] shadow-[0_6px_18px_-8px_oklch(from_var(--oxblood)_l_c_h/0.7)]">
 				<WhatsappLogoIcon size={20} weight="bold" />
 			</span>
 			<span className="relative flex flex-1 flex-col gap-0.5">

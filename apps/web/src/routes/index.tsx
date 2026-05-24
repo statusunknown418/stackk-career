@@ -10,14 +10,13 @@ import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 import { Tools } from "@/components/landing/tools";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 
 const SITE_URL = "https://assendia.com";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const SITE_NAME = "ASSENDIA";
 const TITLE = "ASSENDIA · Garantizamos tu próxima entrevista en menos de 3 meses";
 const DESCRIPTION =
-	"CV reescrito por IA en 30 segundos. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
+	"CV reescrito por IA en 1 minuto. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
 
 const structuredData = {
 	"@context": "https://schema.org",
@@ -27,7 +26,7 @@ const structuredData = {
 			"@id": `${SITE_URL}#organization`,
 			name: SITE_NAME,
 			url: SITE_URL,
-			logo: `${SITE_URL}/logo.png`,
+			logo: `${SITE_URL}/assendia-logo.png`,
 			description: "Plataforma de empleo con IA + coaching humano para LATAM.",
 			areaServed: ["PE", "CO", "MX", "AR", "CL", "UY", "EC", "ES"],
 			foundingLocation: { "@type": "Place", name: "Lima, Perú" },
@@ -51,7 +50,7 @@ const structuredData = {
 			aggregateRating: {
 				"@type": "AggregateRating",
 				ratingValue: "4.9",
-				reviewCount: "380",
+				reviewCount: "90",
 				bestRating: "5",
 				worstRating: "1",
 			},
@@ -118,7 +117,7 @@ export const Route = createFileRoute("/")({
 			},
 			{
 				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500&display=swap",
 			},
 		],
 		scripts: [
@@ -133,12 +132,8 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
 	return (
 		<div className="relative isolate overflow-x-clip">
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[100vh] overflow-hidden [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]"
-			>
-				<AuroraBackground />
-			</div>
+			{/* Subtle film grain over the whole page — premium finish, CSS only */}
+			<div aria-hidden="true" className="grain-overlay pointer-events-none fixed inset-0 z-[60] opacity-[0.04]" />
 			<LandingNav />
 			<main className="-mt-16">
 				<Hero />
