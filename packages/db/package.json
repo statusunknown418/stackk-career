@@ -30,7 +30,7 @@
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.22.1",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   }
 }
