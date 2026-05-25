@@ -80,7 +80,7 @@ function ResumeCreateFlow({ onClose, open }: ResumeCreateFlowProps): React.React
 				<DialogTitle>{parserRunId ? "Importando CV" : "Nuevo CV"}</DialogTitle>
 				<DialogDescription>
 					{parserRunId
-						? "Estamos analizando tu PDF. Puedes cerrar este diálogo — seguirá en segundo plano."
+						? "Estamos analizando tu PDF. Puedes cerrar este panel — seguirá en segundo plano."
 						: "Dale un nombre y, opcionalmente, sube un PDF para extraer las secciones con IA."}
 				</DialogDescription>
 			</DialogHeader>

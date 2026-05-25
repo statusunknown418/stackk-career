@@ -4,7 +4,7 @@ import type { ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resum
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ResumeEditorAnalysisPanel } from "@/components/domains/resume-editor/resume-analysis-panel";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,13 @@ import { orpc } from "@/utils/orpc";
 interface ResumeStreams {
 	"resume-analysis": DeepPartial<ResumeAnalysis>;
 }
+
+type CachedAnalysis = {
+	id: string;
+	analysis: ResumeAnalysis;
+	appliedEditIndices: number[];
+	dismissedEditIndices: number[];
+} | null;
 
 export function ResumeAnalysisSection({
 	resumeId,
@@ -23,9 +30,8 @@ export function ResumeAnalysisSection({
 	onApplyEdit?: (edit: ResumeEdit) => boolean;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
-	const [appliedSlots, setAppliedSlots] = useState<Set<number>>(() => new Set());
 	const queryClient = useQueryClient();
-	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string } | null>(null);
+	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string; analysisId: string } | null>(null);
 
 	const cachedAnalysisOptions = orpc.resumes.getResumeAnalysis.queryOptions({
 		input: { resumeId },
@@ -35,11 +41,29 @@ export function ResumeAnalysisSection({
 
 	const initiateAnalysis = useMutation(
 		orpc.agents.triggerK02DetailedAnalysis.mutationOptions({
-			onSuccess: ({ runId, publicAccessToken }) => {
-				setRunHandle({ runId, accessToken: publicAccessToken });
+			onSuccess: ({ runId, analysisId, publicAccessToken }) => {
+				setRunHandle({ runId, accessToken: publicAccessToken, analysisId });
 			},
 			onError: (mutationError) => {
 				toast.error(mutationError.message || "No se pudo iniciar el análisis.");
+			},
+		})
+	);
+
+	const setEditApplied = useMutation(
+		orpc.resumeAnalyses.setEditApplied.mutationOptions({
+			onError: (mutationError) => {
+				toast.error(mutationError.message || "No se pudo guardar el estado.");
+				queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
+			},
+		})
+	);
+
+	const setEditDismissed = useMutation(
+		orpc.resumeAnalyses.setEditDismissed.mutationOptions({
+			onError: (mutationError) => {
+				toast.error(mutationError.message || "No se pudo guardar el estado.");
+				queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
 			},
 		})
 	);
@@ -60,6 +84,18 @@ export function ResumeAnalysisSection({
 	const cachedData = cachedAnalysis.data?.analysis;
 	const analysisData: DeepPartial<ResumeAnalysis> | undefined = streamedAnalysis ?? cachedData;
 
+	const activeAnalysisId = runHandle?.analysisId ?? cachedAnalysis.data?.id;
+
+	const appliedSlots = useMemo(
+		() => new Set(cachedAnalysis.data?.appliedEditIndices ?? []),
+		[cachedAnalysis.data?.appliedEditIndices]
+	);
+
+	const dismissedSlots = useMemo(
+		() => new Set(cachedAnalysis.data?.dismissedEditIndices ?? []),
+		[cachedAnalysis.data?.dismissedEditIndices]
+	);
+
 	const runStatus = run?.status;
 	const isFailed =
 		runStatus === "FAILED" ||
@@ -77,8 +113,7 @@ export function ResumeAnalysisSection({
 
 	const handleAnalyze = () => {
 		setRunHandle(null);
-		setAppliedSlots(new Set());
-		queryClient.setQueryData(cachedAnalysisOptions.queryKey, null);
+		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, null);
 		initiateAnalysis.mutate({ resumeId });
 	};
 
@@ -87,13 +122,41 @@ export function ResumeAnalysisSection({
 			return;
 		}
 		const ok = onApplyEdit(edit);
-		if (ok) {
-			setAppliedSlots((prev) => {
-				const next = new Set(prev);
-				next.add(slot);
-				return next;
-			});
+		if (!(ok && activeAnalysisId)) {
+			return;
 		}
+
+		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
+			if (!prev) {
+				return prev;
+			}
+			const nextSet = new Set(prev.appliedEditIndices);
+			nextSet.add(slot);
+			return { ...prev, appliedEditIndices: [...nextSet].sort((a, b) => a - b) };
+		});
+
+		setEditApplied.mutate({ analysisId: activeAnalysisId, editIndex: slot, applied: true });
+	};
+
+	const handleDismiss = (slot: number, dismissed: boolean) => {
+		if (!activeAnalysisId) {
+			return;
+		}
+
+		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
+			if (!prev) {
+				return prev;
+			}
+			const nextSet = new Set(prev.dismissedEditIndices);
+			if (dismissed) {
+				nextSet.add(slot);
+			} else {
+				nextSet.delete(slot);
+			}
+			return { ...prev, dismissedEditIndices: [...nextSet].sort((a, b) => a - b) };
+		});
+
+		setEditDismissed.mutate({ analysisId: activeAnalysisId, editIndex: slot, dismissed });
 	};
 
 	if (cachedAnalysis.isLoading) {
@@ -121,9 +184,11 @@ export function ResumeAnalysisSection({
 		<ResumeEditorAnalysisPanel
 			analysis={analysisData}
 			appliedSlots={appliedSlots}
+			dismissedSlots={dismissedSlots}
 			error={error}
 			isStreaming={isStreaming}
 			onApplyEdit={onApplyEdit ? handleApply : undefined}
+			onDismissEdit={activeAnalysisId ? handleDismiss : undefined}
 			onRetry={handleAnalyze}
 			onViewSection={onViewSection}
 		/>

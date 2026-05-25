@@ -1,10 +1,12 @@
 import {
 	ArrowClockwiseIcon,
+	ArrowCounterClockwiseIcon,
 	CaretDownIcon,
 	CheckCircleIcon,
 	TrashSimpleIcon,
 	TriangleDashedIcon,
 	WrenchIcon,
+	XCircleIcon,
 } from "@phosphor-icons/react";
 import { EyeIcon } from "@phosphor-icons/react/dist/ssr";
 import type { EditCategory, EditSeverity, ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
@@ -53,111 +55,24 @@ const SEVERITY_BADGE: Record<EditSeverity, NonNullable<BadgeProps["variant"]>> =
 
 const EDIT_PLACEHOLDERS = [0, 1, 2, 3, 4] as const;
 
-function EditCardActions({
-	completeEdit,
-	canApply,
-	canView,
-	isApplied,
-	isDelete,
-	slot,
-	onApplyEdit,
-	onViewSection,
-}: {
-	completeEdit: ResumeEdit;
-	canApply: boolean;
-	canView: boolean;
-	isApplied: boolean;
-	isDelete: boolean;
-	slot: number;
-	onApplyEdit?: (edit: ResumeEdit, slot: number) => void;
-	onViewSection?: (edit: ResumeEdit) => void;
-}) {
-	const viewTooltip = onViewSection && canView && (
-		<Tooltip>
-			<TooltipTrigger
-				render={
-					<Button
-						aria-label="Ver sección"
-						onClick={() => onViewSection(completeEdit)}
-						size="xs"
-						variant={isApplied ? "ghost" : "secondary"}
-					/>
-				}
-			>
-				<EyeIcon /> Ver
-			</TooltipTrigger>
-			<TooltipContent>Ver sección</TooltipContent>
-		</Tooltip>
-	);
-
-	if (isApplied) {
-		return (
-			<Group>
-				<span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-1.5 py-0.5 font-medium text-[11px] text-success">
-					<CheckCircleIcon weight="fill" />
-					{isDelete ? "Eliminado" : "Aplicado"}
-				</span>
-				{viewTooltip && (
-					<>
-						<GroupSeparator />
-						{viewTooltip}
-					</>
-				)}
-			</Group>
-		);
-	}
-
-	return (
-		<Group>
-			{onApplyEdit && canApply && (
-				<Tooltip>
-					<TooltipTrigger
-						render={
-							<Button
-								aria-label={isDelete ? "Eliminar del CV" : "Aplicar al CV"}
-								onClick={() => onApplyEdit(completeEdit, slot)}
-								size="xs"
-								variant="secondary"
-							/>
-						}
-					>
-						{isDelete ? (
-							<>
-								<TrashSimpleIcon /> Eliminar
-							</>
-						) : (
-							<>
-								<WrenchIcon /> Aplicar
-							</>
-						)}
-					</TooltipTrigger>
-					<TooltipContent>{isDelete ? "Eliminar del CV" : "Aplicar al CV"}</TooltipContent>
-				</Tooltip>
-			)}
-			{viewTooltip && (
-				<>
-					{onApplyEdit && canApply && <GroupSeparator />}
-					{viewTooltip}
-				</>
-			)}
-		</Group>
-	);
-}
-
 export function ResumeEditorAnalysisPanel({
 	analysis,
 	appliedSlots,
+	dismissedSlots,
 	error,
 	isStreaming,
 	onApplyEdit,
+	onDismissEdit,
 	onRetry,
 	onViewSection,
 }: {
 	analysis: DeepPartial<ResumeAnalysis> | undefined;
 	appliedSlots?: Set<number>;
+	dismissedSlots?: Set<number>;
 	error: Error | undefined;
 	isStreaming: boolean;
 	onApplyEdit?: (edit: ResumeEdit, slot: number) => void;
+	onDismissEdit?: (slot: number, dismissed: boolean) => void;
 	onRetry?: () => void;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
@@ -176,6 +91,101 @@ export function ResumeEditorAnalysisPanel({
 			}
 			return next;
 		});
+	};
+
+	const renderActions = (slot: number, completeEdit: ResumeEdit, isApplied: boolean, isDelete: boolean) => {
+		const labels = isDelete
+			? {
+					Icon: TrashSimpleIcon,
+					apply: "Eliminar",
+					applyTitle: "Eliminar del CV",
+					applied: "Eliminado",
+				}
+			: {
+					Icon: WrenchIcon,
+					apply: "Aplicar",
+					applyTitle: "Aplicar al CV",
+					applied: "Aplicado",
+				};
+		const hasBlock = Boolean(completeEdit.targetBlockId);
+		const hasRewrite = Boolean(completeEdit.before && completeEdit.after);
+		const canApply = !isApplied && hasBlock && (isDelete || hasRewrite);
+		const canView = hasBlock && !(isApplied && isDelete);
+		const showApply = Boolean(onApplyEdit) && canApply;
+		const showView = Boolean(onViewSection) && canView;
+		const showSeparator = (isApplied || showApply) && showView;
+
+		return (
+			<Group>
+				{isApplied && (
+					<Button size="xs" variant="secondary">
+						<CheckCircleIcon className="text-success" weight="fill" />
+						{labels.applied}
+					</Button>
+				)}
+
+				{showApply && (
+					<Tooltip>
+						<TooltipTrigger
+							render={
+								<Button
+									aria-label={labels.applyTitle}
+									onClick={() => onApplyEdit?.(completeEdit, slot)}
+									size="xs"
+									variant="secondary"
+								/>
+							}
+						>
+							<labels.Icon /> {labels.apply}
+						</TooltipTrigger>
+						<TooltipContent>{labels.applyTitle}</TooltipContent>
+					</Tooltip>
+				)}
+
+				{showSeparator && <GroupSeparator />}
+
+				{showView && (
+					<>
+						<Tooltip>
+							<TooltipTrigger
+								render={
+									<Button
+										aria-label="Ver sección"
+										onClick={() => onViewSection?.(completeEdit)}
+										size="xs"
+										variant="secondary"
+									/>
+								}
+							>
+								<EyeIcon /> Ver
+							</TooltipTrigger>
+							<TooltipContent>Ver sección</TooltipContent>
+						</Tooltip>
+
+						<GroupSeparator />
+					</>
+				)}
+
+				{onDismissEdit && (
+					<Tooltip>
+						<TooltipTrigger
+							render={
+								<Button
+									aria-label="Descartar sugerencia"
+									onClick={() => onDismissEdit(slot, true)}
+									size="xs"
+									variant="secondary"
+								/>
+							}
+						>
+							<XCircleIcon />
+						</TooltipTrigger>
+
+						<TooltipContent>Descartar</TooltipContent>
+					</Tooltip>
+				)}
+			</Group>
+		);
 	};
 
 	return (
@@ -276,30 +286,44 @@ export function ResumeEditorAnalysisPanel({
 							const completeEdit = edit as ResumeEdit;
 							const isDelete = completeEdit.action === "delete";
 							const isApplied = appliedSlots?.has(slot) ?? false;
-							const canApply =
-								!isApplied &&
-								Boolean(completeEdit.targetBlockId && (isDelete || (completeEdit.before && completeEdit.after)));
-							const canView = !(isApplied && isDelete) && Boolean(completeEdit.targetBlockId);
+							const isDismissed = dismissedSlots?.has(slot) ?? false;
+
+							if (isDismissed) {
+								return (
+									<Item className="gap-2 opacity-50 hover:opacity-100" key={slot} size="sm" variant="outline">
+										<ItemContent>
+											<ItemTitle className="truncate text-xs leading-tight line-through">{edit?.title}</ItemTitle>
+										</ItemContent>
+
+										{onDismissEdit && (
+											<Tooltip>
+												<TooltipTrigger
+													render={
+														<Button
+															aria-label="Restaurar sugerencia"
+															onClick={() => onDismissEdit(slot, false)}
+															size="xs"
+															variant="secondary"
+														/>
+													}
+												>
+													<ArrowCounterClockwiseIcon />
+												</TooltipTrigger>
+												<TooltipContent>Restaurar</TooltipContent>
+											</Tooltip>
+										)}
+									</Item>
+								);
+							}
 
 							return (
 								<Item
-									className={cn("gap-3 transition-opacity duration-200", isApplied && "opacity-60 hover:opacity-100")}
+									className={cn("gap-3 transition-opacity", isApplied && "opacity-60 hover:opacity-100")}
 									key={slot}
 									size="sm"
 									variant="outline"
 								>
-									<ItemHeader className="flex justify-end">
-										<EditCardActions
-											canApply={canApply}
-											canView={canView}
-											completeEdit={completeEdit}
-											isApplied={isApplied}
-											isDelete={isDelete}
-											onApplyEdit={onApplyEdit}
-											onViewSection={onViewSection}
-											slot={slot}
-										/>
-									</ItemHeader>
+									<ItemHeader className="flex">{renderActions(slot, completeEdit, isApplied, isDelete)}</ItemHeader>
 
 									<ItemContent className="gap-1">
 										<ItemTitle className="text-sm leading-tight">{edit?.title}</ItemTitle>

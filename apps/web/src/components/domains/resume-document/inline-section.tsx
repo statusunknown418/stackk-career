@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { getBlockKey } from "@/components/domains/resume-document/block-key-registry";
 import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
@@ -95,13 +96,15 @@ export const InlineSection = withForm({
 					</form.AppField>
 					<Button
 						aria-label="Eliminar sección"
-						className="opacity-0 transition-opacity group-focus-within/section:opacity-100 [@media(hover:hover)]:group-hover/section:opacity-100"
+						className="opacity-0 transition-opacity group-focus-within/section:opacity-100 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/section:opacity-100"
+						data-pending={deleteBlock.isPending}
+						disabled={deleteBlock.isPending}
 						onClick={handleDeleteSection}
 						size="xs"
 						type="button"
 						variant="destructive-ghost"
 					>
-						<TrashIcon /> Eliminar
+						{deleteBlock.isPending ? <Spinner className="size-4" /> : <TrashIcon />} Eliminar
 					</Button>
 				</div>
 

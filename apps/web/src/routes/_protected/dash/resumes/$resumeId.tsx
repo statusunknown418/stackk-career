@@ -227,7 +227,7 @@ function RouteComponent() {
 		// blocks; remove blocks that no longer exist; patch metadata (position,
 		// parentBlockId) when it changes. A blanket `form.reset` here would wipe
 		// any in-progress edits whenever a sibling block is added or deleted.
-		reconcileBlocks(form, nextValues.blocks).catch(() => undefined);
+		reconcileBlocks(form, nextValues.blocks);
 	}, [nextHydrationKey, data, form, autosave]);
 
 	// Subscribe only to a tree-shape projection so the route re-renders when blocks

@@ -331,16 +331,10 @@ export const useDeleteBlock = ({ form }: UseDeleteBlockOptions) => {
 					releaseBlockKey(removedId);
 				}
 
-				const indices: number[] = [];
 				const formBlocks = form.state.values.blocks;
-				for (let i = formBlocks.length - 1; i >= 0; i--) {
-					const blockId = formBlocks[i]?.id;
-					if (blockId !== undefined && toRemove.has(blockId)) {
-						indices.push(i);
-					}
-				}
-				for (const index of indices) {
-					await form.removeFieldValue("blocks", index);
+				const survivors = formBlocks.filter((block) => !toRemove.has(block.id));
+				if (survivors.length !== formBlocks.length) {
+					form.setFieldValue("blocks", survivors);
 				}
 
 				return { previousResume } satisfies DeleteContext;

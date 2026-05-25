@@ -24,6 +24,7 @@ export interface ResumeFormApi {
 	removeFieldValue(field: "blocks", index: number): Promise<void> | void;
 	setFieldValue(
 		field:
+			| "blocks"
 			| `blocks[${number}].id`
 			| `blocks[${number}].position`
 			| `blocks[${number}].createdAt`
@@ -81,13 +82,11 @@ export const BLOCK_FIELD_PATH_RE = /^blocks\[(\d+)\]/;
 
 type FormBlock = ResumeDocumentWrapperForm["blocks"][number];
 
-export const removeMissingBlocks = async (form: ResumeFormApi, keepIds: Set<number>) => {
+export const removeMissingBlocks = (form: ResumeFormApi, keepIds: Set<number>) => {
 	const formBlocks = form.state.values.blocks;
-	for (let index = formBlocks.length - 1; index >= 0; index--) {
-		const formBlock = formBlocks[index];
-		if (formBlock && !keepIds.has(formBlock.id)) {
-			await form.removeFieldValue("blocks", index);
-		}
+	const survivors = formBlocks.filter((formBlock) => keepIds.has(formBlock.id));
+	if (survivors.length !== formBlocks.length) {
+		form.setFieldValue("blocks", survivors);
 	}
 };
 
@@ -117,10 +116,10 @@ export const patchSurvivorBlockMetadata = (form: ResumeFormApi, nextById: Map<nu
 	return survivorIds;
 };
 
-export const reconcileBlocks = async (form: ResumeFormApi, nextBlocks: FormBlock[]) => {
+export const reconcileBlocks = (form: ResumeFormApi, nextBlocks: FormBlock[]) => {
 	const nextById = new Map<number, FormBlock>(nextBlocks.map((block) => [block.id, block]));
 	const keepIds = new Set<number>(nextBlocks.map((block) => block.id));
-	await removeMissingBlocks(form, keepIds);
+	removeMissingBlocks(form, keepIds);
 	const survivorIds = patchSurvivorBlockMetadata(form, nextById);
 	for (const next of nextBlocks) {
 		if (!survivorIds.has(next.id)) {

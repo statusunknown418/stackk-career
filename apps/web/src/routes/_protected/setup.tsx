@@ -1,4 +1,4 @@
-import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import { ArrowBendUpRightIcon, CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Matrix, wave } from "@/components/ui/matrix";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
@@ -76,7 +77,11 @@ function RouteComponent() {
 						<p className="text-success italic tracking-tight">- The Founders</p>
 					</FramePanel>
 
-					<FrameFooter className="flex justify-end">
+					<FrameFooter className="flex justify-end gap-2">
+						<Button render={<Link to="/dash" />} variant="ghost-muted">
+							Explorar app <ArrowBendUpRightIcon />
+						</Button>
+
 						<Button
 							disabled={createGeneration.isPending}
 							loading={createGeneration.isPending}
@@ -190,20 +195,26 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 	const showAnalysis = Boolean(fileId);
 	const isAnalysisComplete = isCompleted;
 
+	const { data: session } = authClient.useSession();
+	const userId = session?.user?.id;
+	const realtimeTokenQuery = useQuery({
+		...orpc.viewer.realtimeToken.queryOptions(),
+		enabled: Boolean(userId && fileId),
+		staleTime: 29 * 60 * 1000,
+	});
+	const draftAccessToken = realtimeTokenQuery.data?.token;
+	const hasDraftSession = Boolean(draftAccessToken && fileId && userId);
+
 	return (
-		<section className="mx-auto grid w-full max-w-6xl grid-rows-[auto_1fr] gap-4 p-4">
+		<section className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
 			<nav className="flex justify-between pt-4">
 				<Button render={<Link to="/setup" />} variant="ghost-muted">
 					<CaretCircleLeftIcon /> Volver
 				</Button>
 
-				{isAnalysisComplete && (
-					<BlurFade>
-						<Button render={<Link to="/dash" />} variant="ghost">
-							Ir a la app <CaretCircleRightIcon />
-						</Button>
-					</BlurFade>
-				)}
+				<Button render={<Link to="/dash" />} variant={isAnalysisComplete ? "ghost" : "ghost-muted"}>
+					{isAnalysisComplete ? "Ir a la app" : "Omitir por ahora"} <CaretCircleRightIcon />
+				</Button>
 			</nav>
 
 			<main className={cn("grid min-h-full min-w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
@@ -222,9 +233,15 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 				</Frame>
 
 				{showAnalysis && (
-					<BlurFade>
+					<BlurFade className="flex max-h-[85svh] flex-col gap-3">
 						<ResumeAnalysisPanel
 							analysis={analysisData}
+							className="min-h-0 flex-1"
+							draft={
+								hasDraftSession && draftAccessToken && userId && fileId
+									? { accessToken: draftAccessToken, fileId, userId }
+									: undefined
+							}
 							error={error}
 							isStreaming={isStreaming && !hasCached}
 							onRetry={handleRetry}

@@ -15,6 +15,7 @@ import { getBlockKey } from "@/components/domains/resume-document/block-key-regi
 import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
@@ -237,13 +238,19 @@ export const InlineSkills = withForm({
 								</form.AppField>
 								<Button
 									aria-label="Eliminar categoría"
-									className="pointer-events-none absolute top-0 right-0 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/line:pointer-events-auto group-focus-within/line:translate-x-0 group-focus-within/line:opacity-100 [@media(hover:hover)]:group-hover/line:pointer-events-auto [@media(hover:hover)]:group-hover/line:translate-x-0 [@media(hover:hover)]:group-hover/line:opacity-100"
+									className="pointer-events-none absolute top-0 right-0 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/line:pointer-events-auto group-focus-within/line:translate-x-0 group-focus-within/line:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/line:pointer-events-auto [@media(hover:hover)]:group-hover/line:translate-x-0 [@media(hover:hover)]:group-hover/line:opacity-100"
+									data-pending={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
+									disabled={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
 									size="icon-sm"
 									type="button"
 									variant="destructive-ghost"
 								>
-									<TrashIcon />
+									{deleteBlock.isPending && deleteBlock.variables?.id === line.id ? (
+										<Spinner className="size-4" />
+									) : (
+										<TrashIcon />
+									)}
 								</Button>
 							</div>
 

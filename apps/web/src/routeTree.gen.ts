@@ -22,6 +22,7 @@ import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
+import { Route as ProtectedDashLettersRouteImport } from './routes/_protected/dash/letters'
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
@@ -92,6 +93,11 @@ const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
   path: '/suggested',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
+const ProtectedDashLettersRoute = ProtectedDashLettersRouteImport.update({
+  id: '/letters',
+  path: '/letters',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
 const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
   id: '/coaches',
   path: '/coaches',
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
   '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/_protected/dash/letters': typeof ProtectedDashLettersRoute
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
+    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
+    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/_protected/dash/agents'
     | '/_protected/dash/coaches'
+    | '/_protected/dash/letters'
     | '/_protected/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -344,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/_protected/dash/letters': {
+      id: '/_protected/dash/letters'
+      path: '/letters'
+      fullPath: '/dash/letters'
+      preLoaderRoute: typeof ProtectedDashLettersRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
     '/_protected/dash/coaches': {
       id: '/_protected/dash/coaches'
       path: '/coaches'
@@ -385,6 +404,7 @@ declare module '@tanstack/react-router' {
 interface ProtectedDashRouteRouteChildren {
   ProtectedDashAgentsRoute: typeof ProtectedDashAgentsRoute
   ProtectedDashCoachesRoute: typeof ProtectedDashCoachesRoute
+  ProtectedDashLettersRoute: typeof ProtectedDashLettersRoute
   ProtectedDashSuggestedRoute: typeof ProtectedDashSuggestedRoute
   ProtectedDashIndexRoute: typeof ProtectedDashIndexRoute
   ProtectedDashResumesResumeIdRoute: typeof ProtectedDashResumesResumeIdRoute
@@ -394,6 +414,7 @@ interface ProtectedDashRouteRouteChildren {
 const ProtectedDashRouteRouteChildren: ProtectedDashRouteRouteChildren = {
   ProtectedDashAgentsRoute: ProtectedDashAgentsRoute,
   ProtectedDashCoachesRoute: ProtectedDashCoachesRoute,
+  ProtectedDashLettersRoute: ProtectedDashLettersRoute,
   ProtectedDashSuggestedRoute: ProtectedDashSuggestedRoute,
   ProtectedDashIndexRoute: ProtectedDashIndexRoute,
   ProtectedDashResumesResumeIdRoute: ProtectedDashResumesResumeIdRoute,
