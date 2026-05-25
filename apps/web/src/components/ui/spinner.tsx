@@ -1,15 +1,7 @@
-import { BeachBallIcon } from "@phosphor-icons/react";
 import type React from "react";
 import { cn } from "@/lib/utils";
+import { Classic } from "../loading-ui/classic";
 
-export function Spinner({ className, ...props }: React.ComponentProps<typeof BeachBallIcon>): React.ReactElement {
-	return (
-		<BeachBallIcon
-			aria-label="Loading"
-			className={cn("animate-spin", className)}
-			role="status"
-			weight="duotone"
-			{...props}
-		/>
-	);
+export function Spinner({ className, ...props }: React.ComponentProps<typeof Classic>): React.ReactElement {
+	return <Classic aria-label="Loading" className={cn(className)} role="status" {...props} />;
 }

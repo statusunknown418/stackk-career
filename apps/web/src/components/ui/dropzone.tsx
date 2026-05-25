@@ -25,6 +25,7 @@ export interface DropzoneProps<T> extends Omit<React.ComponentProps<"div">, "onC
 	input: T;
 	onChange?: (files: File[]) => void;
 	onClientUploadComplete?: (files: ClientUploadedFileData<{ storedId?: string }>[]) => void;
+	onDragReject?: () => void;
 	onUploadError?: (error: Error) => void;
 }
 
@@ -32,6 +33,7 @@ export function Dropzone<T extends Record<string, unknown>>({
 	autoUpload,
 	endpoint,
 	onClientUploadComplete,
+	onDragReject,
 	onUploadError,
 	onChange,
 	disabled,
@@ -71,12 +73,29 @@ export function Dropzone<T extends Record<string, unknown>>({
 		setFiles((prev) => prev.filter((_, i) => i !== index));
 	}, []);
 
-	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+	const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
 		onDrop: handleDrop,
 		accept: fileTypes.length > 0 ? generateClientDropzoneAccept(fileTypes) : undefined,
 		multiple,
 		disabled: isDisabled,
 	});
+	const wasDragRejectRef = React.useRef(false);
+
+	React.useEffect(() => {
+		if (isDragReject && !wasDragRejectRef.current) {
+			onDragReject?.();
+		}
+		wasDragRejectRef.current = isDragReject;
+	}, [isDragReject, onDragReject]);
+	let dragMessage = "Arrastra y suelta o haz clic para subir";
+
+	if (isDragActive) {
+		dragMessage = "Suelta los archivos aquí";
+	}
+
+	if (isDragReject) {
+		dragMessage = "Archivo no permitido";
+	}
 
 	const rootProps = getRootProps();
 
@@ -86,10 +105,12 @@ export function Dropzone<T extends Record<string, unknown>>({
 				"relative flex flex-col items-center justify-center gap-4 rounded-xl border border-input border-dashed bg-muted/40 p-6 text-center outline-none transition-colors",
 				"hover:border-ring/64 hover:bg-muted",
 				"data-[drag-active=true]:border-ring data-[drag-active=true]:bg-accent",
+				"data-[drag-reject=true]:border-destructive/60 data-[drag-reject=true]:bg-destructive/5",
 				isDisabled && "pointer-events-none opacity-64",
 				className
 			)}
 			data-drag-active={isDragActive}
+			data-drag-reject={isDragReject}
 			data-slot="dropzone"
 			{...props}
 			{...rootProps}
@@ -101,10 +122,10 @@ export function Dropzone<T extends Record<string, unknown>>({
 			</div>
 
 			<div className="flex flex-col gap-1">
-				<p className="font-medium text-foreground text-sm">
-					{isDragActive ? "Suelta los archivos aquí" : "Arrastra y suelta o haz clic para subir"}
-				</p>
-				{allowedLabel && <p className="text-muted-foreground text-xs">{allowedLabel}</p>}
+				<p className="font-medium text-foreground text-sm">{dragMessage}</p>
+				{allowedLabel && (
+					<p className={cn("text-muted-foreground text-xs", isDragReject && "text-destructive")}>{allowedLabel}</p>
+				)}
 			</div>
 
 			{files.length > 0 && (
