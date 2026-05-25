@@ -105,6 +105,9 @@ export async function runK02DetailedAnalysisAgent({
 				user: userId,
 				tags: ["feature:k02-detailed-analysis", `env:${process.env.NODE_ENV ?? "development"}`],
 			},
+			google: {
+				thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+			},
 		},
 	});
 }

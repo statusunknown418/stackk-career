@@ -34,7 +34,7 @@ import { pdfUserMessage } from "../lib/ai/pdf-message";
 
 // ─── Public surface ────────────────────────────────────────────────────────
 
-export const RESUME_PARSER_MODEL = "google/gemini-2.5-flash" satisfies LanguageModel;
+export const RESUME_PARSER_MODEL = "google/gemini-3.1-flash-lite" satisfies LanguageModel;
 export const RESUME_PARSER_OBJECT_TYPE = "resume-parser";
 export const RESUME_VALIDATOR_TOOL = "resume_validator";
 export const HEADER_EXTRACTOR_TOOL = "header_extractor";
