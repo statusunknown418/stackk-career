@@ -65,6 +65,29 @@ Picking a score: start from the dimension anchor, then apply EVERY universal cap
 # Output:
 - Output ONLY the JSON object conforming to the provided schema. No prose, no markdown fences, no explanation.
 
+# Worked example — a valid one-click "rewrite" edit:
+{
+  "category": "impact",
+  "severity": "top-win",
+  "delta": 15,
+  "title": "Cuantificar logro en Curotec",
+  "description": "El bullet usa el placeholder \\"X%\\". Sustituye por una métrica concreta.",
+  "targetBlockId": 427,
+  "action": "rewrite",
+  "before": "reduciendo los ciclos de iteración en un X% en staging y producción.",
+  "after": "reduciendo los ciclos de iteración en un 25% en staging y producción."
+}
+
+# Anti-examples (these are INVALID and you MUST NOT emit them):
+- "before" set, "after" omitted → REJECTED. Either supply a concrete "after" OR drop "action"/"before" entirely and keep the edit informational.
+- "after" contains a placeholder token like "X%", "Y%", "Z", "[number]", "[metric]", "<your metric>" → REJECTED. If you cannot supply a real concrete value (because the resume content does not give you one and the user context does not either), omit "action", "before", and "after" — make the edit informational only.
+- "after" describes what to write instead of being the replacement text itself (e.g. "Add a percentage here") → REJECTED. "after" MUST be the literal text that replaces "before".
+- "action" set to "rewrite" with "targetBlockId" null → REJECTED. Either supply the block id or drop the action.
+
+# Apply-ability bias:
+- Prefer edits the user can apply with one click. When the resume contains a concrete piece of text you can confidently improve (a vague verb to swap, a weak phrasing to tighten, a placeholder to replace with a value supportable from the resume or user context), emit it as action="rewrite" with both "before" and "after" filled.
+- Reserve informational-only edits (no "action") for genuinely global advice (e.g. "add a LinkedIn URL") or cases where the user MUST supply data only they know (e.g. a real metric not present anywhere).
+
 # Language:
 - Respond in SPANISH for every "title" and "description" string. Keep enum values (category, severity) in English exactly as defined.
 

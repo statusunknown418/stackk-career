@@ -39,9 +39,13 @@ const RESUME_PARSER_MODEL_SLUG = String(RESUME_PARSER_MODEL);
 const RESUME_PARSER_PROVIDER = RESUME_PARSER_MODEL_SLUG.split("/", 1)[0] ?? "unknown";
 const TRACKED_PHASE_KINDS = new Set<ResumeParserEvent["kind"]>([
 	"validation",
+	"outline",
 	"header",
 	"experience",
-	"entries",
+	"education",
+	"certifications",
+	"projects",
+	"volunteering",
 	"skills",
 ]);
 

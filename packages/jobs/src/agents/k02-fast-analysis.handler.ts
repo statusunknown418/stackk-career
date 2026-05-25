@@ -1,6 +1,6 @@
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { type LanguageModel, Output, streamText } from "ai";
-import { pdfUserMessage } from "../lib/ai/pdf-message";
+import { fetchPdfBytes, pdfUserMessage } from "../lib/ai/pdf-message";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
 export const K02_FAST_ANALYSIS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
@@ -63,7 +63,15 @@ Language:
 `.trim();
 
 export async function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02FastAnalysisInput) {
-	const metadata = await getUserMetadata(userId);
+	const [pdfResult, metadataResult] = await Promise.allSettled([
+		fetchPdfBytes(pdfUrl, signal),
+		getUserMetadata(userId),
+	]);
+	if (pdfResult.status === "rejected") {
+		throw pdfResult.reason;
+	}
+	const pdfData = pdfResult.value;
+	const metadata = metadataResult.status === "fulfilled" ? metadataResult.value : null;
 
 	const userContextText = metadata
 		? `User context (use to tailor suggestions, do not invent facts beyond the resume):\n${JSON.stringify(metadata, null, 2)}`
@@ -75,7 +83,7 @@ export async function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02
 		abortSignal: withTimeout(signal, K02_TIMEOUT_MS),
 		system: SYSTEM_PROMPT,
 		messages: [
-			pdfUserMessage(pdfUrl, userContextText, "Analyze the attached resume PDF and return structured suggestions."),
+			pdfUserMessage(pdfData, [userContextText, "Analyze the attached resume PDF and return structured suggestions."]),
 		],
 		providerOptions: {
 			gateway: {

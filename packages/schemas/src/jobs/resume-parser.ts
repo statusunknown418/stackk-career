@@ -61,17 +61,17 @@ const parserParagraphSchema = z.object({
 	originalText: z.string().optional().describe("Always omit. Reserved for AI rewrites."),
 });
 
-const parserEntryContentSchema = z.object({
+export const parserEntryContentSchema = z.object({
 	title: z
 		.string()
 		.describe(
-			"Primary entry heading. For work: job role (e.g. 'Senior Software Engineer'). For education: degree (e.g. 'B.Sc. Computer Science'). For certifications: cert name. For projects: project name. For volunteering: role. Short. No commentary."
+			"Primary entry heading, COPIED VERBATIM from the PDF — same words, same order, same casing. For work: job role (e.g. 'Senior Software Engineer'). For education: degree (e.g. 'B.Sc. Computer Science'). For certifications: cert name. For projects: project name. For volunteering: role. Short. No commentary. NEVER invent, paraphrase, translate, or substitute a different entry's title. If the source text is ambiguous, prefer the heading line of the entry exactly as printed."
 		),
 	subtitle: z
 		.string()
 		.optional()
 		.describe(
-			"Secondary heading. For work: company name only. For education: school/institution. For certifications: issuer. For projects: optional role/team. For volunteering: organization. Short. Just the entity, no extras."
+			"Secondary heading, COPIED VERBATIM from the PDF. For work: company name only. For education: school/institution. For certifications: issuer. For projects: optional role/team. For volunteering: organization. Short. Just the entity, no extras. NEVER invent, paraphrase, or substitute the subtitle from a neighboring entry. Omit only when the source PDF truly has no subtitle for this entry."
 		),
 	location: z
 		.string()
@@ -103,7 +103,7 @@ const parserEntryContentSchema = z.object({
 		.string()
 		.optional()
 		.describe(
-			"HTML body of the entry. Required whenever any text follows the header. Bullet lists from the source → one <ul><li>...</li></ul> block. Paragraphs → <p>...</p> before the list. Allowed tags only: p, ul, ol, li, strong, em, b, i, br. Copy text verbatim. Omit ONLY when the entry has zero body text below the header."
+			"HTML body of THIS entry only. Required whenever any text follows this entry's header in the PDF. Bullet lists from the source → one <ul><li>...</li></ul> block. Paragraphs → <p>...</p> before the list. Allowed tags only: p, ul, ol, li, strong, em, b, i, br. Copy text verbatim from THIS entry's body — NEVER pull bullets, paragraphs, or descriptions from a neighboring entry. NEVER invent content. Omit ONLY when this entry has zero body text below its header in the PDF."
 		),
 	descriptorFormat: z
 		.enum(["plain", "html"])
@@ -229,6 +229,50 @@ export const extractedSkillsBundleSchema = z.object({
 export type HeaderBundle = z.infer<typeof extractedHeaderSchema>;
 export type EntriesBundle = z.infer<typeof extractedEntriesBundleSchema>;
 export type SkillsBundle = z.infer<typeof extractedSkillsBundleSchema>;
+export type ParserEntry = z.infer<typeof parserEntryContentSchema>;
+
+// Outline pass — single lightweight call that enumerates every entry-shaped
+// block in the PDF so per-entry workers can extract each one in isolation.
+// Bullets, dates, descriptions are intentionally EXCLUDED here — the outline
+// is a checklist of "what entries exist" so workers can tunnel-vision on each.
+
+export const resumeOutlineKindSchema = z
+	.enum(["experience", "education", "certification", "project", "volunteering"])
+	.describe(
+		"Section the entry belongs to. Use 'experience' for jobs/roles/internships/contracts, 'education' for degrees/schools, 'certification' for certs/licenses, 'project' for projects, 'volunteering' for volunteer roles."
+	);
+
+export const resumeOutlineItemSchema = z.object({
+	kind: resumeOutlineKindSchema,
+	title: z
+		.string()
+		.describe(
+			"Primary heading of the entry as written in the PDF. Job role, degree name, certification name, project name, or volunteer role. Verbatim."
+		),
+	subtitle: z
+		.string()
+		.optional()
+		.describe("Secondary heading: company / school / issuer / team / organization. Verbatim. Omit when truly absent."),
+	dateRangeRaw: z
+		.string()
+		.optional()
+		.describe(
+			"Date range as written in the PDF. Examples: 'Jul 2022 - Present', '2019 - 2021'. Verbatim. Omit when the entry has no date range."
+		),
+});
+
+export const resumeOutlineSchema = z.object({
+	items: z
+		.array(resumeOutlineItemSchema)
+		.default([])
+		.describe(
+			"Every entry-shaped block found in the PDF. Over-report is OK — duplicates are dropped downstream. Order: PDF document order. Empty array only when the resume truly contains no entries."
+		),
+});
+
+export type ResumeOutlineKind = z.infer<typeof resumeOutlineKindSchema>;
+export type ResumeOutlineItem = z.infer<typeof resumeOutlineItemSchema>;
+export type ResumeOutline = z.infer<typeof resumeOutlineSchema>;
 
 // Trigger metadata vocabulary — single source of truth, imported by both the
 // handler (`packages/jobs/src/agents/resume-parser.handler.ts`) and the task
@@ -241,7 +285,17 @@ export const resumeParserStepSchema = z.enum([
 	"complete",
 ]);
 
-export const resumeParserPhaseSchema = z.enum(["validation", "header", "experience", "entries", "skills"]);
+export const resumeParserPhaseSchema = z.enum([
+	"validation",
+	"outline",
+	"header",
+	"experience",
+	"education",
+	"certifications",
+	"projects",
+	"volunteering",
+	"skills",
+]);
 export const resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed", "canceled"]);
 
 export type ResumeParserStep = z.infer<typeof resumeParserStepSchema>;
