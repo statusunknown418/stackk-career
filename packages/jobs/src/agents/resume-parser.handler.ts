@@ -99,105 +99,48 @@ Fields:
 Reject invoices, contracts, articles, syllabi, blank PDFs.
 `.trim();
 
+// Field semantics are in the JSON Schema via Zod .describe(). Keep prompts
+// task-level only: WHAT to extract, copy verbatim, no commentary.
+
 const HEADER_SYSTEM = `
-Extract header from resume PDF. Return JSON with contact + summary.
+Extract the candidate's header info from the attached resume PDF.
 
-Rules:
-- Copy text verbatim. No paraphrasing.
-- Missing → null. Never invent.
-- String fields hold DATA only. No commentary, no reasoning, no meta-text.
-
-contact:
-- firstName / lastName: split full name. Empty string if missing.
-- items: array of { kind, value, label? }. kind ∈ {address, email, phone, linkedin, website, other}.
-- address = postal/city-state-country line only.
-- Return null if no contact info found.
-
-summary:
-- paragraphs: array of { text, format }. format defaults to "html". Wrap text in <p>...</p>.
-- Only real summary/objective paragraph. Absent → null.
-- Never bullets, job descriptions, or skills here.
+- Copy text verbatim. No paraphrasing, no translation, no cleanup.
+- String fields hold DATA only — never commentary, reasoning, or meta-text.
+- Missing data → null / omit per the schema. Never invent.
 `.trim();
 
 const EXPERIENCE_SYSTEM = `
-Extract every work experience entry from the resume PDF. Return { entries: [...] }. Empty when zero jobs.
+Extract EVERY work experience entry from the attached resume PDF.
 
-Output discipline:
-- Every string field is DATA. No commentary, no reasoning, no meta-text.
-- Missing → omit field. Never write explanations as values.
 - Copy text verbatim. No paraphrasing.
-
-Fields per entry:
-- title: job role. Short. (e.g. "Senior Software Engineer")
-- subtitle: company name only. Short. (e.g. "Acme Corp")
-- location: place string only. City/region/country. Omit if absent. Never duties or bullets.
-- isRemote: true if role is remote.
-- startDate / endDate: "YYYY-MM". Omit endDate when ongoing. Years-only → "YYYY-01" / "YYYY-12".
-- isCurrent: true only if "Present"/"Current"/"Now". When true, endDate omitted.
-- descriptor: HTML body. descriptorFormat="html". entryStyle="standard".
-  - Bullets → one <ul><li>...</li></ul> block.
-  - Paragraphs → <p>...</p> before list.
-  - Allowed tags: p, ul, ol, li, strong, em, b, i, br.
-  - Omit if entry has no body.
-
-Rules:
-- Extract every job. Preserve PDF order.
-- Each distinct role appears exactly once. No duplicates.
-- "Remote"/"Hybrid" → isRemote=true AND location="Remote"/"Hybrid".
+- String fields hold DATA only — never commentary, reasoning, or meta-text.
+- Extract every job, role, internship, contract, freelance engagement.
+- Preserve PDF order. Each distinct role appears exactly once — no duplicates.
+- Dates and bullets are PRIMARY data. Always populate when present in the PDF.
+- Missing data → null / omit per the schema. Never invent.
 `.trim();
 
 const ENTRIES_BUNDLE_SYSTEM = `
-Extract education, certifications, projects, volunteering from resume PDF. One JSON object.
+Extract education, certifications, projects, and volunteering from the attached resume PDF.
+Do NOT include work experience — that is handled by a separate extractor.
 
-Output discipline:
-- Every string field is DATA. No commentary, no reasoning, no meta-text.
-- Missing → omit field. Never write explanations as values.
 - Copy text verbatim. No paraphrasing.
-
-Sections (each value = { entries: [...] } or null when absent):
-- education: degrees, schools, bootcamps.
-- certifications: certifications, licenses, credentials.
-- projects: personal, academic, side projects.
-- volunteering: volunteer, pro bono, community roles.
-- Do NOT include work experience here (handled separately).
-
-Field map per section:
-- education: title=degree, subtitle=school, location=city/country.
-- certifications: title=cert name, subtitle=issuer, location=omit unless stated.
-- projects: title=project, subtitle=role/team (optional), location=omit unless stated.
-- volunteering: title=role, subtitle=organization, location=city/country.
-
-Common rules:
-- location: place string only. Omit if not present.
-- startDate / endDate: "YYYY-MM". Omit endDate when ongoing. Years-only → "YYYY-01" / "YYYY-12".
-- isCurrent: true only if ongoing.
-- descriptor: HTML body. Bullets → <ul><li>...</li></ul>. Paragraphs → <p>...</p>. Allowed tags: p, ul, ol, li, strong, em, b, i, br. Omit if no body.
-
-Preserve PDF order. No duplicates across sections.
+- String fields hold DATA only — never commentary, reasoning, or meta-text.
+- Extract every entry. Preserve PDF order. No duplicates across sections.
+- Dates and bullets are PRIMARY data. Always populate when present in the PDF.
+- Missing section → null per the schema. Missing field → omit per the schema. Never invent.
 `.trim();
 
 const SKILLS_BUNDLE_SYSTEM = `
-Extract skills + languages from resume PDF. One JSON object.
+Extract skills and languages from the attached resume PDF.
 
-Output discipline:
-- Every string field is DATA. No commentary, no reasoning, no meta-text.
-- Copy text verbatim.
-
-Sections (value = { lines: [...] } or null when absent):
-- skills: technical, tools, frameworks. line.category ∈ {technical, laboratory, interests, certifications, other}.
-- languages: spoken human languages only. line.category = "languages".
-
-lines[] = { label, category, items[] }
-- label: row heading from PDF (e.g. "Frameworks", "Languages"). Sensible label if none.
-- items[] = { value, proficiency?, skillKind? }
-- value: skill verbatim.
-- proficiency: only set when PDF states it. ∈ {basic, conversational, fluent, native, beginner, intermediate, advanced, expert}.
-
-Rules:
-- Extract every skill.
-- Programming languages → skills (technical), NOT languages section.
-- Never put job descriptions or summary paragraphs here.
-- Absent section → null, not empty array.
+- Copy text verbatim. No paraphrasing.
+- String fields hold DATA only — never commentary, reasoning, or meta-text.
+- Extract every skill listed. Do not drop items.
+- Programming languages go in skills (technical), NOT in the languages section.
+- Never put job descriptions, certification text, or summary paragraphs into skills.
+- Missing section → null per the schema. Never invent.
 `.trim();
 
 // ─── Internal helpers ──────────────────────────────────────────────────────
@@ -225,10 +168,11 @@ const baseRequest = (
 		gateway: {
 			tags: ["feature:resume-parser", `env:${process.env.NODE_ENV ?? "development"}`],
 		},
-		// Disable Gemini 2.5 Flash "thinking" so reasoning tokens can't bleed into
-		// structured-output string fields (title/descriptor/etc).
+		// 2.5-pro requires thinking. -1 = dynamic budget (model decides).
+		// Keep reasoning private (includeThoughts:false) so it doesn't leak into
+		// structured-output string fields.
 		google: {
-			thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+			thinkingConfig: { thinkingBudget: -1, includeThoughts: false },
 		},
 	},
 });
