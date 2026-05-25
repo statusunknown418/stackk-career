@@ -8,8 +8,7 @@ import {
 	WhatsappLogoIcon,
 	XLogoIcon,
 } from "@phosphor-icons/react";
-import { type MotionValue, motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
-import { useRef } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { FOOTER_COLUMNS } from "./data";
 
 const SOCIAL_LINKS = [
@@ -28,29 +27,16 @@ const LEGAL_LINKS = [
 const EASE_OUT_QUINT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export function LandingFooter() {
-	const footerRef = useRef<HTMLElement>(null);
 	const reduced = useReducedMotion();
 
-	const { scrollYProgress } = useScroll({
-		target: footerRef,
-		offset: ["start end", "end end"],
-	});
-
-	// Signature wordmark scrubs: starts compressed and faded, settles bold + sharp.
-	// Smooth the wordmark's wheel-jitter so the 42px translate doesn't shudder.
-	const smoothScroll = useSpring(scrollYProgress, { stiffness: 180, damping: 30, mass: 0.3 });
-	const markScale = useTransform(smoothScroll, [0, 0.55], [0.92, 1]);
-	const markOpacity = useTransform(smoothScroll, [0, 0.4, 0.9], [0.15, 1, 1]);
-	const markY = useTransform(smoothScroll, [0, 0.55], [42, 0]);
-
 	return (
-		<footer className="relative mt-16 overflow-hidden border-border border-t bg-foreground/[0.015]" ref={footerRef}>
+		<footer className="relative mt-16 overflow-hidden border-border border-t bg-foreground/[0.015]">
 			{/* Hairline accent above the signature, like a printer's mark */}
 			<div aria-hidden="true" className="absolute top-0 left-1/2 h-px w-24 -translate-x-1/2 bg-oxblood/60" />
 
 			<div className="mx-auto max-w-[1200px] px-6 pt-16 pb-10 md:pt-20">
-				{/* SIGNATURE — giant ASSENDIA wordmark, scroll-scrubbed */}
-				<SignatureMark markOpacity={markOpacity} markScale={markScale} markY={markY} />
+				{/* SIGNATURE — giant ASSENDIA wordmark, static */}
+				<SignatureMark />
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
@@ -134,15 +120,7 @@ export function LandingFooter() {
 	);
 }
 
-interface SignatureMarkProps {
-	markOpacity: MotionValue<number>;
-	markScale: MotionValue<number>;
-	markY: MotionValue<number>;
-}
-
-function SignatureMark({ markOpacity, markScale, markY }: SignatureMarkProps) {
-	const reduced = useReducedMotion();
-
+function SignatureMark() {
 	return (
 		<div className="relative">
 			<div className="flex items-center justify-between gap-4">
@@ -154,26 +132,14 @@ function SignatureMark({ markOpacity, markScale, markY }: SignatureMarkProps) {
 				</span>
 			</div>
 
-			<motion.div
-				className="relative mt-2 flex w-full items-end justify-center leading-none"
-				style={
-					reduced
-						? undefined
-						: {
-								scale: markScale,
-								opacity: markOpacity,
-								y: markY,
-								transformOrigin: "center bottom",
-							}
-				}
-			>
+			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"
 					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
 				>
 					ASSENDIA
 				</span>
-			</motion.div>
+			</div>
 		</div>
 	);
 }

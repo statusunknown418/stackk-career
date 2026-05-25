@@ -98,7 +98,7 @@ export function Tools() {
 					</header>
 				</Reveal>
 
-				<ol className="flex flex-col gap-2">
+				<ol className="flex flex-col gap-2 md:-mx-5">
 					{TOOLS.map((tool, idx) => (
 						<ToolRow idx={idx} key={tool.index} tool={tool} />
 					))}
@@ -149,7 +149,7 @@ function ToolRow({ idx, tool }: { idx: number; tool: Tool }) {
 		<motion.li
 			className={
 				isHuman
-					? "group grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-3 rounded-2xl border border-oxblood/40 bg-oxblood/[0.06] px-5 py-6 md:grid-cols-[auto_minmax(0,1.1fr)_minmax(0,1fr)_8.5rem] md:gap-x-8 md:py-7"
+					? "group grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-3 rounded-2xl border border-oxblood/40 bg-oxblood/[0.06] px-5 py-6 md:mx-5 md:grid-cols-[auto_minmax(0,1.1fr)_minmax(0,1fr)_8.5rem] md:gap-x-8 md:py-7"
 					: "group grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-2 rounded-2xl border border-transparent px-5 py-5 transition-all duration-300 ease-out hover:border-border hover:bg-foreground/[0.03] md:grid-cols-[auto_minmax(0,1.1fr)_minmax(0,1fr)_8.5rem] md:gap-x-8 md:py-6"
 			}
 			initial={reduced ? false : { opacity: 0, y: 18 }}
