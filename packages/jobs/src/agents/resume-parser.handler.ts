@@ -88,167 +88,116 @@ export interface ResumeParserTelemetry {
 // ─── Prompts ───────────────────────────────────────────────────────────────
 
 const VALIDATE_SYSTEM = `
-You are a resume validator. Inspect the attached PDF and decide if it is a resume / CV.
+Resume validator. Inspect the attached PDF.
 
-Return JSON conforming to the schema:
-- isResume: true only when the document is clearly a personal resume / CV (sections like experience, education, skills, contact details).
-- confidence: 0.0 to 1.0 (your confidence in the decision).
-- candidateName: full name if found, else null.
-- reason: short, factual justification grounded in observed content.
+Fields:
+- isResume: true only if clearly a personal resume / CV.
+- confidence: 0.0 - 1.0.
+- candidateName: full name or null.
+- reason: one short factual sentence.
 
-Reject (isResume=false) for: invoices, contracts, articles, syllabi, generic documents, blank PDFs.
+Reject invoices, contracts, articles, syllabi, blank PDFs.
 `.trim();
 
 const HEADER_SYSTEM = `
-Extract the candidate's header info from the attached resume PDF. Return BOTH fields in one JSON object.
+Extract header from resume PDF. Return JSON with contact + summary.
 
-CRITICAL RULES:
-- Copy text VERBATIM from the PDF. Do not paraphrase, translate, or "clean up".
-- If a field is not present, return null / omit it. NEVER invent data.
-- The "summary" is the candidate's professional summary / objective / profile paragraph near the top of the resume. It is NOT a job description, NOT a bullet list, NOT skills.
+Rules:
+- Copy text verbatim. No paraphrasing.
+- Missing → null. Never invent.
+- String fields hold DATA only. No commentary, no reasoning, no meta-text.
 
 contact:
-- firstName / lastName: split the full name. Use empty string if missing.
-- items: array of { kind, value, label? } where kind ∈ {address, email, phone, linkedin, website, other}.
-  - address: full postal / city-state-country line ONLY. Not a workplace location.
-  - email: a valid email address.
-  - phone: phone number as written (keep formatting).
-  - linkedin: linkedin.com profile URL or handle.
-  - website: any other URL (portfolio, github, personal site). Use "other" if unsure.
-- Return null when zero contact info is found.
+- firstName / lastName: split full name. Empty string if missing.
+- items: array of { kind, value, label? }. kind ∈ {address, email, phone, linkedin, website, other}.
+- address = postal/city-state-country line only.
+- Return null if no contact info found.
 
 summary:
-- paragraphs: one or more { text, format } blocks. Default format "html".
-- Wrap each paragraph's text in a single <p>...</p> when format is "html".
-- Only include a real summary / objective / profile paragraph. If absent → return null (NOT an empty paragraphs array).
-- Never put bullet lists, job descriptions, or skill lines into summary.
+- paragraphs: array of { text, format }. format defaults to "html". Wrap text in <p>...</p>.
+- Only real summary/objective paragraph. Absent → null.
+- Never bullets, job descriptions, or skills here.
 `.trim();
 
 const EXPERIENCE_SYSTEM = `
-Extract EVERY work experience entry from the attached resume PDF.
+Extract every work experience entry from the resume PDF. Return { entries: [...] }. Empty when zero jobs.
 
-═══ EXHAUSTIVENESS — READ FIRST ═══
-- Extract EVERY job, role, internship, contract, and freelance engagement in the PDF.
-- If the resume lists 9 jobs, return 9 entries. NEVER skip an entry because "it looks similar".
-- Preserve the PDF's order (most-recent first is typical — keep that order).
+Output discipline:
+- Every string field is DATA. No commentary, no reasoning, no meta-text.
+- Missing → omit field. Never write explanations as values.
+- Copy text verbatim. No paraphrasing.
 
-Return { entries: [...] }. If the PDF contains zero work experience, return { entries: [] }.
+Fields per entry:
+- title: job role. Short. (e.g. "Senior Software Engineer")
+- subtitle: company name only. Short. (e.g. "Acme Corp")
+- location: place string only. City/region/country. Omit if absent. Never duties or bullets.
+- isRemote: true if role is remote.
+- startDate / endDate: "YYYY-MM". Omit endDate when ongoing. Years-only → "YYYY-01" / "YYYY-12".
+- isCurrent: true only if "Present"/"Current"/"Now". When true, endDate omitted.
+- descriptor: HTML body. descriptorFormat="html". entryStyle="standard".
+  - Bullets → one <ul><li>...</li></ul> block.
+  - Paragraphs → <p>...</p> before list.
+  - Allowed tags: p, ul, ol, li, strong, em, b, i, br.
+  - Omit if entry has no body.
 
-═══ FIELD SEMANTICS — STRICT ═══
-Be literal: copy text verbatim from the PDF; do NOT paraphrase.
-
-- title    = job position / role (e.g. "Senior Software Engineer").
-- subtitle = company / employer name (e.g. "Acme Corp").
-- location = city, region, country ONLY (e.g. "Lima, Peru" / "Remote" / "New York, NY"). NEVER job duties, descriptions, or bullets.
-- isRemote = true when the role is explicitly remote.
-
-═══ HARD RULES — LOCATION ═══
-- location is a PLACE STRING. Max ~60 chars.
-- If the only candidate text is descriptive (responsibilities, achievements, tools, summary), omit location entirely.
-- "Remote" / "Hybrid" → set isRemote=true and also put "Remote" / "Hybrid" in location.
-- Never copy a sentence into location. If you would need a period, it's not a location.
-
-═══ DATES ═══
-- startDate / endDate as "YYYY-MM" (omit endDate when the role is ongoing).
-- isCurrent = true ONLY when the role is ongoing (text says "Present", "Current", "Now"). When true, endDate must be null/omitted.
-- Years-only sources → use "YYYY-01" for startDate, "YYYY-12" for endDate as a best-effort. Omit a date when truly absent.
-
-═══ DESCRIPTOR (entry body) ═══
-- descriptor holds the entry's narrative as HTML. descriptorFormat="html". entryStyle="standard".
-- Bullet lists in the source → ONE <ul><li>...</li><li>...</li></ul> block. Never wrap individual bullets in <p>.
-- Free-form prose paragraphs go in <p>...</p> BEFORE the list, in document order.
-- Allowed tags ONLY: p, ul, ol, li, strong, em, b, i, br. Strip any other markup.
-- Copy bullet text verbatim. Do not summarize, translate, or merge bullets.
-- If the entry has no body text in the PDF, omit descriptor (do NOT fabricate one, do NOT echo title/subtitle).
-
-═══ ANTI-PATTERNS (never do this) ═══
-- ❌ location: "Led migration of legacy auth system to OAuth2..."   (bullet — goes in descriptor)
-- ❌ location: "Python, AWS, Kubernetes"                            (skills — drop entirely)
-- ❌ subtitle: "Acme Corp — Remote — 2020-2023"                     (split: subtitle=company, location=Remote, dates separately)
-- ❌ descriptor echoing the title or subtitle
-- ❌ skipping an entry because "it looks similar to another"
+Rules:
+- Extract every job. Preserve PDF order.
+- Each distinct role appears exactly once. No duplicates.
+- "Remote"/"Hybrid" → isRemote=true AND location="Remote"/"Hybrid".
 `.trim();
 
 const ENTRIES_BUNDLE_SYSTEM = `
-Extract every non-experience entries-based section from the attached resume PDF in ONE JSON object.
+Extract education, certifications, projects, volunteering from resume PDF. One JSON object.
 
-═══ EXHAUSTIVENESS — READ FIRST ═══
-- Extract EVERY entry in the PDF for the sections below. Do not skip degrees, certifications, or projects.
-- Preserve the PDF's order. Never duplicate an entry across sections.
-- WORK EXPERIENCE is handled by a separate extractor — do NOT include jobs / employment / freelance engagements here.
+Output discipline:
+- Every string field is DATA. No commentary, no reasoning, no meta-text.
+- Missing → omit field. Never write explanations as values.
+- Copy text verbatim. No paraphrasing.
 
-═══ SECTIONS ═══
-- education: EDUCATION — degrees, schools, bootcamps, formal studies.
-- certifications: CERTIFICATIONS / licenses / professional credentials.
-- projects: PROJECTS — personal, academic, or notable side projects.
-- volunteering: VOLUNTEERING / community involvement / pro bono work.
+Sections (each value = { entries: [...] } or null when absent):
+- education: degrees, schools, bootcamps.
+- certifications: certifications, licenses, credentials.
+- projects: personal, academic, side projects.
+- volunteering: volunteer, pro bono, community roles.
+- Do NOT include work experience here (handled separately).
 
-Each section's value is { entries: [...] } or null when that section is genuinely absent from the PDF.
+Field map per section:
+- education: title=degree, subtitle=school, location=city/country.
+- certifications: title=cert name, subtitle=issuer, location=omit unless stated.
+- projects: title=project, subtitle=role/team (optional), location=omit unless stated.
+- volunteering: title=role, subtitle=organization, location=city/country.
 
-═══ FIELD SEMANTICS — STRICT ═══
-Map fields per section. Be literal: copy text verbatim from the PDF; do NOT paraphrase.
+Common rules:
+- location: place string only. Omit if not present.
+- startDate / endDate: "YYYY-MM". Omit endDate when ongoing. Years-only → "YYYY-01" / "YYYY-12".
+- isCurrent: true only if ongoing.
+- descriptor: HTML body. Bullets → <ul><li>...</li></ul>. Paragraphs → <p>...</p>. Allowed tags: p, ul, ol, li, strong, em, b, i, br. Omit if no body.
 
-education entry:
-- title    = degree or program (e.g. "B.Sc. Computer Science").
-- subtitle = institution / school name (e.g. "MIT").
-- location = city / country of the institution. NEVER coursework or honors.
-
-certifications entry:
-- title    = certification name (e.g. "AWS Solutions Architect Associate").
-- subtitle = issuing organization (e.g. "Amazon Web Services").
-- location = omit unless the PDF explicitly states a place. NEVER a credential ID or score.
-
-projects entry:
-- title    = project name.
-- subtitle = role / context / team (e.g. "Personal project", "Capstone — Team of 4"). May be omitted.
-- location = omit unless the PDF states one. NEVER tech stack or description.
-
-volunteering entry:
-- title    = role / position held.
-- subtitle = organization name.
-- location = city / country only.
-
-═══ HARD RULES — LOCATION ═══
-- location is a PLACE STRING. Max ~60 chars.
-- If the only candidate text is descriptive (responsibilities, achievements, tools, summary), omit location entirely.
-- Never copy a sentence into location. If you would need a period, it's not a location.
-
-═══ DATES ═══
-- startDate / endDate as "YYYY-MM" (omit endDate when ongoing).
-- isCurrent = true ONLY when the entry is ongoing. When true, endDate must be null/omitted.
-- Years-only sources → use "YYYY-01" for startDate, "YYYY-12" for endDate as a best-effort. Omit a date when truly absent.
-
-═══ DESCRIPTOR (entry body) ═══
-- descriptor holds the entry's narrative as HTML. descriptorFormat="html". entryStyle="standard".
-- Bullet lists in the source → ONE <ul><li>...</li><li>...</li></ul> block. Never wrap individual bullets in <p>.
-- Free-form prose paragraphs go in <p>...</p> BEFORE the list, in document order.
-- Allowed tags ONLY: p, ul, ol, li, strong, em, b, i, br. Strip any other markup.
-- Copy bullet text verbatim. Do not summarize, translate, or merge bullets.
-- If the entry has no body text in the PDF, omit descriptor.
-
-Return null (NOT an empty entries array) for sections absent from the PDF.
+Preserve PDF order. No duplicates across sections.
 `.trim();
 
 const SKILLS_BUNDLE_SYSTEM = `
-Extract every skills-based section from the attached resume PDF in ONE JSON object.
+Extract skills + languages from resume PDF. One JSON object.
 
-Sections:
-- skills: technical / tools / frameworks. Use any of {technical, laboratory, interests, certifications, other} per line.category.
-- languages: spoken human languages (English, Spanish, etc.). Every line.category MUST be "languages".
+Output discipline:
+- Every string field is DATA. No commentary, no reasoning, no meta-text.
+- Copy text verbatim.
 
-Each section's value is { lines: [...] } or null when the section is genuinely absent.
+Sections (value = { lines: [...] } or null when absent):
+- skills: technical, tools, frameworks. line.category ∈ {technical, laboratory, interests, certifications, other}.
+- languages: spoken human languages only. line.category = "languages".
 
-lines[] shape: { label, category, items[] }
-- label = the row's heading from the PDF (e.g. "Languages", "Frameworks", "Cloud"). Use a sensible label when the PDF lists skills without sub-headings.
-- items[] shape: { value, proficiency?, skillKind? }
-- value = the skill as written in the PDF (verbatim).
-- proficiency ∈ {basic, conversational, fluent, native, beginner, intermediate, advanced, expert}. Only set when the PDF states it.
+lines[] = { label, category, items[] }
+- label: row heading from PDF (e.g. "Frameworks", "Languages"). Sensible label if none.
+- items[] = { value, proficiency?, skillKind? }
+- value: skill verbatim.
+- proficiency: only set when PDF states it. ∈ {basic, conversational, fluent, native, beginner, intermediate, advanced, expert}.
 
-RULES:
-- Extract every skill listed. Do not drop items even if the line is long.
-- Never put job descriptions, certifications text, or summary paragraphs in skills.
-- Programming languages go in skills (technical), NOT in the languages section.
-- Return null (not an empty lines array) for sections absent from the PDF.
+Rules:
+- Extract every skill.
+- Programming languages → skills (technical), NOT languages section.
+- Never put job descriptions or summary paragraphs here.
+- Absent section → null, not empty array.
 `.trim();
 
 // ─── Internal helpers ──────────────────────────────────────────────────────
