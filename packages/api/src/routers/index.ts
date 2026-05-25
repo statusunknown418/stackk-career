@@ -8,6 +8,7 @@ import { filesMetadataRouter } from "./files-metadata";
 import { generationsRouter } from "./generations";
 import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
+import { resumeAnalysesRouter } from "./resume-analyses";
 import { resumesRouter } from "./resumes";
 import { suggestionsRouter } from "./suggestions";
 import { viewerRouter } from "./viewer";
@@ -28,6 +29,7 @@ export const appRouter = {
 	onboardingProfile: onboardingProfileRouter,
 	viewer: viewerRouter,
 	resumes: resumesRouter,
+	resumeAnalyses: resumeAnalysesRouter,
 	blocks: blocksRouter,
 	suggestions: suggestionsRouter,
 };

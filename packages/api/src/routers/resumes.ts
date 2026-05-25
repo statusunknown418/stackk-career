@@ -288,7 +288,12 @@ export const resumesRouter = {
 		});
 
 		const [row] = await context.db
-			.select({ id: resumeAnalyses.id, object: resumeAnalyses.object })
+			.select({
+				id: resumeAnalyses.id,
+				object: resumeAnalyses.object,
+				appliedEditIndices: resumeAnalyses.appliedEditIndices,
+				dismissedEditIndices: resumeAnalyses.dismissedEditIndices,
+			})
 			.from(resumeAnalyses)
 			.where(
 				and(
@@ -312,7 +317,12 @@ export const resumesRouter = {
 		}
 
 		context.log?.set({ outcome: "found", analysis: { id: row.id } });
-		return { id: row.id, analysis: parsed.data };
+		return {
+			id: row.id,
+			analysis: parsed.data,
+			appliedEditIndices: row.appliedEditIndices,
+			dismissedEditIndices: row.dismissedEditIndices,
+		};
 	}),
 
 	updateTitle: protectedProcedure.input(updateResumeTitleSchema).handler(async ({ context, input }) => {

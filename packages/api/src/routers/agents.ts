@@ -32,6 +32,8 @@ export const agentsRouter = {
 
 			const [row] = await context.db
 				.select({
+					fileId: fileMetadata.id,
+					fileName: fileMetadata.name,
 					generationId: generations.id,
 					pdfUrl: fileMetadata.url,
 				})
@@ -94,6 +96,8 @@ export const agentsRouter = {
 					"k02-fast-analysis",
 					{
 						analysisId,
+						displayName: row.fileName ?? undefined,
+						fileId: row.fileId ?? undefined,
 						generationId: input.generationId,
 						userId,
 						pdfUrl: row.pdfUrl,
@@ -192,6 +196,7 @@ export const agentsRouter = {
 						generationId: resume.generationId,
 						resumeId: resume.id,
 						userId,
+						parentAnalysisId: input.parentAnalysisId,
 					},
 					{
 						concurrencyKey: userId,
