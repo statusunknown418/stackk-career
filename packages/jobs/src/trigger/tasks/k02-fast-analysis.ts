@@ -1,9 +1,10 @@
 import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
+import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import { k02FastAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-fast-analysis";
 import { toError } from "@stackk-career/schemas/utils/to-error";
-import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
+import { idempotencyKeys, logger, metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import { and, eq, ne } from "drizzle-orm";
 import {
 	K02_FAST_ANALYSIS_MODEL,
@@ -14,12 +15,15 @@ import { assertPdfHostAllowed } from "../../lib/utils";
 import { k02Queue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
 
+const K02_FAST_ANALYSIS_MODEL_SLUG = String(K02_FAST_ANALYSIS_MODEL);
+const K02_FAST_ANALYSIS_PROVIDER = K02_FAST_ANALYSIS_MODEL_SLUG.split("/", 1)[0] ?? "unknown";
+
 export const k02FastAnalysisTask = schemaTask({
 	id: "k02-fast-analysis",
 	queue: k02Queue,
 	schema: k02FastAnalysisInputSchema,
 	maxDuration: 300,
-	run: async ({ analysisId, generationId, userId, pdfUrl }, { ctx, signal }) => {
+	run: async ({ analysisId, displayName, fileId, generationId, userId, pdfUrl }, { ctx, signal }) => {
 		const db = getTriggerDb();
 
 		logger.info("k02-fast-analysis = start", {
@@ -39,26 +43,27 @@ export const k02FastAnalysisTask = schemaTask({
 		metadata.set("step", "analyzing");
 
 		const result = await runK02FastAnalysisAgent({ pdfUrl: pdfUrlObj.toString(), userId, signal });
-
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
-		const [outputResult, usageResult, broadcastResult] = await Promise.allSettled([
-			result.output,
-			result.usage,
-			waitUntilComplete(),
-		]);
+		const object = await result.output;
+		const usage = await result.totalUsage;
+		const finishReason = await result.finishReason;
+		await waitUntilComplete();
 
-		if (outputResult.status === "rejected") {
-			throw outputResult.reason;
-		}
-		if (broadcastResult.status === "rejected") {
-			logger.warn("k02-fast-analysis = broadcast_failed", { reason: String(broadcastResult.reason) });
-		}
-
-		const object = outputResult.value;
-		const usage = usageResult.status === "fulfilled" ? usageResult.value : undefined;
-
-		logger.info("k02-fast-analysis = completed", { analysisId, generationId, usage });
+		metadata.set("ai", {
+			model: K02_FAST_ANALYSIS_MODEL_SLUG,
+			provider: K02_FAST_ANALYSIS_PROVIDER,
+			feature: "k02-fast-analysis",
+			attempt: ctx.attempt.number,
+			finishReason: finishReason ?? null,
+			usage: {
+				inputTokens: usage.inputTokens ?? null,
+				cachedInputTokens: usage.cachedInputTokens ?? null,
+				outputTokens: usage.outputTokens ?? null,
+				reasoningTokens: usage.reasoningTokens ?? null,
+				totalTokens: usage.totalTokens ?? null,
+			},
+		});
 
 		metadata.set("step", "persisting");
 
@@ -77,9 +82,65 @@ export const k02FastAnalysisTask = schemaTask({
 			}),
 		]);
 
+		let resumeParserRunId: string | null = null;
+
+		if (fileId) {
+			metadata.set("step", "queueing_resume_parser");
+
+			try {
+				const idempotencyKey = await idempotencyKeys.create(`resume-parser-from-analysis-${analysisId}`);
+				const handle = await tasks.trigger<typeof resumeParserTask>(
+					"resume-parser",
+					{
+						userId,
+						fileId,
+						generationId,
+						displayName,
+					},
+					{
+						concurrencyKey: userId,
+						idempotencyKey,
+						idempotencyKeyTTL: "24h",
+						tags: [
+							`user:${userId}`,
+							`file:${fileId}`,
+							`gen:${generationId}`,
+							`analysis:${analysisId}`,
+							"agent:resume-parser",
+							"source:k02-fast-analysis",
+						],
+					}
+				);
+
+				resumeParserRunId = handle.id;
+				metadata.set("resumeParserRunId", handle.id);
+				metadata.set("resumeParserStatus", "queued");
+
+				logger.info("k02-fast-analysis = resume_parser_triggered", {
+					analysisId,
+					fileId,
+					generationId,
+					resumeParserRunId,
+					userId,
+				});
+			} catch (error) {
+				const message = toError(error).message;
+				metadata.set("resumeParserStatus", "failed");
+				metadata.set("resumeParserError", message);
+
+				logger.warn("k02-fast-analysis = resume_parser_trigger_failed", {
+					analysisId,
+					error: message,
+					fileId,
+					generationId,
+					userId,
+				});
+			}
+		}
+
 		metadata.set("step", "complete");
 
-		return { analysisId, generationId, userId, object };
+		return { analysisId, generationId, resumeParserRunId, userId, object };
 	},
 
 	onFailure: async ({ payload, error, ctx }) => {

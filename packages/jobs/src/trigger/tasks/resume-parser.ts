@@ -13,13 +13,16 @@
  */
 import { getTriggerDb } from "@stackk-career/db/http";
 import { generations } from "@stackk-career/db/schema/generations";
+import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeParserInputSchema } from "@stackk-career/schemas/jobs/resume-parser";
 import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { generateLexoKeyBetween, withLexoPositions } from "@stackk-career/schemas/utils/lexographical";
+import { toError } from "@stackk-career/schemas/utils/to-error";
 import { AbortTaskRunError, logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { constructNow, formatDate } from "date-fns";
+import { and, eq, isNull } from "drizzle-orm";
 import {
 	RESUME_PARSER_MODEL,
 	RESUME_PARSER_OBJECT_TYPE,
@@ -32,7 +35,15 @@ import { resolveFile } from "../../lib/resume-parser/resolve-file";
 import { resumeParserQueue } from "../queues";
 
 const RECENT_TRACE_LIMIT = 3;
-const TRACKED_PHASE_KINDS = new Set<ResumeParserEvent["kind"]>(["validation", "header", "entries", "skills"]);
+const RESUME_PARSER_MODEL_SLUG = String(RESUME_PARSER_MODEL);
+const RESUME_PARSER_PROVIDER = RESUME_PARSER_MODEL_SLUG.split("/", 1)[0] ?? "unknown";
+const TRACKED_PHASE_KINDS = new Set<ResumeParserEvent["kind"]>([
+	"validation",
+	"header",
+	"experience",
+	"entries",
+	"skills",
+]);
 
 async function insertPlannedSectionChildren({
 	createdResumeId,
@@ -88,6 +99,82 @@ async function insertPlannedSectionChildren({
 		if (result.status === "rejected") {
 			logger.warn("resume-parser = child_insert_failed", { reason: String(result.reason) });
 		}
+	}
+}
+
+async function runResumeParserAgentWithObservability({
+	attempt,
+	onEvent,
+	pdfUrl,
+	signal,
+	userId,
+}: {
+	attempt: number;
+	onEvent: (event: ResumeParserEvent) => void;
+	pdfUrl: string;
+	signal: AbortSignal;
+	userId: string;
+}) {
+	metadata.set("aiFeature", "resume-parser");
+	metadata.set("aiModel", RESUME_PARSER_MODEL_SLUG);
+	metadata.set("aiProvider", RESUME_PARSER_PROVIDER);
+	metadata.set("aiAttempt", attempt);
+	metadata.set("aiStatus", "running");
+
+	logger.info("resume-parser = ai_start", {
+		attempt,
+		model: RESUME_PARSER_MODEL_SLUG,
+		provider: RESUME_PARSER_PROVIDER,
+		source: "pdf",
+		userId,
+	});
+
+	try {
+		const agentOutput = await runResumeParserAgent({ pdfUrl, signal, onEvent });
+		metadata.set("aiStatus", "completed");
+		metadata.set("aiFinishReason", agentOutput.telemetry.finishReason);
+		metadata.set("aiCachedInputTokens", agentOutput.telemetry.totalUsage?.cachedInputTokens ?? null);
+		metadata.set("aiInputTokens", agentOutput.telemetry.totalUsage?.inputTokens ?? null);
+		metadata.set("aiOutputTokens", agentOutput.telemetry.totalUsage?.outputTokens ?? null);
+		metadata.set(
+			"aiReasoningTokens",
+			agentOutput.telemetry.totalUsage?.reasoningTokens ??
+				agentOutput.telemetry.totalUsage?.outputTokenDetails.reasoningTokens ??
+				null
+		);
+		metadata.set("aiTotalTokens", agentOutput.telemetry.totalUsage?.totalTokens ?? null);
+		metadata.set("aiPhaseTelemetry", agentOutput.telemetry.phases as never);
+
+		logger.info("resume-parser = ai_complete", {
+			candidateName: agentOutput.validation.candidateName,
+			finishReason: agentOutput.telemetry.finishReason,
+			model: RESUME_PARSER_MODEL_SLUG,
+			partialFailureCount: agentOutput.telemetry.partialFailureCount,
+			phases: agentOutput.telemetry.phases,
+			source: "pdf",
+			usage: agentOutput.telemetry.totalUsage,
+			userId,
+			validationConfidence: agentOutput.validation.confidence,
+		});
+
+		return agentOutput;
+	} catch (error) {
+		const message = toError(error).message;
+		metadata.set("aiStatus", "failed");
+		metadata.set("aiError", message);
+
+		logger.error("resume-parser = ai_failed", {
+			error: message,
+			model: RESUME_PARSER_MODEL_SLUG,
+			source: "pdf",
+			userId,
+		});
+
+		if (error instanceof Error && error.message.startsWith("Not a resume:")) {
+			throw new AbortTaskRunError(error.message);
+		}
+
+		throw error;
 	}
 }
 
@@ -180,20 +267,19 @@ export const resumeParserTask = schemaTask({
 			const onEvent = (event: ResumeParserEvent) => {
 				emitTrace(event);
 			};
-			let agentOutput: Awaited<ReturnType<typeof runResumeParserAgent>>;
-
-			try {
-				agentOutput = await runResumeParserAgent({ pdfUrl: resolved.pdfUrl, signal, onEvent });
-			} catch (err) {
-				if (err instanceof Error && err.message.startsWith("Not a resume:")) {
-					throw new AbortTaskRunError(err.message);
-				}
-				throw err;
-			}
+			const agentOutput = await runResumeParserAgentWithObservability({
+				attempt: ctx.attempt.number,
+				onEvent,
+				pdfUrl: resolved.pdfUrl,
+				signal,
+				userId: payload.userId,
+			});
 
 			logger.info("resume-parser = agent_done", {
 				confidence: agentOutput.validation.confidence,
 				candidateName: agentOutput.validation.candidateName,
+				finishReason: agentOutput.telemetry.finishReason,
+				usage: agentOutput.telemetry.totalUsage,
 			});
 
 			emitTrace({
@@ -254,6 +340,44 @@ export const resumeParserTask = schemaTask({
 				.returning({ id: resumes.id });
 			if (!createdResume) {
 				throw new Error("Failed to create resume row");
+			}
+
+			// Backlink prior analyses (from upstream generation, e.g. k02-fast-analysis)
+			// to the freshly created resume so the editor's analysis panel can find them.
+			if (payload.generationId) {
+				try {
+					const linked = await db
+						.update(resumeAnalyses)
+						.set({ resumeId: createdResume.id })
+						.where(
+							and(
+								eq(resumeAnalyses.generationId, payload.generationId),
+								eq(resumeAnalyses.userId, payload.userId),
+								isNull(resumeAnalyses.resumeId)
+							)
+						)
+						.returning({ id: resumeAnalyses.id });
+
+					metadata.set("linkedAnalysisCount", linked.length);
+
+					logger.info("resume-parser = analyses_linked", {
+						count: linked.length,
+						resumeId: createdResume.id,
+						sourceGenerationId: payload.generationId,
+						userId: payload.userId,
+					});
+				} catch (linkErr) {
+					const linkMessage = toError(linkErr).message;
+					metadata.set("linkAnalysisStatus", "failed");
+					metadata.set("linkAnalysisError", linkMessage);
+
+					logger.warn("resume-parser = analyses_link_failed", {
+						error: linkMessage,
+						resumeId: createdResume.id,
+						sourceGenerationId: payload.generationId,
+						userId: payload.userId,
+					});
+				}
 			}
 
 			emitTrace({

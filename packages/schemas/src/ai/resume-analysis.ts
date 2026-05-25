@@ -41,3 +41,16 @@ export const resumeAnalysisSchema = z.object({
 export type ResumeAnalysis = z.infer<typeof resumeAnalysisSchema>;
 export type ResumeAnalysisObject = ResumeAnalysis;
 export type ResumeEdit = ResumeAnalysis["edits"][number];
+export type ResumeAnalysisScoreBreakdown = ResumeAnalysis["scoreBreakdown"];
+
+export const priorEditStatusEnum = z.enum(["applied", "dismissed", "pending"]);
+export type PriorEditStatus = z.infer<typeof priorEditStatusEnum>;
+
+export type PriorAnalysisEdit = ResumeEdit & { status: PriorEditStatus };
+
+export interface PriorAnalysisContext {
+	analysisId: string;
+	edits: PriorAnalysisEdit[];
+	scoreBreakdown: ResumeAnalysisScoreBreakdown;
+	scoreOverall: ResumeAnalysis["scoreOverall"];
+}

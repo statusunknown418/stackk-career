@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const k02FastAnalysisInputSchema = z.object({
 	analysisId: z.string(),
+	displayName: z.string().optional(),
+	fileId: z.string().optional(),
 	generationId: z.string(),
 	userId: z.string(),
 	pdfUrl: z.url(),

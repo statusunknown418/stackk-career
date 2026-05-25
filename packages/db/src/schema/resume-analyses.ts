@@ -31,6 +31,16 @@ export const resumeAnalyses = sqliteTable(
 
 		model: t.text().$type<LanguageModel>(),
 		object: t.text({ mode: "json" }),
+		appliedEditIndices: t
+			.text({ mode: "json" })
+			.$type<number[]>()
+			.notNull()
+			.$defaultFn(() => []),
+		dismissedEditIndices: t
+			.text({ mode: "json" })
+			.$type<number[]>()
+			.notNull()
+			.$defaultFn(() => []),
 		error: t.text(),
 
 		createdAt: t

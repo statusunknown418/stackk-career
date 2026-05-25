@@ -1,0 +1,1 @@
+ALTER TABLE `resume_analyses` ADD `appliedEditIndices` text NOT NULL DEFAULT '[]';

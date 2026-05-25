@@ -59,8 +59,10 @@ export const extractedHeaderSchema = z.object({
 	summary: extractedSummarySchema.nullable().default(null),
 });
 
+// Experience is split into its own call — heaviest section by output tokens
+// (many jobs × many HTML bullets each), so isolating it avoids truncation of
+// the rest of the entries family when the resume is dense.
 export const extractedEntriesBundleSchema = z.object({
-	experience: extractedEntriesSectionSchema.nullable().default(null),
 	education: extractedEntriesSectionSchema.nullable().default(null),
 	certifications: extractedEntriesSectionSchema.nullable().default(null),
 	projects: extractedEntriesSectionSchema.nullable().default(null),
@@ -87,7 +89,7 @@ export const resumeParserStepSchema = z.enum([
 	"complete",
 ]);
 
-export const resumeParserPhaseSchema = z.enum(["validation", "header", "entries", "skills"]);
+export const resumeParserPhaseSchema = z.enum(["validation", "header", "experience", "entries", "skills"]);
 export const resumeParserPhaseStatusSchema = z.enum(["running", "complete", "failed", "canceled"]);
 
 export type ResumeParserStep = z.infer<typeof resumeParserStepSchema>;
