@@ -96,7 +96,7 @@ function RouteComponent() {
 			<section aria-labelledby="resumes-list-heading" className="px-4 py-2">
 				{hasResumeContent ? (
 					<article className="flex flex-col gap-4">
-						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 							{data.map((resume) => (
 								<ResumeCard key={resume.id} resume={resume} />
 							))}
