@@ -9,7 +9,12 @@ export type EditSeverity = z.infer<typeof editSeverityEnum>;
 export const editActionEnum = z.enum(["rewrite", "delete"]);
 export type EditAction = z.infer<typeof editActionEnum>;
 
-const scoreField = z.number().int().min(0).max(100);
+const scoreField = z
+	.number()
+	.int()
+	.min(0)
+	.max(100)
+	.describe("Integer score from 0 to 100. NEVER a decimal. Round to nearest whole number before emitting.");
 export const resumeAnalysisScoreBreakdownKeys = ["impact", "keywords", "clarity", "formatting", "length"] as const;
 
 export const resumeAnalysisSchema = z.object({

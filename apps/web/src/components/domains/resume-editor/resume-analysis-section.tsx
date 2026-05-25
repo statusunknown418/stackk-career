@@ -52,8 +52,30 @@ export function ResumeAnalysisSection({
 
 	const setEditApplied = useMutation(
 		orpc.resumeAnalyses.setEditApplied.mutationOptions({
-			onError: (mutationError) => {
+			onMutate: async ({ editIndex, applied }) => {
+				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
+				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
+				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
+					if (!prev) {
+						return prev;
+					}
+					const nextSet = new Set(prev.appliedEditIndices);
+					if (applied) {
+						nextSet.add(editIndex);
+					} else {
+						nextSet.delete(editIndex);
+					}
+					return { ...prev, appliedEditIndices: [...nextSet].sort((a, b) => a - b) };
+				});
+				return { previous };
+			},
+			onError: (mutationError, _vars, ctx) => {
+				if (ctx?.previous !== undefined) {
+					queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, ctx.previous);
+				}
 				toast.error(mutationError.message || "No se pudo guardar el estado.");
+			},
+			onSettled: () => {
 				queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
 			},
 		})
@@ -61,8 +83,30 @@ export function ResumeAnalysisSection({
 
 	const setEditDismissed = useMutation(
 		orpc.resumeAnalyses.setEditDismissed.mutationOptions({
-			onError: (mutationError) => {
+			onMutate: async ({ editIndex, dismissed }) => {
+				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
+				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
+				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
+					if (!prev) {
+						return prev;
+					}
+					const nextSet = new Set(prev.dismissedEditIndices);
+					if (dismissed) {
+						nextSet.add(editIndex);
+					} else {
+						nextSet.delete(editIndex);
+					}
+					return { ...prev, dismissedEditIndices: [...nextSet].sort((a, b) => a - b) };
+				});
+				return { previous };
+			},
+			onError: (mutationError, _vars, ctx) => {
+				if (ctx?.previous !== undefined) {
+					queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, ctx.previous);
+				}
 				toast.error(mutationError.message || "No se pudo guardar el estado.");
+			},
+			onSettled: () => {
 				queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
 			},
 		})
@@ -82,7 +126,6 @@ export function ResumeAnalysisSection({
 
 	const streamedAnalysis = streams["resume-analysis"]?.at(-1);
 	const cachedData = cachedAnalysis.data?.analysis;
-	const analysisData: DeepPartial<ResumeAnalysis> | undefined = streamedAnalysis ?? cachedData;
 
 	const activeAnalysisId = runHandle?.analysisId ?? cachedAnalysis.data?.id;
 
@@ -111,10 +154,15 @@ export function ResumeAnalysisSection({
 		realtimeError ??
 		(isFailed ? new Error("Algo ocurrió con el análisis, por favor intenta nuevamente en unos minutos") : undefined);
 
+	const analysisData: DeepPartial<ResumeAnalysis> | undefined = isStreaming
+		? streamedAnalysis
+		: (streamedAnalysis ?? cachedData);
+
 	const handleAnalyze = () => {
+		const parentAnalysisId = cachedAnalysis.data?.id;
 		setRunHandle(null);
 		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, null);
-		initiateAnalysis.mutate({ resumeId });
+		initiateAnalysis.mutate({ resumeId, parentAnalysisId });
 	};
 
 	const handleApply = (edit: ResumeEdit, slot: number) => {
@@ -125,16 +173,6 @@ export function ResumeAnalysisSection({
 		if (!(ok && activeAnalysisId)) {
 			return;
 		}
-
-		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
-			if (!prev) {
-				return prev;
-			}
-			const nextSet = new Set(prev.appliedEditIndices);
-			nextSet.add(slot);
-			return { ...prev, appliedEditIndices: [...nextSet].sort((a, b) => a - b) };
-		});
-
 		setEditApplied.mutate({ analysisId: activeAnalysisId, editIndex: slot, applied: true });
 	};
 
@@ -142,20 +180,6 @@ export function ResumeAnalysisSection({
 		if (!activeAnalysisId) {
 			return;
 		}
-
-		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
-			if (!prev) {
-				return prev;
-			}
-			const nextSet = new Set(prev.dismissedEditIndices);
-			if (dismissed) {
-				nextSet.add(slot);
-			} else {
-				nextSet.delete(slot);
-			}
-			return { ...prev, dismissedEditIndices: [...nextSet].sort((a, b) => a - b) };
-		});
-
 		setEditDismissed.mutate({ analysisId: activeAnalysisId, editIndex: slot, dismissed });
 	};
 

@@ -276,6 +276,11 @@ const baseRequest = (
 		gateway: {
 			tags: ["feature:resume-parser", `env:${process.env.NODE_ENV ?? "development"}`],
 		},
+		// Disable Gemini 2.5 Flash "thinking" so reasoning tokens can't bleed into
+		// structured-output string fields (title/descriptor/etc).
+		google: {
+			thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+		},
 	},
 });
 

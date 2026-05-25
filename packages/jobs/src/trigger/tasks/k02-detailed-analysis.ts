@@ -4,6 +4,7 @@ import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import {
+	type EditCategory,
 	type PriorAnalysisContext,
 	type PriorEditStatus,
 	type ResumeAnalysis,
@@ -90,10 +91,18 @@ export const k02DetailedAnalysisTask = schemaTask({
 		const result = await runK02DetailedAnalysisAgent({ resumeContent, userId, signal, priorAnalysis });
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
-		const object = await result.output;
+		const rawObject = await result.output;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
 		await waitUntilComplete();
+
+		const object = clampEditDeltas(rawObject, (dropped) => {
+			logger.warn("k02-detailed-analysis = edits_clamped", {
+				analysisId,
+				droppedCount: dropped.length,
+				droppedDeltas: dropped.map((edit) => ({ category: edit.category, delta: edit.delta })),
+			});
+		});
 
 		metadata.set("ai", {
 			model: K02_DETAILED_ANALYSIS_MODEL_SLUG,
@@ -150,6 +159,34 @@ export const k02DetailedAnalysisTask = schemaTask({
 			.where(and(eq(resumeAnalyses.id, payload.analysisId), ne(resumeAnalyses.status, "ready")));
 	},
 });
+
+function clampEditDeltas(analysis: ResumeAnalysis, onDrop: (dropped: ResumeAnalysis["edits"]) => void): ResumeAnalysis {
+	const perCategory: Record<EditCategory, number> = {
+		impact: 0,
+		keywords: 0,
+		clarity: 0,
+		formatting: 0,
+		length: 0,
+	};
+	const dropped: ResumeAnalysis["edits"] = [];
+
+	const keptEdits = analysis.edits.filter((edit) => {
+		const projected = analysis.scoreBreakdown[edit.category] + perCategory[edit.category] + edit.delta;
+		if (projected > 100) {
+			dropped.push(edit);
+			return false;
+		}
+		perCategory[edit.category] += edit.delta;
+		return true;
+	});
+
+	if (dropped.length === 0) {
+		return analysis;
+	}
+
+	onDrop(dropped);
+	return { ...analysis, edits: keptEdits };
+}
 
 async function loadPriorAnalysisContext(
 	db: TriggerDb,

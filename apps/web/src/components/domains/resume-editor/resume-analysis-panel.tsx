@@ -217,7 +217,11 @@ export function ResumeEditorAnalysisPanel({
 			{(partial || showLoaders) && (
 				<Collapsible render={<section aria-label="Puntaje" />}>
 					<header className="grid place-items-center gap-4">
-						<Gauge value={partial?.scoreOverall ?? 0} />
+						{typeof partial?.scoreOverall === "number" ? (
+							<Gauge value={partial.scoreOverall} />
+						) : (
+							<Skeleton className="size-32 rounded-full" />
+						)}
 
 						<CollapsibleTrigger
 							render={
@@ -266,7 +270,11 @@ export function ResumeEditorAnalysisPanel({
 			{(partial?.edits?.length || showLoaders) && (
 				<section aria-label="Mejoras sugeridas" className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
 					<header className="text-muted-foreground text-xs">
-						+{partial?.edits?.length ?? "X"} mejoras de mayor impacto
+						{partial?.edits?.length ? (
+							`+${partial.edits.length} mejoras de mayor impacto`
+						) : (
+							<Shimmer>Buscando mejoras…</Shimmer>
+						)}
 					</header>
 
 					<ItemGroup className="min-h-0 flex-1 gap-2 overflow-y-auto">
