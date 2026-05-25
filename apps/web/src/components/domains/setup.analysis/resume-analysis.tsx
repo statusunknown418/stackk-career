@@ -1,6 +1,5 @@
 import {
 	ArrowBendUpRightIcon,
-	ArrowClockwiseIcon,
 	CaretCircleRightIcon,
 	CheckCircleIcon,
 	HashStraightIcon,
@@ -17,7 +16,7 @@ import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/u
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
-import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Progress, ProgressIndicator, ProgressLabel, ProgressTrack, ProgressValue } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type ResumeDraftContext, useResumeDraftRuns } from "./use-resume-draft-runs";
@@ -58,14 +57,12 @@ export function ResumeAnalysisPanel({
 	draft,
 	error,
 	isStreaming,
-	onRetry,
 }: {
 	analysis: DeepPartial<ResumeAnalysis> | undefined;
 	className?: string;
 	draft?: ResumeDraftContext;
 	error: Error | undefined;
 	isStreaming: boolean;
-	onRetry?: () => void;
 }) {
 	const partial = analysis;
 	const showLoaders = !error && isStreaming;
@@ -164,14 +161,6 @@ export function ResumeAnalysisPanel({
 						<AlertTitle>No pudimos completar el análisis</AlertTitle>
 						<AlertDescription>{error.message}</AlertDescription>
 					</Alert>
-				)}
-
-				{onRetry && !isStreaming && (partial || error) && (
-					<FrameFooter className="flex justify-end">
-						<Button onClick={onRetry} variant="ghost">
-							<ArrowClockwiseIcon /> Reintentar análisis
-						</Button>
-					</FrameFooter>
 				)}
 			</Frame>
 

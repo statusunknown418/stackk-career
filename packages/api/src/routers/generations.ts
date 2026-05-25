@@ -41,6 +41,16 @@ export const generationsRouter = {
 			throw error;
 		}
 
+		context.log?.set({
+			generation: {
+				type: input.type ?? null,
+				model: input.model ?? null,
+				has_title: Boolean(input.title),
+				has_summary: Boolean(input.summary),
+			},
+		});
+
+		const insertStart = performance.now();
 		const [row] = await context.db
 			.insert(generations)
 			.values({
@@ -48,6 +58,10 @@ export const generationsRouter = {
 				owner: userId,
 			})
 			.returning({ id: generations.id });
+
+		context.log?.set({
+			db: { insert_generation_ms: performance.now() - insertStart },
+		});
 
 		if (!row) {
 			const error = new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create generation" });

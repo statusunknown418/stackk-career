@@ -61,7 +61,7 @@ function DashLayout() {
 									return (
 										<SidebarMenuItem key={item.id}>
 											<SidebarMenuButton isActive={isActive} render={<Link to={item.to} />} tooltip={item.label}>
-												<item.icon />
+												<item.icon weight="fill" />
 												<span>{item.label}</span>
 											</SidebarMenuButton>
 										</SidebarMenuItem>
@@ -97,7 +97,7 @@ function DashLayout() {
 						</SidebarTrigger>
 
 						<TooltipContent>
-							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
+							Abrir/Cerrar panel izquierdo <Kbd>⌘ + .</Kbd>
 						</TooltipContent>
 					</Tooltip>
 

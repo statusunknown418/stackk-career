@@ -1,4 +1,5 @@
 import { ArrowBendUpRightIcon, CaretUpIcon } from "@phosphor-icons/react";
+import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import type { UIMessage } from "ai";
@@ -10,6 +11,7 @@ import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
+import { ResumeParserChainOfThought } from "@/components/domains/resumes/resume-parser-chain";
 import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
 import { Spinner } from "@/components/ui/spinner";
@@ -56,7 +58,8 @@ const QUESTIONS: OnboardingQuestion[] = [
 const UPLOAD_PROMPT = "Perfecto. Para terminar, sube tu CV en PDF y lo analizamos juntos.";
 const ANALYZING_PROMPT = "Excelente, ya tengo tu CV. Déjame revisarlo…";
 const SKIPPED_ANSWER = "__skipped__" as const;
-const SKIPPED_ANSWER_LABEL = "Prefiero omitir esto por ahora";
+const SKIP_QUESTION_LABEL = "Prefiero no responder";
+const SKIPPED_REPLY_LABEL = "Omitido";
 const INVALID_FILE_TOAST = "Archivo no permitido. Sube tu CV en PDF.";
 
 type Answers = Partial<Record<OnboardingAnswerKey, string | typeof SKIPPED_ANSWER>>;
@@ -87,9 +90,16 @@ function nextUnansweredIndex(answers: Answers): number {
 interface OnboardingChatProps {
 	assistantMessage?: UIMessage;
 	isAnalysisStreaming?: boolean;
+	isParserStreaming?: boolean;
+	parserEvents?: readonly ResumeParserEvent[];
 }
 
-export function OnboardingChat({ assistantMessage, isAnalysisStreaming = false }: OnboardingChatProps) {
+export function OnboardingChat({
+	assistantMessage,
+	isAnalysisStreaming = false,
+	isParserStreaming = false,
+	parserEvents = [],
+}: OnboardingChatProps) {
 	const { data, isLoading } = useQuery(orpc.onboardingProfile.get.queryOptions());
 
 	if (isLoading) {
@@ -105,6 +115,8 @@ export function OnboardingChat({ assistantMessage, isAnalysisStreaming = false }
 			assistantMessage={assistantMessage}
 			initialAnswers={pickAnswers(data)}
 			isAnalysisStreaming={isAnalysisStreaming}
+			isParserStreaming={isParserStreaming}
+			parserEvents={parserEvents}
 		/>
 	);
 }
@@ -113,10 +125,14 @@ function OnboardingChatInner({
 	assistantMessage,
 	initialAnswers,
 	isAnalysisStreaming,
+	isParserStreaming,
+	parserEvents,
 }: {
 	assistantMessage: UIMessage | undefined;
 	initialAnswers: Answers;
 	isAnalysisStreaming: boolean;
+	isParserStreaming: boolean;
+	parserEvents: readonly ResumeParserEvent[];
 }) {
 	const { storeId: fileId, generationId, analysisStatus } = setupRoute.useSearch();
 	const navigate = setupRoute.useNavigate();
@@ -190,7 +206,11 @@ function OnboardingChatInner({
 
 						<Message from="user">
 							<MessageContent>
-								{answers[question.id] === SKIPPED_ANSWER ? SKIPPED_ANSWER_LABEL : (answers[question.id] ?? "")}
+								{answers[question.id] === SKIPPED_ANSWER ? (
+									<span className="text-muted-foreground italic">{SKIPPED_REPLY_LABEL}</span>
+								) : (
+									(answers[question.id] ?? "")
+								)}
 							</MessageContent>
 						</Message>
 
@@ -223,17 +243,17 @@ function OnboardingChatInner({
 						</Message>
 
 						{questionTypewriter.done && (
-							<Suggestions>
-								{currentQuestion.options.map((option) => (
-									<Suggestion key={option} onClick={handlePick} size="lg" suggestion={option} />
-								))}
-								<Suggestion
-									onClick={handleSkipQuestion}
-									size="lg"
-									suggestion={SKIPPED_ANSWER_LABEL}
-									variant="ghost-muted"
-								/>
-							</Suggestions>
+							<div className="flex flex-col gap-2">
+								<Suggestions>
+									{currentQuestion.options.map((option) => (
+										<Suggestion key={option} onClick={handlePick} size="lg" suggestion={option} />
+									))}
+								</Suggestions>
+
+								<Button className="self-start" onClick={handleSkipQuestion} size="xs" variant="ghost-muted">
+									{SKIP_QUESTION_LABEL}
+								</Button>
+							</div>
 						)}
 					</div>
 				)}
@@ -294,6 +314,10 @@ function OnboardingChatInner({
 						</Message>
 
 						{analysisStatus !== "complete" && <Shimmer className="text-sm">Processing</Shimmer>}
+
+						{(isParserStreaming || parserEvents.length > 0) && (
+							<ResumeParserChainOfThought events={parserEvents} isStreaming={isParserStreaming} />
+						)}
 
 						{reasoningText && (
 							<Reasoning isStreaming={isReasoningStreaming}>

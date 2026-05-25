@@ -1,13 +1,15 @@
 import { ArrowBendUpRightIcon, CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
+import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
+import { useRealtimeRun, useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { mergeResumeParserEvents } from "@/components/domains/resumes/lib/map-parser-phase";
 import { ResumeAnalysisPanel } from "@/components/domains/setup.analysis/resume-analysis";
 import { OnboardingChat } from "@/components/domains/setup.chat/onboarding-chat";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -127,14 +129,6 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 		})
 	);
 
-	const handleRetry = () => {
-		setRunHandle(null);
-		hasStartedRef.current = true;
-		queryClient.setQueryData(cachedAnalysisOptions.queryKey, null);
-		navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: undefined }) });
-		initiateAnalysis.mutate({ generationId });
-	};
-
 	const hasCached = Boolean(cachedAnalysis.data);
 
 	useEffect(() => {
@@ -205,6 +199,15 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 	const draftAccessToken = realtimeTokenQuery.data?.token;
 	const hasDraftSession = Boolean(draftAccessToken && fileId && userId);
 
+	const parserRunIdRaw = run?.metadata?.resumeParserRunId;
+	const parserRunId = typeof parserRunIdRaw === "string" ? parserRunIdRaw : undefined;
+	const { run: parserRun } = useRealtimeRun<typeof resumeParserTask>(parserRunId, {
+		accessToken: draftAccessToken,
+		enabled: Boolean(parserRunId && draftAccessToken),
+	});
+	const parserEvents = mergeResumeParserEvents(parserRun?.metadata as Record<string, unknown> | null | undefined);
+	const isParserRunning = Boolean(parserRun) && parserRun?.status === "EXECUTING";
+
 	return (
 		<section className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
 			<nav className="flex justify-between pt-4">
@@ -217,9 +220,13 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 				</Button>
 			</nav>
 
-			<main className={cn("grid min-h-full min-w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
-				<Frame className="max-h-[85svh]">
-					<OnboardingChat isAnalysisStreaming={isStreaming} />
+			<main className={cn("grid min-h-full w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
+				<Frame className="max-h-[85svh] min-w-0">
+					<OnboardingChat
+						isAnalysisStreaming={isStreaming}
+						isParserStreaming={isParserRunning}
+						parserEvents={parserEvents}
+					/>
 
 					{isAnalysisComplete && (
 						<BlurFade>
@@ -233,7 +240,7 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 				</Frame>
 
 				{showAnalysis && (
-					<BlurFade className="flex max-h-[85svh] flex-col gap-3">
+					<BlurFade className="flex max-h-[85svh] min-w-0 flex-col gap-3">
 						<ResumeAnalysisPanel
 							analysis={analysisData}
 							className="min-h-0 flex-1"
@@ -244,7 +251,6 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 							}
 							error={error}
 							isStreaming={isStreaming && !hasCached}
-							onRetry={handleRetry}
 						/>
 					</BlurFade>
 				)}

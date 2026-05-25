@@ -33,7 +33,6 @@ const STEP_BASE_PROGRESS: Record<ResumeParserStep, number> = {
 	complete: 1,
 };
 
-const RUNNING_AGENT_PHASE_BONUS = 0.15;
 const RUNNING_AGENT_MAX = 0.75;
 const RECENT_TRACE_LIMIT = 3;
 
@@ -63,9 +62,21 @@ const readPhaseStatus = (meta: Meta, phase: ResumeParserPhase): ResumeParserPhas
 const clampProgress = (value: number) => Math.max(0, Math.min(1, value));
 
 const computeRunningAgentProgress = (meta: Meta): number => {
-	const phases: ResumeParserPhase[] = ["header", "experience", "entries", "skills"];
+	const phases: ResumeParserPhase[] = [
+		"outline",
+		"header",
+		"experience",
+		"education",
+		"certifications",
+		"projects",
+		"volunteering",
+		"skills",
+	];
 	const completed = phases.filter((phase) => readPhaseStatus(meta, phase) === "complete").length;
-	const bonus = Math.min(completed * RUNNING_AGENT_PHASE_BONUS, RUNNING_AGENT_MAX - STEP_BASE_PROGRESS.running_agent);
+	const bonus = Math.min(
+		(completed / phases.length) * (RUNNING_AGENT_MAX - STEP_BASE_PROGRESS.running_agent),
+		RUNNING_AGENT_MAX - STEP_BASE_PROGRESS.running_agent
+	);
 	return STEP_BASE_PROGRESS.running_agent + bonus;
 };
 

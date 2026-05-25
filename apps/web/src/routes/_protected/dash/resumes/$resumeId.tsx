@@ -1,4 +1,4 @@
-import { CopyIcon, DotsThreeOutlineIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CopyIcon, DotsThreeOutlineIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
@@ -27,6 +27,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import {
 	DropdownMenu,
@@ -44,6 +45,7 @@ import {
 	SAVE_STATUS_LABELS,
 	useAppForm,
 } from "@/lib/forms/resume-form";
+import { cn } from "@/lib/utils";
 import { orpc, queryClient } from "@/utils/orpc";
 
 const swapText = (value: string | undefined, before: string, after: string): string | null => {
@@ -147,6 +149,7 @@ function RouteComponent() {
 	const { data } = useSuspenseQuery(resumeQuery);
 
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+	const [areSectionsOpen, setAreSectionsOpen] = useState(true);
 
 	const handleSelectSection = (id: number | null) => {
 		navigate({
@@ -357,7 +360,7 @@ function RouteComponent() {
 
 	return (
 		<section className="flex h-full min-h-0 flex-col overflow-hidden">
-			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 py-2.5 ps-1 pe-4 backdrop-blur-md md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -432,16 +435,26 @@ function RouteComponent() {
 				</article>
 			</header>
 
-			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 py-4">
+			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 pt-3">
 				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
-					<div className="shrink-0 rounded-lg bg-background p-2">
-						<SectionRail
-							activeId={focusedSectionId}
-							contactId={contactBlockId}
-							onSelect={handleSelectSection}
-							sections={railSections}
-						/>
-					</div>
+					<Collapsible
+						className="shrink-0 rounded-lg bg-background"
+						onOpenChange={setAreSectionsOpen}
+						open={areSectionsOpen}
+					>
+						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
+							Secciones
+							<CaretDownIcon className={cn("transition-transform", !areSectionsOpen && "-rotate-90")} />
+						</CollapsibleTrigger>
+						<CollapsiblePanel className="px-2 pb-2">
+							<SectionRail
+								activeId={focusedSectionId}
+								contactId={contactBlockId}
+								onSelect={handleSelectSection}
+								sections={railSections}
+							/>
+						</CollapsiblePanel>
+					</Collapsible>
 
 					<ResumeAnalysisSection
 						onApplyEdit={handleApplyEdit}
@@ -450,7 +463,7 @@ function RouteComponent() {
 					/>
 				</article>
 
-				<article className="min-w-0 flex-1 overflow-y-auto px-4 pb-16">
+				<article className="min-w-0 flex-1 overflow-y-auto">
 					<ResumeDocument
 						blockIndexById={blockIndexById}
 						focusedSectionId={focusedSectionId}

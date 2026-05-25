@@ -16,7 +16,7 @@ function Classic({ className, ...props }: ClassicProps) {
           }
         }
       `}</style>
-			<span className={cn("box-border inline-block size-5 text-primary", className)} role="status" {...props}>
+			<span className={cn("box-border inline-block size-5 text-inherit", className)} role="status" {...props}>
 				<span aria-hidden="true" className="relative top-1/2 left-1/2 block size-full">
 					{Array.from({ length: 12 }, (_, index) => (
 						<span
