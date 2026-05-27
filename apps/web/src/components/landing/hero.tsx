@@ -224,7 +224,7 @@ export function Hero() {
 				</div>
 			</section>
 
-			<section className="relative border-border border-y bg-muted/40 px-6 pt-14 pb-16">
+			<section className="relative border-border border-b bg-muted/40 px-6 pt-14 pb-16">
 				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12">
 					<motion.dl
 						className="hidden flex-wrap items-baseline justify-center gap-x-12 gap-y-4 text-center"
@@ -250,7 +250,7 @@ export function Hero() {
 						/>
 						<HeroStat countTo={18} label="días a tu primera entrevista" reducedMotion={motionDisabled} value="18" />
 					</motion.dl>
-					<div className="flex w-full flex-col items-center gap-6 border-border border-t pt-10">
+					<div className="flex w-full flex-col items-center gap-6">
 						<p className="font-mono text-[10px] text-foreground/65 uppercase tracking-[0.12em]">
 							Nuestros talentos ya trabajan en
 						</p>

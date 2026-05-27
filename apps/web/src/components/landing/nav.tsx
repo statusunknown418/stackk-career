@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/theme-provider";
 import { buttonVariants } from "@/components/ui/button";
-import { Magnetic } from "@/components/ui/magnetic";
 import { Sheet, SheetClose, SheetPanel, SheetPopup, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./data";
@@ -110,12 +109,10 @@ export function LandingNav() {
 								initial={{ opacity: 0, scale: 0.85, width: 0 }}
 								transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
 							>
-								<Magnetic strength={0.22}>
-									<a className={buttonVariants({ size: "sm" })} href="/setup">
-										Analiza mi CV gratis
-										<ArrowRightIcon weight="bold" />
-									</a>
-								</Magnetic>
+								<a className={buttonVariants({ size: "sm" })} href="/setup">
+									Analiza mi CV gratis
+									<ArrowRightIcon weight="bold" />
+								</a>
 							</motion.span>
 						)}
 					</AnimatePresence>

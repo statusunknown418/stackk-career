@@ -7,7 +7,7 @@ import { TESTIMONIALS, type Testimonial } from "./data";
 const REST = TESTIMONIALS.slice(1);
 
 const EASE_OUT_QUINT = [0.16, 1, 0.3, 1] as const;
-const ROTATE_INTERVAL_MS = 5000;
+const ROTATE_INTERVAL_MS = 3500;
 
 interface ColumnConfig {
 	durationClass: string;
