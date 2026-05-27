@@ -25,7 +25,6 @@ const EMPTY = "—";
 export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const ownerName = resume.contact ? `${resume.contact.firstName} ${resume.contact.lastName}`.trim() : null;
 	const updatedLabel = formatDistanceToNow(resume.updatedAt, { addSuffix: true, locale: es });
-	const score = resume.aiMetadata?.agentScore;
 	const agentCreated = resume.aiMetadata?.agentCreated ?? false;
 
 	return (
@@ -92,11 +91,6 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 
 				<FrameFooter className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
 					<time dateTime={formatISO(resume.updatedAt)}>Actualizado {updatedLabel}</time>
-					{typeof score === "number" && (
-						<span className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground tabular-nums">
-							{score}/100
-						</span>
-					)}
 				</FrameFooter>
 			</Frame>
 		</Link>

@@ -178,7 +178,7 @@ export const updateResumeTitleSchema = z.object({
 });
 
 export const createResumeInputSchema = z.object({
-	label: z.string().trim().min(1).max(120),
+	targetRole: z.string().trim().min(1).max(120).optional(),
 });
 
 export const getResumeAnalysisInputSchema = z.object({

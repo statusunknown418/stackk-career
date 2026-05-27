@@ -117,7 +117,6 @@ function DashLayout() {
 
 					<Tooltip>
 						<Button
-							className="ml-auto"
 							onClick={() => router.history.forward()}
 							render={<TooltipTrigger />}
 							size="icon-sm"

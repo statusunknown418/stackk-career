@@ -84,7 +84,7 @@ export const resumesRouter = {
 
 		const firstChildPosition = generateLexoKeyBetween(null, null);
 
-		const title = input.label;
+		const title = input.targetRole ?? "CV sin título";
 
 		const newResume = await context.db.transaction(async (tx) => {
 			const [createdGeneration] = await tx
@@ -106,6 +106,7 @@ export const resumesRouter = {
 					userId,
 					title,
 					displayName: title,
+					targetRole: input.targetRole,
 					generationId: createdGeneration.id,
 				})
 				.returning({

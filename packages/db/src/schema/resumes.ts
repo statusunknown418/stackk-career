@@ -26,11 +26,12 @@ export const resumes = sqliteTable(
 			.references(() => user.id, { onDelete: "cascade" }),
 
 		targetedCompanyIdentifier: t.text(),
+		targetRole: t.text(),
 		isPrimary: t.integer({ mode: "boolean" }).notNull().default(false),
 		aiMetadata: t.text({ mode: "json" }).$type<{ agentScore: number; agentCreated: boolean }>(),
 		status: t.text({ enum: resumeStatusEnum }).default("draft").notNull(),
-		displayName: t.text().notNull().default("Nuevo CV"),
-		title: t.text().notNull().default("Jon Doe"),
+		displayName: t.text().notNull().default("CV sin título"),
+		title: t.text().notNull().default("CV sin título"),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })

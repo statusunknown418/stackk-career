@@ -3,10 +3,12 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { orpc } from "@/utils/orpc";
 
 interface ResumeCreateFormProps {
@@ -14,24 +16,13 @@ interface ResumeCreateFormProps {
 	onParseStart: (runId: string) => void;
 }
 
-const getResumeLabelError = (value: string): string | undefined => {
-	const parsed = createResumeInputSchema.shape.label.safeParse(value);
-	return parsed.success ? undefined : (parsed.error.issues[0]?.message ?? "Etiqueta inválida");
-};
-
-const parseResumeLabel = (value: string): string | undefined => {
-	const parsed = createResumeInputSchema.shape.label.safeParse(value);
+const parseTargetRole = (value: string): string | undefined => {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return;
+	}
+	const parsed = createResumeInputSchema.shape.targetRole.safeParse(trimmed);
 	return parsed.success ? parsed.data : undefined;
-};
-
-const readFieldError = (error: unknown): string | null => {
-	if (typeof error === "string") {
-		return error;
-	}
-	if (error instanceof Error) {
-		return error.message;
-	}
-	return error == null ? null : String(error);
 };
 
 export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProps): React.ReactElement {
@@ -56,10 +47,10 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 
 	const form = useForm({
 		defaultValues: {
-			label: "",
+			targetRole: "",
 		},
 		onSubmit: ({ value }) => {
-			createBlankMutation.mutate({ label: createResumeInputSchema.parse(value).label });
+			createBlankMutation.mutate({ targetRole: parseTargetRole(value.targetRole) });
 		},
 	});
 
@@ -71,56 +62,52 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 				form.handleSubmit();
 			}}
 		>
-			<form.Field
-				name="label"
-				validators={{
-					onBlur: ({ value }) => getResumeLabelError(value),
-					onChange: ({ value }) => getResumeLabelError(value),
-					onSubmit: ({ value }) => getResumeLabelError(value),
-				}}
-			>
-				{(field) => {
-					const showLabelError = field.state.meta.isTouched || form.state.submissionAttempts > 0;
-					const labelError = showLabelError ? readFieldError(field.state.meta.errors[0]) : null;
-
-					return (
-						<Field>
-							<FieldLabel htmlFor="resume-label">Titulo</FieldLabel>
-							<Input
-								autoFocus
-								disabled={createBlankMutation.isPending || parseMutation.isPending}
-								id="resume-label"
-								maxLength={120}
-								onBlur={field.handleBlur}
-								onChange={(e) => field.handleChange(e.target.value)}
-								placeholder="Ej. Senior Product Manager - 2026"
-								value={field.state.value}
-							/>
-							{labelError && <FieldError>{labelError}</FieldError>}
-						</Field>
-					);
-				}}
+			<form.Field name="targetRole">
+				{(field) => (
+					<Field>
+						<FieldLabel htmlFor="resume-target-role">Puesto objetivo</FieldLabel>
+						<Input
+							autoFocus
+							disabled={createBlankMutation.isPending || parseMutation.isPending}
+							id="resume-target-role"
+							maxLength={120}
+							onBlur={field.handleBlur}
+							onChange={(e) => field.handleChange(e.target.value)}
+							placeholder="Ej. Senior Product Manager"
+							value={field.state.value}
+						/>
+						<FieldDescription>
+							Opcional. Lo usaremos para adaptar el contenido. Lo puedes cambiar después.
+						</FieldDescription>
+					</Field>
+				)}
 			</form.Field>
+
+			<form.Subscribe selector={(state) => state.isSubmitting}>
+				{(isSubmitting) => (
+					<Button disabled={isSubmitting || createBlankMutation.isPending || parseMutation.isPending} type="submit">
+						{isSubmitting && <Loader />}
+						Crear desde cero
+					</Button>
+				)}
+			</form.Subscribe>
+
+			<Separator />
 
 			<section className="flex flex-col gap-3">
 				<p className="text-muted-foreground text-sm">
-					Sube un PDF y dejaremos que el agente extraiga las secciones automáticamente. O créalo en blanco.
+					También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente.
 				</p>
 
-				<form.Subscribe
-					selector={(state) => ({
-						isSubmitting: state.isSubmitting,
-						label: state.values.label,
-					})}
-				>
-					{({ isSubmitting, label }) => {
-						const parsedLabel = parseResumeLabel(label);
-						const isBusy = isSubmitting || createBlankMutation.isPending || parseMutation.isPending;
+				<form.Subscribe selector={(state) => state.values.targetRole}>
+					{(targetRole) => {
+						const parsedRole = parseTargetRole(targetRole);
+						const isBusy = createBlankMutation.isPending || parseMutation.isPending;
 
 						return (
 							<Dropzone<{ generationId: string | undefined }>
 								autoUpload
-								disabled={isBusy || !parsedLabel}
+								disabled={isBusy}
 								endpoint="resumeUploader"
 								input={{ generationId: undefined }}
 								onClientUploadComplete={(files) => {
@@ -129,11 +116,7 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 										toast.error("No pudimos registrar el archivo. Intenta de nuevo.");
 										return;
 									}
-									if (!parsedLabel) {
-										toast.error("Agrega un título válido antes de subir el archivo.");
-										return;
-									}
-									parseMutation.mutate({ fileId, displayName: parsedLabel });
+									parseMutation.mutate({ fileId, displayName: parsedRole });
 								}}
 								onUploadError={(err) => toast.error(err.message)}
 							/>
@@ -141,30 +124,6 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 					}}
 				</form.Subscribe>
 			</section>
-
-			<form.Subscribe
-				selector={(state) => ({
-					canSubmit: state.canSubmit,
-					isSubmitting: state.isSubmitting,
-					label: state.values.label,
-				})}
-			>
-				{({ canSubmit, isSubmitting, label }) => (
-					<Button
-						disabled={
-							isSubmitting ||
-							createBlankMutation.isPending ||
-							parseMutation.isPending ||
-							!canSubmit ||
-							!parseResumeLabel(label)
-						}
-						type="submit"
-						variant="outline"
-					>
-						Crear en blanco
-					</Button>
-				)}
-			</form.Subscribe>
 		</form>
 	);
 }

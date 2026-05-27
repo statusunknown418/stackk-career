@@ -96,11 +96,14 @@ export const verification = sqliteTable(
 	(table) => [index("verification_identifier_idx").on(table.identifier)]
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
 	sessions: many(session),
 	accounts: many(account),
 	files: many(fileMetadata),
-	subscriptions: many(userSubscriptions),
+	subscription: one(userSubscriptions, {
+		fields: [user.id],
+		references: [userSubscriptions.userId],
+	}),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
