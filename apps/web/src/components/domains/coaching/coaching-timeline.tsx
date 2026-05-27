@@ -25,6 +25,7 @@ interface StepDef {
 const routeApi = getRouteApi("/_protected/dash/coaches");
 
 const DEFAULT_STEP = 1;
+const coachingDashboardQueryKey = orpc.coaching.dashboard.queryOptions().queryKey;
 
 const steps: readonly StepDef[] = [
 	{
@@ -95,7 +96,7 @@ export function CoachingTimeline() {
 	);
 
 	const { data: realtime } = useQuery({
-		...orpc.coaching.realtimeToken.queryOptions(),
+		...orpc.viewer.realtimeToken.queryOptions(),
 		enabled: Boolean(userId),
 		refetchInterval: 25 * 60 * 1000,
 		staleTime: 25 * 60 * 1000,
@@ -111,10 +112,10 @@ export function CoachingTimeline() {
 
 	useEffect(() => {
 		if (runs.length > lastRunCountRef.current) {
-			queryClient.invalidateQueries({ queryKey: orpc.coaching.dashboard.queryOptions().queryKey });
+			queryClient.invalidateQueries({ queryKey: coachingDashboardQueryKey });
 		}
 		lastRunCountRef.current = runs.length;
-	}, [runs.length, queryClient, orpc.coaching.dashboard.queryOptions().queryKey]);
+	}, [runs.length, queryClient]);
 
 	const stageBooking = current ? pickStageBooking(dashboard?.bookings, current.stage) : null;
 

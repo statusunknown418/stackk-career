@@ -1,4 +1,11 @@
-import { BriefcaseIcon, CalendarIcon, FilesIcon, type Icon, PulseIcon } from "@phosphor-icons/react";
+import {
+	BriefcaseIcon,
+	CalendarIcon,
+	ChatCircleTextIcon,
+	FilesIcon,
+	type Icon,
+	PulseIcon,
+} from "@phosphor-icons/react";
 import type { FileRouteTypes } from "@/routeTree.gen";
 
 export interface CareerWorkspaceNavigationItem {
@@ -6,7 +13,7 @@ export interface CareerWorkspaceNavigationItem {
 	icon: Icon;
 	id: string;
 	label: string;
-	to?: FileRouteTypes["fullPaths"];
+	to?: FileRouteTypes["to"];
 }
 
 export const careerWorkspaceNavigation = [
@@ -21,7 +28,14 @@ export const careerWorkspaceNavigation = [
 		icon: FilesIcon,
 		id: "curriculums",
 		label: "Curriculums",
-		to: "/dash/resumes/",
+		to: "/dash/resumes",
+	},
+	{
+		disabled: true,
+		icon: ChatCircleTextIcon,
+		id: "cover-letter",
+		label: "Cartas de presentación",
+		to: "/dash/letters",
 	},
 	{
 		disabled: true,

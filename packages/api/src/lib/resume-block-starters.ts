@@ -21,7 +21,7 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 			return {
 				blockType: "paragraph",
 				content: {
-					text: "<p>Escribe aquí el contenido principal de esta sección.</p>",
+					text: "",
 					format: "html",
 					aiSuggested: false,
 				},
@@ -30,7 +30,7 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 			return {
 				blockType: "skill_line",
 				content: {
-					label: "Nueva categoria",
+					label: "",
 					category: "other",
 				},
 			};
@@ -38,9 +38,9 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 			return {
 				blockType: "entry",
 				content: {
-					title: "Nuevo elemento",
-					subtitle: "Agrega puesto, institucion o proyecto",
-					descriptor: "<p>Edita este elemento para añadir fechas, ubicación e impacto.</p>",
+					title: "",
+					subtitle: "",
+					descriptor: "",
 					descriptorFormat: "html",
 					entryStyle: "standard",
 					isCurrent: false,

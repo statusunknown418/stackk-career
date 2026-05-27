@@ -24,12 +24,12 @@ export const messages = sqliteTable(
 		error: t.text(),
 		model: t.text().$type<LanguageModel>(),
 		order: t.integer(),
-		toolMeta: t.blob({ mode: "json" }).$type<{ toolId: string; toolName: string }>(),
+		toolMeta: t.text({ mode: "json" }).$type<{ toolId: string; toolName: string }>(),
 		isTool: t.integer({ mode: "boolean" }),
 		isAssistant: t.integer({ mode: "boolean" }).notNull().default(false),
 
 		objectType: t.text(),
-		object: t.blob({ mode: "json" }),
+		object: t.text({ mode: "json" }),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })

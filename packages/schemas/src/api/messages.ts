@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { insertMessageSchema } from "../db/messages";
 
-export const createMessageInputSchema = insertMessageSchema.required({
+export const createMessageInputSchema = insertMessageSchema.omit({ model: true }).required({
 	generationId: true,
 	isAssistant: true,
 	order: true,

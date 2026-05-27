@@ -1,19 +1,22 @@
-import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import { ArrowBendUpRightIcon, CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
+import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
+import { useRealtimeRun, useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { mergeResumeParserEvents } from "@/components/domains/resumes/lib/map-parser-phase";
 import { ResumeAnalysisPanel } from "@/components/domains/setup.analysis/resume-analysis";
 import { OnboardingChat } from "@/components/domains/setup.chat/onboarding-chat";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Matrix, wave } from "@/components/ui/matrix";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
@@ -76,7 +79,11 @@ function RouteComponent() {
 						<p className="text-success italic tracking-tight">- The Founders</p>
 					</FramePanel>
 
-					<FrameFooter className="flex justify-end">
+					<FrameFooter className="flex justify-end gap-2">
+						<Button render={<Link to="/dash" />} variant="ghost-muted">
+							Explorar app <ArrowBendUpRightIcon />
+						</Button>
+
 						<Button
 							disabled={createGeneration.isPending}
 							loading={createGeneration.isPending}
@@ -111,7 +118,7 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 	const cachedAnalysis = useQuery(cachedAnalysisOptions);
 
 	const initiateAnalysis = useMutation(
-		orpc.agents.initiateResumeAnalysis.mutationOptions({
+		orpc.agents.triggerK02FastAnalysis.mutationOptions({
 			onSuccess: ({ runId, publicAccessToken }) => {
 				setRunHandle({ runId, accessToken: publicAccessToken });
 			},
@@ -121,14 +128,6 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 			},
 		})
 	);
-
-	const handleRetry = () => {
-		setRunHandle(null);
-		hasStartedRef.current = true;
-		queryClient.setQueryData(cachedAnalysisOptions.queryKey, null);
-		navigate({ to: Route.fullPath, search: (prev) => ({ ...prev, analysisStatus: undefined }) });
-		initiateAnalysis.mutate({ generationId });
-	};
 
 	const hasCached = Boolean(cachedAnalysis.data);
 
@@ -190,25 +189,44 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 	const showAnalysis = Boolean(fileId);
 	const isAnalysisComplete = isCompleted;
 
+	const { data: session } = authClient.useSession();
+	const userId = session?.user?.id;
+	const realtimeTokenQuery = useQuery({
+		...orpc.viewer.realtimeToken.queryOptions(),
+		enabled: Boolean(userId && fileId),
+		staleTime: 29 * 60 * 1000,
+	});
+	const draftAccessToken = realtimeTokenQuery.data?.token;
+	const hasDraftSession = Boolean(draftAccessToken && fileId && userId);
+
+	const parserRunIdRaw = run?.metadata?.resumeParserRunId;
+	const parserRunId = typeof parserRunIdRaw === "string" ? parserRunIdRaw : undefined;
+	const { run: parserRun } = useRealtimeRun<typeof resumeParserTask>(parserRunId, {
+		accessToken: draftAccessToken,
+		enabled: Boolean(parserRunId && draftAccessToken),
+	});
+	const parserEvents = mergeResumeParserEvents(parserRun?.metadata as Record<string, unknown> | null | undefined);
+	const isParserRunning = Boolean(parserRun) && parserRun?.status === "EXECUTING";
+
 	return (
-		<section className="mx-auto grid w-full max-w-6xl grid-rows-[auto_1fr] gap-4 p-4">
+		<section className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4">
 			<nav className="flex justify-between pt-4">
 				<Button render={<Link to="/setup" />} variant="ghost-muted">
 					<CaretCircleLeftIcon /> Volver
 				</Button>
 
-				{isAnalysisComplete && (
-					<BlurFade>
-						<Button render={<Link to="/dash" />} variant="ghost">
-							Ir a la app <CaretCircleRightIcon />
-						</Button>
-					</BlurFade>
-				)}
+				<Button render={<Link to="/dash" />} variant={isAnalysisComplete ? "ghost" : "ghost-muted"}>
+					{isAnalysisComplete ? "Ir a la app" : "Omitir por ahora"} <CaretCircleRightIcon />
+				</Button>
 			</nav>
 
-			<main className={cn("grid min-h-full min-w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
-				<Frame className="max-h-[85svh]">
-					<OnboardingChat isAnalysisStreaming={isStreaming} />
+			<main className={cn("grid min-h-full w-full max-w-6xl gap-4", showAnalysis && "lg:grid-cols-2")}>
+				<Frame className="max-h-[85svh] min-w-0">
+					<OnboardingChat
+						isAnalysisStreaming={isStreaming}
+						isParserStreaming={isParserRunning}
+						parserEvents={parserEvents}
+					/>
 
 					{isAnalysisComplete && (
 						<BlurFade>
@@ -222,12 +240,17 @@ function SetupChatView({ fileId, generationId }: { fileId: string | undefined; g
 				</Frame>
 
 				{showAnalysis && (
-					<BlurFade>
+					<BlurFade className="flex max-h-[85svh] min-w-0 flex-col gap-3">
 						<ResumeAnalysisPanel
 							analysis={analysisData}
+							className="min-h-0 flex-1"
+							draft={
+								hasDraftSession && draftAccessToken && userId && fileId
+									? { accessToken: draftAccessToken, fileId, userId }
+									: undefined
+							}
 							error={error}
 							isStreaming={isStreaming && !hasCached}
-							onRetry={handleRetry}
 						/>
 					</BlurFade>
 				)}

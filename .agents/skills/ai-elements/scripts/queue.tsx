@@ -94,13 +94,13 @@ const sampleTodos: QueueTodo[] = [
 
 interface MessageActionsProps {
 	messageId: string;
-	onRemove: (e: React.MouseEvent, id: string) => void;
-	onSend: (e: React.MouseEvent, id: string) => void;
+	onRemove: (e: MouseEvent, id: string) => void;
+	onSend: (e: MouseEvent, id: string) => void;
 }
 
 const MessageActions = memo(({ messageId, onRemove, onSend }: MessageActionsProps) => {
-	const handleRemove = useCallback((e: React.MouseEvent) => onRemove(e, messageId), [onRemove, messageId]);
-	const handleSend = useCallback((e: React.MouseEvent) => onSend(e, messageId), [onSend, messageId]);
+	const handleRemove = useCallback((e: MouseEvent) => onRemove(e, messageId), [onRemove, messageId]);
+	const handleSend = useCallback((e: MouseEvent) => onSend(e, messageId), [onSend, messageId]);
 	return (
 		<QueueItemActions>
 			<QueueItemAction aria-label="Remove from queue" onClick={handleRemove} title="Remove from queue">

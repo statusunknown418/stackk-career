@@ -2,11 +2,9 @@ import {
 	ArrowCircleLeftIcon,
 	ArrowCircleRightIcon,
 	BriefcaseIcon,
-	ChatsIcon,
 	GearIcon,
 	SidebarSimpleIcon,
 } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
 import { Button } from "@/components/ui/button";
@@ -30,11 +28,9 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
-import { orpc, queryClient } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
 	component: DashLayout,
-	beforeLoad: async () => queryClient.ensureQueryData(orpc.generations.list.queryOptions()),
 	loader: () => getSidebarState(),
 });
 
@@ -42,8 +38,6 @@ function DashLayout() {
 	const matchRoute = useLocation();
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
-
-	const { data } = useSuspenseQuery(orpc.generations.list.queryOptions());
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
@@ -67,7 +61,7 @@ function DashLayout() {
 									return (
 										<SidebarMenuItem key={item.id}>
 											<SidebarMenuButton isActive={isActive} render={<Link to={item.to} />} tooltip={item.label}>
-												<item.icon />
+												<item.icon weight="fill" />
 												<span>{item.label}</span>
 											</SidebarMenuButton>
 										</SidebarMenuItem>
@@ -98,6 +92,16 @@ function DashLayout() {
 			<SidebarInset className="grid h-[calc(100svh-1rem)] grid-rows-[auto_1fr] overflow-hidden rounded-sm border">
 				<nav className="flex border-b px-2 py-1">
 					<Tooltip>
+						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
+							<SidebarSimpleIcon weight="duotone" />
+						</SidebarTrigger>
+
+						<TooltipContent>
+							Abrir/Cerrar panel izquierdo <Kbd>⌘ + .</Kbd>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
 						<Button
 							disabled={!router.history.canGoBack()}
 							onClick={() => router.history.back()}
@@ -112,30 +116,7 @@ function DashLayout() {
 					</Tooltip>
 
 					<Tooltip>
-						<SidebarTrigger render={<TooltipTrigger />} size="sm" variant="ghost-muted">
-							<SidebarSimpleIcon weight="duotone" />
-							Nav
-						</SidebarTrigger>
-
-						<TooltipContent>
-							Abrir/Cerrar panel izquierdo <Kbd>⌘ + B</Kbd>
-						</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
-						<SidebarTrigger render={<TooltipTrigger />} side="right" size="sm" variant="ghost-muted">
-							<ChatsIcon weight="duotone" />
-							Chats
-						</SidebarTrigger>
-
-						<TooltipContent>
-							Abrir/cerrar panel derecho <Kbd>⌘ + J</Kbd>
-						</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
 						<Button
-							className="ml-auto"
 							onClick={() => router.history.forward()}
 							render={<TooltipTrigger />}
 							size="icon-sm"
@@ -152,32 +133,6 @@ function DashLayout() {
 					<Outlet />
 				</div>
 			</SidebarInset>
-
-			<Sidebar className="py-3 pl-0" collapsible="offcanvas" side="right" variant="inset">
-				<SidebarContent>
-					<SidebarGroup className="p-0">
-						<SidebarGroupLabel>Recientes</SidebarGroupLabel>
-
-						<SidebarGroupContent>
-							<SidebarMenu className="gap-0">
-								{data.length === 0 ? (
-									<li className="px-2 py-1 text-muted-foreground text-xs">No hay chats</li>
-								) : (
-									data.map((gen) => (
-										<SidebarMenuItem key={gen.id}>
-											<SidebarMenuButton className="gap-1.5" tooltip={gen.summary ?? gen.title ?? "Sin titulo"}>
-												<span className="truncate">{gen.title ?? "Sin título"}</span>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									))
-								)}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				</SidebarContent>
-
-				<SidebarRail />
-			</Sidebar>
 		</SidebarProvider>
 	);
 }

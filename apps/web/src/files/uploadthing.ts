@@ -1,11 +1,11 @@
 import { call } from "@orpc/server";
 import { createContext } from "@stackk-career/api/context";
-import { startRequestLog, withRequestLog } from "@stackk-career/api/logging";
 import { appRouter } from "@stackk-career/api/routers/index";
 import { insertFileMetadataSchema } from "@stackk-career/schemas/db/file-metadata";
 import type { FileRouter } from "uploadthing/server";
 import { createUploadthing, UploadThingError } from "uploadthing/server";
 import { getUser } from "@/functions/get-user";
+import { readRequestLog } from "@/lib/request-log";
 
 const f = createUploadthing();
 
@@ -26,44 +26,34 @@ export const uploadRouter = {
 
 			return { userId: user.user.id, input };
 		})
-		.onUploadComplete(({ metadata, file, req }) => {
-			const log = startRequestLog({
-				request: req,
-				method: "POST",
-				path: "/api/uploadthing",
-			});
-
-			log.set({
+		.onUploadComplete(async ({ metadata, file, req }) => {
+			const log = readRequestLog();
+			log?.set({
 				upload: {
 					endpoint: "resumeUploader",
 					provider: "uploadthing",
 				},
 			});
 
-			return withRequestLog(log, async () => {
-				const insertDb = await call(
-					appRouter.filesMetadata.link,
-					{
-						url: file.ufsUrl,
-						userId: metadata.userId,
-						storageId: file.customId,
-						generationId: metadata.input.generationId,
-					},
-					{
-						context: createContext({
-							req,
-							log,
-						}),
-					}
-				);
-
-				return {
-					uploadedBy: metadata.userId,
-					fileUrl: file.ufsUrl,
-					storedId: insertDb.id,
+			const insertDb = await call(
+				appRouter.filesMetadata.link,
+				{
+					url: file.ufsUrl,
+					userId: metadata.userId,
+					storageId: file.customId,
 					generationId: metadata.input.generationId,
-				};
-			});
+				},
+				{
+					context: await createContext({ req, log }),
+				}
+			);
+
+			return {
+				uploadedBy: metadata.userId,
+				fileUrl: file.ufsUrl,
+				storedId: insertDb.id,
+				generationId: metadata.input.generationId,
+			};
 		}),
 } satisfies FileRouter;
 

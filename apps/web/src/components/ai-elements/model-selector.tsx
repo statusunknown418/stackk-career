@@ -37,7 +37,9 @@ export const ModelSelectorContent = ({
 		{...props}
 	>
 		<DialogTitle className="sr-only">{title}</DialogTitle>
-		<Command className="**:data-[slot=command-input-wrapper]:h-auto">{children}</Command>
+		<div className="**:data-[slot=command-input-wrapper]:h-auto">
+			<Command>{children}</Command>
+		</div>
 	</DialogContent>
 );
 

@@ -1,7 +1,7 @@
 import { AddressBookIcon, SquaresFourIcon } from "@phosphor-icons/react";
 import type { SectionKind } from "@stackk-career/schemas/api/resumes";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { getBlockKey } from "./block-key-registry";
+import { getBlockKey } from "../resume-document/block-key-registry";
 import { getSectionIcon } from "./section-icons";
 
 export interface SectionRailItem {

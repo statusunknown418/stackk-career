@@ -1,6 +1,7 @@
-import { CaretUpIcon } from "@phosphor-icons/react";
+import { ArrowBendUpRightIcon, CaretUpIcon } from "@phosphor-icons/react";
+import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, Link } from "@tanstack/react-router";
 import type { UIMessage } from "ai";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
+import { ResumeParserChainOfThought } from "@/components/domains/resumes/resume-parser-chain";
+import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
 import { Spinner } from "@/components/ui/spinner";
 import { useTypewriter } from "@/hooks/use-typewriter";
@@ -54,8 +57,12 @@ const QUESTIONS: OnboardingQuestion[] = [
 
 const UPLOAD_PROMPT = "Perfecto. Para terminar, sube tu CV en PDF y lo analizamos juntos.";
 const ANALYZING_PROMPT = "Excelente, ya tengo tu CV. Déjame revisarlo…";
+const SKIPPED_ANSWER = "__skipped__" as const;
+const SKIP_QUESTION_LABEL = "Prefiero no responder";
+const SKIPPED_REPLY_LABEL = "Omitido";
+const INVALID_FILE_TOAST = "Archivo no permitido. Sube tu CV en PDF.";
 
-type Answers = Partial<Record<OnboardingAnswerKey, string>>;
+type Answers = Partial<Record<OnboardingAnswerKey, string | typeof SKIPPED_ANSWER>>;
 
 const setupRoute = getRouteApi("/_protected/setup");
 
@@ -83,9 +90,16 @@ function nextUnansweredIndex(answers: Answers): number {
 interface OnboardingChatProps {
 	assistantMessage?: UIMessage;
 	isAnalysisStreaming?: boolean;
+	isParserStreaming?: boolean;
+	parserEvents?: readonly ResumeParserEvent[];
 }
 
-export function OnboardingChat({ assistantMessage, isAnalysisStreaming = false }: OnboardingChatProps) {
+export function OnboardingChat({
+	assistantMessage,
+	isAnalysisStreaming = false,
+	isParserStreaming = false,
+	parserEvents = [],
+}: OnboardingChatProps) {
 	const { data, isLoading } = useQuery(orpc.onboardingProfile.get.queryOptions());
 
 	if (isLoading) {
@@ -101,6 +115,8 @@ export function OnboardingChat({ assistantMessage, isAnalysisStreaming = false }
 			assistantMessage={assistantMessage}
 			initialAnswers={pickAnswers(data)}
 			isAnalysisStreaming={isAnalysisStreaming}
+			isParserStreaming={isParserStreaming}
+			parserEvents={parserEvents}
 		/>
 	);
 }
@@ -109,10 +125,14 @@ function OnboardingChatInner({
 	assistantMessage,
 	initialAnswers,
 	isAnalysisStreaming,
+	isParserStreaming,
+	parserEvents,
 }: {
 	assistantMessage: UIMessage | undefined;
 	initialAnswers: Answers;
 	isAnalysisStreaming: boolean;
+	isParserStreaming: boolean;
+	parserEvents: readonly ResumeParserEvent[];
 }) {
 	const { storeId: fileId, generationId, analysisStatus } = setupRoute.useSearch();
 	const navigate = setupRoute.useNavigate();
@@ -139,6 +159,14 @@ function OnboardingChatInner({
 		}
 		setAnswers((prev) => ({ ...prev, [currentQuestion.id]: answer }));
 		saveProfile.mutate({ [currentQuestion.id]: answer });
+	}
+
+	function handleSkipQuestion() {
+		if (!currentQuestion) {
+			return;
+		}
+		setAnswers((prev) => ({ ...prev, [currentQuestion.id]: SKIPPED_ANSWER }));
+		saveProfile.mutate({ [currentQuestion.id]: null });
 	}
 
 	function handleRestore(index: number) {
@@ -177,7 +205,13 @@ function OnboardingChatInner({
 						</Message>
 
 						<Message from="user">
-							<MessageContent>{answers[question.id] ?? ""}</MessageContent>
+							<MessageContent>
+								{answers[question.id] === SKIPPED_ANSWER ? (
+									<span className="text-muted-foreground italic">{SKIPPED_REPLY_LABEL}</span>
+								) : (
+									(answers[question.id] ?? "")
+								)}
+							</MessageContent>
 						</Message>
 
 						<Checkpoint>
@@ -209,11 +243,17 @@ function OnboardingChatInner({
 						</Message>
 
 						{questionTypewriter.done && (
-							<Suggestions>
-								{currentQuestion.options.map((option) => (
-									<Suggestion key={option} onClick={handlePick} size="lg" suggestion={option} />
-								))}
-							</Suggestions>
+							<div className="flex flex-col gap-2">
+								<Suggestions>
+									{currentQuestion.options.map((option) => (
+										<Suggestion key={option} onClick={handlePick} size="lg" suggestion={option} />
+									))}
+								</Suggestions>
+
+								<Button className="self-start" onClick={handleSkipQuestion} size="xs" variant="ghost-muted">
+									{SKIP_QUESTION_LABEL}
+								</Button>
+							</div>
 						)}
 					</div>
 				)}
@@ -233,20 +273,27 @@ function OnboardingChatInner({
 						</Message>
 
 						{uploadTypewriter.done && (
-							<Dropzone<{ generationId: string | undefined }>
-								endpoint="resumeUploader"
-								input={{ generationId }}
-								onClientUploadComplete={(files) => {
-									const storedId = files.at(0)?.serverData.storedId;
-									if (!storedId) {
-										toast.error("No pudimos registrar el archivo. Intenta de nuevo.");
-										return;
-									}
-									toast.success("CV subido");
-									navigate({ search: { step: "chat", generationId, storeId: storedId } });
-								}}
-								onUploadError={(err) => toast.error(err.message)}
-							/>
+							<div className="space-y-3">
+								<Dropzone<{ generationId: string | undefined }>
+									endpoint="resumeUploader"
+									input={{ generationId }}
+									onClientUploadComplete={(files) => {
+										const storedId = files.at(0)?.serverData.storedId;
+										if (!storedId) {
+											toast.error("No pudimos registrar el archivo. Intenta de nuevo.");
+											return;
+										}
+										toast.success("CV subido");
+										navigate({ search: { step: "chat", generationId, storeId: storedId } });
+									}}
+									onDragReject={() => toast.error(INVALID_FILE_TOAST)}
+									onUploadError={(err) => toast.error(err.message)}
+								/>
+
+								<Button className="w-full sm:w-auto" render={<Link to="/dash" />} variant="ghost-muted">
+									Continuar sin CV <ArrowBendUpRightIcon />
+								</Button>
+							</div>
 						)}
 					</div>
 				)}
@@ -267,6 +314,10 @@ function OnboardingChatInner({
 						</Message>
 
 						{analysisStatus !== "complete" && <Shimmer className="text-sm">Processing</Shimmer>}
+
+						{(isParserStreaming || parserEvents.length > 0) && (
+							<ResumeParserChainOfThought events={parserEvents} isStreaming={isParserStreaming} />
+						)}
 
 						{reasoningText && (
 							<Reasoning isStreaming={isReasoningStreaming}>

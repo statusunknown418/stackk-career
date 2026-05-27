@@ -30,7 +30,17 @@ export const resumeAnalyses = sqliteTable(
 		status: t.text({ enum: resumeAnalysisStatusEnum }).notNull().default("pending"),
 
 		model: t.text().$type<LanguageModel>(),
-		object: t.blob({ mode: "json" }),
+		object: t.text({ mode: "json" }),
+		appliedEditIndices: t
+			.text({ mode: "json" })
+			.$type<number[]>()
+			.notNull()
+			.$defaultFn(() => []),
+		dismissedEditIndices: t
+			.text({ mode: "json" })
+			.$type<number[]>()
+			.notNull()
+			.$defaultFn(() => []),
 		error: t.text(),
 
 		createdAt: t

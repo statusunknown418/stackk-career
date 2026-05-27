@@ -5,7 +5,7 @@ import type { ComponentProps } from "react";
 import { createContext, useContext, useMemo } from "react";
 import { getUsage } from "tokenlens";
 import { Button } from "@/components/ui/button";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/preview-card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +46,7 @@ export const Context = ({ usedTokens, maxTokens, usage, modelId, ...props }: Con
 
 	return (
 		<ContextContext.Provider value={contextValue}>
-			<HoverCard closeDelay={0} openDelay={0} {...props} />
+			<HoverCard {...props} />
 		</ContextContext.Provider>
 	);
 };
@@ -103,14 +103,19 @@ export const ContextTrigger = ({ children, ...props }: ContextTriggerProps) => {
 	}).format(usedPercent);
 
 	return (
-		<HoverCardTrigger asChild>
-			{children ?? (
-				<Button type="button" variant="ghost" {...props}>
-					<span className="font-medium text-muted-foreground">{renderedPercent}</span>
-					<ContextIcon />
-				</Button>
-			)}
-		</HoverCardTrigger>
+		<HoverCardTrigger
+			render={
+				children ? (
+					// biome-ignore lint/complexity/noUselessFragments: just in case
+					<>{children}</>
+				) : (
+					<Button type="button" variant="ghost" {...props}>
+						<span className="font-medium text-muted-foreground">{renderedPercent}</span>
+						<ContextIcon />
+					</Button>
+				)
+			}
+		/>
 	);
 };
 

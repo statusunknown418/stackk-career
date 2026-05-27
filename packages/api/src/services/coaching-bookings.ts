@@ -9,6 +9,7 @@ import type { CoachingBookingChangedAction } from "@stackk-career/schemas/jobs/c
 import { tasks } from "@trigger.dev/sdk";
 import { eq, inArray } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export interface CaptureBookingInput {
 	bookingStatus?: string;
@@ -57,6 +58,8 @@ export async function captureBooking(input: CaptureBookingInput, log?: RequestLo
 					videoCallUrl: values.videoCallUrl,
 				},
 			});
+
+		await invalidateViewerUsage(db, input.userId, ["coaching_sessions_per_cycle"]);
 
 		log?.set({
 			coaching: {

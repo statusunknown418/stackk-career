@@ -5,7 +5,7 @@ import { FileTextIcon, GlobeIcon, ImageIcon, Music2Icon, PaperclipIcon, VideoIco
 import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/preview-card";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -301,9 +301,7 @@ export const AttachmentRemove = ({ label = "Remove", className, children, ...pro
 
 export type AttachmentHoverCardProps = ComponentProps<typeof HoverCard>;
 
-export const AttachmentHoverCard = ({ openDelay = 0, closeDelay = 0, ...props }: AttachmentHoverCardProps) => (
-	<HoverCard closeDelay={closeDelay} openDelay={openDelay} {...props} />
-);
+export const AttachmentHoverCard = (props: AttachmentHoverCardProps) => <HoverCard {...props} />;
 
 export type AttachmentHoverCardTriggerProps = ComponentProps<typeof HoverCardTrigger>;
 

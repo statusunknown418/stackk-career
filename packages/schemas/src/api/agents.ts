@@ -1,7 +1,24 @@
 import { z } from "zod";
 
-export const initiateResumeAnalysisInputSchema = z.object({
+export const triggerResumeAnalysisInputSchema = z.object({
 	generationId: z.string().nonempty(),
 	parentAnalysisId: z.string().optional(),
 });
-export type InitiateResumeAnalysisInput = z.infer<typeof initiateResumeAnalysisInputSchema>;
+export type InitiateResumeAnalysisInput = z.infer<typeof triggerResumeAnalysisInputSchema>;
+
+export const triggerDetailedResumeAnalysisInputSchema = z.object({
+	resumeId: z.string().nonempty(),
+	parentAnalysisId: z.string().optional(),
+});
+export type InitiateDetailedResumeAnalysisInput = z.infer<typeof triggerDetailedResumeAnalysisInputSchema>;
+
+export const triggerResumeParserInputSchema = z
+	.object({
+		fileId: z.string().optional(),
+		fileUrl: z.url().optional(),
+		displayName: z.string().trim().min(1).max(120).optional(),
+	})
+	.refine((value) => Boolean(value.fileId) !== Boolean(value.fileUrl), {
+		message: "Provide exactly one of fileId or fileUrl",
+	});
+export type InitiateResumeParserInput = z.infer<typeof triggerResumeParserInputSchema>;

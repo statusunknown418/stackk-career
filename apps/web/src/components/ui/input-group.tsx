@@ -2,6 +2,7 @@
 
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { Input, type InputProps } from "@/components/ui/input";
 import { Textarea, type TextareaProps } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -100,4 +101,13 @@ export function InputGroupInput({ className, ...props }: InputProps): React.Reac
 
 export function InputGroupTextarea({ className, ...props }: TextareaProps): React.ReactElement {
 	return <Textarea className={className} unstyled {...props} />;
+}
+
+export function InputGroupButton({
+	className,
+	size = "icon-sm",
+	variant = "ghost",
+	...props
+}: ButtonProps): React.ReactElement {
+	return <Button className={className} data-slot="input-group-button" size={size} variant={variant} {...props} />;
 }

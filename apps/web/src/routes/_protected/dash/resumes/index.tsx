@@ -1,44 +1,64 @@
 import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { RouteIcon } from "lucide-react";
+import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
-import Loader from "@/components/loader";
+import { ResumeCreateDialog } from "@/components/domains/resumes/resume-create-dialog";
+import { ResumePendingCards } from "@/components/domains/resumes/resume-pending-cards";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
 import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/components/ui/meter";
-import { orpc, queryClient } from "@/utils/orpc";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash/resumes/")({
 	component: RouteComponent,
-	beforeLoad: () => queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
+	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
+	pendingComponent: ResumesIndexPending,
 });
+
+function ResumesIndexPending() {
+	return (
+		<section className="space-y-4">
+			<section className="flex justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
+				<article className="grid gap-1">
+					<h1 className="font-light text-2xl">Curriculums</h1>
+					<FrameDescription>
+						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
+					</FrameDescription>
+				</article>
+			</section>
+
+			<section className="px-4 py-2">
+				<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+					{Array.from({ length: 6 }).map((_, i) => (
+						<ResumeCardSkeleton key={i.toString()} />
+					))}
+				</ul>
+			</section>
+		</section>
+	);
+}
 
 function RouteComponent() {
 	const listQuery = orpc.resumes.list.queryOptions();
 	const { data } = useSuspenseQuery(listQuery);
+	const { data: session } = authClient.useSession();
+	const userId = session?.user?.id;
+	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-	const navigate = useNavigate();
+	const tokenQuery = useQuery({
+		...orpc.viewer.realtimeToken.queryOptions(),
+		enabled: Boolean(userId),
+		staleTime: 29 * 60 * 1000,
+	});
 
-	const { mutateAsync, isPending } = useMutation(
-		orpc.resumes.create.mutationOptions({
-			onSuccess(data) {
-				navigate({
-					to: "/dash/resumes/$resumeId",
-					params: {
-						resumeId: data.resumeId,
-					},
-				});
-			},
-			onSettled() {
-				queryClient.invalidateQueries({ queryKey: listQuery.queryKey });
-			},
-		})
-	);
+	const openDialog = () => setIsCreateDialogOpen(true);
 
-	const hasResumeContent = data.length > 0 || isPending;
+	const hasResumeContent = data.length > 0;
 
 	return (
 		<section className="space-y-4">
@@ -50,8 +70,8 @@ function RouteComponent() {
 						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
 					</FrameDescription>
 
-					<Button className="mt-4 max-w-max" disabled={isPending || data.length >= 5} onClick={() => mutateAsync({})}>
-						{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
+					<Button className="mt-4 max-w-max" disabled={data.length >= 5} onClick={openDialog}>
+						<PlusCircleIcon />
 						Crear nuevo
 					</Button>
 				</article>
@@ -71,14 +91,15 @@ function RouteComponent() {
 				</Meter>
 			</section>
 
+			{userId && tokenQuery.data?.token && <ResumePendingCards accessToken={tokenQuery.data.token} userId={userId} />}
+
 			<section aria-labelledby="resumes-list-heading" className="px-4 py-2">
 				{hasResumeContent ? (
 					<article className="flex flex-col gap-4">
-						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+						<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{data.map((resume) => (
 								<ResumeCard key={resume.id} resume={resume} />
 							))}
-							{isPending && <ResumeCardSkeleton />}
 						</ul>
 					</article>
 				) : (
@@ -95,14 +116,16 @@ function RouteComponent() {
 						</EmptyHeader>
 
 						<EmptyContent>
-							<Button disabled={isPending} onClick={() => mutateAsync({})} size="sm">
-								{isPending ? <Loader centered={false} /> : <PlusCircleIcon />}
+							<Button onClick={openDialog} size="sm">
+								<PlusCircleIcon />
 								Crear CV
 							</Button>
 						</EmptyContent>
 					</Empty>
 				)}
 			</section>
+
+			<ResumeCreateDialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen} />
 		</section>
 	);
 }

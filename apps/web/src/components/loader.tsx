@@ -1,8 +1,8 @@
-import { BeachBallIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { Classic } from "./loading-ui/classic";
 
 export default function Loader({ centered = true, className }: { centered?: boolean; className?: string }) {
-	const icon = <BeachBallIcon className={cn("size-4 animate-spin", className)} />;
+	const icon = <Classic className={cn("size-4", className)} />;
 
 	if (!centered) {
 		return icon;

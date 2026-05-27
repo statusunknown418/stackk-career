@@ -8,13 +8,16 @@
     "./db/*": "./src/db/*.ts",
     "./jobs/*": "./src/jobs/*.ts",
     "./ai/*": "./src/ai/*.ts",
-    "./utils/*": "./src/utils/*.ts"
+    "./utils/*": "./src/utils/*.ts",
+    "./subscriptions": "./src/subscriptions/index.ts",
+    "./subscriptions/*": "./src/subscriptions/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@stackk-career/db": "workspace:*",
+    "date-fns": "catalog:",
     "drizzle-zod": "catalog:",
     "zod": "catalog:"
   },

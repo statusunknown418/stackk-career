@@ -16,15 +16,22 @@ export const resumes = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => `resume_${createId()}`),
 		templateId: t.text(),
-		generationId: t.text(),
-		userId: t.text().notNull(),
+		generationId: t
+			.text()
+			.notNull()
+			.references(() => generations.id, { onDelete: "cascade" }),
+		userId: t
+			.text()
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
 		targetedCompanyIdentifier: t.text(),
+		targetRole: t.text(),
 		isPrimary: t.integer({ mode: "boolean" }).notNull().default(false),
-		aiMetadata: t.blob({ mode: "json" }).$type<{ agentScore: number; agentCreated: boolean }>(),
+		aiMetadata: t.text({ mode: "json" }).$type<{ agentScore: number; agentCreated: boolean }>(),
 		status: t.text({ enum: resumeStatusEnum }).default("draft").notNull(),
-		displayName: t.text().notNull().default("Nuevo CV"),
-		title: t.text().notNull().default("Jon Doe"),
+		displayName: t.text().notNull().default("CV sin título"),
+		title: t.text().notNull().default("CV sin título"),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })

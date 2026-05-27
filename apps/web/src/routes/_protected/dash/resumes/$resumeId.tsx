@@ -1,17 +1,20 @@
-import { CopyIcon, DotsThreeOutlineIcon, ExportIcon, SparkleIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CopyIcon, DotsThreeOutlineIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
-import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
+import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
-import { useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
+import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
-import { ResumeDocumentEditor } from "@/components/domains/resume-editor/resume-document-editor";
+import { ResumeAnalysisSection } from "@/components/domains/resume-editor/resume-analysis-section";
 import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
+import { useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";
 import {
@@ -24,10 +27,8 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Group, GroupSeparator } from "@/components/ui/group";
-import { Input } from "@/components/ui/input";
-import { InputGroup } from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,6 +36,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	blockIdFromFieldName,
 	buildDocumentFormValues,
@@ -43,7 +45,58 @@ import {
 	SAVE_STATUS_LABELS,
 	useAppForm,
 } from "@/lib/forms/resume-form";
+import { cn } from "@/lib/utils";
 import { orpc, queryClient } from "@/utils/orpc";
+
+const swapText = (value: string | undefined, before: string, after: string): string | null => {
+	if (!value?.includes(before)) {
+		return null;
+	}
+	return value.replace(before, after);
+};
+
+const applyRewriteToBlock = (block: Block, before: string, after: string): Block["content"] | null => {
+	switch (block.blockType) {
+		case "bullet":
+		case "paragraph": {
+			const next = swapText(block.content.text, before, after);
+			return next === null ? null : { ...block.content, text: next };
+		}
+		case "entry": {
+			const hit = (["descriptor", "title", "subtitle", "location"] as const)
+				.map((key) => ({ key, next: swapText(block.content[key], before, after) }))
+				.find((candidate) => candidate.next !== null);
+			return hit ? { ...block.content, [hit.key]: hit.next } : null;
+		}
+		case "section": {
+			const next = swapText(block.content.title, before, after);
+			return next === null ? null : { ...block.content, title: next };
+		}
+		case "skill_item": {
+			const next = swapText(block.content.value, before, after);
+			return next === null ? null : { ...block.content, value: next };
+		}
+		case "skill_line": {
+			const next = swapText(block.content.label, before, after);
+			return next === null ? null : { ...block.content, label: next };
+		}
+		case "contact": {
+			const idx = block.content.items.findIndex((item) => item.value.includes(before));
+			if (idx === -1) {
+				return null;
+			}
+			const item = block.content.items[idx];
+			if (!item) {
+				return null;
+			}
+			const items = [...block.content.items];
+			items[idx] = { ...item, value: item.value.replace(before, after) };
+			return { ...block.content, items };
+		}
+		default:
+			return null;
+	}
+};
 
 const resumeSearchSchema = z.object({
 	section: z.coerce.number().int().positive().optional().catch(undefined),
@@ -51,14 +104,40 @@ const resumeSearchSchema = z.object({
 
 export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 	component: RouteComponent,
-	loader: ({ params }) =>
-		queryClient.ensureQueryData(
+	loader: ({ params, context }) =>
+		context.queryClient.ensureQueryData(
 			orpc.resumes.get.queryOptions({
 				input: { id: params.resumeId },
 			})
 		),
+	pendingComponent: ResumeEditorPending,
 	validateSearch: resumeSearchSchema,
 });
+
+function ResumeEditorPending() {
+	return (
+		<section className="flex h-full min-h-0 flex-col overflow-hidden">
+			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+				<article className="w-full max-w-xl space-y-2 pl-3">
+					<Skeleton className="h-4 w-40" />
+					<Skeleton className="h-7 w-64" />
+				</article>
+			</header>
+			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 py-4">
+				<article className="h-full w-72 shrink-0 space-y-2 rounded-lg bg-background p-2">
+					<Skeleton className="h-6 w-full" />
+					<Skeleton className="h-6 w-full" />
+					<Skeleton className="h-6 w-2/3" />
+				</article>
+				<article className="min-w-0 flex-1 space-y-3 overflow-y-auto px-4 pb-16">
+					<Skeleton className="h-10 w-1/2" />
+					<Skeleton className="h-32 w-full" />
+					<Skeleton className="h-32 w-full" />
+				</article>
+			</section>
+		</section>
+	);
+}
 
 function RouteComponent() {
 	const params = Route.useParams();
@@ -70,17 +149,7 @@ function RouteComponent() {
 	const { data } = useSuspenseQuery(resumeQuery);
 
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-	const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
-
-	const prefersReducedMotion = useReducedMotion();
-
-	const registerSection = useCallback((id: number, el: HTMLElement | null) => {
-		if (el) {
-			sectionRefs.current.set(id, el);
-		} else {
-			sectionRefs.current.delete(id);
-		}
-	}, []);
+	const [areSectionsOpen, setAreSectionsOpen] = useState(true);
 
 	const handleSelectSection = (id: number | null) => {
 		navigate({
@@ -90,16 +159,6 @@ function RouteComponent() {
 			replace: true,
 		});
 	};
-
-	useEffect(() => {
-		if (focusedSectionId === null) {
-			return;
-		}
-		sectionRefs.current.get(focusedSectionId)?.scrollIntoView({
-			behavior: prefersReducedMotion ? "auto" : "smooth",
-			block: "start",
-		});
-	}, [focusedSectionId, prefersReducedMotion]);
 
 	const initialValues = useMemo(() => buildDocumentFormValues(data), [data]);
 
@@ -149,8 +208,8 @@ function RouteComponent() {
 
 	// Re-hydrate the form when the underlying resume snapshot changes (e.g. after
 	// adding a section, deleting blocks, or any external mutation that invalidates
-	// the query). Tree shape is keyed by id + updatedAt of every block + the resume
-	// itself, so per-keystroke saves don't trigger a reset.
+	// the query). Tree shape is keyed by resume id + each block's id/parent/position,
+	// so per-keystroke content saves don't trigger a reset.
 	const hydratedDataKeyRef = useRef<string | null>(null);
 	const nextHydrationKey = buildHydrationKey(data);
 
@@ -171,7 +230,7 @@ function RouteComponent() {
 		// blocks; remove blocks that no longer exist; patch metadata (position,
 		// parentBlockId) when it changes. A blanket `form.reset` here would wipe
 		// any in-progress edits whenever a sibling block is added or deleted.
-		reconcileBlocks(form, nextValues.blocks).catch(() => undefined);
+		reconcileBlocks(form, nextValues.blocks);
 	}, [nextHydrationKey, data, form, autosave]);
 
 	// Subscribe only to a tree-shape projection so the route re-renders when blocks
@@ -182,6 +241,7 @@ function RouteComponent() {
 	useStore(form.store, (state) =>
 		state.values.blocks.map((block) => `${block.id}:${block.parentBlockId ?? ""}:${block.position}`).join("|")
 	);
+
 	const rootBlocks = buildBlockTree(form.state.values.blocks);
 	const blockIndexById = new Map(form.state.values.blocks.map((block, index) => [block.id, index] as const));
 
@@ -228,11 +288,79 @@ function RouteComponent() {
 		await deleteMutation.mutateAsync({ id: params.resumeId });
 	};
 
+	const findFocusAncestor = (
+		blocks: typeof form.state.values.blocks,
+		blockId: number
+	): (typeof blocks)[number] | null => {
+		const node = blocks.find((block) => block.id === blockId);
+		if (!node) {
+			return null;
+		}
+		if (node.blockType === "section" || node.blockType === "contact") {
+			return node;
+		}
+		return node.parentBlockId === null ? null : findFocusAncestor(blocks, node.parentBlockId);
+	};
+
+	const handleViewSection = (edit: ResumeEdit) => {
+		if (!edit.targetBlockId) {
+			return;
+		}
+		const ancestor = findFocusAncestor(form.state.values.blocks, edit.targetBlockId);
+		if (!ancestor) {
+			toast.error("No se encontró la sección correspondiente.");
+			return;
+		}
+		handleSelectSection(ancestor.id);
+	};
+
+	const deleteBlock = useDeleteBlock({ form });
+
+	const handleApplyEdit = (edit: ResumeEdit): boolean => {
+		if (!edit.targetBlockId) {
+			return false;
+		}
+		const blocks = form.state.values.blocks;
+		const index = blocks.findIndex((block) => block.id === edit.targetBlockId);
+		if (index === -1) {
+			toast.error("No se encontró el bloque a editar.");
+			return false;
+		}
+		const block = blocks[index];
+		if (!block) {
+			return false;
+		}
+
+		if (edit.action === "delete") {
+			if (block.blockType === "contact") {
+				toast.error("No se puede eliminar el bloque de contacto.");
+				return false;
+			}
+			deleteBlock.mutate({ id: block.id, resumeId: params.resumeId });
+			toast.success("Bloque eliminado");
+			return true;
+		}
+
+		if (!(edit.before && edit.after)) {
+			return false;
+		}
+		const replaced = applyRewriteToBlock(block as Block, edit.before, edit.after);
+		if (replaced === null) {
+			toast.error("No se encontró el texto exacto a reemplazar. Por favor editalo manualmente.");
+			return false;
+		}
+		form.setFieldValue(`blocks[${index}].content`, replaced as typeof block.content);
+		autosave.queueBlockSave(block.id);
+		autosave.flushBlockSave(block.id);
+		toast.success("Mejora aplicada");
+		return true;
+	};
+
 	const saveStatusLabel = SAVE_STATUS_LABELS[autosave.saveStatus];
 
 	return (
-		<section className="relative flex flex-col gap-4">
-			<header className="sticky inset-0 z-10 flex flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
+		<section className="flex h-full min-h-0 flex-col overflow-hidden">
+			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 py-2.5 ps-1 pe-4 backdrop-blur-md md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -254,33 +382,21 @@ function RouteComponent() {
 
 					<form.AppField name="title">
 						{(field) => (
-							<InputGroup className="max-w-xs" variant="ghost">
-								<Input
-									className="text-lg!"
-									nativeInput
-									onBlur={field.handleBlur}
-									onChange={(event) => {
-										field.handleChange(event.currentTarget.value);
-									}}
-									size="lg"
-									value={field.state.value}
-									variant="ghost"
+							<div className="max-w-xs ps-2">
+								<InlineTextEditor
+									onBlur={() => field.handleBlur()}
+									onChange={(value) => field.handleChange(value)}
+									placeholder="Título del CV"
+									value={field.state.value ?? ""}
+									variant="subtitle"
 								/>
-							</InputGroup>
+							</div>
 						)}
 					</form.AppField>
 				</article>
 
 				<article className="flex items-center gap-2">
 					<Group>
-						<Button className="tabular-nums" variant="outline">
-							<SparkleIcon />
-							Agente
-							<Kbd>K-02</Kbd>
-						</Button>
-
-						<GroupSeparator />
-
 						<NewSectionSheet form={form} />
 
 						<GroupSeparator />
@@ -319,22 +435,39 @@ function RouteComponent() {
 				</article>
 			</header>
 
-			<section className="relative flex gap-2 ps-3 pe-6">
-				<article>
-					<SectionRail
-						activeId={focusedSectionId}
-						contactId={contactBlockId}
-						onSelect={handleSelectSection}
-						sections={railSections}
+			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 pt-3">
+				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
+					<Collapsible
+						className="shrink-0 rounded-lg bg-background"
+						onOpenChange={setAreSectionsOpen}
+						open={areSectionsOpen}
+					>
+						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
+							Secciones
+							<CaretDownIcon className={cn("transition-transform", !areSectionsOpen && "-rotate-90")} />
+						</CollapsibleTrigger>
+						<CollapsiblePanel className="px-2 pb-2">
+							<SectionRail
+								activeId={focusedSectionId}
+								contactId={contactBlockId}
+								onSelect={handleSelectSection}
+								sections={railSections}
+							/>
+						</CollapsiblePanel>
+					</Collapsible>
+
+					<ResumeAnalysisSection
+						onApplyEdit={handleApplyEdit}
+						onViewSection={handleViewSection}
+						resumeId={params.resumeId}
 					/>
 				</article>
 
-				<article className="max-h-full px-6 pb-10 md:px-8">
-					<ResumeDocumentEditor
+				<article className="min-w-0 flex-1 overflow-y-auto">
+					<ResumeDocument
 						blockIndexById={blockIndexById}
 						focusedSectionId={focusedSectionId}
 						form={form}
-						registerSection={registerSection}
 						rootBlocks={rootBlocks}
 					/>
 				</article>

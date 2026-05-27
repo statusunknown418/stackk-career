@@ -13,6 +13,7 @@ import {
 import { and, asc, count, desc, eq } from "drizzle-orm";
 import { protectedProcedure } from "../index";
 import { createResumeAnalysisDiff } from "../lib/analysis.helpers";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 const MAX_GENERATIONS_PER_USER = 5;
 
@@ -41,6 +42,16 @@ export const generationsRouter = {
 			throw error;
 		}
 
+		context.log?.set({
+			generation: {
+				type: input.type ?? null,
+				model: input.model ?? null,
+				has_title: Boolean(input.title),
+				has_summary: Boolean(input.summary),
+			},
+		});
+
+		const insertStart = performance.now();
 		const [row] = await context.db
 			.insert(generations)
 			.values({
@@ -48,6 +59,10 @@ export const generationsRouter = {
 				owner: userId,
 			})
 			.returning({ id: generations.id });
+
+		context.log?.set({
+			db: { insert_generation_ms: performance.now() - insertStart },
+		});
 
 		if (!row) {
 			const error = new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create generation" });
@@ -60,6 +75,10 @@ export const generationsRouter = {
 			outcome: "created",
 			generation: { id: row.id },
 		});
+
+		await invalidateViewerUsage(context.db, userId, [
+			input.type === "conversation" ? "conversation_generations_per_cycle" : "resume_creation_generations_per_cycle",
+		]);
 
 		return row;
 	}),

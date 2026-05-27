@@ -227,33 +227,77 @@ const compareDescString = (a: string | undefined, b: string | undefined): number
 	return b.localeCompare(a);
 };
 
+const compareTimelinePresence = (
+	aFields: ReturnType<typeof readEntryTimelineFields>,
+	bFields: ReturnType<typeof readEntryTimelineFields>
+): number => {
+	if (aFields.isCurrent !== bFields.isCurrent) {
+		return aFields.isCurrent ? -1 : 1;
+	}
+
+	const aHasStart = Boolean(aFields.startDate);
+	const bHasStart = Boolean(bFields.startDate);
+	if (aHasStart !== bHasStart) {
+		return aHasStart ? 1 : -1;
+	}
+
+	if (!(aHasStart || bHasStart)) {
+		return 0;
+	}
+
+	return compareDescString(aFields.startDate, bFields.startDate);
+};
+
+const compareTimelineEndDate = (
+	aFields: ReturnType<typeof readEntryTimelineFields>,
+	bFields: ReturnType<typeof readEntryTimelineFields>
+): number => {
+	const aEnd = aFields.isCurrent ? "9999-12" : aFields.endDate;
+	const bEnd = bFields.isCurrent ? "9999-12" : bFields.endDate;
+	return compareDescString(aEnd, bEnd);
+};
+
+const compareTimelineIds = (a: TimelineSortable, b: TimelineSortable): number => {
+	const aIsOptimistic = a.id < 0;
+	const bIsOptimistic = b.id < 0;
+	if (aIsOptimistic !== bIsOptimistic) {
+		return aIsOptimistic ? -1 : 1;
+	}
+
+	return b.id - a.id;
+};
+
 // Sort entries newest-first for timeline-style sections (experience / education).
 // Data is the source of truth: isCurrent desc → startDate desc → endDate desc
 // (isCurrent treated as "9999-12") → id desc as stable tiebreak (later-created
-// row wins). Zero-padded YYYY-MM compares lexicographically. Malformed content
-// falls to the bottom via safeParse.
+// row wins). Zero-padded YYYY-MM compares lexicographically. Entries lacking a
+// startDate (freshly added rows before the user fills the form) float to the
+// top so focus lands on them rather than being yanked to the bottom on each
+// keystroke.
 export function sortEntriesByTimeline<T extends TimelineSortable>(entries: readonly T[]): T[] {
 	return [...entries].sort((a, b) => {
 		const aFields = readEntryTimelineFields(a.content);
 		const bFields = readEntryTimelineFields(b.content);
 
-		if (aFields.isCurrent !== bFields.isCurrent) {
-			return aFields.isCurrent ? -1 : 1;
+		// Neither has a startDate: preserve the caller's order (lexo-asc from
+		// `buildBlockTree`). Falling through to the id tiebreak would push
+		// optimistic rows (negative ids) below saved rows (positive ids) and
+		// the freshly-inserted entry would visibly jump to the bottom.
+		const startPresenceCmp = compareTimelinePresence(aFields, bFields);
+		if (startPresenceCmp === 0 && !(aFields.startDate || bFields.startDate)) {
+			return 0;
 		}
 
-		const startCmp = compareDescString(aFields.startDate, bFields.startDate);
-		if (startCmp !== 0) {
-			return startCmp;
+		if (startPresenceCmp !== 0) {
+			return startPresenceCmp;
 		}
 
-		const aEnd = aFields.isCurrent ? "9999-12" : aFields.endDate;
-		const bEnd = bFields.isCurrent ? "9999-12" : bFields.endDate;
-		const endCmp = compareDescString(aEnd, bEnd);
+		const endCmp = compareTimelineEndDate(aFields, bFields);
 		if (endCmp !== 0) {
 			return endCmp;
 		}
 
-		return b.id - a.id;
+		return compareTimelineIds(a, b);
 	});
 }
 

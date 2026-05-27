@@ -5,19 +5,53 @@ import type { ResumeDocumentWrapperForm } from "@stackk-career/schemas/api/resum
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
 import { useMutation } from "@tanstack/react-query";
 import { constructNow } from "date-fns";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import type { ResumeFormApi } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc, queryClient } from "@/utils/orpc";
-import { getBlockKey, migrateBlockKey, releaseBlockKey } from "./block-key-registry";
+import { getBlockKey, migrateBlockKey, releaseBlockKey } from "../resume-document/block-key-registry";
 
 let nextOptimisticBlockId = -1;
 export const optimisticBlockId = () => nextOptimisticBlockId--;
 
 type ResumeBlock = ResumeDocumentWrapperForm["blocks"][number];
 
+interface CreatedBlock {
+	id: number;
+}
+
+interface CreateDeferred {
+	promise: Promise<CreatedBlock>;
+	reject: (reason: unknown) => void;
+	resolve: (value: CreatedBlock) => void;
+}
+
+// Shared across hooks so a pending delete can wait for its sibling create to
+// land (and learn the real server id) instead of POSTing a still-optimistic id.
+const pendingCreates = new Map<number, CreateDeferred>();
+
+// Module-scoped so concurrent `useCreateBlock` instances (e.g. two sections both
+// appending an entry on the same tick) serialize through one queue. Per-hook
+// chains would race to read the same cached tail position and mint duplicate
+// lexo keys.
+let createChain: Promise<unknown> = Promise.resolve();
+
+const isOrpcNotFound = (err: unknown): boolean =>
+	typeof err === "object" && err !== null && "code" in err && (err as { code?: unknown }).code === "NOT_FOUND";
+
+const createDeferred = (): CreateDeferred => {
+	let resolve!: (value: CreatedBlock) => void;
+	let reject!: (reason: unknown) => void;
+	const promise = new Promise<CreatedBlock>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+};
+
 interface CreateContext {
+	deferred: CreateDeferred | null;
 	optimisticId: number;
 	previousResume: ReturnType<typeof queryClient.getQueryData> extends infer T ? T | undefined : undefined;
 }
@@ -29,10 +63,25 @@ interface UseCreateBlockOptions {
 const isSiblingOfParent = (block: { parentBlockId: number | null }, parentBlockId: number | null) =>
 	(block.parentBlockId ?? null) === (parentBlockId ?? null);
 
-const buildOptimisticBlock = (input: CreateBlockApiMutationInput, previousBlocks: ResumeBlock[]): ResumeBlock => {
+const resolveInsertionWindow = (
+	input: CreateBlockApiMutationInput,
+	previousBlocks: ResumeBlock[]
+): { before: string | null; after: string | null } => {
+	const providedBefore = input.before ?? null;
+	const providedAfter = input.after ?? null;
+	// Caller specified at least one neighbor: honor exactly. Don't derive the
+	// missing side from siblings — caller's intent is "insert against this
+	// neighbor", not "fill the rest of the row".
+	if (providedBefore !== null || providedAfter !== null) {
+		return { before: providedBefore, after: providedAfter };
+	}
+	// Neither neighbor: tail-append against current siblings.
 	const siblings = previousBlocks.filter((block) => isSiblingOfParent(block, input.parentBlockId ?? null));
-	const before = input.before ?? siblings.at(-1)?.position ?? null;
-	const after = input.after ?? null;
+	return { before: siblings.at(-1)?.position ?? null, after: null };
+};
+
+const buildOptimisticBlock = (input: CreateBlockApiMutationInput, previousBlocks: ResumeBlock[]): ResumeBlock => {
+	const { before, after } = resolveInsertionWindow(input, previousBlocks);
 	const now = constructNow(new Date());
 
 	return {
@@ -56,7 +105,6 @@ const findBlockIndexById = (blocks: ResumeBlock[], id: number) => blocks.findInd
 export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 	const params = Route.useParams();
 	const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: params.resumeId } });
-	const chainRef = useRef<Promise<unknown>>(Promise.resolve());
 
 	const mutation = useMutation(
 		orpc.blocks.create.mutationOptions({
@@ -65,13 +113,16 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 				const previousResume = queryClient.getQueryData(resumeQuery.queryKey);
 
 				if (!previousResume) {
-					return { optimisticId: 0, previousResume } satisfies CreateContext;
+					return { deferred: null, optimisticId: 0, previousResume } satisfies CreateContext;
 				}
 
 				const optimisticBlock = buildOptimisticBlock(
 					input as unknown as CreateBlockApiMutationInput,
 					previousResume.blocks as ResumeBlock[]
 				);
+
+				const deferred = createDeferred();
+				pendingCreates.set(optimisticBlock.id, deferred);
 
 				// Seed a stable React key for this optimistic id; `onSuccess` migrates it
 				// to the real id so consumers iterating with `getBlockKey(block.id)` never
@@ -88,7 +139,7 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 
 				form.pushFieldValue("blocks", optimisticBlock);
 
-				return { optimisticId: optimisticBlock.id, previousResume } satisfies CreateContext;
+				return { deferred, optimisticId: optimisticBlock.id, previousResume } satisfies CreateContext;
 			},
 			onSuccess: async (created, _input, context) => {
 				if (!context?.optimisticId) {
@@ -96,6 +147,8 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 				}
 
 				const optimisticId = context.optimisticId;
+				context.deferred?.resolve({ id: created.id });
+				pendingCreates.delete(optimisticId);
 
 				// Move the key BEFORE the cache/form id swap so the next render reads the
 				// same uuid under `created.id` that it previously read under the optimistic id.
@@ -120,8 +173,14 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 				}
 
 				// Sections also create a starter child server-side; pull it into cache + form.
+				// Skip the refetch if the section was already optimistically deleted while
+				// the create was in flight — invalidation would resurrect it.
 				if (created.blockType === "section") {
-					await queryClient.invalidateQueries({ queryKey: resumeQuery.queryKey });
+					const cached = queryClient.getQueryData(resumeQuery.queryKey);
+					const stillPresent = cached?.blocks.some((block) => block.id === created.id) ?? false;
+					if (stillPresent) {
+						await queryClient.invalidateQueries({ queryKey: resumeQuery.queryKey });
+					}
 				}
 			},
 			onError: async (error, _input, context) => {
@@ -130,6 +189,8 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 					queryClient.setQueryData(resumeQuery.queryKey, context.previousResume);
 				}
 				if (context?.optimisticId) {
+					context.deferred?.reject(error);
+					pendingCreates.delete(context.optimisticId);
 					releaseBlockKey(context.optimisticId);
 					const idx = findBlockIndexById(form.state.values.blocks, context.optimisticId);
 					if (idx !== -1) {
@@ -137,23 +198,41 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 					}
 				}
 			},
+			// Defensive cleanup: if react-query cancels the mutation before either
+			// success/error fires, the deferred would leak and any waiting delete
+			// for this optimistic id would hang. Reject + drop the map entry here.
+			onSettled: (_data, _error, _input, context) => {
+				const ctx = context as CreateContext | undefined;
+				if (!ctx?.optimisticId) {
+					return;
+				}
+				if (pendingCreates.has(ctx.optimisticId)) {
+					ctx.deferred?.reject(new Error("Create mutation settled without resolution"));
+					pendingCreates.delete(ctx.optimisticId);
+				}
+			},
 		})
 	);
 
 	// Serialize successive calls so each request sees the freshest cache state when computing
 	// `before`. Without this, two rapid clicks would race on the same tail position and the
-	// server would emit duplicate lexo keys for sibling rows.
+	// server would emit duplicate lexo keys for sibling rows. Only refresh `before` from cache
+	// when the caller did NOT specify any neighbor — explicit windows must be honored verbatim.
 	const enqueue = useCallback(
 		(input: CreateBlockApiMutationInput) => {
-			const next = chainRef.current
+			const next = createChain
 				.then(() => {
+					const hasExplicitNeighbor = (input.before ?? null) !== null || (input.after ?? null) !== null;
+					if (hasExplicitNeighbor) {
+						return mutation.mutateAsync(input);
+					}
 					const cached = queryClient.getQueryData(resumeQuery.queryKey);
 					const siblings = cached?.blocks.filter((block) => isSiblingOfParent(block, input.parentBlockId ?? null));
-					const freshBefore = input.before ?? siblings?.at(-1)?.position ?? null;
+					const freshBefore = siblings?.at(-1)?.position ?? null;
 					return mutation.mutateAsync({ ...input, before: freshBefore });
 				})
 				.catch(() => undefined);
-			chainRef.current = next;
+			createChain = next;
 			return next;
 		},
 		[mutation, resumeQuery.queryKey]
@@ -166,7 +245,6 @@ export const useCreateBlock = ({ form }: UseCreateBlockOptions) => {
 
 interface DeleteContext {
 	previousResume: ReturnType<typeof queryClient.getQueryData> extends infer T ? T | undefined : undefined;
-	removedFormIndices: number[];
 }
 
 const collectSubtreeIds = (blocks: { id: number; parentBlockId: number | null }[], rootId: number): Set<number> => {
@@ -192,14 +270,54 @@ export const useDeleteBlock = ({ form }: UseDeleteBlockOptions) => {
 	const params = Route.useParams();
 	const resumeQuery = orpc.resumes.get.queryOptions({ input: { id: params.resumeId } });
 
+	const baseDeleteOptions = orpc.blocks.delete.mutationOptions({});
+	const originalDeleteFn = baseDeleteOptions.mutationFn;
+
 	return useMutation(
 		orpc.blocks.delete.mutationOptions({
+			mutationFn: async (input, mutationContext) => {
+				if (!originalDeleteFn) {
+					return { id: input.id };
+				}
+				const runDelete = async (id: number) => {
+					try {
+						return await originalDeleteFn({ ...input, id }, mutationContext);
+					} catch (err) {
+						// Idempotent delete: the block is already gone (double-click,
+						// stale cache, prior delete in flight). Treat as success so the
+						// onError rollback doesn't resurrect a row the user already
+						// dismissed.
+						if (isOrpcNotFound(err)) {
+							return { id };
+						}
+						throw err;
+					}
+				};
+				if (input.id < 0) {
+					const pending = pendingCreates.get(input.id);
+					if (!pending) {
+						// Create never enqueued (or already rolled back) — nothing to delete server-side.
+						return { id: input.id };
+					}
+					let createdId: number;
+					try {
+						const created = await pending.promise;
+						createdId = created.id;
+					} catch {
+						// Sibling create rejected → nothing was persisted, optimistic
+						// removal already reflects the desired state.
+						return { id: input.id };
+					}
+					return await runDelete(createdId);
+				}
+				return await runDelete(input.id);
+			},
 			onMutate: async (input: DeleteBlockApiMutationInput) => {
 				await queryClient.cancelQueries({ queryKey: resumeQuery.queryKey });
 				const previousResume = queryClient.getQueryData(resumeQuery.queryKey);
 
 				if (!previousResume) {
-					return { previousResume, removedFormIndices: [] } satisfies DeleteContext;
+					return { previousResume } satisfies DeleteContext;
 				}
 
 				const toRemove = collectSubtreeIds(previousResume.blocks, input.id);
@@ -213,19 +331,13 @@ export const useDeleteBlock = ({ form }: UseDeleteBlockOptions) => {
 					releaseBlockKey(removedId);
 				}
 
-				const indices: number[] = [];
 				const formBlocks = form.state.values.blocks;
-				for (let i = formBlocks.length - 1; i >= 0; i--) {
-					const blockId = formBlocks[i]?.id;
-					if (blockId !== undefined && toRemove.has(blockId)) {
-						indices.push(i);
-					}
-				}
-				for (const index of indices) {
-					await form.removeFieldValue("blocks", index);
+				const survivors = formBlocks.filter((block) => !toRemove.has(block.id));
+				if (survivors.length !== formBlocks.length) {
+					form.setFieldValue("blocks", survivors);
 				}
 
-				return { previousResume, removedFormIndices: indices } satisfies DeleteContext;
+				return { previousResume } satisfies DeleteContext;
 			},
 			onError: (error, _variables, context) => {
 				toast.error(error.message || "No se pudo eliminar el bloque.");

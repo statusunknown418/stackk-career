@@ -2,10 +2,10 @@ import { pacerDevtoolsPlugin } from "@tanstack/react-pacer-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { createMiddleware } from "@tanstack/react-start";
-import { evlogErrorHandler } from "evlog/nitro/v3";
 import { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { evlogErrorHandler } from "@/lib/evlog-error-handler.server";
 import type { orpc } from "@/utils/orpc";
 
 import appCss from "../index.css?url";

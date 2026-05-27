@@ -9,22 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as StatusRouteImport } from './routes/status'
+import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-suggestions'
 import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
 import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
+import { Route as ProtectedDashLettersRouteImport } from './routes/_protected/dash/letters'
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicyRoute = PolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -42,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   id: '/api/uploadthing',
   path: '/api/uploadthing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResumeSuggestionsRoute = ApiResumeSuggestionsRouteImport.update({
+  id: '/api/resume-suggestions',
+  path: '/api/resume-suggestions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedSetupRoute = ProtectedSetupRouteImport.update({
@@ -72,6 +97,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
   id: '/suggested',
   path: '/suggested',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ProtectedDashLettersRoute = ProtectedDashLettersRouteImport.update({
+  id: '/letters',
+  path: '/letters',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
 const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
@@ -105,11 +135,16 @@ const ProtectedDashResumesResumeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/status': typeof StatusRoute
+  '/terms': typeof TermsRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -121,10 +156,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/status': typeof StatusRoute
+  '/terms': typeof TermsRoute
   '/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -138,11 +178,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
+  '/policy': typeof PolicyRoute
+  '/status': typeof StatusRoute
+  '/terms': typeof TermsRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
+  '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
   '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
+  '/_protected/dash/letters': typeof ProtectedDashLettersRoute
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
@@ -156,11 +201,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/policy'
+    | '/status'
+    | '/terms'
     | '/dash'
     | '/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
+    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -172,10 +222,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/policy'
+    | '/status'
+    | '/terms'
     | '/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
+    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -188,11 +243,16 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
+    | '/policy'
+    | '/status'
+    | '/terms'
     | '/_protected/dash'
     | '/_protected/setup'
+    | '/api/resume-suggestions'
     | '/api/uploadthing'
     | '/_protected/dash/agents'
     | '/_protected/dash/coaches'
+    | '/_protected/dash/letters'
     | '/_protected/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
@@ -206,6 +266,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PolicyRoute: typeof PolicyRoute
+  StatusRoute: typeof StatusRoute
+  TermsRoute: typeof TermsRoute
+  ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
@@ -214,6 +278,27 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policy': {
+      id: '/policy'
+      path: '/policy'
+      fullPath: '/policy'
+      preLoaderRoute: typeof PolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -240,6 +325,13 @@ declare module '@tanstack/react-router' {
       path: '/api/uploadthing'
       fullPath: '/api/uploadthing'
       preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/resume-suggestions': {
+      id: '/api/resume-suggestions'
+      path: '/api/resume-suggestions'
+      fullPath: '/api/resume-suggestions'
+      preLoaderRoute: typeof ApiResumeSuggestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/setup': {
@@ -284,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/_protected/dash/letters': {
+      id: '/_protected/dash/letters'
+      path: '/letters'
+      fullPath: '/dash/letters'
+      preLoaderRoute: typeof ProtectedDashLettersRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
     '/_protected/dash/coaches': {
       id: '/_protected/dash/coaches'
       path: '/coaches'
@@ -325,6 +424,7 @@ declare module '@tanstack/react-router' {
 interface ProtectedDashRouteRouteChildren {
   ProtectedDashAgentsRoute: typeof ProtectedDashAgentsRoute
   ProtectedDashCoachesRoute: typeof ProtectedDashCoachesRoute
+  ProtectedDashLettersRoute: typeof ProtectedDashLettersRoute
   ProtectedDashSuggestedRoute: typeof ProtectedDashSuggestedRoute
   ProtectedDashIndexRoute: typeof ProtectedDashIndexRoute
   ProtectedDashResumesResumeIdRoute: typeof ProtectedDashResumesResumeIdRoute
@@ -334,6 +434,7 @@ interface ProtectedDashRouteRouteChildren {
 const ProtectedDashRouteRouteChildren: ProtectedDashRouteRouteChildren = {
   ProtectedDashAgentsRoute: ProtectedDashAgentsRoute,
   ProtectedDashCoachesRoute: ProtectedDashCoachesRoute,
+  ProtectedDashLettersRoute: ProtectedDashLettersRoute,
   ProtectedDashSuggestedRoute: ProtectedDashSuggestedRoute,
   ProtectedDashIndexRoute: ProtectedDashIndexRoute,
   ProtectedDashResumesResumeIdRoute: ProtectedDashResumesResumeIdRoute,
@@ -361,6 +462,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
+  PolicyRoute: PolicyRoute,
+  StatusRoute: StatusRoute,
+  TermsRoute: TermsRoute,
+  ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,

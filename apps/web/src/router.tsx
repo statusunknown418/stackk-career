@@ -3,6 +3,7 @@ import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
 import "./index.css";
 import { ArrowCounterClockwiseIcon, TriangleDashedIcon } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import Loader from "./components/loader";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "./components/ui/alert";
 import { Button } from "./components/ui/button";
@@ -14,10 +15,12 @@ export const getRouter = () => {
 		routeTree,
 		scrollRestoration: true,
 		defaultPreloadStaleTime: 0,
+		defaultPendingMs: 100,
+		defaultPendingMinMs: 300,
 		context: { orpc, queryClient },
 		defaultPendingComponent: () => <Loader />,
 		defaultNotFoundComponent: () => <div>Not Found</div>,
-		defaultErrorComponent: ({ error, reset, info }) => (
+		defaultErrorComponent: ({ error, info }) => (
 			<section>
 				<Alert variant="error">
 					<TriangleDashedIcon />
@@ -26,9 +29,9 @@ export const getRouter = () => {
 					<AlertDescription className="font-mono">{info?.componentStack}</AlertDescription>
 
 					<AlertAction>
-						<Button onClick={reset}>
+						<Button render={<Link to="/" />}>
 							<ArrowCounterClockwiseIcon />
-							Recargar
+							Ir al inicio
 						</Button>
 					</AlertAction>
 				</Alert>

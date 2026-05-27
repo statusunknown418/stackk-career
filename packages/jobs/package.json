@@ -10,7 +10,7 @@
   },
   "scripts": {
     "trigger:dev": "trigger dev",
-    "trigger:deploy": "SKIP_ENV_VALIDATION=true trigger deploy",
+    "trigger:deploy": "trigger deploy",
     "trigger:login": "trigger login",
     "check-types": "tsc --noEmit"
   },
@@ -20,6 +20,7 @@
     "@stackk-career/schemas": "workspace:*",
     "@trigger.dev/sdk": "catalog:",
     "ai": "catalog:",
+    "date-fns": "catalog:",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {

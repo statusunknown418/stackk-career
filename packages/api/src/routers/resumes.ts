@@ -1,18 +1,23 @@
 import { ORPCError } from "@orpc/client";
+import { generations } from "@stackk-career/db/schema/generations";
+import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import {
 	blankResumeSections,
+	createResumeInputSchema,
+	getResumeAnalysisInputSchema,
 	listResumesInputSchema,
 	updateResumeTitleSchema,
 } from "@stackk-career/schemas/api/resumes";
 import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
-import { constructNow, formatDate } from "date-fns";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 
 export const resumesRouter = {
 	list: protectedProcedure.input(listResumesInputSchema).handler(async ({ context, input }) => {
@@ -48,7 +53,8 @@ export const resumesRouter = {
 					eq(resumeBlocks.blockType, "contact"),
 					inArray(resumeBlocks.resumeId, resumeIds)
 				)
-			);
+			)
+			.$withCache();
 
 		context.log?.set({
 			action: "get_resume_blocks",
@@ -80,18 +86,35 @@ export const resumesRouter = {
 		}));
 	}),
 
-	create: protectedProcedure.handler(async ({ context }) => {
+	create: protectedProcedure.input(createResumeInputSchema).handler(async ({ context, input }) => {
 		const { email, id: userId, name } = context.session.user;
 
-		const now = constructNow(new Date());
 		const firstChildPosition = generateLexoKeyBetween(null, null);
 
+		const title = input.targetRole ?? "CV sin título";
+
 		const newResume = await context.db.transaction(async (tx) => {
+			const [createdGeneration] = await tx
+				.insert(generations)
+				.values({
+					owner: userId,
+					type: "resume-creation",
+					title,
+				})
+				.returning({ id: generations.id });
+
+			if (!createdGeneration) {
+				return null;
+			}
+
 			const [createdResume] = await tx
 				.insert(resumes)
 				.values({
 					userId,
-					title: `Nuevo CV - ${formatDate(now, "PPP")}`,
+					title,
+					displayName: title,
+					targetRole: input.targetRole,
+					generationId: createdGeneration.id,
 				})
 				.returning({
 					id: resumes.id,
@@ -170,6 +193,8 @@ export const resumesRouter = {
 				cause: "malformed_data_or_unknown",
 			});
 		}
+
+		await invalidateViewerUsage(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
 
 		context.log?.set({
 			outcome: "success",
@@ -259,6 +284,53 @@ export const resumesRouter = {
 		});
 
 		return { deleted, blocks };
+	}),
+
+	getResumeAnalysis: protectedProcedure.input(getResumeAnalysisInputSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+
+		context.log?.set({
+			action: "get_resume_analysis",
+			user: { id: userId },
+			resume: { id: input.resumeId },
+		});
+
+		const [row] = await context.db
+			.select({
+				id: resumeAnalyses.id,
+				object: resumeAnalyses.object,
+				appliedEditIndices: resumeAnalyses.appliedEditIndices,
+				dismissedEditIndices: resumeAnalyses.dismissedEditIndices,
+			})
+			.from(resumeAnalyses)
+			.where(
+				and(
+					eq(resumeAnalyses.resumeId, input.resumeId),
+					eq(resumeAnalyses.userId, userId),
+					eq(resumeAnalyses.status, "ready")
+				)
+			)
+			.orderBy(desc(resumeAnalyses.createdAt))
+			.limit(1);
+
+		if (!row?.object) {
+			context.log?.set({ outcome: "not_found" });
+			return null;
+		}
+
+		const parsed = resumeAnalysisSchema.safeParse(row.object);
+		if (!parsed.success) {
+			context.log?.set({ outcome: "invalid", analysis: { id: row.id } });
+			return null;
+		}
+
+		context.log?.set({ outcome: "found", analysis: { id: row.id } });
+		return {
+			id: row.id,
+			analysis: parsed.data,
+			appliedEditIndices: row.appliedEditIndices,
+			dismissedEditIndices: row.dismissedEditIndices,
+		};
 	}),
 
 	updateTitle: protectedProcedure.input(updateResumeTitleSchema).handler(async ({ context, input }) => {

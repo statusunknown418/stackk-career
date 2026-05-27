@@ -9,14 +9,13 @@ interface BookerProps {
 }
 
 export function Booker({ email, eventSlug, name, userId }: BookerProps) {
-	const getCalConfig = async () => {
-		const cal = await getCalApi({ namespace: eventSlug });
-		cal("ui", { hideEventTypeDetails: true, layout: "month_view", theme: "light" });
-	};
-
 	useEffect(() => {
-		getCalConfig();
-	}, []);
+		getCalApi({ namespace: eventSlug })
+			.then((cal) => {
+				cal("ui", { hideEventTypeDetails: true, layout: "month_view", theme: "light" });
+			})
+			.catch(() => undefined);
+	}, [eventSlug]);
 
 	return (
 		<Cal

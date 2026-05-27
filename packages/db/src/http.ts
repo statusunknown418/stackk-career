@@ -1,8 +1,8 @@
 import { createClient } from "@libsql/client/http";
 import { env } from "@stackk-career/env/server";
-import { upstashCache } from "drizzle-orm/cache/upstash";
 import { drizzle } from "drizzle-orm/libsql/http";
 
+import { safeUpstashCache } from "./safe-cache";
 import * as schema from "./schema";
 
 /**
@@ -32,14 +32,14 @@ export function createTriggerDb() {
 	return drizzle({
 		client,
 		schema,
-		cache: upstashCache({
+		cache: safeUpstashCache({
 			url: env.UPSTASH_REDIS_REST_URL,
 			token: env.UPSTASH_REDIS_REST_TOKEN,
 		}),
 	});
 }
 
-type TriggerDb = ReturnType<typeof createTriggerDb>;
+export type TriggerDb = ReturnType<typeof createTriggerDb>;
 
 let triggerDb: TriggerDb | undefined;
 

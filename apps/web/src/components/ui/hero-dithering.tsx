@@ -1,4 +1,5 @@
 import { Dithering } from "@paper-design/shaders-react";
+import { Link } from "@tanstack/react-router";
 import type { SVGProps } from "react";
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
@@ -401,10 +402,12 @@ export function HeroDitheringCTA({
 			className={cn("flex items-center justify-center gap-4 pb-4 md:pb-0", className)}
 			data-slot="hero-dithering-cta"
 		>
-			<Button asChild className={cn("font-pixel-square", buttonClassName)} size="lg">
-				<a href={href} onClick={onClick} rel={rel} target={target}>
-					{label}
-				</a>
+			<Button
+				className={cn("font-pixel-square", buttonClassName)}
+				render={<Link onClick={onClick} rel={rel} target={target} to={href} />}
+				size="lg"
+			>
+				{label}
 			</Button>
 		</div>
 	);
