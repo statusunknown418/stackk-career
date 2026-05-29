@@ -31,7 +31,6 @@ export const careerWorkspaceNavigation = [
 		to: "/dash/resumes",
 	},
 	{
-		disabled: true,
 		icon: ChatCircleTextIcon,
 		id: "cover-letter",
 		label: "Cartas de presentación",

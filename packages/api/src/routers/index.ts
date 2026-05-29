@@ -6,6 +6,7 @@ import { blocksRouter } from "./blocks";
 import { coachingRouter } from "./coaching";
 import { filesMetadataRouter } from "./files-metadata";
 import { generationsRouter } from "./generations";
+import { lettersRouter } from "./letters";
 import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
 import { resumeAnalysesRouter } from "./resume-analyses";
@@ -24,6 +25,7 @@ export const appRouter = {
 	agents: agentsRouter,
 	filesMetadata: filesMetadataRouter,
 	generations: generationsRouter,
+	letters: lettersRouter,
 	messages: messagesRouter,
 	coaching: coachingRouter,
 	onboardingProfile: onboardingProfileRouter,

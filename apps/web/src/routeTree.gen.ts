@@ -22,12 +22,13 @@ import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
-import { Route as ProtectedDashLettersRouteImport } from './routes/_protected/dash/letters'
 import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
+import { Route as ProtectedDashLettersIndexRouteImport } from './routes/_protected/dash/letters/index'
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
+import { Route as ProtectedDashLettersGenerationIdRouteImport } from './routes/_protected/dash/letters/$generationId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -93,11 +94,6 @@ const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
   path: '/suggested',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
-const ProtectedDashLettersRoute = ProtectedDashLettersRouteImport.update({
-  id: '/letters',
-  path: '/letters',
-  getParentRoute: () => ProtectedDashRouteRoute,
-} as any)
 const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
   id: '/coaches',
   path: '/coaches',
@@ -114,6 +110,12 @@ const ProtectedDashResumesIndexRoute =
     path: '/resumes/',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
+const ProtectedDashLettersIndexRoute =
+  ProtectedDashLettersIndexRouteImport.update({
+    id: '/letters/',
+    path: '/letters/',
+    getParentRoute: () => ProtectedDashRouteRoute,
+  } as any)
 const ApiWebhooksCalSplatRoute = ApiWebhooksCalSplatRouteImport.update({
   id: '/api/webhooks/cal/$',
   path: '/api/webhooks/cal/$',
@@ -123,6 +125,12 @@ const ProtectedDashResumesResumeIdRoute =
   ProtectedDashResumesResumeIdRouteImport.update({
     id: '/resumes/$resumeId',
     path: '/resumes/$resumeId',
+    getParentRoute: () => ProtectedDashRouteRoute,
+  } as any)
+const ProtectedDashLettersGenerationIdRoute =
+  ProtectedDashLettersGenerationIdRouteImport.update({
+    id: '/letters/$generationId',
+    path: '/letters/$generationId',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
 
@@ -137,13 +145,14 @@ export interface FileRoutesByFullPath {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
-  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash/': typeof ProtectedDashIndexRoute
+  '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
+  '/dash/letters/': typeof ProtectedDashLettersIndexRoute
   '/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -156,13 +165,14 @@ export interface FileRoutesByTo {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/dash/agents': typeof ProtectedDashAgentsRoute
   '/dash/coaches': typeof ProtectedDashCoachesRoute
-  '/dash/letters': typeof ProtectedDashLettersRoute
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dash': typeof ProtectedDashIndexRoute
+  '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
+  '/dash/letters': typeof ProtectedDashLettersIndexRoute
   '/dash/resumes': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRoutesById {
@@ -178,13 +188,14 @@ export interface FileRoutesById {
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_protected/dash/agents': typeof ProtectedDashAgentsRoute
   '/_protected/dash/coaches': typeof ProtectedDashCoachesRoute
-  '/_protected/dash/letters': typeof ProtectedDashLettersRoute
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
+  '/_protected/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/_protected/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
+  '/_protected/dash/letters/': typeof ProtectedDashLettersIndexRoute
   '/_protected/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
 export interface FileRouteTypes {
@@ -200,13 +211,14 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
-    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash/'
+    | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
+    | '/dash/letters/'
     | '/dash/resumes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -219,13 +231,14 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/dash/agents'
     | '/dash/coaches'
-    | '/dash/letters'
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dash'
+    | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
+    | '/dash/letters'
     | '/dash/resumes'
   id:
     | '__root__'
@@ -240,13 +253,14 @@ export interface FileRouteTypes {
     | '/api/uploadthing'
     | '/_protected/dash/agents'
     | '/_protected/dash/coaches'
-    | '/_protected/dash/letters'
     | '/_protected/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/_protected/dash/'
+    | '/_protected/dash/letters/$generationId'
     | '/_protected/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
+    | '/_protected/dash/letters/'
     | '/_protected/dash/resumes/'
   fileRoutesById: FileRoutesById
 }
@@ -356,13 +370,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
-    '/_protected/dash/letters': {
-      id: '/_protected/dash/letters'
-      path: '/letters'
-      fullPath: '/dash/letters'
-      preLoaderRoute: typeof ProtectedDashLettersRouteImport
-      parentRoute: typeof ProtectedDashRouteRoute
-    }
     '/_protected/dash/coaches': {
       id: '/_protected/dash/coaches'
       path: '/coaches'
@@ -384,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashResumesIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/_protected/dash/letters/': {
+      id: '/_protected/dash/letters/'
+      path: '/letters'
+      fullPath: '/dash/letters/'
+      preLoaderRoute: typeof ProtectedDashLettersIndexRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
     '/api/webhooks/cal/$': {
       id: '/api/webhooks/cal/$'
       path: '/api/webhooks/cal/$'
@@ -398,26 +412,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashResumesResumeIdRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/_protected/dash/letters/$generationId': {
+      id: '/_protected/dash/letters/$generationId'
+      path: '/letters/$generationId'
+      fullPath: '/dash/letters/$generationId'
+      preLoaderRoute: typeof ProtectedDashLettersGenerationIdRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
   }
 }
 
 interface ProtectedDashRouteRouteChildren {
   ProtectedDashAgentsRoute: typeof ProtectedDashAgentsRoute
   ProtectedDashCoachesRoute: typeof ProtectedDashCoachesRoute
-  ProtectedDashLettersRoute: typeof ProtectedDashLettersRoute
   ProtectedDashSuggestedRoute: typeof ProtectedDashSuggestedRoute
   ProtectedDashIndexRoute: typeof ProtectedDashIndexRoute
+  ProtectedDashLettersGenerationIdRoute: typeof ProtectedDashLettersGenerationIdRoute
   ProtectedDashResumesResumeIdRoute: typeof ProtectedDashResumesResumeIdRoute
+  ProtectedDashLettersIndexRoute: typeof ProtectedDashLettersIndexRoute
   ProtectedDashResumesIndexRoute: typeof ProtectedDashResumesIndexRoute
 }
 
 const ProtectedDashRouteRouteChildren: ProtectedDashRouteRouteChildren = {
   ProtectedDashAgentsRoute: ProtectedDashAgentsRoute,
   ProtectedDashCoachesRoute: ProtectedDashCoachesRoute,
-  ProtectedDashLettersRoute: ProtectedDashLettersRoute,
   ProtectedDashSuggestedRoute: ProtectedDashSuggestedRoute,
   ProtectedDashIndexRoute: ProtectedDashIndexRoute,
+  ProtectedDashLettersGenerationIdRoute: ProtectedDashLettersGenerationIdRoute,
   ProtectedDashResumesResumeIdRoute: ProtectedDashResumesResumeIdRoute,
+  ProtectedDashLettersIndexRoute: ProtectedDashLettersIndexRoute,
   ProtectedDashResumesIndexRoute: ProtectedDashResumesIndexRoute,
 }
 
