@@ -198,6 +198,16 @@ export const lettersRouter = {
 			throw new ORPCError("BAD_REQUEST", { message: "La carta no tiene un puesto definido" });
 		}
 
+		// Language override: si el caller pidió cambiar idioma para este turno (preset
+		// "En inglés" / "En español"), persistimos el switch en el generation row antes
+		// de disparar el task. Así re-triggers posteriores arrancan directamente en el
+		// idioma nuevo sin volver a pasar el override.
+		const effectiveLanguage = input.language ?? gen.language;
+		if (input.language && input.language !== gen.language) {
+			await context.db.update(generations).set({ language: input.language }).where(eq(generations.id, gen.id));
+			context.log?.set({ languageChange: { from: gen.language, to: input.language } });
+		}
+
 		const existing = await context.db
 			.select({ id: messages.id })
 			.from(messages)
@@ -231,7 +241,7 @@ export const lettersRouter = {
 					extraPrompt: input.extraPrompt,
 					generationId: gen.id,
 					jobPosition: gen.title,
-					language: gen.language,
+					language: effectiveLanguage,
 					messageId,
 					resumeId: gen.resumeId,
 					userId,
@@ -244,7 +254,7 @@ export const lettersRouter = {
 						`user:${userId}`,
 						`gen:${gen.id}`,
 						`letter:${messageId}`,
-						`lang:${gen.language}`,
+						`lang:${effectiveLanguage}`,
 						"agent:casey-letters",
 					],
 				}

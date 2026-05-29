@@ -24,11 +24,17 @@ export type CreateCoverLetterGenerationInput = z.infer<typeof createCoverLetterG
 
 /**
  * Input for triggering the CASEY-Letters task from the chat at /letters/:generationId.
- * The task reads jobPosition + resumeId + language from the generation itself; only the
- * user's free-form extra prompt is forwarded per turn.
+ * The task reads jobPosition + resumeId + language from the generation itself; el
+ * user's free-form extra prompt se forwardea per turn.
+ *
+ * `language` opcional: si se pasa, override el valor del generation row Y persiste
+ * el cambio en DB (así re-triggers posteriores arrancan en el nuevo idioma sin
+ * volver a pasar el override). Usado por el preset "En inglés" / "En español" del
+ * artifact panel para cambiar idioma a mitad de hilo sin re-crear la carta.
  */
 export const triggerCoverLetterInputSchema = z.object({
 	generationId: z.string().nonempty(),
 	extraPrompt: z.string().max(2000).optional(),
+	language: coverLetterLanguageSchema.optional(),
 });
 export type TriggerCoverLetterInput = z.infer<typeof triggerCoverLetterInputSchema>;

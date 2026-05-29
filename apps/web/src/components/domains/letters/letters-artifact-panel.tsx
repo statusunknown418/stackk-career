@@ -11,6 +11,7 @@ import {
 	TriangleDashedIcon,
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -26,11 +27,12 @@ import { CoverLetterSection } from "./cover-letter-section";
 interface LettersArtifactPanelProps {
 	artifact: DeepPartial<CoverLetter> | undefined;
 	className?: string;
+	currentLanguage: CoverLetterLanguage;
 	error?: Error;
 	hasContent: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
-	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
+	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
 }
 
 const SECTION_DEFS = [
@@ -44,6 +46,10 @@ interface RegeneratePreset {
 	description: string;
 	extraPrompt: string | undefined;
 	label: string;
+	/** Si está seteado, también persiste el cambio de idioma en la generation. */
+	language?: CoverLetterLanguage;
+	/** Si está seteado, el preset solo aparece cuando la carta actual está en este idioma. */
+	onlyIfCurrentLanguage?: CoverLetterLanguage;
 }
 
 const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
@@ -64,14 +70,27 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 		label: "Más concreta",
 	},
 	{
-		description: "Carta completa en inglés americano.",
-		extraPrompt: "Reescribí la carta completa en inglés (American English) manteniendo el mismo contenido y tono.",
-		label: "En inglés",
-	},
-	{
 		description: "Tono más cercano sin perder profesionalismo.",
 		extraPrompt: "Hacé la carta más cálida y personal sin perder profesionalismo. Suaviza el cuerpo y el cierre.",
 		label: "Más cálida",
+	},
+	// Switch idioma. Solo muestra el del idioma opuesto al actual; el preset persiste
+	// el switch en generations.language Y dispara el run, así el modelo arranca con el
+	// system prompt del nuevo idioma (extraPrompt solo no alcanza — el system prompt
+	// gana sobre instrucciones del user message en Claude).
+	{
+		description: "Cambia el idioma del thread a inglés.",
+		extraPrompt: "Reescribí la carta completa en inglés (American English) manteniendo el mismo contenido.",
+		label: "En inglés",
+		language: "en",
+		onlyIfCurrentLanguage: "es",
+	},
+	{
+		description: "Cambia el idioma del thread a español.",
+		extraPrompt: "Reescribí la carta completa en español (LATAM neutro) manteniendo el mismo contenido.",
+		label: "En español",
+		language: "es",
+		onlyIfCurrentLanguage: "en",
 	},
 ] as const;
 
@@ -116,6 +135,7 @@ function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined)
 export function LettersArtifactPanel({
 	artifact,
 	className,
+	currentLanguage,
 	error,
 	hasContent,
 	isPending,
@@ -129,10 +149,14 @@ export function LettersArtifactPanel({
 	const canExport = Boolean(formattedText) && !isStreaming;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
+	const visiblePresets = REGENERATE_PRESETS.filter(
+		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
+	);
+
 	const handleRegenerate = async (preset: RegeneratePreset) => {
 		setPopoverOpen(false);
 		try {
-			await onTriggerAsync({ extraPrompt: preset.extraPrompt });
+			await onTriggerAsync({ extraPrompt: preset.extraPrompt, language: preset.language });
 		} catch {
 			// Toast emitido por la route.
 		}
@@ -224,7 +248,7 @@ export function LettersArtifactPanel({
 							<PopoverPopup align="end" className="w-72">
 								<div className="flex flex-col gap-1">
 									<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
-									{REGENERATE_PRESETS.map((preset) => (
+									{visiblePresets.map((preset) => (
 										<button
 											className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
 											disabled={!canRegenerate}

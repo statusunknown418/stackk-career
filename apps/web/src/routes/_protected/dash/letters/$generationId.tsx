@@ -1,5 +1,6 @@
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -64,7 +65,7 @@ function RouteComponent() {
 
 	const triggerMutateAsync = triggerMutation.mutateAsync;
 	const onTriggerAsync = useCallback(
-		(input: { extraPrompt?: string }) => triggerMutateAsync({ generationId, ...input }),
+		(input: { extraPrompt?: string; language?: CoverLetterLanguage }) => triggerMutateAsync({ generationId, ...input }),
 		[generationId, triggerMutateAsync]
 	);
 
@@ -118,6 +119,7 @@ function RouteComponent() {
 
 			<LettersArtifactPanel
 				artifact={artifact}
+				currentLanguage={data.generation.language}
 				error={error}
 				hasContent={Boolean(artifact) || data.latestArtifact !== null}
 				isPending={isPending}
