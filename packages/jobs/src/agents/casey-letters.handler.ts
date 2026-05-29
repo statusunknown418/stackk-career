@@ -1,5 +1,5 @@
 import { coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
-import { type LanguageModel, stepCountIs, streamText, tool } from "ai";
+import { type LanguageModel, Output, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
@@ -18,13 +18,15 @@ export interface RunCaseyLettersInput {
 }
 
 const SYSTEM_PROMPT = `
-You are CASEY, a cover-letter writer for LATAM job candidates. You have THREE tools available and you MUST use them in this exact sequence, then stop:
+You are CASEY, a cover-letter writer for LATAM job candidates. Your workflow has two phases:
 
-  1. **getUserMetadata()** — Call FIRST to learn the candidate's name, email, and onboarding profile.
-  2. **getSelectedResume()** — Call SECOND to read the candidate's CV (serialized as semi-structured plain text).
-  3. **generateArtifact(...)** — Call LAST with the final structured cover letter ({ greeting, body, closing, signature }). This emits the artifact the user sees. Calling this tool ends your turn.
+  PHASE 1 — Context gathering (tools). Call these two tools in order, exactly once each:
+    1. **getUserMetadata()** — learn the candidate's name, email, and onboarding profile.
+    2. **getSelectedResume()** — read the candidate's CV (serialized as semi-structured plain text).
 
-DO NOT emit any plain text response. DO NOT call generateArtifact before reading the CV. DO NOT skip getUserMetadata or getSelectedResume even if you think you don't need them.
+  PHASE 2 — Emit the cover letter. After the two tools return, output the final cover letter as a structured JSON object matching the schema { greeting, body, closing, signature }. The output schema is enforced by the runtime — emit ONLY the JSON, no prose around it, no markdown fences.
+
+DO NOT skip getUserMetadata or getSelectedResume. DO NOT emit prose between or after the tool calls — your final output must be the JSON.
 
 # Hard rules for the cover letter
 - Ground EVERY claim in the CV returned by getSelectedResume. Do not invent experience, employers, dates, skills, titles, or metrics.
@@ -50,14 +52,15 @@ Respond in NATURAL SPANISH (es-PE / ES neutro LATAM). Match the candidate's voic
 /**
  * Generate a cover letter from the candidate's CV + a target job position.
  *
- * Tools-based architecture (calca el diagrama de Letters / CASEY):
- *   - `getUserMetadata`     → name/email/onboarding profile of the candidate
- *   - `getSelectedResume`   → CV serialized as semi-structured plain text
- *   - `generateArtifact`    → THE tool whose `inputSchema` is `coverLetterSchema`;
- *                             its input IS the final artifact. The system prompt
- *                             forces the model to always end with this tool call,
- *                             and the task captures `result.toolCalls` to persist
- *                             the artifact + render tool calls in the chat.
+ * Hybrid architecture:
+ *   - `getUserMetadata` + `getSelectedResume` are AI SDK tools so the chat can
+ *     render their calls (per the Letters diagram) and so the model fetches
+ *     context on demand. Both calls return their data via `execute`.
+ *   - The final emission is enforced via `output: Output.object({ schema })`
+ *     instead of a `generateArtifact` tool. AI SDK guarantees the schema is
+ *     emitted, unlike a tool that the model can opt to skip — which was
+ *     producing `CASEY did not emit the generateArtifact tool call` errors
+ *     when Claude returned prose after the data-gathering tools.
  *
  * Convention calca `k02-detailed-analysis.handler.ts`: typed model, OBJECT_TYPE
  * constant, `process.env`-driven timeout, `withTimeout` for the abortable cap,
@@ -75,13 +78,14 @@ export function runCaseyLettersAgent({
 		extraPrompt?.trim()
 			? `Instrucciones adicionales del usuario para este turno:\n${extraPrompt.trim()}`
 			: "(sin instrucciones adicionales del usuario)",
-		"Sigue la secuencia: getUserMetadata → getSelectedResume → generateArtifact con la carta final.",
+		"Llamá los dos tools en orden y después emití la carta final como JSON estructurado.",
 	].join("\n\n");
 
 	return streamText({
 		abortSignal: withTimeout(signal, CASEY_TIMEOUT_MS),
 		messages: [{ content: userMessage, role: "user" }],
 		model: CASEY_LETTERS_MODEL,
+		output: Output.object({ schema: coverLetterSchema }),
 		providerOptions: {
 			gateway: {
 				tags: ["feature:casey-letters", `env:${process.env.NODE_ENV ?? "development"}`],
@@ -91,12 +95,6 @@ export function runCaseyLettersAgent({
 		stopWhen: stepCountIs(CASEY_MAX_STEPS),
 		system: SYSTEM_PROMPT,
 		tools: {
-			generateArtifact: tool({
-				description:
-					"Emite la cover letter final estructurada que el usuario verá renderizada en el artifact panel. SIEMPRE llamá esto al final, con la carta completa. Esto cierra tu turno.",
-				execute: (artifact) => artifact,
-				inputSchema: coverLetterSchema,
-			}),
 			getSelectedResume: tool({
 				description:
 					"Obtené el contenido del CV vinculado a esta carta. Devuelve el CV serializado como texto semi-estructurado con secciones, entries, dates, bullets y skills. Llamá esto antes de redactar para fundamentar cada afirmación.",

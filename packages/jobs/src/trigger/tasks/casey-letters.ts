@@ -2,7 +2,6 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
@@ -46,17 +45,12 @@ export const caseyLettersTask = schemaTask({
 			userId,
 		});
 
-		// Drain the stream so all tool calls (getUserMetadata, getSelectedResume,
-		// generateArtifact) are executed before we inspect the results.
+		// Drain the stream so all tool calls (getUserMetadata, getSelectedResume) are
+		// executed and the structured output is fully emitted before we inspect.
 		await result.consumeStream();
 
+		const object = await result.output;
 		const toolCalls = await result.toolCalls;
-		const generateCall = toolCalls.find((c) => c.toolName === "generateArtifact");
-		if (!generateCall) {
-			throw new Error("CASEY did not emit the generateArtifact tool call");
-		}
-		const object = coverLetterSchema.parse(generateCall.input);
-
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
 
