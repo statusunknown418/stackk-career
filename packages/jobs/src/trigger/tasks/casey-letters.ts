@@ -2,16 +2,34 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { validateCoverLetter } from "@stackk-career/schemas/ai/cover-letter-validator";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { and, asc, eq, isNull } from "drizzle-orm";
-import { CASEY_LETTERS_MODEL, runCaseyLettersAgent } from "../../agents/casey-letters.handler";
+import {
+	CASEY_LETTERS_FALLBACK_MODEL,
+	CASEY_LETTERS_MODEL,
+	runCaseyLettersAgent,
+} from "../../agents/casey-letters.handler";
 import { letterQueue } from "../queues";
 import { coverLetterArtifactStream } from "../streams";
 
-const CASEY_LETTERS_MODEL_SLUG = String(CASEY_LETTERS_MODEL);
-const CASEY_LETTERS_PROVIDER = CASEY_LETTERS_MODEL_SLUG.split("/", 1)[0] ?? "unknown";
+/**
+ * Soft cap on the resume plaintext we inject as tool output. ~8k chars ≈ 2k tokens —
+ * cubre con margen un CV típico de LATAM de 2-3 páginas. Si excede, truncamos al
+ * último newline antes del cap y dejamos una marca explícita para que el modelo
+ * entienda que faltan datos en vez de inventarlos.
+ */
+const MAX_RESUME_PLAINTEXT_CHARS = 8000;
+
+/**
+ * Switch to Haiku 4.5 on the last retry attempt. The first two attempts use
+ * Sonnet (mejor calidad para redacción). Si Sonnet falla 2x — probablemente
+ * timeout, rate limit transiente o un edge case del modelo — el tercer intento
+ * cambia a Haiku como fallback antes de surfaecer el error al usuario.
+ */
+const FALLBACK_ON_ATTEMPT = Number(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT ?? 3);
 
 export const caseyLettersTask = schemaTask({
 	id: "casey-letters",
@@ -27,10 +45,17 @@ export const caseyLettersTask = schemaTask({
 	run: async ({ extraPrompt, generationId, jobPosition, messageId, resumeId, userId }, { ctx, signal }) => {
 		const db = getTriggerDb();
 
+		// Sonnet en attempts 1-2; Haiku como fallback en el último intento si los anteriores fallaron.
+		const modelForAttempt =
+			ctx.attempt.number >= FALLBACK_ON_ATTEMPT ? CASEY_LETTERS_FALLBACK_MODEL : CASEY_LETTERS_MODEL;
+		const modelSlug = String(modelForAttempt);
+		const modelProvider = modelSlug.split("/", 1)[0] ?? "unknown";
+
 		logger.info("casey-letters = start", {
 			attempt: ctx.attempt.number,
 			generationId,
 			messageId,
+			model: modelSlug,
 			userId,
 		});
 
@@ -41,6 +66,7 @@ export const caseyLettersTask = schemaTask({
 		const result = await runCaseyLettersAgent({
 			extraPrompt,
 			jobPosition,
+			model: modelForAttempt,
 			resumePlaintext,
 			signal,
 			userId,
@@ -57,12 +83,26 @@ export const caseyLettersTask = schemaTask({
 		const finishReason = await result.finishReason;
 		await waitUntilComplete();
 
+		// Anti-clichés check. Solo informativo — loggeamos + flageamos en metadata.
+		// La decisión de reintentar con feedback queda para una iteración futura;
+		// hoy queremos visibilidad de la frecuencia con que el modelo igual emite
+		// frases baneadas a pesar del system prompt.
+		const validation = validateCoverLetter(object);
+		if (!validation.ok) {
+			logger.warn("casey-letters = banned_phrases_detected", {
+				attempt: ctx.attempt.number,
+				foundPhrases: validation.foundPhrases,
+				generationId,
+				messageId,
+			});
+		}
+
 		metadata.set("ai", {
 			attempt: ctx.attempt.number,
 			feature: "casey-letters",
 			finishReason: finishReason ?? null,
-			model: CASEY_LETTERS_MODEL_SLUG,
-			provider: CASEY_LETTERS_PROVIDER,
+			model: modelSlug,
+			provider: modelProvider,
 			toolCalls: toolCalls.map((c) => c.toolName),
 			usage: {
 				cachedInputTokens: usage.cachedInputTokens ?? null,
@@ -70,6 +110,10 @@ export const caseyLettersTask = schemaTask({
 				outputTokens: usage.outputTokens ?? null,
 				reasoningTokens: usage.reasoningTokens ?? null,
 				totalTokens: usage.totalTokens ?? null,
+			},
+			validation: {
+				foundPhrases: [...validation.foundPhrases],
+				ok: validation.ok,
 			},
 		});
 
@@ -102,14 +146,14 @@ export const caseyLettersTask = schemaTask({
 		await db
 			.update(messages)
 			.set({
-				model: CASEY_LETTERS_MODEL,
+				model: modelForAttempt,
 				object,
 				text: object.body,
 			})
 			.where(and(eq(messages.id, messageId), eq(messages.generationId, generationId)));
 
 		metadata.set("step", "complete");
-		return { generationId, messageId, object, toolCalls: toolCalls.map((c) => c.toolName), userId };
+		return { generationId, messageId, model: modelSlug, object, toolCalls: toolCalls.map((c) => c.toolName), userId };
 	},
 
 	onFailure: async ({ payload, error, ctx }) => {
@@ -227,5 +271,18 @@ async function loadResumeAsPlaintext(
 		lines.push("");
 	}
 
-	return lines.join("\n").trim();
+	const full = lines.join("\n").trim();
+	if (full.length <= MAX_RESUME_PLAINTEXT_CHARS) {
+		return full;
+	}
+
+	// Truncar al último newline antes del cap mantiene blocks completos (no partimos
+	// un block a la mitad) y la marca explícita evita que el modelo invente lo que
+	// le falta.
+	const head = full.slice(0, MAX_RESUME_PLAINTEXT_CHARS);
+	const lastNewline = head.lastIndexOf("\n");
+	const safeCut = lastNewline > 0 ? head.slice(0, lastNewline) : head;
+	const omittedChars = full.length - safeCut.length;
+
+	return `${safeCut}\n\n[…CV truncado — ${omittedChars} caracteres omitidos para acotar el contexto. Si necesitás un dato puntual que no aparece arriba, omitilo en la carta en vez de improvisarlo…]`;
 }
