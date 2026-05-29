@@ -1,35 +1,47 @@
 "use client";
 
-import { PaperPlaneRightIcon } from "@phosphor-icons/react";
+import { IdentificationCardIcon, PaperPlaneRightIcon, ReadCvLogoIcon, WrenchIcon } from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ComponentType } from "react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { orpc } from "@/utils/orpc";
 
 interface LettersChatPanelMessage {
 	id: string;
 	isAssistant: boolean | null;
+	isTool: boolean | null;
 	objectType: string | null;
 	text: string | null;
-}
-
-interface LettersChatPanelRunHandle {
-	accessToken: string;
-	runId: string;
+	toolMeta: { toolId: string; toolName: string } | null;
 }
 
 interface LettersChatPanelProps {
-	generationId: string;
+	isPending: boolean;
 	jobPosition: string;
 	messages: readonly LettersChatPanelMessage[];
-	onRunTriggered?: (handle: LettersChatPanelRunHandle) => void;
+	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
 	resumeTitle: string | null;
+}
+
+interface ToolPresentation {
+	Icon: ComponentType<{ className?: string; weight?: "duotone" }>;
+	label: string;
+}
+
+const TOOL_PRESENTATION: Record<string, ToolPresentation> = {
+	getSelectedResume: { Icon: ReadCvLogoIcon, label: "CASEY leyó tu CV" },
+	getUserMetadata: { Icon: IdentificationCardIcon, label: "CASEY revisó tu perfil" },
+};
+
+function toolPresentation(toolName: string | undefined): ToolPresentation {
+	if (toolName && TOOL_PRESENTATION[toolName]) {
+		return TOOL_PRESENTATION[toolName];
+	}
+	return { Icon: WrenchIcon, label: toolName ?? "CASEY consultó una herramienta" };
 }
 
 /**
@@ -37,40 +49,23 @@ interface LettersChatPanelProps {
  *
  * Builds on the AI Elements components: <Conversation> (sticky scroll-to-bottom),
  * <Message>/<MessageContent> (user/assistant bubbles). Submitting the form calls
- * `orpc.letters.trigger`, which dispatches the CASEY-Letters Trigger.dev task
- * and returns a `runId` + `publicAccessToken`. We hand that handle up via
- * `onRunTriggered` so the parent route owns the `useRealtimeRunWithStreams`
- * subscription and feeds streamed chunks into the artifact panel.
+ * `onTriggerAsync` (the route owns the underlying mutation so the artifact panel
+ * can fire it too). The textarea clears only on a successful submit so the user
+ * doesn't lose text if the trigger fails.
+ *
+ * Tool calls (`isTool: true`) render as inline muted rows with a friendly Spanish
+ * label per the Letters architecture diagram (getUserMetadata → message, etc).
  */
 export function LettersChatPanel({
-	generationId,
+	isPending,
 	jobPosition,
 	messages,
-	onRunTriggered,
+	onTriggerAsync,
 	resumeTitle,
 }: LettersChatPanelProps) {
-	const queryClient = useQueryClient();
 	const [extraPrompt, setExtraPrompt] = useState("");
 
-	const triggerMutation = useMutation(
-		orpc.letters.trigger.mutationOptions({
-			onSuccess: (result) => {
-				setExtraPrompt("");
-				if (result.runId && result.publicAccessToken) {
-					onRunTriggered?.({
-						accessToken: result.publicAccessToken,
-						runId: result.runId,
-					});
-				}
-				queryClient.invalidateQueries({
-					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
-				});
-			},
-			onError: (err) => toast.error(err.message),
-		})
-	);
-
-	// Hide the artifact messages from the chat — those render in the right pane.
+	// Hide artifact messages — those render in the right pane — but keep tool rows.
 	const chatMessages = messages.filter((m) => !(m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE));
 
 	return (
@@ -95,22 +90,37 @@ export function LettersChatPanel({
 						</MessageContent>
 					</Message>
 
-					{chatMessages.map((m) => (
-						<Message from={m.isAssistant ? "assistant" : "user"} key={m.id}>
-							<MessageContent>{m.text ?? ""}</MessageContent>
-						</Message>
-					))}
+					{chatMessages.map((m) => {
+						if (m.isTool === true) {
+							const { Icon, label } = toolPresentation(m.toolMeta?.toolName);
+							return (
+								<div className="flex items-center gap-2 px-3 py-1 text-muted-foreground text-xs" key={m.id}>
+									<Icon className="size-3.5" weight="duotone" />
+									<span>{label}</span>
+								</div>
+							);
+						}
+
+						return (
+							<Message from={m.isAssistant ? "assistant" : "user"} key={m.id}>
+								<MessageContent>{m.text ?? ""}</MessageContent>
+							</Message>
+						);
+					})}
 				</ConversationContent>
 			</Conversation>
 
 			<form
 				className="flex flex-col gap-2 border-border border-t pt-4"
-				onSubmit={(e) => {
+				onSubmit={async (e) => {
 					e.preventDefault();
-					triggerMutation.mutate({
-						generationId,
-						extraPrompt: extraPrompt.trim() || undefined,
-					});
+					const trimmed = extraPrompt.trim();
+					try {
+						await onTriggerAsync({ extraPrompt: trimmed || undefined });
+						setExtraPrompt("");
+					} catch {
+						// Toast ya emitido por la route; mantenemos el texto para reintento.
+					}
 				}}
 			>
 				<Field>
@@ -118,7 +128,7 @@ export function LettersChatPanel({
 						Indicación adicional
 					</FieldLabel>
 					<Textarea
-						disabled={triggerMutation.isPending}
+						disabled={isPending}
 						id="extra-prompt"
 						maxLength={2000}
 						onChange={(e) => setExtraPrompt(e.target.value)}
@@ -128,9 +138,9 @@ export function LettersChatPanel({
 					/>
 				</Field>
 
-				<Button className="self-end" disabled={triggerMutation.isPending} size="sm" type="submit">
+				<Button className="self-end" disabled={isPending} size="sm" type="submit">
 					<PaperPlaneRightIcon weight="bold" />
-					{triggerMutation.isPending ? "Generando…" : "Generar carta"}
+					{isPending ? "Generando…" : "Generar carta"}
 				</Button>
 			</form>
 		</section>

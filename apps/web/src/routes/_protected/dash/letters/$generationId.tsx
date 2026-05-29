@@ -1,10 +1,11 @@
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { LettersArtifactPanel } from "@/components/domains/letters/letters-artifact-panel";
 import { LettersChatPanel } from "@/components/domains/letters/letters-chat-panel";
 import { orpc } from "@/utils/orpc";
@@ -41,9 +42,31 @@ function RouteComponent() {
 	const queryClient = useQueryClient();
 	const { data } = useSuspenseQuery(orpc.letters.get.queryOptions({ input: { generationId } }));
 
-	// The chat panel mutation hands the run handle up here so this component owns
-	// the realtime subscription (which needs to outlive the form re-renders).
+	// The route owns the trigger mutation so both panels can fire it (chat from
+	// the textarea, artifact from the "Regenerar" presets) and the realtime
+	// subscription stays attached at this level through the panel re-renders.
 	const [runHandle, setRunHandle] = useState<RunHandle | null>(null);
+	const autoTriggeredRef = useRef(false);
+
+	const triggerMutation = useMutation(
+		orpc.letters.trigger.mutationOptions({
+			onError: (err) => toast.error(err.message),
+			onSuccess: (result) => {
+				if (result.runId && result.publicAccessToken) {
+					setRunHandle({ accessToken: result.publicAccessToken, runId: result.runId });
+				}
+				queryClient.invalidateQueries({
+					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
+				});
+			},
+		})
+	);
+
+	const triggerMutateAsync = triggerMutation.mutateAsync;
+	const onTriggerAsync = useCallback(
+		(input: { extraPrompt?: string }) => triggerMutateAsync({ generationId, ...input }),
+		[generationId, triggerMutateAsync]
+	);
 
 	const realtime = useRealtimeRunWithStreams<typeof caseyLettersTask, LetterStreams>(runHandle?.runId, {
 		accessToken: runHandle?.accessToken,
@@ -55,6 +78,24 @@ function RouteComponent() {
 			setRunHandle(null);
 		},
 	});
+
+	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
+	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` evita que un
+	// invalidate post-éxito re-dispare antes de que aparezcan los mensajes.
+	const isEmpty = data.messages.length === 0 && data.latestArtifact === null;
+	const isPending = triggerMutation.isPending;
+	useEffect(() => {
+		if (autoTriggeredRef.current) {
+			return;
+		}
+		if (isEmpty && !runHandle && !isPending) {
+			autoTriggeredRef.current = true;
+			onTriggerAsync({}).catch(() => {
+				// Toast ya emitido por onError; permitimos reintento manual.
+				autoTriggeredRef.current = false;
+			});
+		}
+	}, [isEmpty, runHandle, isPending, onTriggerAsync]);
 
 	// While the task streams, prefer the partial chunk from realtime. When idle (no run),
 	// fall back to whatever the API last persisted on `messages.object`.
@@ -68,14 +109,21 @@ function RouteComponent() {
 	return (
 		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr]">
 			<LettersChatPanel
-				generationId={generationId}
+				isPending={isPending}
 				jobPosition={data.generation.title ?? "el puesto"}
 				messages={data.messages}
-				onRunTriggered={setRunHandle}
+				onTriggerAsync={onTriggerAsync}
 				resumeTitle={data.resume?.title ?? null}
 			/>
 
-			<LettersArtifactPanel artifact={artifact} error={error} isStreaming={isStreaming} />
+			<LettersArtifactPanel
+				artifact={artifact}
+				error={error}
+				hasContent={Boolean(artifact) || data.latestArtifact !== null}
+				isPending={isPending}
+				isStreaming={isStreaming}
+				onTriggerAsync={onTriggerAsync}
+			/>
 		</section>
 	);
 }

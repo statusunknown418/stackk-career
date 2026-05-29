@@ -1,17 +1,33 @@
-import { HandWavingIcon, ParagraphIcon, PenNibIcon, SealIcon, TriangleDashedIcon } from "@phosphor-icons/react";
+"use client";
+
+import {
+	ArrowsClockwiseIcon,
+	HandWavingIcon,
+	ParagraphIcon,
+	PenNibIcon,
+	SealIcon,
+	TriangleDashedIcon,
+} from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { DeepPartial } from "ai";
+import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { CoverLetterSection } from "./cover-letter-section";
 
 interface LettersArtifactPanelProps {
 	artifact: DeepPartial<CoverLetter> | undefined;
 	className?: string;
 	error?: Error;
+	hasContent: boolean;
+	isPending: boolean;
 	isStreaming: boolean;
+	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
 }
 
 const SECTION_DEFS = [
@@ -21,6 +37,41 @@ const SECTION_DEFS = [
 	{ icon: SealIcon, key: "signature", label: "Firma" },
 ] as const;
 
+interface RegeneratePreset {
+	description: string;
+	extraPrompt: string | undefined;
+	label: string;
+}
+
+const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
+	{
+		description: "Misma carta, otra pasada del modelo.",
+		extraPrompt: undefined,
+		label: "Sin cambios",
+	},
+	{
+		description: "Más respetuosa, sin informalidades.",
+		extraPrompt: "Hacé la carta más formal y respetuosa. Quitá cualquier informalidad o coloquialismo.",
+		label: "Más formal",
+	},
+	{
+		description: "Métricas y resultados específicos del CV.",
+		extraPrompt:
+			"Hacé la carta más concreta. Citá métricas, stacks o resultados específicos del CV en cada párrafo del cuerpo.",
+		label: "Más concreta",
+	},
+	{
+		description: "Carta completa en inglés americano.",
+		extraPrompt: "Reescribí la carta completa en inglés (American English) manteniendo el mismo contenido y tono.",
+		label: "En inglés",
+	},
+	{
+		description: "Tono más cercano sin perder profesionalismo.",
+		extraPrompt: "Hacé la carta más cálida y personal sin perder profesionalismo. Suaviza el cuerpo y el cierre.",
+		label: "Más cálida",
+	},
+] as const;
+
 /**
  * Right pane of /dash/letters/$generationId — renders the cover-letter artifact.
  *
@@ -28,28 +79,89 @@ const SECTION_DEFS = [
  * and resume-editor/resume-analysis-panel.tsx): a `Frame` with status badge in the header,
  * `Shimmer` for active streaming, `Skeleton` for unstarted sections, `Alert` for errors.
  * Inherits the app's neutral palette (bg-background / bg-card) — no landing tokens.
+ *
+ * The "Regenerar" button (header, top-right) opens a popover with tone presets that fire
+ * a new run via `onTriggerAsync` with a hardcoded `extraPrompt`. Disabled while pending
+ * or streaming. Hidden until there's something to regenerate.
  */
-export function LettersArtifactPanel({ artifact, className, error, isStreaming }: LettersArtifactPanelProps) {
+export function LettersArtifactPanel({
+	artifact,
+	className,
+	error,
+	hasContent,
+	isPending,
+	isStreaming,
+	onTriggerAsync,
+}: LettersArtifactPanelProps) {
 	const showLoaders = !error && isStreaming;
-	const hasContent = Boolean(artifact);
+	const hasStreamedContent = Boolean(artifact);
+	const canRegenerate = hasContent && !(isPending || isStreaming);
+	const [popoverOpen, setPopoverOpen] = useState(false);
+
+	const handleRegenerate = async (preset: RegeneratePreset) => {
+		setPopoverOpen(false);
+		try {
+			await onTriggerAsync({ extraPrompt: preset.extraPrompt });
+		} catch {
+			// Toast emitido por la route.
+		}
+	};
 
 	return (
 		<Frame className={className ?? "h-full max-h-[85svh]"}>
-			<FrameHeader>
-				<FrameTitle className="font-light text-xl tracking-tight">Tu carta de presentación</FrameTitle>
-				<FrameDescription>
-					{error && <Badge variant="secondary">Error</Badge>}
-					{!error && isStreaming && (
-						<Badge variant="secondary">
-							<Shimmer>CASEY redactando…</Shimmer>
-						</Badge>
-					)}
-					{!(error || isStreaming) && hasContent && <Badge variant="secondary">Listo</Badge>}
-					{!(error || isStreaming || hasContent) && <Badge variant="secondary">Esperando datos</Badge>}
-				</FrameDescription>
+			<FrameHeader className="flex-row items-start justify-between gap-3">
+				<div className="flex flex-col gap-1.5">
+					<FrameTitle className="font-light text-xl tracking-tight">Tu carta de presentación</FrameTitle>
+					<FrameDescription>
+						{error && <Badge variant="secondary">Error</Badge>}
+						{!error && isStreaming && (
+							<Badge variant="secondary">
+								<Shimmer>CASEY redactando…</Shimmer>
+							</Badge>
+						)}
+						{!(error || isStreaming) && hasContent && <Badge variant="secondary">Listo</Badge>}
+						{!(error || isStreaming || hasContent) && <Badge variant="secondary">Esperando datos</Badge>}
+					</FrameDescription>
+				</div>
+
+				{hasContent && (
+					<Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
+						<PopoverTrigger
+							render={
+								<Button
+									aria-label="Regenerar carta"
+									disabled={!canRegenerate}
+									size="sm"
+									type="button"
+									variant="outline"
+								>
+									<ArrowsClockwiseIcon className={cn(isPending && "animate-spin")} weight="bold" />
+									Regenerar
+								</Button>
+							}
+						/>
+						<PopoverPopup align="end" className="w-72">
+							<div className="flex flex-col gap-1">
+								<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
+								{REGENERATE_PRESETS.map((preset) => (
+									<button
+										className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
+										disabled={!canRegenerate}
+										key={preset.label}
+										onClick={() => handleRegenerate(preset)}
+										type="button"
+									>
+										<span className="font-medium">{preset.label}</span>
+										<span className="text-muted-foreground text-xs">{preset.description}</span>
+									</button>
+								))}
+							</div>
+						</PopoverPopup>
+					</Popover>
+				)}
 			</FrameHeader>
 
-			{(hasContent || showLoaders) && (
+			{(hasStreamedContent || showLoaders) && (
 				<FramePanel className="flex flex-1 flex-col gap-3 overflow-y-auto">
 					{SECTION_DEFS.map((def) => {
 						const text = artifact?.[def.key];

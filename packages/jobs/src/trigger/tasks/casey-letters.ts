@@ -8,6 +8,7 @@ import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { CASEY_LETTERS_MODEL, runCaseyLettersAgent } from "../../agents/casey-letters.handler";
 import { letterQueue } from "../queues";
+import { coverLetterArtifactStream } from "../streams";
 
 const CASEY_LETTERS_MODEL_SLUG = String(CASEY_LETTERS_MODEL);
 const CASEY_LETTERS_PROVIDER = CASEY_LETTERS_MODEL_SLUG.split("/", 1)[0] ?? "unknown";
@@ -45,14 +46,16 @@ export const caseyLettersTask = schemaTask({
 			userId,
 		});
 
-		// Drain the stream so all tool calls (getUserMetadata, getSelectedResume) are
-		// executed and the structured output is fully emitted before we inspect.
-		await result.consumeStream();
+		// Stream partial CoverLetter chunks to the UI as the model emits structured output
+		// (calca el patrón de k02-fast-analysis). El pipe drena el stream — los tools se
+		// ejecutan y el `output` schema-enforced queda completo antes de leerlo.
+		const { waitUntilComplete } = coverLetterArtifactStream.pipe(result.partialOutputStream);
 
 		const object = await result.output;
 		const toolCalls = await result.toolCalls;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
+		await waitUntilComplete();
 
 		metadata.set("ai", {
 			attempt: ctx.attempt.number,
@@ -69,6 +72,31 @@ export const caseyLettersTask = schemaTask({
 				totalTokens: usage.totalTokens ?? null,
 			},
 		});
+
+		// Persist each tool call as a chat row so el panel izquierdo los renderiza inline
+		// (fidelidad al diagrama: getUserMetadata → message, getSelectedResume → message).
+		// Compartimos el `order` del artifact: la query del get ordena por
+		// (order asc, createdAt asc), así que los tools quedan entre el turno del usuario
+		// y el siguiente mensaje sin colisionar con el artifact (que el chat filtra).
+		if (toolCalls.length > 0) {
+			metadata.set("step", "persisting_tool_calls");
+			const [artifactRow] = await db
+				.select({ order: messages.order })
+				.from(messages)
+				.where(eq(messages.id, messageId))
+				.limit(1);
+			const artifactOrder = artifactRow?.order ?? 0;
+
+			await db.insert(messages).values(
+				toolCalls.map((call) => ({
+					generationId,
+					isAssistant: true,
+					isTool: true,
+					order: artifactOrder,
+					toolMeta: { toolId: call.toolCallId, toolName: call.toolName },
+				}))
+			);
+		}
 
 		metadata.set("step", "persisting");
 		await db
