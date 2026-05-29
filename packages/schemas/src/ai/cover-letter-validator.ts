@@ -16,30 +16,48 @@ import type { CoverLetter } from "./cover-letter";
  *   un nombre propio incluye una palabra que en el otro idioma es banneada.
  */
 export const COVER_LETTER_CLICHE_PHRASES_ES = [
+	// Adjetivos vacíos
 	"apasionado",
 	"apasionada",
-	"team player",
-	"siempre dispuesto a aprender",
-	"siempre dispuesta a aprender",
-	"amplia experiencia",
-	"me considero",
-	"tengo la capacidad de",
-	"buscar nuevos retos",
 	"altamente motivado",
 	"altamente motivada",
 	"proactivo y dinámico",
 	"proactiva y dinámica",
+	"team player",
 	"trabajador en equipo",
 	"trabajadora en equipo",
 	"habilidades interpersonales",
+
+	// Filler genérico ("yo me considero…", "tengo la capacidad de…")
+	"me considero",
+	"tengo la capacidad de",
+	"amplia experiencia",
+	"siempre dispuesto a aprender",
+	"siempre dispuesta a aprender",
+	"buscar nuevos retos",
+
+	// Filler vacío que el modelo cae a meter cuando el CV es pobre — observados
+	// en runs reales. Detectan cartas que no citan nada concreto del CV.
+	"cuento con conocimientos",
+	"descritas en mi perfil",
+	"descritos en mi perfil",
+	"estoy convencido de que",
+	"me ha permitido desarrollar",
+	"siempre he estado interesado",
+	"me motiva la oportunidad",
+	"agregar valor",
+	"aportar valor",
+	"habilidades transferibles",
+	"estoy emocionado",
+	"me emociona",
 ] as const;
 
 export const COVER_LETTER_CLICHE_PHRASES_EN = [
+	// Empty adjectives
 	"passionate about",
 	"team player",
 	"always willing to learn",
 	"extensive experience",
-	"i consider myself",
 	"highly motivated",
 	"proactive and dynamic",
 	"interpersonal skills",
@@ -49,6 +67,18 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 	"synergy",
 	"detail-oriented",
 	"self-starter",
+
+	// Filler genérico que aparece cuando el CV es delgado
+	"i consider myself",
+	"i have always been",
+	"i'm thrilled to",
+	"deeply passionate",
+	"uniquely positioned",
+	"perfect fit",
+	"leverage my skills",
+	"i'm eager to",
+	"bring value",
+	"transferable skills",
 ] as const;
 
 /**
