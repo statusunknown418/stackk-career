@@ -1,19 +1,21 @@
+import type { CoverLetterLanguage } from "../api/letters";
 import type { CoverLetter } from "./cover-letter";
 
 /**
  * Frases hueras / clichés que CASEY no debe usar al redactar una cover letter.
  *
- * La fuente única de verdad: el system prompt referencia esta lista y el validator
+ * Lista única de verdad: el system prompt referencia estas listas y el validator
  * en runtime usa la misma para detectar drift cuando el modelo igual las emite.
  *
  * Reglas:
- * - Solo frases verdaderamente vacías o memorables como tales (la palabra
- *   "experiencia" sola NO va aquí — es legítima en contexto).
- * - Mínimo 2-3 palabras para evitar falsos positivos (ej.: "buscar" sola
- *   se confundiría con cualquier verbo de búsqueda).
+ * - Solo frases verdaderamente vacías o tan trilladas que dañan la carta.
+ * - Mínimo 2-3 palabras para evitar falsos positivos.
  * - Match case-insensitive; el validator se encarga de la normalización.
+ * - Separadas por idioma: una carta en inglés no se evalúa contra clichés
+ *   en español (y viceversa) — ahorra falsos positivos cuando el saludo o
+ *   un nombre propio incluye una palabra que en el otro idioma es banneada.
  */
-export const COVER_LETTER_CLICHE_PHRASES = [
+export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"apasionado",
 	"apasionada",
 	"team player",
@@ -32,6 +34,39 @@ export const COVER_LETTER_CLICHE_PHRASES = [
 	"habilidades interpersonales",
 ] as const;
 
+export const COVER_LETTER_CLICHE_PHRASES_EN = [
+	"passionate about",
+	"team player",
+	"always willing to learn",
+	"extensive experience",
+	"i consider myself",
+	"highly motivated",
+	"proactive and dynamic",
+	"interpersonal skills",
+	"results-driven",
+	"go-getter",
+	"thinking outside the box",
+	"synergy",
+	"detail-oriented",
+	"self-starter",
+] as const;
+
+/**
+ * Mantenido para back-compat con el system prompt anterior que importaba
+ * un solo array. Hoy contiene ambos idiomas concatenados (es + en).
+ *
+ * @deprecated usar getClichePhrases(language) — esto se quita cuando todos
+ * los call sites hayan migrado.
+ */
+export const COVER_LETTER_CLICHE_PHRASES = [
+	...COVER_LETTER_CLICHE_PHRASES_ES,
+	...COVER_LETTER_CLICHE_PHRASES_EN,
+] as const;
+
+export function getClichePhrases(language: CoverLetterLanguage): readonly string[] {
+	return language === "en" ? COVER_LETTER_CLICHE_PHRASES_EN : COVER_LETTER_CLICHE_PHRASES_ES;
+}
+
 export interface CoverLetterValidationResult {
 	foundPhrases: readonly string[];
 	ok: boolean;
@@ -39,19 +74,22 @@ export interface CoverLetterValidationResult {
 
 /**
  * Escanea body + closing del artifact buscando frases clichés literales
- * (case-insensitive, sin tildes-sensitivity). El greeting + signature se
- * excluyen porque la firma podría contener nombres propios que coincidan
- * y el saludo casi nunca es donde caen los problemas.
+ * (case-insensitive). El greeting + signature se excluyen porque la firma
+ * podría contener nombres propios que coincidan y el saludo casi nunca es
+ * donde caen los problemas.
  *
  * Devuelve `ok=true` si no encontró ninguna; `false` con la lista exacta
  * de qué encontró si sí. El caller decide qué hacer (loggear, reintentar,
  * flagear). No lanza — el validator es informativo, no bloquea.
  */
-export function validateCoverLetter(letter: CoverLetter): CoverLetterValidationResult {
+export function validateCoverLetter(
+	letter: CoverLetter,
+	language: CoverLetterLanguage = "es"
+): CoverLetterValidationResult {
 	const haystack = `${letter.body} ${letter.closing}`.toLowerCase();
 	const foundPhrases: string[] = [];
 
-	for (const phrase of COVER_LETTER_CLICHE_PHRASES) {
+	for (const phrase of getClichePhrases(language)) {
 		if (haystack.includes(phrase.toLowerCase())) {
 			foundPhrases.push(phrase);
 		}

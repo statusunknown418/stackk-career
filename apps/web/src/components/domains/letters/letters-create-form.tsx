@@ -43,6 +43,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 	const form = useForm({
 		defaultValues: {
 			jobPosition: "",
+			language: "es" as "es" | "en",
 			resumeId: resumes[0]?.id ?? "",
 		},
 		onSubmit: ({ value }) => {
@@ -107,6 +108,27 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 							</SelectPopup>
 						</Select>
 						<FieldDescription>CASEY tomará tu experiencia y skills de este CV.</FieldDescription>
+					</Field>
+				)}
+			</form.Field>
+
+			<form.Field name="language">
+				{(field) => (
+					<Field>
+						<FieldLabel htmlFor="letters-language">Idioma de la carta</FieldLabel>
+						<Select
+							onValueChange={(value) => field.handleChange((value ?? "es") as "es" | "en")}
+							value={field.state.value}
+						>
+							<SelectTrigger id="letters-language">
+								<SelectValue placeholder="Elige idioma" />
+							</SelectTrigger>
+							<SelectPopup>
+								<SelectItem value="es">Español (LATAM)</SelectItem>
+								<SelectItem value="en">English (US)</SelectItem>
+							</SelectPopup>
+						</Select>
+						<FieldDescription>Usa inglés si postulas a un rol fuera de LATAM.</FieldDescription>
 					</Field>
 				)}
 			</form.Field>

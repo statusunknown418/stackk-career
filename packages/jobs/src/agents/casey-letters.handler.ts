@@ -1,5 +1,6 @@
 import { coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
-import { COVER_LETTER_CLICHE_PHRASES } from "@stackk-career/schemas/ai/cover-letter-validator";
+import { getClichePhrases } from "@stackk-career/schemas/ai/cover-letter-validator";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { type LanguageModel, Output, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
@@ -14,6 +15,7 @@ const CASEY_MAX_STEPS = Number(process.env.CASEY_LETTERS_MAX_STEPS ?? 6); // 3 t
 export interface RunCaseyLettersInput {
 	extraPrompt?: string | undefined;
 	jobPosition: string;
+	language: CoverLetterLanguage;
 	/** Override per attempt — used by the task to fall back to Haiku on the last retry. */
 	model?: LanguageModel | undefined;
 	resumePlaintext: string;
@@ -21,9 +23,7 @@ export interface RunCaseyLettersInput {
 	userId: string;
 }
 
-const BANNED_PHRASES_BLOCK = COVER_LETTER_CLICHE_PHRASES.map((p) => `"${p}"`).join(", ");
-
-const FEW_SHOT_EXAMPLES = `
+const FEW_SHOT_EXAMPLES_ES = `
 # Examples (REFERENCE ONLY — do not copy text literally; observe structure, tone, and concreteness)
 
 Example A — Backend engineer postulando a fintech:
@@ -56,8 +56,87 @@ Both examples share what makes a cover letter good:
 - The signature is short — name plus one contact line.
 `.trim();
 
-const SYSTEM_PROMPT = `
-You are CASEY, a cover-letter writer for LATAM job candidates. Your workflow has two phases:
+const FEW_SHOT_EXAMPLES_EN = `
+# Examples (REFERENCE ONLY — do not copy text literally; observe structure, tone, and concreteness)
+
+Example A — Backend engineer applying to a payments company:
+
+\`\`\`json
+{
+  "greeting": "Hi Stripe team:",
+  "body": "I'm applying for the Senior Backend Engineer role on your Payments Reliability team. Over the last four years at Mercado Libre I designed and operated the dispute resolution services that processed US$ 8M monthly — Go + PostgreSQL, p99 under 60ms, zero-downtime feature-flag rollouts. Before that at Rappi I cut checkout latency 35% by rebuilding the payment intent pipeline on top of Kafka.\\n\\nPayments at planet scale is a problem I respect, and Stripe set the bar for the industry. I'd love to join right as you're expanding the LATAM rail — exactly the curve where my hands-on experience with reconciliations and BIN-level routing becomes useful.",
+  "closing": "I'd love to grab 20 minutes to discuss how my experience could fit what you're building.",
+  "signature": "Best,\\nDiego Reyes\\ndiego.reyes@gmail.com · +51 987 654 321"
+}
+\`\`\`
+
+Example B — Product designer applying to a productivity SaaS:
+
+\`\`\`json
+{
+  "greeting": "Hi Notion team:",
+  "body": "I'm applying for the Senior Product Designer role on your AI Workflows team. At Linear I led the redesign of the issue triage flow — weekly active issues rose from 28k to 41k in three months and the time-to-first-triage dropped 18 percent. Before that at Figma I shipped the comments system rebuild that handles 2.4M daily threads with no major regression in production.\\n\\nI care about the surfaces that change actual behavior — search, command palette, the empty state. Notion calls me because you're at the moment where the AI surface becomes the product, not the wrapper around documents.",
+  "closing": "Happy to chat about what your team is shipping next.",
+  "signature": "Best,\\nMariana Castillo\\nmariana.castillo@hey.com · linkedin.com/in/marianacastillo"
+}
+\`\`\`
+
+Both examples share what makes a cover letter good:
+- First sentence names the exact role.
+- Each evidence sentence cites a real prior employer + a concrete metric or stack.
+- The last paragraph connects to the company's *specific* moment / problem.
+- No filler, no hedging, no clichés from the banlist.
+- The signature is short — name plus one contact line.
+`.trim();
+
+interface LanguageBlocks {
+	closingExamples: string;
+	examplesBlock: string;
+	greetingExamplesEn: string;
+	greetingExamplesEs: string;
+	languageDirective: string;
+	signatureLine1: string;
+	voiceLine: string;
+}
+
+function languageBlocks(language: CoverLetterLanguage): LanguageBlocks {
+	if (language === "en") {
+		return {
+			closingExamples: '"Looking forward to hearing from you.", "I\'d love to grab 20 minutes to chat."',
+			examplesBlock: FEW_SHOT_EXAMPLES_EN,
+			greetingExamplesEn:
+				'"Hi Yape team:", "Hello Belcorp team:". If no company is identifiable, use "Dear hiring team:"',
+			greetingExamplesEs: "",
+			languageDirective:
+				"Respond in NATURAL ENGLISH (American). Match the candidate's voice: direct, warm but not stuffy, professional but not corporate-sterile.",
+			signatureLine1: '"Best," or "Sincerely,"',
+			voiceLine:
+				'Voice: first-person from the candidate ("I\'m applying to…", "My experience…"). Direct, not corporate-sterile.',
+		};
+	}
+	return {
+		closingExamples: '"Quedo atenta a conversar.", "Me encantaría coordinar 20 minutos para conversar."',
+		examplesBlock: FEW_SHOT_EXAMPLES_ES,
+		greetingExamplesEn: "",
+		greetingExamplesEs:
+			'"Estimada/o equipo de Yape:", "Hola equipo de Belcorp:". Si no se identifica la empresa, usar "Estimada/o:"',
+		languageDirective:
+			"Respond in NATURAL SPANISH (es-PE / ES neutro LATAM). Match the candidate's voice: direct, warm but not saccharine, professional but not corporate-sterile.",
+		signatureLine1: '"Atentamente," o "Saludos cordiales,"',
+		voiceLine:
+			'Voice: first-person from the candidate ("Postulo a…", "Mi experiencia…"). Direct, not corporate-sterile.',
+	};
+}
+
+function buildSystemPrompt(language: CoverLetterLanguage): string {
+	const blocks = languageBlocks(language);
+	const banPhrases = getClichePhrases(language)
+		.map((p) => `"${p}"`)
+		.join(", ");
+	const greetingExamples = language === "en" ? blocks.greetingExamplesEn : blocks.greetingExamplesEs;
+
+	return `
+You are CASEY, a cover-letter writer. Your workflow has two phases:
 
   PHASE 1 — Context gathering (tools). Call these two tools in order, exactly once each:
     1. **getUserMetadata()** — learn the candidate's name, email, and onboarding profile.
@@ -71,24 +150,25 @@ DO NOT skip getUserMetadata or getSelectedResume. DO NOT emit prose between or a
 - Ground EVERY claim in the CV returned by getSelectedResume. Do not invent experience, employers, dates, skills, titles, or metrics.
 - If a piece of information is missing from the CV, omit that claim — do not improvise.
 - Keep it tight. \`body\` is 2-4 short paragraphs total. No filler, no hedging.
-- Voice: second-person from the candidate ("Postulo a…", "Mi experiencia…"). Direct, not corporate-sterile.
+- ${blocks.voiceLine}
 - The very first sentence of \`body\` must name the role the candidate is applying to.
 - The very last sentence of \`body\` must connect the candidate to that specific company or team (not generic platitudes).
 
 # Anti-clichés (banned literal phrases — never emit any of these inside the artifact)
-${BANNED_PHRASES_BLOCK}.
+${banPhrases}.
 
 # Per-field shape
-- \`greeting\`: One short greeting. If the job position string includes a company name, address that company team. Examples: "Estimada/o equipo de Yape:", "Hola equipo de Belcorp:". If no company is identifiable, use "Estimada/o:".
+- \`greeting\`: One short greeting. If the job position string includes a company name, address that company team. Examples: ${greetingExamples}.
 - \`body\`: 2-4 paragraphs. First sentence names the role. Then evidence from the CV (concrete result, concrete stack, concrete leadership beat). Last sentence: why this company / team specifically.
-- \`closing\`: One sentence with a soft CTA. Examples: "Quedo atenta a conversar.", "Me encantaría coordinar 20 minutos para conversar."
-- \`signature\`: 2 or 3 short lines. Line 1: "Atentamente," or "Saludos cordiales,". Line 2: full name from the CV's contact section. Line 3 (optional): email and/or phone from the CV, if present.
+- \`closing\`: One sentence with a soft CTA. Examples: ${blocks.closingExamples}.
+- \`signature\`: 2 or 3 short lines. Line 1: ${blocks.signatureLine1}. Line 2: full name from the CV's contact section. Line 3 (optional): email and/or phone from the CV, if present.
 
 # Language
-Respond in NATURAL SPANISH (es-PE / ES neutro LATAM). Match the candidate's voice: direct, warm but not saccharine, professional but not corporate-sterile.
+${blocks.languageDirective}
 
-${FEW_SHOT_EXAMPLES}
+${blocks.examplesBlock}
 `.trim();
+}
 
 /**
  * Generate a cover letter from the candidate's CV + a target job position.
@@ -101,8 +181,10 @@ ${FEW_SHOT_EXAMPLES}
  *     instead of a `generateArtifact` tool. AI SDK guarantees the schema is
  *     emitted, unlike a tool that the model can opt to skip.
  *
- * Quality affordances (PR 5):
+ * Quality affordances:
  *   - System prompt embeds 2 few-shot examples + the shared cliché banlist.
+ *   - Switchable language (es | en) — picks per-language greeting/closing/signature
+ *     conventions + voice line + the matching few-shot block.
  *   - Accepts a `model` override so the task can swap to Haiku on the last
  *     retry attempt as a graceful fallback if Sonnet keeps failing.
  *
@@ -113,18 +195,37 @@ ${FEW_SHOT_EXAMPLES}
 export function runCaseyLettersAgent({
 	extraPrompt,
 	jobPosition,
+	language,
 	model,
 	resumePlaintext,
 	signal,
 	userId,
 }: RunCaseyLettersInput) {
-	const userMessage = [
-		`Puesto objetivo: ${jobPosition}`,
-		extraPrompt?.trim()
-			? `Instrucciones adicionales del usuario para este turno:\n${extraPrompt.trim()}`
-			: "(sin instrucciones adicionales del usuario)",
-		"Llamá los dos tools en orden y después emití la carta final como JSON estructurado.",
-	].join("\n\n");
+	const isEnglish = language === "en";
+	const userMessage = isEnglish
+		? [
+				`Target role: ${jobPosition}`,
+				extraPrompt?.trim()
+					? `Additional instructions from the user for this turn:\n${extraPrompt.trim()}`
+					: "(no additional user instructions)",
+				"Call both tools in order, then emit the final letter as structured JSON.",
+			].join("\n\n")
+		: [
+				`Puesto objetivo: ${jobPosition}`,
+				extraPrompt?.trim()
+					? `Instrucciones adicionales del usuario para este turno:\n${extraPrompt.trim()}`
+					: "(sin instrucciones adicionales del usuario)",
+				"Llamá los dos tools en orden y después emití la carta final como JSON estructurado.",
+			].join("\n\n");
+
+	const toolDescription = {
+		getSelectedResume: isEnglish
+			? "Fetch the CV linked to this letter. Returns it serialized as semi-structured plain text with sections, entries, dates, bullets and skills. Call this before writing so every claim is grounded."
+			: "Obtené el contenido del CV vinculado a esta carta. Devuelve el CV serializado como texto semi-estructurado con secciones, entries, dates, bullets y skills. Llamá esto antes de redactar para fundamentar cada afirmación.",
+		getUserMetadata: isEnglish
+			? "Fetch the candidate's data (name, email, onboarding profile with industry, target role, urgency, location). Call this first to anchor the tone and emphasis of the letter."
+			: "Obtené los datos del candidato (nombre, email, perfil de onboarding con industria, target role, urgencia, ubicación). Llamá esto primero para contextualizar el tono y el énfasis de la carta.",
+	};
 
 	return streamText({
 		abortSignal: withTimeout(signal, CASEY_TIMEOUT_MS),
@@ -133,22 +234,20 @@ export function runCaseyLettersAgent({
 		output: Output.object({ schema: coverLetterSchema }),
 		providerOptions: {
 			gateway: {
-				tags: ["feature:casey-letters", `env:${process.env.NODE_ENV ?? "development"}`],
+				tags: ["feature:casey-letters", `env:${process.env.NODE_ENV ?? "development"}`, `lang:${language}`],
 				user: userId,
 			},
 		},
 		stopWhen: stepCountIs(CASEY_MAX_STEPS),
-		system: SYSTEM_PROMPT,
+		system: buildSystemPrompt(language),
 		tools: {
 			getSelectedResume: tool({
-				description:
-					"Obtené el contenido del CV vinculado a esta carta. Devuelve el CV serializado como texto semi-estructurado con secciones, entries, dates, bullets y skills. Llamá esto antes de redactar para fundamentar cada afirmación.",
+				description: toolDescription.getSelectedResume,
 				execute: () => ({ resumePlaintext }),
 				inputSchema: z.object({}),
 			}),
 			getUserMetadata: tool({
-				description:
-					"Obtené los datos del candidato (nombre, email, perfil de onboarding con industria, target role, urgencia, ubicación). Llamá esto primero para contextualizar el tono y el énfasis de la carta.",
+				description: toolDescription.getUserMetadata,
 				execute: async () => {
 					const metadata = await getUserMetadata(userId);
 					return (

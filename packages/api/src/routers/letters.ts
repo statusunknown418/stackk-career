@@ -65,6 +65,7 @@ export const lettersRouter = {
 					type: "cover-letter",
 					title: input.jobPosition,
 					resumeId: input.resumeId,
+					language: input.language,
 				})
 				.returning({ id: generations.id });
 
@@ -92,6 +93,7 @@ export const lettersRouter = {
 					id: generations.id,
 					title: generations.title,
 					resumeId: generations.resumeId,
+					language: generations.language,
 					createdAt: generations.createdAt,
 					updatedAt: generations.updatedAt,
 				})
@@ -169,7 +171,12 @@ export const lettersRouter = {
 		});
 
 		const [gen] = await context.db
-			.select({ id: generations.id, resumeId: generations.resumeId, title: generations.title })
+			.select({
+				id: generations.id,
+				language: generations.language,
+				resumeId: generations.resumeId,
+				title: generations.title,
+			})
 			.from(generations)
 			.where(
 				and(eq(generations.id, input.generationId), eq(generations.owner, userId), eq(generations.type, "cover-letter"))
@@ -224,6 +231,7 @@ export const lettersRouter = {
 					extraPrompt: input.extraPrompt,
 					generationId: gen.id,
 					jobPosition: gen.title,
+					language: gen.language,
 					messageId,
 					resumeId: gen.resumeId,
 					userId,
@@ -232,7 +240,13 @@ export const lettersRouter = {
 					concurrencyKey: `letter-${gen.id}`,
 					idempotencyKey,
 					idempotencyKeyTTL: "24h",
-					tags: [`user:${userId}`, `gen:${gen.id}`, `letter:${messageId}`, "agent:casey-letters"],
+					tags: [
+						`user:${userId}`,
+						`gen:${gen.id}`,
+						`letter:${messageId}`,
+						`lang:${gen.language}`,
+						"agent:casey-letters",
+					],
 				}
 			);
 

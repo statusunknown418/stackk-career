@@ -42,7 +42,7 @@ export const caseyLettersTask = schemaTask({
 		minTimeoutInMs: 1000,
 	},
 	schema: caseyLettersInputSchema,
-	run: async ({ extraPrompt, generationId, jobPosition, messageId, resumeId, userId }, { ctx, signal }) => {
+	run: async ({ extraPrompt, generationId, jobPosition, language, messageId, resumeId, userId }, { ctx, signal }) => {
 		const db = getTriggerDb();
 
 		// Sonnet en attempts 1-2; Haiku como fallback en el último intento si los anteriores fallaron.
@@ -54,11 +54,13 @@ export const caseyLettersTask = schemaTask({
 		logger.info("casey-letters = start", {
 			attempt: ctx.attempt.number,
 			generationId,
+			language,
 			messageId,
 			model: modelSlug,
 			userId,
 		});
 
+		metadata.set("language", language);
 		metadata.set("step", "loading_resume");
 		const resumePlaintext = await loadResumeAsPlaintext(db, resumeId, userId);
 
@@ -66,6 +68,7 @@ export const caseyLettersTask = schemaTask({
 		const result = await runCaseyLettersAgent({
 			extraPrompt,
 			jobPosition,
+			language,
 			model: modelForAttempt,
 			resumePlaintext,
 			signal,
@@ -86,8 +89,9 @@ export const caseyLettersTask = schemaTask({
 		// Anti-clichés check. Solo informativo — loggeamos + flageamos en metadata.
 		// La decisión de reintentar con feedback queda para una iteración futura;
 		// hoy queremos visibilidad de la frecuencia con que el modelo igual emite
-		// frases baneadas a pesar del system prompt.
-		const validation = validateCoverLetter(object);
+		// frases baneadas a pesar del system prompt. El validator usa el banlist
+		// del idioma correcto para evitar falsos positivos.
+		const validation = validateCoverLetter(object, language);
 		if (!validation.ok) {
 			logger.warn("casey-letters = banned_phrases_detected", {
 				attempt: ctx.attempt.number,

@@ -2,6 +2,8 @@
 
 import {
 	ArrowsClockwiseIcon,
+	CopyIcon,
+	DownloadSimpleIcon,
 	HandWavingIcon,
 	ParagraphIcon,
 	PenNibIcon,
@@ -11,6 +13,7 @@ import {
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { DeepPartial } from "ai";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +76,31 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 ] as const;
 
 /**
+ * Serialize the (possibly partial) cover letter to plain text suitable for clipboard
+ * + .txt download. Returns null si alguna sección falta o todavía es un chunk
+ * incompleto — el caller usa eso para deshabilitar Copy/Download mientras streamea.
+ */
+function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined): string | null {
+	if (!artifact) {
+		return null;
+	}
+	const { greeting, body, closing, signature } = artifact;
+	if (typeof greeting !== "string" || !greeting) {
+		return null;
+	}
+	if (typeof body !== "string" || !body) {
+		return null;
+	}
+	if (typeof closing !== "string" || !closing) {
+		return null;
+	}
+	if (typeof signature !== "string" || !signature) {
+		return null;
+	}
+	return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}\n`;
+}
+
+/**
  * Right pane of /dash/letters/$generationId — renders the cover-letter artifact.
  *
  * Mirrors the visual language of the CV-analysis panels (setup.analysis/resume-analysis.tsx
@@ -80,9 +108,10 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
  * `Shimmer` for active streaming, `Skeleton` for unstarted sections, `Alert` for errors.
  * Inherits the app's neutral palette (bg-background / bg-card) — no landing tokens.
  *
- * The "Regenerar" button (header, top-right) opens a popover with tone presets that fire
- * a new run via `onTriggerAsync` with a hardcoded `extraPrompt`. Disabled while pending
- * or streaming. Hidden until there's something to regenerate.
+ * Header buttons (top-right):
+ *   - Copy (clipboard) — disabled mientras streamea o la carta está incompleta.
+ *   - Download (.txt) — idem.
+ *   - "Regenerar" — popover con presets de tono que firen un nuevo run.
  */
 export function LettersArtifactPanel({
 	artifact,
@@ -96,6 +125,8 @@ export function LettersArtifactPanel({
 	const showLoaders = !error && isStreaming;
 	const hasStreamedContent = Boolean(artifact);
 	const canRegenerate = hasContent && !(isPending || isStreaming);
+	const formattedText = formatCoverLetterAsText(artifact);
+	const canExport = Boolean(formattedText) && !isStreaming;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
 	const handleRegenerate = async (preset: RegeneratePreset) => {
@@ -105,6 +136,33 @@ export function LettersArtifactPanel({
 		} catch {
 			// Toast emitido por la route.
 		}
+	};
+
+	const handleCopy = async () => {
+		if (!formattedText) {
+			return;
+		}
+		try {
+			await navigator.clipboard.writeText(formattedText);
+			toast.success("Carta copiada al portapapeles");
+		} catch {
+			toast.error("No pudimos copiar al portapapeles");
+		}
+	};
+
+	const handleDownload = () => {
+		if (!formattedText) {
+			return;
+		}
+		const blob = new Blob([formattedText], { type: "text/plain;charset=utf-8" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = "cover-letter.txt";
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
 	};
 
 	return (
@@ -125,39 +183,63 @@ export function LettersArtifactPanel({
 				</div>
 
 				{hasContent && (
-					<Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
-						<PopoverTrigger
-							render={
-								<Button
-									aria-label="Regenerar carta"
-									disabled={!canRegenerate}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									<ArrowsClockwiseIcon className={cn(isPending && "animate-spin")} weight="bold" />
-									Regenerar
-								</Button>
-							}
-						/>
-						<PopoverPopup align="end" className="w-72">
-							<div className="flex flex-col gap-1">
-								<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
-								{REGENERATE_PRESETS.map((preset) => (
-									<button
-										className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
+					<div className="flex items-center gap-1.5">
+						<Button
+							aria-label="Copiar al portapapeles"
+							disabled={!canExport}
+							onClick={handleCopy}
+							size="icon-sm"
+							type="button"
+							variant="outline"
+						>
+							<CopyIcon weight="bold" />
+						</Button>
+
+						<Button
+							aria-label="Descargar como .txt"
+							disabled={!canExport}
+							onClick={handleDownload}
+							size="icon-sm"
+							type="button"
+							variant="outline"
+						>
+							<DownloadSimpleIcon weight="bold" />
+						</Button>
+
+						<Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
+							<PopoverTrigger
+								render={
+									<Button
+										aria-label="Regenerar carta"
 										disabled={!canRegenerate}
-										key={preset.label}
-										onClick={() => handleRegenerate(preset)}
+										size="sm"
 										type="button"
+										variant="outline"
 									>
-										<span className="font-medium">{preset.label}</span>
-										<span className="text-muted-foreground text-xs">{preset.description}</span>
-									</button>
-								))}
-							</div>
-						</PopoverPopup>
-					</Popover>
+										<ArrowsClockwiseIcon className={cn(isPending && "animate-spin")} weight="bold" />
+										Regenerar
+									</Button>
+								}
+							/>
+							<PopoverPopup align="end" className="w-72">
+								<div className="flex flex-col gap-1">
+									<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
+									{REGENERATE_PRESETS.map((preset) => (
+										<button
+											className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
+											disabled={!canRegenerate}
+											key={preset.label}
+											onClick={() => handleRegenerate(preset)}
+											type="button"
+										>
+											<span className="font-medium">{preset.label}</span>
+											<span className="text-muted-foreground text-xs">{preset.description}</span>
+										</button>
+									))}
+								</div>
+							</PopoverPopup>
+						</Popover>
+					</div>
 				)}
 			</FrameHeader>
 

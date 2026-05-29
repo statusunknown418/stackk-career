@@ -9,6 +9,15 @@ import { resumeAnalyses } from "./resume-analyses";
 export const generationTypes = ["conversation", "resume-creation", "cover-letter"] as const;
 export type GenerationTypes = (typeof generationTypes)[number];
 
+/**
+ * Idiomas soportados para artifacts generados (hoy: cover-letter).
+ * `es` cubre LATAM neutro / es-PE — default. `en` agrega flujo en inglés americano
+ * para postulaciones a roles internacionales. Para sumar pt o fr: agregar a esta
+ * lista + escribir few-shot examples + bloque de "Language" en el system prompt.
+ */
+export const generationLanguages = ["es", "en"] as const;
+export type GenerationLanguage = (typeof generationLanguages)[number];
+
 export const generations = sqliteTable(
 	"generations",
 	(t) => ({
@@ -27,6 +36,10 @@ export const generations = sqliteTable(
 		// Plain text column (no FK at the DB level) to avoid circular import with the resumes schema;
 		// ownership/validity enforced in the API procedure that creates the generation.
 		resumeId: t.text(),
+
+		// For type="cover-letter": user-selected output language for the artifact.
+		// Propagated end-to-end (create → trigger → task → agent system prompt + few-shot block).
+		language: t.text({ enum: generationLanguages }).default("es").notNull(),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })
