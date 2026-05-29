@@ -6,7 +6,7 @@ import { fileMetadata } from "./file-metadata";
 import { messages } from "./messages";
 import { resumeAnalyses } from "./resume-analyses";
 
-export const generationTypes = ["conversation", "resume-creation"] as const;
+export const generationTypes = ["conversation", "resume-creation", "cover-letter"] as const;
 export type GenerationTypes = (typeof generationTypes)[number];
 
 export const generations = sqliteTable(
@@ -22,6 +22,11 @@ export const generations = sqliteTable(
 		summary: t.text(),
 		model: t.text(),
 		type: t.text({ enum: generationTypes }),
+
+		// For type="cover-letter": the resume.id this letter is linked to (selected in the /letters dialog).
+		// Plain text column (no FK at the DB level) to avoid circular import with the resumes schema;
+		// ownership/validity enforced in the API procedure that creates the generation.
+		resumeId: t.text(),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })
