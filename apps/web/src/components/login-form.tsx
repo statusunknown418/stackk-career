@@ -39,7 +39,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 										authClient.signIn.social({
 											provider: "google",
 											newUserCallbackURL: "/setup",
-											callbackURL: search.redirect,
+											// Para users existentes: si vinieron desde un protected route,
+											// usar ese URL; si vinieron directo a /login, mandar a /dash
+											// (NO al landing — Better-Auth defaultea a / si no se pasa).
+											callbackURL: search.redirect ?? "/dash",
 											fetchOptions: {
 												onRequest: () => {
 													isLoading(true);
@@ -103,7 +106,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 				</FramePanel>
 			</Frame>
 			<CardDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="/">Terms of Service</a> and <a href="/">Privacy Policy</a>.
+				Al continuar, aceptás nuestros <Link to="/terms">Términos de Servicio</Link> y nuestra{" "}
+				<Link to="/policy">Política de Privacidad</Link>.
 			</CardDescription>
 		</div>
 	);

@@ -81,8 +81,11 @@ function RouteComponent() {
 	});
 
 	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
-	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` evita que un
-	// invalidate post-éxito re-dispare antes de que aparezcan los mensajes.
+	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` se setea ANTES
+	// del mutate y NO se resetea en el catch — si el primer disparo falla, el user
+	// re-intenta manual desde el form. Resetearlo causaba loop de retries cuando
+	// isPending transicionaba true→false y el effect re-corría con isEmpty todavía
+	// true.
 	const isEmpty = data.messages.length === 0 && data.latestArtifact === null;
 	const isPending = triggerMutation.isPending;
 	useEffect(() => {
@@ -92,8 +95,7 @@ function RouteComponent() {
 		if (isEmpty && !runHandle && !isPending) {
 			autoTriggeredRef.current = true;
 			onTriggerAsync({}).catch(() => {
-				// Toast ya emitido por onError; permitimos reintento manual.
-				autoTriggeredRef.current = false;
+				// Toast emitido por onError. El user re-intenta manualmente vía el form.
 			});
 		}
 	}, [isEmpty, runHandle, isPending, onTriggerAsync]);

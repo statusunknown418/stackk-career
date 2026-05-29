@@ -24,7 +24,6 @@ export const careerWorkspaceNavigation = [
 		to: "/dash",
 	},
 	{
-		disabled: true,
 		icon: FilesIcon,
 		id: "curriculums",
 		label: "Curriculums",
