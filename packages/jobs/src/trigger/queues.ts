@@ -25,3 +25,12 @@ export const k02DetailedQueue = queue({
 	name: "k02-detailed-analysis",
 	concurrencyLimit: Number(process.env.K02_DETAILED_QUEUE_CONCURRENCY ?? 5),
 });
+
+/**
+ * casey-letters generates a single CoverLetter via streamText. 1 LLM call per run,
+ * cheap per slot — can run wider, similar to k02Queue.
+ */
+export const letterQueue = queue({
+	name: "casey-letters",
+	concurrencyLimit: Number(process.env.LETTER_QUEUE_CONCURRENCY ?? 10),
+});

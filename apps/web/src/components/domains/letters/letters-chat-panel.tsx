@@ -19,10 +19,16 @@ interface LettersChatPanelMessage {
 	text: string | null;
 }
 
+interface LettersChatPanelRunHandle {
+	accessToken: string;
+	runId: string;
+}
+
 interface LettersChatPanelProps {
 	generationId: string;
 	jobPosition: string;
 	messages: readonly LettersChatPanelMessage[];
+	onRunTriggered?: (handle: LettersChatPanelRunHandle) => void;
 	resumeTitle: string | null;
 }
 
@@ -31,17 +37,31 @@ interface LettersChatPanelProps {
  *
  * Builds on the AI Elements components: <Conversation> (sticky scroll-to-bottom),
  * <Message>/<MessageContent> (user/assistant bubbles). Submitting the form calls
- * `orpc.letters.trigger`, which today is a stub that inserts a placeholder
- * artifact; the real CASEY-Letters task wiring lands in the next PR.
+ * `orpc.letters.trigger`, which dispatches the CASEY-Letters Trigger.dev task
+ * and returns a `runId` + `publicAccessToken`. We hand that handle up via
+ * `onRunTriggered` so the parent route owns the `useRealtimeRunWithStreams`
+ * subscription and feeds streamed chunks into the artifact panel.
  */
-export function LettersChatPanel({ generationId, jobPosition, messages, resumeTitle }: LettersChatPanelProps) {
+export function LettersChatPanel({
+	generationId,
+	jobPosition,
+	messages,
+	onRunTriggered,
+	resumeTitle,
+}: LettersChatPanelProps) {
 	const queryClient = useQueryClient();
 	const [extraPrompt, setExtraPrompt] = useState("");
 
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
-			onSuccess: () => {
+			onSuccess: (result) => {
 				setExtraPrompt("");
+				if (result.runId && result.publicAccessToken) {
+					onRunTriggered?.({
+						accessToken: result.publicAccessToken,
+						runId: result.runId,
+					});
+				}
 				queryClient.invalidateQueries({
 					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
 				});

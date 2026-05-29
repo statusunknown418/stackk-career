@@ -1,30 +1,18 @@
 import { ORPCError } from "@orpc/client";
+import { createId } from "@paralleldrive/cuid2";
 import { generations } from "@stackk-career/db/schema/generations";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { COVER_LETTER_OBJECT_TYPE, type CoverLetter, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
+import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
+import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import {
 	createCoverLetterGenerationInputSchema,
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
+import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
-
-/**
- * Sentinel artifact used by the `trigger` stub procedure below. Replaced by the
- * real CASEY-Letters Trigger.dev task in the next PR. When the real task lands,
- * `trigger` will dispatch a Trigger.dev run and return a `runId` +
- * `publicAccessToken` for the frontend to subscribe via
- * `useRealtimeRunWithStreams`. Until then, the UI receives this placeholder so
- * the end-to-end flow (create → navigate → render artifact) is exercised.
- */
-const PLACEHOLDER_ARTIFACT: CoverLetter = {
-	greeting: "Estimada/o:",
-	body: "Esta es una versión preliminar. El task CASEY-Letters todavía no está conectado (se entrega en el PR siguiente). Una vez en línea, este artifact se completará con la carta real generada por Claude Sonnet 4.6 a partir del puesto y del CV vinculado.",
-	closing: "Quedo atenta a tu respuesta.",
-	signature: "— CASEY",
-};
 
 export const lettersRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {
@@ -162,22 +150,26 @@ export const lettersRouter = {
 		}),
 
 	/**
-	 * STUB — replaced by the real CASEY-Letters Trigger.dev wiring in the next PR.
-	 * For now: inserts an optional user message (if `extraPrompt` was provided),
-	 * then an assistant message with `objectType=cover-letter-v1` carrying the
-	 * sentinel artifact above. Returns `null` for runId/publicAccessToken so the
-	 * UI can detect the stub state and skip realtime subscription.
+	 * Dispatch a CASEY-Letters Trigger.dev run. The task picks up the candidate's CV
+	 * via `resumeId` and the target role via the generation's `title`. The pending
+	 * artifact message is inserted BEFORE the trigger so the UI can render its row
+	 * immediately; the task fills `object` + `text` on completion, or `onFailure`
+	 * stamps an `error` on the same row.
+	 *
+	 * Pattern calca `agents.triggerK02FastAnalysis`: concurrencyKey scoped to the
+	 * generation (so re-triggers on the same letter serialize), idempotencyKey to
+	 * dedupe retries, tags for realtime token scoping on the frontend.
 	 */
 	trigger: protectedProcedure.input(triggerCoverLetterInputSchema).handler(async ({ context, input }) => {
 		const userId = context.session.user.id;
 		context.log?.set({
-			action: "trigger_cover_letter_stub",
-			user: { id: userId },
+			action: "trigger_cover_letter",
 			generation: { id: input.generationId },
+			user: { id: userId },
 		});
 
 		const [gen] = await context.db
-			.select({ id: generations.id })
+			.select({ id: generations.id, resumeId: generations.resumeId, title: generations.title })
 			.from(generations)
 			.where(
 				and(eq(generations.id, input.generationId), eq(generations.owner, userId), eq(generations.type, "cover-letter"))
@@ -189,43 +181,79 @@ export const lettersRouter = {
 			throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
 		}
 
+		if (!gen.resumeId) {
+			context.log?.set({ outcome: "missing_resume" });
+			throw new ORPCError("BAD_REQUEST", { message: "La carta no tiene un CV vinculado" });
+		}
+
+		if (!gen.title) {
+			context.log?.set({ outcome: "missing_job_position" });
+			throw new ORPCError("BAD_REQUEST", { message: "La carta no tiene un puesto definido" });
+		}
+
 		const existing = await context.db
 			.select({ id: messages.id })
 			.from(messages)
 			.where(eq(messages.generationId, gen.id));
-		const nextOrder = existing.length;
+		const baseOrder = existing.length;
 
 		if (input.extraPrompt) {
 			await context.db.insert(messages).values({
 				generationId: gen.id,
 				isAssistant: false,
-				order: nextOrder,
+				order: baseOrder,
 				text: input.extraPrompt,
 			});
 		}
 
-		const [artifactMessage] = await context.db
-			.insert(messages)
-			.values({
-				generationId: gen.id,
-				isAssistant: true,
-				order: input.extraPrompt ? nextOrder + 1 : nextOrder,
-				objectType: COVER_LETTER_OBJECT_TYPE,
-				object: PLACEHOLDER_ARTIFACT,
-				text: PLACEHOLDER_ARTIFACT.body,
-			})
-			.returning({ id: messages.id });
-
-		context.log?.set({
-			outcome: "stub_inserted",
-			message: { id: artifactMessage?.id },
+		const messageId = `msg_${createId()}`;
+		await context.db.insert(messages).values({
+			generationId: gen.id,
+			id: messageId,
+			isAssistant: true,
+			objectType: COVER_LETTER_OBJECT_TYPE,
+			order: input.extraPrompt ? baseOrder + 1 : baseOrder,
 		});
 
-		return {
-			runId: null,
-			publicAccessToken: null,
-			messageId: artifactMessage?.id ?? null,
-			artifact: PLACEHOLDER_ARTIFACT,
-		};
+		try {
+			const idempotencyKey = await idempotencyKeys.create(`casey-letters-${messageId}`);
+
+			const handle = await tasks.trigger<typeof caseyLettersTask>(
+				"casey-letters",
+				{
+					extraPrompt: input.extraPrompt,
+					generationId: gen.id,
+					jobPosition: gen.title,
+					messageId,
+					resumeId: gen.resumeId,
+					userId,
+				},
+				{
+					concurrencyKey: `letter-${gen.id}`,
+					idempotencyKey,
+					idempotencyKeyTTL: "24h",
+					tags: [`user:${userId}`, `gen:${gen.id}`, `letter:${messageId}`, "agent:casey-letters"],
+				}
+			);
+
+			context.log?.set({
+				message: { id: messageId },
+				outcome: "triggered",
+				run: { id: handle.id },
+			});
+
+			return {
+				messageId,
+				publicAccessToken: handle.publicAccessToken,
+				runId: handle.id,
+			};
+		} catch (error) {
+			context.log?.set({ outcome: "trigger_failed" });
+			context.log?.error(error instanceof Error ? error : new Error("trigger_failed"));
+
+			await context.db.update(messages).set({ error: "trigger_failed" }).where(eq(messages.id, messageId));
+
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "No pudimos iniciar la generación" });
+		}
 	}),
 };
