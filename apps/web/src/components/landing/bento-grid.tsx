@@ -49,15 +49,15 @@ function ReasonsStrip() {
 			{/* Section intro — same paper, no green chrome yet, just the editorial frame */}
 			<div className="px-6 pt-16 pb-4 md:pt-24 md:pb-6">
 				<Reveal>
-					<header className="mx-auto max-w-[1200px]">
-						<div className="flex items-center gap-2 font-mono text-[11px] text-foreground uppercase tracking-[0.12em]">
+					<header className="mx-auto max-w-7xl">
+						<div className="flex items-center gap-2 font-mono text-foreground text-xs uppercase tracking-widest">
 							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
 							<span>El producto</span>
 						</div>
-						<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-[1.02] tracking-[-0.035em]">
+						<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-none tracking-tight">
 							<WordReveal>Una suscripción que reúne las herramientas que te aseguran tu próxima entrevista.</WordReveal>
 						</h2>
-						<p className="mt-5 max-w-[620px] text-[1rem] text-foreground/65 leading-[1.55]">
+						<p className="mt-5 max-w-[620px] text-base text-foreground/65 leading-relaxed">
 							Un Agente especializado de IA y un coach senior, juntos para potenciarte.
 						</p>
 					</header>
@@ -206,30 +206,28 @@ function ReasonCardContent({
 			{/* Big ghost number — the editorial anchor for each reason */}
 			<span
 				aria-hidden="true"
-				className="pointer-events-none absolute top-[-2.5rem] right-[-1rem] select-none font-bold font-display text-[clamp(11rem,22vw,18rem)] text-foreground/[0.05] leading-none tracking-[-0.06em]"
+				className="pointer-events-none absolute top-[-2.5rem] right-[-1rem] select-none font-bold font-display text-[clamp(11rem,22vw,18rem)] text-foreground/[0.05] leading-none tracking-tighter"
 			>
 				{displayNumber}
 			</span>
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-[11px] text-foreground uppercase tracking-[0.12em]">
+				<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">
 					Razón {displayNumber}
 				</span>
 			</header>
 
-			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-[1.05] tracking-[-0.03em]">
+			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-[1.05] tracking-tight">
 				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
 			</h3>
 
-			<p className="relative mt-5 max-w-[52ch] text-[clamp(1rem,1.4vw,1.125rem)] text-foreground/65 leading-[1.6]">
+			<p className="relative mt-5 max-w-[52ch] text-[clamp(1rem,1.4vw,1.125rem)] text-foreground/65 leading-relaxed">
 				{reason.body}
 			</p>
 
 			<footer className="relative mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-6">
-				<span className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.1em]">
-					{reason.receipt.label}
-				</span>
+				<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">{reason.receipt.label}</span>
 				<span className="font-display font-semibold text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
 					{leading ? (
 						<>
@@ -287,7 +285,7 @@ function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	if (reduced || !isDesktop) {
 		return (
 			<div className="px-6 py-8">
-				<div className="mx-auto max-w-[1200px]">
+				<div className="mx-auto max-w-7xl">
 					<StaticPriceComposition reason={reason} />
 				</div>
 			</div>
@@ -362,7 +360,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 		// 220vh: ~120vh of pinned scrubbing past the initial pin attachment.
 		<div className="relative h-[108vh]" ref={containerRef}>
 			<div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background px-6">
-				<article className="relative mx-auto flex w-full max-w-[1200px] flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-14">
+				<article className="relative mx-auto flex w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-14">
 					{/* Green corner block — the brand anchor. Scroll-linked scale. */}
 					<motion.span
 						aria-hidden="true"
@@ -377,9 +375,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 					{/* Header chrome — Razón 02 meta */}
 					<motion.header className="relative flex items-center gap-2" style={{ opacity: headerOpacity, y: headerY }}>
 						<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-						<span className="font-medium font-mono text-[10.5px] text-foreground uppercase tracking-[0.1em]">
-							El precio
-						</span>
+						<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
 					</motion.header>
 
 					{/* Title */}
@@ -397,7 +393,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 							{/* Both prices with a single strike that sweeps across them */}
 							<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4 gap-y-1">
 								<motion.span
-									className="flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-[-0.04em]"
+									className="flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-tighter"
 									style={{ opacity: price2299Opacity, y: price2299Y }}
 								>
 									<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
@@ -414,7 +410,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 							</div>
 
 							<motion.span
-								className="mt-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.08em]"
+								className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest"
 								style={{ opacity: ellosSubOpacity }}
 							>
 								Pagas más por menos
@@ -434,20 +430,20 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 						<div className="flex flex-col items-end text-right md:items-start md:text-left">
 							<div className="mt-3 flex items-baseline gap-2">
 								<motion.span
-									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-[-0.045em]"
+									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-tighter"
 									style={{ opacity: solesMarkOpacity, y: solesMarkY }}
 								>
 									S/
 								</motion.span>
 								<motion.span
 									aria-live="polite"
-									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground tabular-nums leading-none tracking-[-0.045em]"
+									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground tabular-nums leading-none tracking-tighter"
 									style={{ opacity: numberOpacity }}
 								>
 									{counterText}
 								</motion.span>
 								<motion.span
-									className="font-mono text-[12px] text-foreground/60 tracking-tight"
+									className="font-mono text-foreground/60 text-xs tracking-tight"
 									style={{ opacity: perMesOpacity }}
 								>
 									/mes
@@ -455,7 +451,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 							</div>
 
 							<motion.span
-								className="mt-3 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.08em]"
+								className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest"
 								style={{ opacity: nosotrosSubOpacity }}
 							>
 								Pagas menos por mucho más
@@ -500,7 +496,7 @@ function ScrollProgressRail({ progress, railScale }: ScrollProgressRailProps) {
 
 	return (
 		<div className="relative mt-10 flex items-center gap-4 border-border border-t pt-5">
-			<span className="font-mono text-[9px] text-foreground/55 uppercase tracking-[0.12em]">El argumento</span>
+			<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">El argumento</span>
 
 			{/* Thin scrubbing bar */}
 			<div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-border">
@@ -541,9 +537,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-[10.5px] text-foreground uppercase tracking-[0.1em]">
-					El precio
-				</span>
+				<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
 			</header>
 
 			<h3 className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-[1.04] tracking-[-0.028em]">
@@ -553,13 +547,13 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 			<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-6 md:grid-cols-[1fr_auto_1fr]">
 				<div className="flex flex-col items-start text-left md:items-end md:text-right">
 					<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4">
-						<span className="relative flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-[-0.04em]">
+						<span className="relative flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-tighter">
 							<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
 							250
 						</span>
 						<span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-[2.5px] bg-foreground/70" />
 					</div>
-					<span className="mt-3 font-mono text-[10px] text-foreground/55 uppercase tracking-[0.08em]">
+					<span className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest">
 						Pagas más por menos
 					</span>
 				</div>
@@ -573,13 +567,13 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 
 				<div className="flex flex-col items-end text-right md:items-start md:text-left">
 					<div className="mt-3 flex items-baseline gap-2">
-						<span className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-[-0.045em]">
+						<span className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-tighter">
 							S/
 							<CountUp duration={1.0} once to={79} />
 						</span>
-						<span className="font-mono text-[12px] text-foreground/60 tracking-tight">/mes</span>
+						<span className="font-mono text-foreground/60 text-xs tracking-tight">/mes</span>
 					</div>
-					<span className="mt-3 font-mono text-[10px] text-foreground/65 uppercase tracking-[0.08em]">
+					<span className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest">
 						Pagas menos por mucho más
 					</span>
 				</div>

@@ -193,7 +193,7 @@ export function FounderMessage() {
 			>
 				{/* Eyebrow — small editorial marker */}
 				<motion.div
-					className="col-span-12 col-start-1 flex items-center gap-3 font-mono text-[#0c140e]/70 text-[10.5px] uppercase tracking-[0.13em] md:col-span-10 md:col-start-2"
+					className="col-span-12 col-start-1 flex items-center gap-3 font-mono text-neutral-950/70 text-xs uppercase tracking-widest md:col-span-10 md:col-start-2"
 					initial={reduced ? false : { opacity: 0, y: 8 }}
 					transition={{ duration: 0.6, ease: EASE_OUT_QUINT }}
 					viewport={{ margin: "-15% 0px", once: true }}
@@ -212,7 +212,7 @@ export function FounderMessage() {
 					viewport={{ margin: "-15% 0px", once: true }}
 					whileInView={reduced ? undefined : { opacity: 1, scale: 1, rotate: 0 }}
 				>
-					<QuotesIcon className="-ml-1 text-[#0c140e]/85" size={56} weight="fill" />
+					<QuotesIcon className="-ml-1 text-neutral-950/85" size={56} weight="fill" />
 				</motion.div>
 
 				{/* The letter — each stanza reveals word-by-word as it enters view,
@@ -221,7 +221,7 @@ export function FounderMessage() {
 					Carta abierta del equipo ASSENDIA
 				</h2>
 
-				<div className="col-span-12 col-start-1 mt-6 flex flex-col gap-6 font-display font-medium text-[#0c140e] text-[clamp(1.4rem,3vw,2.4rem)] leading-[1.22] tracking-[-0.022em] md:col-span-9 md:col-start-2 md:mt-8 md:gap-7">
+				<div className="col-span-12 col-start-1 mt-6 flex flex-col gap-6 font-display font-medium text-[clamp(1.4rem,3vw,2.4rem)] text-neutral-950 leading-[1.22] tracking-[-0.022em] md:col-span-9 md:col-start-2 md:mt-8 md:gap-7">
 					{stanzas.map((stanza) => (
 						<p className="text-balance" key={stanza.id}>
 							{stanza.words.map((word) => (
@@ -242,10 +242,10 @@ export function FounderMessage() {
 				>
 					<SignatureMark />
 					<div className="flex flex-col gap-1">
-						<span className="font-display-italic font-light text-[#0c140e] text-[1.05rem] leading-tight md:text-[1.2rem]">
+						<span className="font-display-italic font-light text-base text-neutral-950 leading-tight md:text-[1.2rem]">
 							Equipo ASSENDIA
 						</span>
-						<span className="font-mono text-[#0c140e]/65 text-[10.5px] uppercase tracking-[0.11em]">Lima, Perú</span>
+						<span className="font-mono text-neutral-950/65 text-xs uppercase tracking-widest">Lima, Perú</span>
 					</div>
 					<div aria-hidden="true" className="ml-auto hidden h-px flex-1 bg-foreground/25 md:block" />
 				</motion.footer>

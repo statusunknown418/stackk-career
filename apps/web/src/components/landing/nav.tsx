@@ -54,7 +54,7 @@ export function LandingNav() {
 	}, []);
 
 	return (
-		<header className="sticky top-4 z-50 mx-auto mt-4 w-full max-w-[1200px] px-4">
+		<header className="sticky top-4 z-50 mx-auto mt-4 w-full max-w-7xl px-4">
 			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/95 py-2 pr-2 pl-3 shadow-[var(--shadow-nav)]">
 				<a className="flex shrink-0 items-center gap-2 pr-3 text-foreground tracking-tight" href="#top">
 					<img
@@ -64,7 +64,7 @@ export function LandingNav() {
 						src="/assendia-logo.png"
 						width={32}
 					/>
-					<span className="font-bold font-display text-[1.05rem] leading-none tracking-[-0.02em]">ASSENDIA</span>
+					<span className="font-bold font-display text-base leading-none tracking-tight">ASSENDIA</span>
 				</a>
 
 				<span aria-hidden="true" className="hidden h-5 w-px bg-muted md:block" />
@@ -78,7 +78,7 @@ export function LandingNav() {
 								<a
 									aria-current={isActive ? "true" : undefined}
 									className={cn(
-										"relative inline-flex items-center rounded-full px-3 py-1.5 font-medium text-[13px] transition-colors",
+										"relative inline-flex items-center rounded-full px-3 py-1.5 font-medium text-sm transition-colors",
 										isActive ? "text-foreground" : "text-foreground/60 hover:bg-muted hover:text-foreground"
 									)}
 									href={link.href}
@@ -95,7 +95,7 @@ export function LandingNav() {
 				<div className="ml-auto flex items-center gap-1.5 md:ml-0">
 					<ThemeToggle />
 					<a
-						className="hidden rounded-full px-3 py-1.5 font-medium text-[13px] text-foreground/65 transition-colors hover:text-foreground md:inline-flex"
+						className="hidden rounded-full px-3 py-1.5 font-medium text-foreground/65 text-sm transition-colors hover:text-foreground md:inline-flex"
 						href="/login"
 					>
 						Iniciar sesión
@@ -166,9 +166,7 @@ function MobileMenu() {
 						src="/assendia-logo.png"
 						width={32}
 					/>
-					<span className="font-bold font-display text-[1.05rem] text-foreground leading-none tracking-[-0.02em]">
-						ASSENDIA
-					</span>
+					<span className="font-bold font-display text-base text-foreground leading-none tracking-tight">ASSENDIA</span>
 				</div>
 				<SheetPanel>
 					<ul className="mt-2 flex flex-col gap-1">
@@ -177,7 +175,7 @@ function MobileMenu() {
 								<SheetClose
 									render={
 										<a
-											className="block rounded-lg px-3 py-3 font-medium text-[15px] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+											className="block rounded-lg px-3 py-3 font-medium text-base text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
 											href={link.href}
 										>
 											{link.label}
@@ -192,7 +190,7 @@ function MobileMenu() {
 						<SheetClose
 							render={
 								<a
-									className="rounded-lg px-3 py-2 font-medium text-[14px] text-foreground/75 transition-colors hover:bg-muted hover:text-foreground"
+									className="rounded-lg px-3 py-2 font-medium text-foreground/75 text-sm transition-colors hover:bg-muted hover:text-foreground"
 									href="/login"
 								>
 									Iniciar sesión

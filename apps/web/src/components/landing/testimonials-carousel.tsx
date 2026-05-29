@@ -64,7 +64,7 @@ function FeaturedTestimonial() {
 			onMouseLeave={() => setPaused(false)}
 		>
 			<motion.span
-				className="inline-block font-mono text-[11px] text-foreground/55 uppercase tracking-[0.12em]"
+				className="inline-block font-mono text-foreground/55 text-xs uppercase tracking-widest"
 				initial={reduced ? false : { opacity: 0, y: 8 }}
 				transition={reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_OUT_QUINT }}
 				viewport={{ margin: "-15% 0px", once: true }}
@@ -77,7 +77,7 @@ function FeaturedTestimonial() {
 				<AnimatePresence initial={false} mode="wait">
 					<motion.blockquote
 						animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
-						className="text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-[1.15] tracking-[-0.025em]"
+						className="text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-[1.15] tracking-tight"
 						exit={reduced ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(8px)" }}
 						initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16, filter: "blur(8px)" }}
 						key={active.id}
@@ -97,7 +97,7 @@ function FeaturedTestimonial() {
 			<AnimatePresence initial={false} mode="wait">
 				<motion.p
 					animate={{ opacity: 1, y: 0 }}
-					className="mt-6 font-mono text-[11px] text-foreground/65 uppercase tracking-[0.09em]"
+					className="mt-6 font-mono text-foreground/65 text-xs uppercase tracking-widest"
 					exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
 					initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
 					key={`${active.id}-meta`}
@@ -152,7 +152,7 @@ function FeaturedTestimonial() {
 export function TestimonialsCarousel() {
 	return (
 		<section className="overflow-hidden border-border border-y bg-foreground/[0.025] px-6 py-16 md:py-24" id="casos">
-			<div className="mx-auto max-w-[1200px]">
+			<div className="mx-auto max-w-7xl">
 				<FeaturedTestimonial />
 
 				<div className="relative h-[640px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)] md:h-[760px]">
@@ -167,7 +167,7 @@ export function TestimonialsCarousel() {
 					</div>
 				</div>
 
-				<p className="mt-8 text-center font-mono text-[10px] text-foreground/55 uppercase tracking-[0.1em]">
+				<p className="mt-8 text-center font-mono text-foreground/55 text-xs uppercase tracking-widest">
 					Una muestra de las 90 reseñas · pasa el cursor para pausar
 				</p>
 			</div>
@@ -205,7 +205,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 			<header className="flex items-center gap-3">
 				<span
 					aria-hidden="true"
-					className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground/[0.06] font-semibold text-[11px] text-foreground"
+					className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground/[0.06] font-semibold text-foreground text-xs"
 				>
 					{testimonial.initials}
 				</span>
@@ -213,21 +213,21 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 					<p className="truncate font-display font-semibold text-[13.5px] text-foreground leading-tight tracking-tight">
 						{testimonial.name}
 					</p>
-					<p className="truncate font-display-italic font-light text-[12px] text-foreground/60 leading-tight">
+					<p className="truncate font-display-italic font-light text-foreground/60 text-xs leading-tight">
 						{testimonial.role}
 					</p>
 				</div>
 			</header>
 
-			<blockquote className="text-[13.5px] text-foreground/80 leading-[1.55]">“{testimonial.quote}”</blockquote>
+			<blockquote className="text-[13.5px] text-foreground/80 leading-relaxed">“{testimonial.quote}”</blockquote>
 
 			<footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-border border-t pt-3">
 				{testimonial.chip && (
-					<span className="rounded-full border border-border bg-foreground/[0.06] px-2 py-0.5 font-medium font-mono text-[9px] text-foreground uppercase tracking-[0.08em]">
+					<span className="rounded-full border border-border bg-foreground/[0.06] px-2 py-0.5 font-medium font-mono text-foreground text-xs uppercase tracking-widest">
 						{testimonial.chip}
 					</span>
 				)}
-				<span className="ml-auto font-mono text-[10px] text-foreground/55 uppercase tracking-[0.1em]">
+				<span className="ml-auto font-mono text-foreground/55 text-xs uppercase tracking-widest">
 					{testimonial.location}
 				</span>
 			</footer>

@@ -28,17 +28,17 @@ export function Pricing() {
 function PricingHeader() {
 	return (
 		<div className="px-6 pt-20 pb-12 sm:pt-28 sm:pb-16">
-			<div className="mx-auto max-w-[1200px]">
+			<div className="mx-auto max-w-7xl">
 				<Reveal>
-					<span className="block font-mono text-[11px] text-foreground/60 uppercase tracking-[0.11em]">
+					<span className="block font-mono text-foreground/60 text-xs uppercase tracking-widest">
 						Planes · precios en soles
 					</span>
 				</Reveal>
-				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-[0.96] tracking-[-0.045em]">
+				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-[0.96] tracking-tighter">
 					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 				</h2>
 				<Reveal delay={0.2}>
-					<p className="mt-7 max-w-[60ch] text-[1.05rem] text-foreground/65 leading-[1.55]">
+					<p className="mt-7 max-w-[60ch] text-base text-foreground/65 leading-relaxed">
 						Empieza gratis con tu Score CV. Pasa a Pro para usar todas las herramientas de IA sin límite. Premium suma
 						tu coach y el camino completo con garantía de entrevista en 90 días.
 					</p>
@@ -54,7 +54,7 @@ function PricingHeader() {
 function PlanGrid() {
 	return (
 		<div className="px-6 pb-16">
-			<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-5">
+			<div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-5">
 				{PLANS.map((plan, idx) => (
 					<PlanCard idx={idx} key={plan.id} plan={plan} />
 				))}
@@ -89,18 +89,18 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			)}
 
 			<div className="flex items-center justify-between gap-3">
-				<h3 className="font-display font-semibold text-[1.6rem] text-foreground tracking-[-0.025em]">{plan.name}</h3>
+				<h3 className="font-display font-semibold text-[1.6rem] text-foreground tracking-tight">{plan.name}</h3>
 			</div>
-			<p className="mt-2 text-[14px] text-foreground/65 leading-[1.5]">{plan.tagline}</p>
+			<p className="mt-2 text-foreground/65 text-sm leading-normal">{plan.tagline}</p>
 
 			<div className="mt-7 flex items-baseline gap-1.5">
 				<span className="font-medium text-base text-foreground/70">S/</span>
-				<span className="font-bold font-display text-[3.4rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
+				<span className="font-bold font-display text-[3.4rem] text-foreground tabular-nums leading-none tracking-tighter">
 					<CountUp duration={1.0} once to={plan.priceSoles} />
 				</span>
 				<span className="ml-1 text-foreground/70 text-sm">{isFree ? "" : "/ mes"}</span>
 			</div>
-			<p className="mt-2 text-[13px] text-foreground/65">{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}</p>
+			<p className="mt-2 text-foreground/65 text-sm">{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}</p>
 
 			<div className={cn("my-7 h-px", featured ? "bg-oxblood/20" : "bg-border")} />
 
@@ -113,7 +113,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 
 				{plan.features.length > HEADLINE_FEATURE_COUNT && (
 					<details className="group/expand mt-3">
-						<summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-[12.5px] text-foreground/70 transition-colors hover:text-foreground">
+						<summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-foreground/70 text-xs transition-colors hover:text-foreground">
 							<CaretDownIcon
 								className="transition-transform duration-200 group-open/expand:rotate-180"
 								size={12}
@@ -137,7 +137,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 						buttonVariants({ size: "lg" }),
 						"w-full",
 						featured
-							? "bg-oxblood text-[#0c140e] hover:bg-oxblood/90"
+							? "bg-oxblood text-neutral-950 hover:bg-oxblood/90"
 							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
 					)}
 					href="/setup"
@@ -154,7 +154,7 @@ function FeatureItem({ feature, delay = 0 }: { delay?: number; feature: string }
 	const reduced = useReducedMotion();
 	return (
 		<motion.li
-			className="flex items-start gap-3 text-[14px] leading-[1.5]"
+			className="flex items-start gap-3 text-sm leading-normal"
 			initial={reduced ? false : { opacity: 0, x: -6 }}
 			transition={{ duration: 0.5, delay, ease: EASE_OUT_QUINT }}
 			viewport={{ margin: "-10% 0px", once: true }}
@@ -178,25 +178,23 @@ function SingleSessionStrip() {
 	return (
 		<div className="px-6 pb-16 sm:pb-24">
 			<aside
-				className="mx-auto max-w-[1200px] overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
+				className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
 				id="sesion-unica"
 			>
 				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
 					<div className="md:col-span-7">
-						<span className="font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.09em]">
-							Sin suscripción
-						</span>
-						<h3 className="mt-2 font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-[-0.025em]">
+						<span className="font-mono text-foreground/60 text-xs uppercase tracking-widest">Sin suscripción</span>
+						<h3 className="mt-2 font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-tight">
 							Sesión única: {SINGLE_SESSION.tagline}
 						</h3>
-						<p className="mt-3 max-w-[560px] text-[14px] text-foreground/65 leading-[1.55]">{SINGLE_SESSION.body}</p>
+						<p className="mt-3 max-w-[560px] text-foreground/65 text-sm leading-relaxed">{SINGLE_SESSION.body}</p>
 					</div>
 
 					<div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
 						<div>
 							<p className="flex items-baseline gap-1.5">
 								<span className="font-medium text-base text-foreground/70">S/</span>
-								<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-[0.85] tracking-[-0.04em]">
+								<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-none tracking-tighter">
 									<CountUp duration={1.0} once to={SINGLE_SESSION.priceSoles} />
 								</span>
 							</p>
@@ -257,13 +255,13 @@ function ClosingMoment() {
 					style={reduced ? undefined : { opacity: dotOpacity, scale: dotScale }}
 				/>
 				<motion.p
-					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-[1.05] tracking-[-0.03em]"
+					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-[1.05] tracking-tight"
 					style={reduced ? undefined : { opacity: lineOpacity, y: lineY, scale: lineScale }}
 				>
 					¿Cumpliste tu objetivo?
 				</motion.p>
 				<motion.p
-					className="mx-auto mt-6 max-w-[600px] text-balance text-[1.05rem] text-foreground/70 leading-[1.65]"
+					className="mx-auto mt-6 max-w-[600px] text-balance text-base text-foreground/70 leading-[1.65]"
 					style={reduced ? undefined : { opacity: bodyOpacity, y: bodyY }}
 				>
 					Cancelas en un clic, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}

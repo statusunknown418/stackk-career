@@ -37,7 +37,7 @@ export function Hero() {
 								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/40" />
 								<span className="relative size-2 rounded-full bg-oxblood" />
 							</span>
-							<span className="font-medium text-[12px] text-foreground/75 tracking-[0.02em]">
+							<span className="font-medium text-foreground/75 text-xs tracking-[0.02em]">
 								Hecho en Perú, para LATAM
 							</span>
 						</span>
@@ -45,7 +45,7 @@ export function Hero() {
 
 					{/* Headline, single bold weight, near-black */}
 					<motion.h1
-						className="max-w-[14ch] font-display font-semibold text-[clamp(2.5rem,8vw,6rem)] text-foreground leading-[0.95] tracking-[-0.04em]"
+						className="max-w-[14ch] font-display font-semibold text-[clamp(2.5rem,8vw,6rem)] text-foreground leading-[0.95] tracking-tighter"
 						initial={fadeUp}
 						transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.1 }}
 						viewport={viewport}
@@ -67,7 +67,7 @@ export function Hero() {
 
 					{/* Supporting line */}
 					<motion.p
-						className="mt-8 max-w-[560px] text-[clamp(1.05rem,1.3vw,1.2rem)] text-foreground leading-[1.5]"
+						className="mt-8 max-w-[560px] text-[clamp(1.05rem,1.3vw,1.2rem)] text-foreground leading-normal"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.3 }}
 						viewport={viewport}
@@ -86,7 +86,7 @@ export function Hero() {
 						whileInView={fadeIn}
 					>
 						<a
-							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-[#0c140e] text-[15px] tracking-tight shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_8px_24px_-12px_oklch(from_var(--oxblood)_l_c_h/0.5)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_14px_30px_-12px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
+							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_8px_24px_-12px_oklch(from_var(--oxblood)_l_c_h/0.5)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_14px_30px_-12px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
 							href="/setup"
 						>
 							Analiza mi CV gratis
@@ -105,7 +105,7 @@ export function Hero() {
 
 					{/* risk-reversal chips */}
 					<motion.ul
-						className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10.5px] text-foreground/60 uppercase tracking-[0.1em]"
+						className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-foreground/60 text-xs uppercase tracking-widest"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.5 }}
 						viewport={viewport}
@@ -136,20 +136,20 @@ export function Hero() {
 							reducedMotion={motionDisabled}
 						>
 							<div className="relative flex items-center justify-between">
-								<p className="font-mono text-[10px] text-foreground/60 uppercase tracking-[0.11em]">
+								<p className="font-mono text-foreground/60 text-xs uppercase tracking-widest">
 									Puntaje de tu CV <span className="text-foreground/35">/ 100</span>
 								</p>
-								<span className="rounded-full bg-oxblood/15 px-2 py-0.5 font-medium font-mono text-[9.5px] text-oxblood uppercase tracking-[0.09em]">
+								<span className="rounded-full bg-oxblood/15 px-2 py-0.5 font-medium font-mono text-oxblood text-xs uppercase tracking-widest">
 									+48 pts
 								</span>
 							</div>
 							<div className="relative mt-auto pt-8">
 								<div className="flex items-baseline gap-3">
-									<span className="font-display font-semibold text-[34px] text-foreground/35 tabular-nums leading-none tracking-[-0.03em] line-through decoration-2">
+									<span className="font-display font-semibold text-[34px] text-foreground/35 tabular-nums leading-none tracking-tight line-through decoration-2">
 										47
 									</span>
 									<ArrowRightIcon className="text-foreground/40" size={18} weight="bold" />
-									<span className="font-display font-semibold text-[clamp(3.5rem,7vw,5rem)] text-foreground tabular-nums leading-[0.85] tracking-[-0.05em]">
+									<span className="font-display font-semibold text-[clamp(3.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-tighter">
 										95
 									</span>
 									<span className="font-display font-medium text-[20px] text-foreground/30 tabular-nums tracking-tight">
@@ -165,25 +165,25 @@ export function Hero() {
 										whileInView={motionDisabled ? undefined : { width: "95%" }}
 									/>
 								</div>
-								<p className="mt-3 text-[13px] text-foreground/60 leading-snug">
+								<p className="mt-3 text-foreground/60 text-sm leading-snug">
 									Reescrito por IA y revisado por tu coach, listo para reclutadores.
 								</p>
 							</div>
 						</OutcomeCard>
 
 						<OutcomeCard className="lg:col-span-2" reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Juega de tu lado</p>
-							<p className="mt-3 font-display font-semibold text-[28px] text-foreground leading-[1] tracking-[-0.03em]">
+							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Juega de tu lado</p>
+							<p className="mt-3 font-display font-semibold text-[28px] text-foreground leading-[1] tracking-tight">
 								Coach 1:1 senior
 							</p>
-							<p className="mt-4 font-mono text-[10.5px] text-foreground/70 uppercase tracking-[0.09em]">
+							<p className="mt-4 font-mono text-foreground/70 text-xs uppercase tracking-widest">
 								Hoy trabajan en las top 25 empresas peruanas y latinoamericanas
 							</p>
 						</OutcomeCard>
 
 						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Primera entrevista</p>
-							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Primera entrevista</p>
+							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-tighter">
 								Día 18
 							</p>
 							<div className="mt-4 flex items-center gap-1">
@@ -201,22 +201,18 @@ export function Hero() {
 										whileInView={motionDisabled ? undefined : { scaleY: 1 }}
 									/>
 								))}
-								<span className="ml-2 font-mono text-[9.5px] text-foreground/55 uppercase tracking-[0.1em]">
-									promedio
-								</span>
+								<span className="ml-2 font-mono text-foreground/55 text-xs uppercase tracking-widest">promedio</span>
 							</div>
 						</OutcomeCard>
 
 						<OutcomeCard reducedMotion={motionDisabled}>
-							<p className="font-mono text-[10px] text-foreground/55 uppercase tracking-[0.11em]">Tu inversión</p>
-							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Tu inversión</p>
+							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-tighter">
 								S/79
 								<span className="font-medium text-[16px] text-foreground/50 tracking-tight">/mes</span>
-								<span className="ml-2 font-medium font-mono text-[11px] text-foreground/55 tracking-tight">
-									≈ US$23
-								</span>
+								<span className="ml-2 font-medium font-mono text-foreground/55 text-xs tracking-tight">≈ US$23</span>
 							</p>
-							<p className="mt-4 font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.09em]">
+							<p className="mt-4 font-mono text-foreground/55 text-xs uppercase tracking-widest">
 								o S/40 (≈ US$11) la sesión única, sin suscripción
 							</p>
 						</OutcomeCard>
@@ -225,7 +221,7 @@ export function Hero() {
 			</section>
 
 			<section className="relative border-border border-b bg-muted/40 px-6 pt-14 pb-16">
-				<div className="mx-auto flex max-w-[1200px] flex-col items-center gap-12">
+				<div className="mx-auto flex max-w-7xl flex-col items-center gap-12">
 					<motion.dl
 						className="hidden flex-wrap items-baseline justify-center gap-x-12 gap-y-4 text-center"
 						initial="hidden"
@@ -251,11 +247,11 @@ export function Hero() {
 						<HeroStat countTo={18} label="días a tu primera entrevista" reducedMotion={motionDisabled} value="18" />
 					</motion.dl>
 					<div className="flex w-full flex-col items-center gap-6">
-						<p className="font-mono text-[10px] text-foreground/65 uppercase tracking-[0.12em]">
+						<p className="font-mono text-foreground/65 text-xs uppercase tracking-widest">
 							Nuestros talentos ya trabajan en
 						</p>
 						<LogoMarqueeRows />
-						<p className="hidden max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-[10px] text-foreground/60 uppercase tracking-[0.1em]">
+						<p className="hidden max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-mono text-foreground/60 text-xs uppercase tracking-widest">
 							<span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-foreground/20" />
 							<span>Empresas verificadas a través del LinkedIn de cada talento</span>
 						</p>
@@ -317,14 +313,14 @@ function HeroStat({
 }) {
 	return (
 		<motion.div className="flex flex-col items-center gap-1" variants={reducedMotion ? undefined : heroStatVariants}>
-			<dt className="font-display font-semibold text-[clamp(2rem,3.5vw,2.75rem)] text-foreground tabular-nums leading-none tracking-[-0.04em]">
+			<dt className="font-display font-semibold text-[clamp(2rem,3.5vw,2.75rem)] text-foreground tabular-nums leading-none tracking-tighter">
 				{countTo === undefined ? (
 					value
 				) : (
 					<CountUp decimals={decimals} duration={1.2} once suffix={suffix} to={countTo} />
 				)}
 			</dt>
-			<dd className="max-w-[18ch] font-mono text-[10px] text-foreground/60 uppercase tracking-[0.09em]">{label}</dd>
+			<dd className="max-w-[18ch] font-mono text-foreground/60 text-xs uppercase tracking-widest">{label}</dd>
 		</motion.div>
 	);
 }

@@ -34,13 +34,13 @@ export function LandingFooter() {
 			{/* Hairline accent above the signature, like a printer's mark */}
 			<div aria-hidden="true" className="absolute top-0 left-1/2 h-px w-24 -translate-x-1/2 bg-oxblood/60" />
 
-			<div className="mx-auto max-w-[1200px] px-6 pt-16 pb-10 md:pt-20">
+			<div className="mx-auto max-w-7xl px-6 pt-16 pb-10 md:pt-20">
 				{/* SIGNATURE — giant ASSENDIA wordmark, static */}
 				<SignatureMark />
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
-					className="mt-10 max-w-[640px] font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-[1.25] tracking-[-0.018em] md:mt-14"
+					className="mt-10 max-w-[640px] font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-[1.25] tracking-tight md:mt-14"
 					initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
 					transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.15 }}
 					viewport={{ once: true, margin: "-10% 0px" }}
@@ -67,9 +67,9 @@ export function LandingFooter() {
 								src="/assendia-logo.png"
 								width={36}
 							/>
-							<span className="font-bold font-display text-2xl text-foreground tracking-[-0.02em]">ASSENDIA</span>
+							<span className="font-bold font-display text-2xl text-foreground tracking-tight">ASSENDIA</span>
 						</a>
-						<p className="mt-4 max-w-[300px] text-[14px] text-foreground/70 leading-[1.6]">
+						<p className="mt-4 max-w-[300px] text-foreground/70 text-sm leading-relaxed">
 							Score CV, IA y coaching humano en una sola suscripción. Hecho en Perú para LATAM.
 						</p>
 					</div>
@@ -82,13 +82,13 @@ export function LandingFooter() {
 				{/* LEGAL ROW */}
 				<div className="mt-14 flex flex-col-reverse items-start justify-between gap-7 border-border border-t pt-7 md:flex-row md:items-center">
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-						<p className="font-mono text-[11px] text-foreground/65 uppercase tracking-[0.08em]">© 2026 ASSENDIA SAC</p>
+						<p className="font-mono text-foreground/65 text-xs uppercase tracking-widest">© 2026 ASSENDIA SAC</p>
 						<LegalDot />
 						<ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
 							{LEGAL_LINKS.map((link, idx) => (
 								<li className="flex items-center gap-3" key={link.href}>
 									<a
-										className="group/legal relative font-mono text-[11px] text-foreground/65 uppercase tracking-[0.08em] transition-colors duration-200 hover:text-foreground"
+										className="group/legal relative font-mono text-foreground/65 text-xs uppercase tracking-widest transition-colors duration-200 hover:text-foreground"
 										href={link.href}
 									>
 										{link.label}
@@ -124,10 +124,8 @@ function SignatureMark() {
 	return (
 		<div className="relative">
 			<div className="flex items-center justify-between gap-4">
-				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tracking-[0.12em]">
-					Tu carrera, en serio.
-				</span>
-				<span className="font-mono text-[10.5px] text-foreground/55 uppercase tabular-nums tracking-[0.12em]">
+				<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Tu carrera, en serio.</span>
+				<span className="font-mono text-foreground/55 text-xs uppercase tabular-nums tracking-widest">
 					Est. 2026 · Perú
 				</span>
 			</div>
@@ -135,7 +133,7 @@ function SignatureMark() {
 			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"
-					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-[0.85] tracking-[-0.06em]"
+					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-none tracking-tighter"
 				>
 					ASSENDIA
 				</span>
@@ -158,12 +156,12 @@ function FooterColumn({ col, colIdx }: FooterColumnProps) {
 			viewport={{ once: true, margin: "-5% 0px" }}
 			whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
 		>
-			<h2 className="mb-5 font-mono text-[10px] text-foreground/75 uppercase tracking-[0.12em]">{col.heading}</h2>
+			<h2 className="mb-5 font-mono text-foreground/75 text-xs uppercase tracking-widest">{col.heading}</h2>
 			<ul className="flex flex-col gap-2.5">
 				{col.links.map((link) => (
 					<li key={link.label}>
 						<a
-							className="group/link relative inline-flex items-center gap-1.5 text-[14px] text-foreground/75 transition-colors duration-200 hover:text-foreground"
+							className="group/link relative inline-flex items-center gap-1.5 text-foreground/75 text-sm transition-colors duration-200 hover:text-foreground"
 							href={link.href}
 						>
 							<span className="relative">
@@ -191,7 +189,7 @@ function LegalDot() {
 
 function DataProtectionPill() {
 	return (
-		<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/35 bg-oxblood/10 px-2.5 py-1 font-mono text-[10.5px] text-foreground/85 uppercase tracking-[0.08em]">
+		<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/35 bg-oxblood/10 px-2.5 py-1 font-mono text-foreground/85 text-xs uppercase tracking-widest">
 			<ShieldCheckIcon className="text-oxblood" size={11} weight="fill" />
 			Datos protegidos · Ley 29733 PE
 		</span>
