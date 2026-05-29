@@ -86,7 +86,7 @@ export function Hero() {
 						whileInView={fadeIn}
 					>
 						<a
-							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_8px_24px_-12px_oklch(from_var(--oxblood)_l_c_h/0.5)] transition-all duration-200 hover:translate-y-[-1px] hover:shadow-[0_1px_0_oklch(0.13_0_0_/_0.08),0_14px_30px_-12px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
+							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:translate-y-[-1px] hover:shadow-cta-hover"
 							href="/setup"
 						>
 							Analiza mi CV gratis

@@ -112,6 +112,7 @@ export function Faq() {
 								item={item}
 								key={item.q}
 								onToggle={() => setOpenValue((cur) => (cur === `faq-${idx}` ? null : `faq-${idx}`))}
+								reduced={reduced}
 							/>
 						))}
 					</ul>
@@ -145,10 +146,10 @@ interface FaqRowProps {
 	isOpen: boolean;
 	item: { q: string; a: string };
 	onToggle: () => void;
+	reduced: boolean | null;
 }
 
-function FaqRow({ idx, isOpen, item, onToggle }: FaqRowProps) {
-	const reduced = useReducedMotion();
+function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 	const triggerId = `faq-trigger-${idx}`;
 	const panelId = `faq-panel-${idx}`;
 

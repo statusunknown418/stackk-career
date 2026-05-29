@@ -1,57 +1,33 @@
 "use client";
 
 import { ArrowRightIcon, ListIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
+import { useState } from "react";
 import { useTheme } from "@/components/theme-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetPanel, SheetPopup, SheetTrigger } from "@/components/ui/sheet";
+import { useActiveSection } from "@/hooks/use-active-section";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./data";
 
 const SECTION_IDS = NAV_LINKS.map((link) => link.href.replace("#", ""));
+const CTA_SHOW_FROM_VIEWPORT_RATIO = 0.6;
 
 export function LandingNav() {
-	const [activeId, setActiveId] = useState<string | null>(null);
+	const activeId = useActiveSection(SECTION_IDS);
 	const [showCta, setShowCta] = useState(false);
 
-	useEffect(() => {
-		const onScroll = () => {
-			setShowCta(window.scrollY > window.innerHeight * 0.6);
-		};
-		onScroll();
-		window.addEventListener("scroll", onScroll, { passive: true });
-		return () => window.removeEventListener("scroll", onScroll);
-	}, []);
-
-	useEffect(() => {
-		const elements = SECTION_IDS.map((id) => document.getElementById(id)).filter(
-			(el): el is HTMLElement => el !== null
-		);
-		if (elements.length === 0) {
+	// `useMotionValueEvent` is the motion/react-idiomatic way to react to scroll changes
+	// without subscribing to window events directly. The CTA appears once the user has
+	// scrolled past 60% of the viewport (i.e. they're past the hero and into the body).
+	const { scrollY } = useScroll();
+	useMotionValueEvent(scrollY, "change", (latest) => {
+		if (typeof window === "undefined") {
 			return;
 		}
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				const visible = entries
-					.filter((entry) => entry.isIntersecting)
-					.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-				if (visible[0]) {
-					setActiveId(visible[0].target.id);
-				}
-			},
-			{
-				rootMargin: "-120px 0px -55% 0px",
-				threshold: [0, 0.25, 0.5, 0.75, 1],
-			}
-		);
-
-		for (const el of elements) {
-			observer.observe(el);
-		}
-		return () => observer.disconnect();
-	}, []);
+		setShowCta(latest > window.innerHeight * CTA_SHOW_FROM_VIEWPORT_RATIO);
+	});
 
 	return (
 		<header className="sticky top-4 z-50 mx-auto mt-4 w-full max-w-7xl px-4">
@@ -124,17 +100,13 @@ export function LandingNav() {
 }
 
 function ThemeToggle() {
-	const { setTheme } = useTheme();
-	const [isDark, setIsDark] = useState(true);
-
-	useEffect(() => {
-		const el = document.documentElement;
-		const sync = () => setIsDark(!el.classList.contains("light"));
-		sync();
-		const observer = new MutationObserver(sync);
-		observer.observe(el, { attributes: true, attributeFilter: ["class"] });
-		return () => observer.disconnect();
-	}, []);
+	// Source of truth comes from the existing ThemeProvider (`useTheme` returns the
+	// preference: "dark" | "light" | "system"). For the "system" case we read the OS
+	// preference declaratively with the repo's `useMediaQuery` (SSR-safe via
+	// `useSyncExternalStore`) — no MutationObserver, no useEffect needed here.
+	const { theme, setTheme } = useTheme();
+	const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
+	const isDark = theme === "dark" || (theme === "system" && systemDark);
 
 	return (
 		<button

@@ -34,6 +34,9 @@
 	--color-oxblood: var(--oxblood);
 	--color-marigold: var(--marigold);
 
+	--shadow-cta: var(--shadow-cta);
+	--shadow-cta-hover: var(--shadow-cta-hover);
+
 	--animate-aurora-1: aurora-1 7s ease-in-out infinite alternate;
 	--animate-aurora-2: aurora-2 9s ease-in-out infinite alternate;
 	--animate-mesh-drift-1: mesh-drift-1 8s ease-in-out infinite;
@@ -519,6 +522,15 @@
 		0 50px 100px -20px oklch(from var(--oxblood) l c h / 0.4),
 		0 30px 60px -30px oklch(0 0 0 / 0.7);
 	--shadow-floating: 0 12px 32px -6px oklch(0 0 0 / 0.55);
+
+	/* Primary CTA shadow used by the hero "Analiza mi CV gratis" button.
+	   Two-stop: a hairline at the top + a soft green-tinted spread below. */
+	--shadow-cta:
+		0 1px 0 oklch(0.13 0 0 / 0.08),
+		0 8px 24px -12px oklch(from var(--oxblood) l c h / 0.5);
+	--shadow-cta-hover:
+		0 1px 0 oklch(0.13 0 0 / 0.08),
+		0 14px 30px -12px oklch(from var(--oxblood) l c h / 0.6);
 }
 
 .dark {
@@ -648,5 +660,25 @@
 @layer utilities {
 	.text-balance {
 		text-wrap: balance;
+	}
+
+	/* Static CSS fallbacks for the hero aurora glow.
+	   Used when the WebGL MeshGradient is skipped (light mode, mobile, reduced motion, or out of view). */
+	.hero-glow-dark {
+		background: radial-gradient(
+			125% 110% at 28% 22%,
+			oklch(0.5 0.15 150 / 0.55),
+			oklch(0.3 0.09 152 / 0.32) 40%,
+			transparent 74%
+		);
+	}
+
+	.hero-glow-light {
+		background: radial-gradient(
+			125% 110% at 28% 20%,
+			oklch(0.88 0.13 150 / 0.6),
+			oklch(0.95 0.06 150 / 0.32) 42%,
+			transparent 76%
+		);
 	}
 }

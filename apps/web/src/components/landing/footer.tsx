@@ -5,14 +5,12 @@ import {
 	InstagramLogoIcon,
 	LinkedinLogoIcon,
 	ShieldCheckIcon,
-	WhatsappLogoIcon,
 	XLogoIcon,
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { FOOTER_COLUMNS } from "./data";
 
 const SOCIAL_LINKS = [
-	{ href: "https://wa.me/51999999999", Icon: WhatsappLogoIcon, label: "WhatsApp" },
 	{ href: "https://linkedin.com/company/assendia", Icon: LinkedinLogoIcon, label: "LinkedIn" },
 	{ href: "https://instagram.com/assendia", Icon: InstagramLogoIcon, label: "Instagram" },
 	{ href: "https://x.com/assendia", Icon: XLogoIcon, label: "X" },
