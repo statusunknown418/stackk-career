@@ -13,6 +13,7 @@ import {
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
+import { jsPDF } from "jspdf";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Shimmer } from "@/components/ai-elements/shimmer";
@@ -25,10 +26,12 @@ import { cn } from "@/lib/utils";
 import { CoverLetterSection } from "./cover-letter-section";
 
 interface LettersArtifactPanelProps {
+	activeVersion: number;
 	artifact: DeepPartial<CoverLetter> | undefined;
 	className?: string;
 	currentLanguage: CoverLetterLanguage;
 	error?: Error;
+	generationCount: number;
 	hasContent: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
@@ -133,10 +136,12 @@ function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined)
  *   - "Regenerar" — popover con presets de tono que firen un nuevo run.
  */
 export function LettersArtifactPanel({
+	activeVersion,
 	artifact,
 	className,
 	currentLanguage,
 	error,
+	generationCount,
 	hasContent,
 	isPending,
 	isStreaming,
@@ -175,18 +180,82 @@ export function LettersArtifactPanel({
 	};
 
 	const handleDownload = () => {
-		if (!formattedText) {
+		if (!artifact) {
 			return;
 		}
-		const blob = new Blob([formattedText], { type: "text/plain;charset=utf-8" });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = "cover-letter.txt";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
+		const { greeting, body, closing, signature } = artifact;
+		if (
+			typeof greeting !== "string" ||
+			typeof body !== "string" ||
+			typeof closing !== "string" ||
+			typeof signature !== "string"
+		) {
+			return;
+		}
+
+		try {
+			const doc = new jsPDF({
+				orientation: "portrait",
+				unit: "mm",
+				format: "a4",
+			});
+
+			const pageWidth = 210;
+			const pageHeight = 297;
+			const margin = 25;
+			const contentWidth = pageWidth - margin * 2;
+
+			doc.setFont("helvetica", "normal");
+			doc.setFontSize(11);
+
+			let cursorY = margin;
+
+			// Saludo
+			doc.setFont("helvetica", "bold");
+			const greetingLines = doc.splitTextToSize(greeting, contentWidth);
+			doc.text(greetingLines, margin, cursorY);
+			cursorY += greetingLines.length * 5 + 8;
+
+			// Cuerpo
+			doc.setFont("helvetica", "normal");
+			const paragraphs = body.split("\n\n");
+			for (const p of paragraphs) {
+				if (!p.trim()) {
+					continue;
+				}
+				const bodyLines = doc.splitTextToSize(p.trim(), contentWidth);
+				if (cursorY + bodyLines.length * 5 > pageHeight - margin) {
+					doc.addPage();
+					cursorY = margin;
+				}
+				doc.text(bodyLines, margin, cursorY);
+				cursorY += bodyLines.length * 5 + 6;
+			}
+
+			// Cierre
+			if (cursorY + 15 > pageHeight - margin) {
+				doc.addPage();
+				cursorY = margin;
+			}
+			cursorY += 4;
+			const closingLines = doc.splitTextToSize(closing, contentWidth);
+			doc.text(closingLines, margin, cursorY);
+			cursorY += closingLines.length * 5 + 8;
+
+			// Firma
+			const signatureLines = doc.splitTextToSize(signature, contentWidth);
+			if (cursorY + signatureLines.length * 5 > pageHeight - margin) {
+				doc.addPage();
+				cursorY = margin;
+			}
+			doc.setFont("helvetica", "bold");
+			doc.text(signatureLines, margin, cursorY);
+
+			doc.save("carta-de-presentacion.pdf");
+			toast.success("Carta descargada como PDF");
+		} catch {
+			toast.error("No se pudo generar el PDF");
+		}
 	};
 
 	return (
@@ -201,7 +270,7 @@ export function LettersArtifactPanel({
 								<Shimmer>CASEY redactando…</Shimmer>
 							</Badge>
 						)}
-						{!(error || isStreaming) && hasContent && <Badge variant="secondary">Listo</Badge>}
+						{!(error || isStreaming) && hasContent && <Badge variant="secondary">Versión {activeVersion}/5</Badge>}
 						{!(error || isStreaming || hasContent) && <Badge variant="secondary">Esperando datos</Badge>}
 					</FrameDescription>
 				</div>
@@ -220,7 +289,7 @@ export function LettersArtifactPanel({
 						</Button>
 
 						<Button
-							aria-label="Descargar como .txt"
+							aria-label="Descargar como PDF"
 							disabled={!canExport}
 							onClick={handleDownload}
 							size="icon-sm"
@@ -236,11 +305,18 @@ export function LettersArtifactPanel({
 									<Button
 										aria-label="Regenerar carta"
 										disabled={!canRegenerate}
+										onClick={(e) => {
+											if (generationCount >= 5) {
+												e.preventDefault();
+												e.stopPropagation();
+												onTriggerAsync({});
+											}
+										}}
 										size="sm"
 										type="button"
 										variant="outline"
 									>
-										<ArrowsClockwiseIcon className={cn(isPending && "animate-spin")} weight="bold" />
+										<ArrowsClockwiseIcon className={cn((isPending || isStreaming) && "animate-spin")} weight="bold" />
 										Regenerar
 									</Button>
 								}

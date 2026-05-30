@@ -18,6 +18,7 @@ export const caseyLettersInputSchema = z.object({
 	userId: z.string(),
 	resumeId: z.string(),
 	jobPosition: z.string().min(1).max(500),
+	jobDescription: z.string().max(5000).optional(),
 	language: coverLetterLanguageSchema.default("es"),
 	extraPrompt: z.string().max(2000).optional(),
 });

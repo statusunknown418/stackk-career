@@ -42,7 +42,10 @@ export const caseyLettersTask = schemaTask({
 		minTimeoutInMs: 1000,
 	},
 	schema: caseyLettersInputSchema,
-	run: async ({ extraPrompt, generationId, jobPosition, language, messageId, resumeId, userId }, { ctx, signal }) => {
+	run: async (
+		{ extraPrompt, generationId, jobPosition, jobDescription, language, messageId, resumeId, userId },
+		{ ctx, signal }
+	) => {
 		const db = getTriggerDb();
 
 		// Sonnet en attempts 1-2; Haiku como fallback en el último intento si los anteriores fallaron.
@@ -68,6 +71,7 @@ export const caseyLettersTask = schemaTask({
 		const result = await runCaseyLettersAgent({
 			extraPrompt,
 			jobPosition,
+			jobDescription,
 			language,
 			model: modelForAttempt,
 			resumePlaintext,

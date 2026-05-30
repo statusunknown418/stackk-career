@@ -17,6 +17,7 @@ export type CoverLetterLanguage = z.infer<typeof coverLetterLanguageSchema>;
  */
 export const createCoverLetterGenerationInputSchema = z.object({
 	jobPosition: z.string().trim().min(1).max(500),
+	jobDescription: z.string().trim().max(5000).optional(),
 	language: coverLetterLanguageSchema.default("es"),
 	resumeId: z.string().nonempty(),
 });

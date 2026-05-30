@@ -9,6 +9,7 @@ import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface LettersChatPanelMessage {
 	id: string;
@@ -23,8 +24,10 @@ interface LettersChatPanelProps {
 	isPending: boolean;
 	jobPosition: string;
 	messages: readonly LettersChatPanelMessage[];
+	onSelectVersion: (messageId: string) => void;
 	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
 	resumeTitle: string | null;
+	selectedMessageId: string | null;
 }
 
 interface ToolPresentation {
@@ -60,13 +63,15 @@ export function LettersChatPanel({
 	isPending,
 	jobPosition,
 	messages,
+	onSelectVersion,
 	onTriggerAsync,
 	resumeTitle,
+	selectedMessageId,
 }: LettersChatPanelProps) {
 	const [extraPrompt, setExtraPrompt] = useState("");
 
-	// Hide artifact messages — those render in the right pane — but keep tool rows.
-	const chatMessages = messages.filter((m) => !(m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE));
+	// Keep all messages in chronological order so we can select versions.
+	const chatMessages = messages;
 
 	return (
 		<section className="flex h-full flex-col gap-4">
@@ -87,6 +92,10 @@ export function LettersChatPanel({
 							<p className="mt-1 text-muted-foreground text-xs">
 								Si quieres orientar el tono o resaltar algo, escríbelo abajo.
 							</p>
+							<p className="mt-2 border-border/40 border-t pt-2 font-medium text-muted-foreground text-xs">
+								💡 Puedes hacer clic en las versiones generadas en el chat para ver su contenido en el panel de la
+								derecha.
+							</p>
 						</MessageContent>
 					</Message>
 
@@ -98,6 +107,39 @@ export function LettersChatPanel({
 									<Icon className="size-3.5" weight="duotone" />
 									<span>{label}</span>
 								</div>
+							);
+						}
+
+						if (m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE) {
+							const coverLetterMessages = messages.filter(
+								(msg) => msg.isAssistant === true && msg.objectType === COVER_LETTER_OBJECT_TYPE
+							);
+							const versionNumber = coverLetterMessages.findIndex((item) => item.id === m.id) + 1;
+							const isActive =
+								selectedMessageId === m.id || (selectedMessageId === null && m.id === coverLetterMessages.at(-1)?.id);
+
+							return (
+								<Message from="assistant" key={m.id}>
+									<MessageContent>
+										<button
+											className={cn(
+												"flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left outline-none transition-all",
+												isActive
+													? "border-accent bg-accent/72 text-accent-foreground shadow-sm"
+													: "border-border/40 bg-muted/32 text-foreground hover:bg-muted/72"
+											)}
+											onClick={() => onSelectVersion(m.id)}
+											type="button"
+										>
+											<span className="flex items-center gap-2 font-semibold text-sm">
+												📄 Versión {versionNumber}/5
+											</span>
+											<span className="font-normal text-muted-foreground text-xs">
+												{isActive ? "Visualizando" : "Haz clic para cargar"}
+											</span>
+										</button>
+									</MessageContent>
+								</Message>
 							);
 						}
 

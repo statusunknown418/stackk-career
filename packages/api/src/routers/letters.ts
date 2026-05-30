@@ -64,6 +64,7 @@ export const lettersRouter = {
 					owner: userId,
 					type: "cover-letter",
 					title: input.jobPosition,
+					summary: input.jobDescription,
 					resumeId: input.resumeId,
 					language: input.language,
 				})
@@ -92,6 +93,7 @@ export const lettersRouter = {
 				.select({
 					id: generations.id,
 					title: generations.title,
+					summary: generations.summary,
 					resumeId: generations.resumeId,
 					language: generations.language,
 					createdAt: generations.createdAt,
@@ -176,6 +178,7 @@ export const lettersRouter = {
 				language: generations.language,
 				resumeId: generations.resumeId,
 				title: generations.title,
+				summary: generations.summary,
 			})
 			.from(generations)
 			.where(
@@ -241,6 +244,7 @@ export const lettersRouter = {
 					extraPrompt: input.extraPrompt,
 					generationId: gen.id,
 					jobPosition: gen.title,
+					jobDescription: gen.summary ?? undefined,
 					language: effectiveLanguage,
 					messageId,
 					resumeId: gen.resumeId,

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { orpc } from "@/utils/orpc";
 
 interface LettersCreateFormProps {
@@ -29,6 +30,16 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 	const queryClient = useQueryClient();
 	const { data: resumes } = useSuspenseQuery(orpc.resumes.list.queryOptions());
 
+	const resumeOptions = resumes.map((resume) => ({
+		label: resume.title ?? "CV sin título",
+		value: resume.id,
+	}));
+
+	const languageOptions = [
+		{ label: "Español (LATAM)", value: "es" },
+		{ label: "English (US)", value: "en" },
+	];
+
 	const createMutation = useMutation(
 		orpc.letters.createGeneration.mutationOptions({
 			onSuccess: ({ generationId }) => {
@@ -43,6 +54,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 	const form = useForm({
 		defaultValues: {
 			jobPosition: "",
+			jobDescription: "",
 			language: "es" as "es" | "en",
 			resumeId: resumes[0]?.id ?? "",
 		},
@@ -91,18 +103,40 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 				)}
 			</form.Field>
 
+			<form.Field name="jobDescription">
+				{(field) => (
+					<Field>
+						<FieldLabel htmlFor="letters-job-description">Descripción del puesto</FieldLabel>
+						<Textarea
+							disabled={createMutation.isPending}
+							id="letters-job-description"
+							maxLength={5000}
+							onBlur={field.handleBlur}
+							onChange={(e) => field.handleChange(e.target.value)}
+							placeholder="Pega aquí la descripción del puesto o contexto de la oferta de trabajo para que CASEY adapte mejor la carta."
+							value={field.state.value}
+						/>
+						<FieldDescription>Opcional. Ayuda a alinear tus logros a lo que el puesto requiere.</FieldDescription>
+					</Field>
+				)}
+			</form.Field>
+
 			<form.Field name="resumeId">
 				{(field) => (
 					<Field>
 						<FieldLabel htmlFor="letters-resume-id">CV a vincular</FieldLabel>
-						<Select onValueChange={(value) => field.handleChange(value ?? "")} value={field.state.value}>
+						<Select
+							items={resumeOptions}
+							onValueChange={(value) => field.handleChange(value ?? "")}
+							value={field.state.value}
+						>
 							<SelectTrigger id="letters-resume-id">
 								<SelectValue placeholder="Elige un CV" />
 							</SelectTrigger>
-							<SelectPopup>
-								{resumes.map((resume) => (
-									<SelectItem key={resume.id} value={resume.id}>
-										{resume.title ?? "CV sin título"}
+							<SelectPopup alignItemWithTrigger={false}>
+								{resumeOptions.map((option) => (
+									<SelectItem key={option.value} value={option.value}>
+										{option.label}
 									</SelectItem>
 								))}
 							</SelectPopup>
@@ -117,15 +151,19 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 					<Field>
 						<FieldLabel htmlFor="letters-language">Idioma de la carta</FieldLabel>
 						<Select
+							items={languageOptions}
 							onValueChange={(value) => field.handleChange((value ?? "es") as "es" | "en")}
 							value={field.state.value}
 						>
 							<SelectTrigger id="letters-language">
 								<SelectValue placeholder="Elige idioma" />
 							</SelectTrigger>
-							<SelectPopup>
-								<SelectItem value="es">Español (LATAM)</SelectItem>
-								<SelectItem value="en">English (US)</SelectItem>
+							<SelectPopup alignItemWithTrigger={false}>
+								{languageOptions.map((option) => (
+									<SelectItem key={option.value} value={option.value}>
+										{option.label}
+									</SelectItem>
+								))}
 							</SelectPopup>
 						</Select>
 						<FieldDescription>Usa inglés si postulas a un rol fuera de LATAM.</FieldDescription>

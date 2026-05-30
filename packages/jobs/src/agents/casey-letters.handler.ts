@@ -14,6 +14,7 @@ const CASEY_MAX_STEPS = Number(process.env.CASEY_LETTERS_MAX_STEPS ?? 6); // 3 t
 
 export interface RunCaseyLettersInput {
 	extraPrompt?: string | undefined;
+	jobDescription?: string | undefined;
 	jobPosition: string;
 	language: CoverLetterLanguage;
 	/** Override per attempt — used by the task to fall back to Haiku on the last retry. */
@@ -189,6 +190,11 @@ You may ONLY mention the following if they are explicitly present in the CV retu
 - The very first sentence of \`body\` must name the role the candidate is applying to.
 - The very last sentence of \`body\` must connect the candidate to that specific company or team — and that connection MUST come from real CV material, not invented affinity. If the job position does NOT identify a company, the last sentence connects to the role's domain through real CV evidence instead.
 
+## 6. JOB DESCRIPTION ALIGNMENT — address real employer needs
+- If a job description context is provided, analyze it to identify key challenges, technologies, or requirements.
+- Prioritize highlighting matching skills, projects, and metrics from the candidate's CV that directly address the specific needs of the job description.
+- DO NOT invent or fabricate matching experience (Hard Rule 3 still applies). If the job description asks for skill Z and the candidate does not have it, do not mention Z or pretend they do.
+
 # Anti-clichés (banned literal phrases — never emit any of these inside the artifact)
 ${banPhrases}.
 
@@ -230,6 +236,7 @@ ${blocks.examplesBlock}
 export function runCaseyLettersAgent({
 	extraPrompt,
 	jobPosition,
+	jobDescription,
 	language,
 	model,
 	resumePlaintext,
@@ -240,6 +247,7 @@ export function runCaseyLettersAgent({
 	const userMessage = isEnglish
 		? [
 				`Target role: ${jobPosition}`,
+				jobDescription?.trim() ? `Job description context:\n${jobDescription.trim()}` : "(no job description provided)",
 				extraPrompt?.trim()
 					? `Additional instructions from the user for this turn:\n${extraPrompt.trim()}`
 					: "(no additional user instructions)",
@@ -247,6 +255,9 @@ export function runCaseyLettersAgent({
 			].join("\n\n")
 		: [
 				`Puesto objetivo: ${jobPosition}`,
+				jobDescription?.trim()
+					? `Descripción del puesto / contexto de la oferta:\n${jobDescription.trim()}`
+					: "(no se especificó descripción del puesto)",
 				extraPrompt?.trim()
 					? `Instrucciones adicionales del usuario para este turno:\n${extraPrompt.trim()}`
 					: "(sin instrucciones adicionales del usuario)",
