@@ -50,6 +50,26 @@ export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"habilidades transferibles",
 	"estoy emocionado",
 	"me emociona",
+
+	// REFUSAL / META-COMMENT PATTERNS — el modelo escribe una negativa o
+	// pedido de actualizar el CV en vez de una carta. EJEMPLO REAL observado:
+	// "Mi CV no cuenta con experiencia laboral documentada... Para redactar
+	// una carta honesta y útil necesito que el CV esté completo... Una vez
+	// que actualices tu CV con la información completa, con gusto redacto la
+	// carta de inmediato." Eso NO es una cover letter, es un mensaje al user
+	// disfrazado de artifact. Flageado = prompt drift crítico.
+	"no cuenta con experiencia",
+	"no cuento con experiencia",
+	"necesito que el cv",
+	"necesito que actualices",
+	"una vez que actualices",
+	"una vez que tengas",
+	"para redactar una carta honesta",
+	"con gusto redacto",
+	"redacto la carta de inmediato",
+	"no tengo información suficiente",
+	"si me proporcionas",
+	"si me das más información",
 ] as const;
 
 export const COVER_LETTER_CLICHE_PHRASES_EN = [
@@ -79,6 +99,15 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 	"i'm eager to",
 	"bring value",
 	"transferable skills",
+
+	// Refusal / meta-comment patterns
+	"my cv does not include",
+	"my cv lacks",
+	"i need your cv to be updated",
+	"once you update your cv",
+	"i'd be happy to write",
+	"i don't have enough information",
+	"if you could provide",
 ] as const;
 
 /**

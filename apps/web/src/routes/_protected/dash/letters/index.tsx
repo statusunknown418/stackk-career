@@ -15,10 +15,14 @@ export const Route = createFileRoute("/_protected/dash/letters/")({
 	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.letters.list.queryOptions()),
 });
 
+// Module-level: el Intl.DateTimeFormat es caro de construir y no depende de props/state.
+// `timeStyle: "short"` agrega HH:mm — para distinguir cartas actualizadas el mismo día
+// (request del user al ver 3 cartas con la misma fecha sin hora).
+const dateTimeFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
+
 function RouteComponent() {
 	const { data } = useSuspenseQuery(orpc.letters.list.queryOptions());
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
-	const dateFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long" });
 
 	return (
 		<section className="space-y-4">
@@ -54,7 +58,7 @@ function RouteComponent() {
 											<ItemTitle>{letter.title ?? "Sin título"}</ItemTitle>
 											{letter.updatedAt && (
 												<ItemDescription>
-													Actualizada el {dateFormatter.format(new Date(letter.updatedAt))}
+													Actualizada el {dateTimeFormatter.format(new Date(letter.updatedAt))}
 												</ItemDescription>
 											)}
 										</ItemContent>
