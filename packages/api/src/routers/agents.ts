@@ -16,6 +16,7 @@ import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "../";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
+import { assertMultipleQuotas, assertSingleQuota } from "../services/subscriptions";
 
 export const agentsRouter = {
 	triggerK02FastAnalysis: protectedProcedure
@@ -29,6 +30,8 @@ export const agentsRouter = {
 				generation: { id: input.generationId },
 				parentAnalysisId: input.parentAnalysisId,
 			});
+
+			await assertSingleQuota(context.db, userId, "resume_analyses_per_cycle");
 
 			const [row] = await context.db
 				.select({
@@ -143,6 +146,8 @@ export const agentsRouter = {
 				parentAnalysisId: input.parentAnalysisId,
 			});
 
+			await assertSingleQuota(context.db, userId, "resume_analyses_per_cycle");
+
 			const [resume] = await context.db
 				.select({ id: resumes.id, generationId: resumes.generationId })
 				.from(resumes)
@@ -244,6 +249,10 @@ export const agentsRouter = {
 				fileId: input.fileId ?? null,
 				hasFileUrl: Boolean(input.fileUrl),
 			});
+
+			// Parsing produces a resume + a `resume-creation` generation, same as `resumes.create`. Gate both
+			// limits at this entry point so the upload path can't outrun the per-cycle generation cap.
+			await assertMultipleQuotas(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
 
 			if (input.fileId) {
 				const [file] = await context.db

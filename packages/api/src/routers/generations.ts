@@ -9,12 +9,12 @@ import {
 	getResumeAnalysisInputSchema,
 	type ResumeAnalysisHistoryItem,
 } from "@stackk-career/schemas/api/generations";
-import { and, asc, count, desc, eq } from "drizzle-orm";
+import type { CachedUsageLimitKey } from "@stackk-career/schemas/subscriptions";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { protectedProcedure } from "../index";
 import { createResumeAnalysisDiff } from "../lib/analysis.helpers";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
-
-const MAX_GENERATIONS_PER_USER = 5;
+import { assertSingleQuota } from "../services/subscriptions";
 
 export const generationsRouter = {
 	create: protectedProcedure.input(createGenerationInputSchema).handler(async ({ context, input }) => {
@@ -25,21 +25,10 @@ export const generationsRouter = {
 			user: { id: userId },
 		});
 
-		const [usage] = await context.db.select({ total: count() }).from(generations).where(eq(generations.owner, userId));
+		const quotaKey: CachedUsageLimitKey =
+			input.type === "conversation" ? "conversation_generations_per_cycle" : "resume_creation_generations_per_cycle";
 
-		const total = usage?.total ?? 0;
-
-		context.log?.set({ usage: { total, limit: MAX_GENERATIONS_PER_USER } });
-
-		if (total >= MAX_GENERATIONS_PER_USER) {
-			const error = new ORPCError("FORBIDDEN", {
-				message: `Generation limit reached (${MAX_GENERATIONS_PER_USER}).`,
-			});
-
-			context.log?.set({ outcome: "limit_reached" });
-
-			throw error;
-		}
+		await assertSingleQuota(context.db, userId, quotaKey);
 
 		context.log?.set({
 			generation: {
@@ -75,9 +64,7 @@ export const generationsRouter = {
 			generation: { id: row.id },
 		});
 
-		await invalidateViewerUsage(context.db, userId, [
-			input.type === "conversation" ? "conversation_generations_per_cycle" : "resume_creation_generations_per_cycle",
-		]);
+		await invalidateViewerUsage(context.db, userId, [quotaKey]);
 
 		return row;
 	}),

@@ -35,7 +35,7 @@
     "@stackk-career/config": "workspace:*",
     "@types/node": "catalog:",
     "husky": "latest",
-    "lint-staged": "latest",
+    "lint-staged": "^17.0.5",
     "turbo": "^2.9.16",
     "typescript": "^6.0.3",
     "ultracite": "7.6.0"
