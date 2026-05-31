@@ -17,6 +17,7 @@ import { es } from "date-fns/locale";
 import { lazy, Suspense, useState } from "react";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
+import { DashRing } from "@/components/loading-ui/dash-ring";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ const STATUS_BADGE: Record<SubscriptionStatus, { label: string; variant: BadgePr
 };
 
 const HEADER_COPY: Record<View["kind"], { description: string; title: string }> = {
-	overview: { description: "Tu plan, tu uso y opciones de cambio.", title: "Tu plan" },
+	overview: { description: "Tu plan, tu uso y opciones de cambio.", title: "Plan" },
 	selector: { description: "Cambia o mejora tu plan cuando quieras.", title: "Elige tu plan" },
 	checkout: { description: "Ingresa los datos de tu tarjeta. El cobro es mensual.", title: "Confirmar pago" },
 };
@@ -246,7 +247,7 @@ function PlanOverview({ snapshot }: { snapshot: BillingSnapshot }): React.ReactE
 
 			<div className="flex flex-col gap-4">
 				<div className="flex items-baseline justify-between gap-2">
-					<span className="font-medium text-foreground text-sm">Uso de este ciclo</span>
+					<span className="font-medium text-foreground text-sm">Uso del ciclo</span>
 					<span className="text-muted-foreground text-xs tabular-nums">Reinicia {formatResetDate(periodEnd)}</span>
 				</div>
 				<div className="flex flex-col gap-3.5">
@@ -348,6 +349,7 @@ function PlanCheckout({
 	planId: PaidPlanIdInput;
 }): React.ReactElement {
 	const [brickError, setBrickError] = useState<string | null>(null);
+	const [submitting, setSubmitting] = useState(false);
 	const plan = PLAN_CATALOG[planId];
 
 	return (
@@ -373,26 +375,49 @@ function PlanCheckout({
 				</Alert>
 			)}
 
-			<Suspense
-				fallback={
-					<div className="flex min-h-48 items-center justify-center">
-						<Loader />
+			<div className="relative">
+				<Suspense
+					fallback={
+						<div className="flex min-h-48 items-center justify-center">
+							<Loader />
+						</div>
+					}
+				>
+					<PaymentBrick
+						amount={plan.priceMonthlyPen}
+						onBrickError={(message) => {
+							setBrickError(message);
+							toast.error(message);
+						}}
+						onTokenReady={async (args) => {
+							setBrickError(null);
+							setSubmitting(true);
+							try {
+								await onTokenReady(args);
+							} finally {
+								setSubmitting(false);
+							}
+						}}
+						payerEmail={payerEmail}
+					/>
+				</Suspense>
+
+				{submitting && (
+					<div
+						aria-live="polite"
+						className="fade-in-0 absolute inset-0 z-10 flex animate-in flex-col items-center justify-center gap-4 bg-background duration-200"
+						role="status"
+					>
+						<DashRing className="size-8 text-foreground" />
+						<div className="flex flex-col gap-1 text-center">
+							<p className="font-medium text-sm">Procesando tu pago</p>
+							<p className="text-muted-foreground text-xs">
+								Estamos validando tu tarjeta con Mercado Pago. No cierres esta ventana.
+							</p>
+						</div>
 					</div>
-				}
-			>
-				<PaymentBrick
-					amount={plan.priceMonthlyPen}
-					onBrickError={(message) => {
-						setBrickError(message);
-						toast.error(message);
-					}}
-					onTokenReady={async (args) => {
-						setBrickError(null);
-						await onTokenReady(args);
-					}}
-					payerEmail={payerEmail}
-				/>
-			</Suspense>
+				)}
+			</div>
 
 			<div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
 				<ShieldCheckIcon className="size-3.5 shrink-0" />
@@ -494,24 +519,29 @@ function BillingSheetContent(): React.ReactElement {
 	const hasAccess = hasActiveSubscriptionAccess(snapshot.subscription.status);
 	const canCancelSubscription = !isFree && hasAccess;
 
-	const submitCheckout: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, payerEmail }) => {
+	const submitCheckout: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, deviceId, payerEmail }) => {
 		if (view.kind !== "checkout") {
 			return;
 		}
+
 		const email = payerEmail ?? session?.user.email;
+
 		if (!email) {
 			showCheckoutError("Necesitamos un correo para procesar el pago.");
 			return;
 		}
+
 		const mutation = isFree ? createSubscription : changePlan;
-		await mutation
-			.mutateAsync({
-				backUrl: window.location.href,
-				cardTokenId,
-				payerEmail: email,
-				planId: view.planId,
-			})
-			.catch(() => undefined);
+
+		await mutation.mutateAsync({
+			backUrl: window.location.href.includes("localhost")
+				? "https://unoutspoken-arty-clayton.ngrok-free.dev/"
+				: window.location.href,
+			cardTokenId,
+			deviceId,
+			payerEmail: email,
+			planId: view.planId,
+		});
 	};
 
 	const inUpgradeFlow = view.kind !== "overview";

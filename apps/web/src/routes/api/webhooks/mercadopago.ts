@@ -64,7 +64,7 @@ async function handle({ request }: { request: Request }): Promise<Response> {
 	}
 }
 
-export const Route = createFileRoute("/api/webhooks/mercadopago/$")({
+export const Route = createFileRoute("/api/webhooks/mercadopago")({
 	server: {
 		handlers: {
 			POST: handle,
