@@ -10,6 +10,8 @@ export type PaidPlanIdInput = z.infer<typeof paidPlanIdSchema>;
 export const createSubscriptionInputSchema = z.object({
 	backUrl: z.string().url(),
 	cardTokenId: z.string().min(1),
+	/** Mercado Pago device fingerprint from `window.MP_DEVICE_SESSION_ID`; improves card validation. */
+	deviceId: z.string().min(1).optional(),
 	payerEmail: z.string().email(),
 	planId: paidPlanIdSchema,
 });

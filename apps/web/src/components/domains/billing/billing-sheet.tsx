@@ -17,6 +17,7 @@ import { es } from "date-fns/locale";
 import { lazy, Suspense, useState } from "react";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
+import { DashRing } from "@/components/loading-ui/dash-ring";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ const STATUS_BADGE: Record<SubscriptionStatus, { label: string; variant: BadgePr
 };
 
 const HEADER_COPY: Record<View["kind"], { description: string; title: string }> = {
-	overview: { description: "Tu plan, tu uso y opciones de cambio.", title: "Tu plan" },
+	overview: { description: "Tu plan, tu uso y opciones de cambio.", title: "Plan" },
 	selector: { description: "Cambia o mejora tu plan cuando quieras.", title: "Elige tu plan" },
 	checkout: { description: "Ingresa los datos de tu tarjeta. El cobro es mensual.", title: "Confirmar pago" },
 };
@@ -246,7 +247,7 @@ function PlanOverview({ snapshot }: { snapshot: BillingSnapshot }): React.ReactE
 
 			<div className="flex flex-col gap-4">
 				<div className="flex items-baseline justify-between gap-2">
-					<span className="font-medium text-foreground text-sm">Uso de este ciclo</span>
+					<span className="font-medium text-foreground text-sm">Uso del ciclo</span>
 					<span className="text-muted-foreground text-xs tabular-nums">Reinicia {formatResetDate(periodEnd)}</span>
 				</div>
 				<div className="flex flex-col gap-3.5">
@@ -338,32 +339,105 @@ function PlanSelector({
 	);
 }
 
+function useRefreshBilling(): () => void {
+	const queryClient = useQueryClient();
+
+	return () => {
+		queryClient.invalidateQueries({ queryKey: orpc.billing.getSnapshot.queryKey() });
+		queryClient.invalidateQueries({ queryKey: orpc.viewer.usage.queryKey() });
+	};
+}
+
 function PlanCheckout({
-	onTokenReady,
-	payerEmail,
+	onCompleted,
 	planId,
+	snapshot,
 }: {
-	onTokenReady: PaymentBrickProps["onTokenReady"];
-	payerEmail: string | undefined;
+	onCompleted: () => void;
 	planId: PaidPlanIdInput;
+	snapshot: BillingSnapshot;
 }): React.ReactElement {
+	const { data: session } = authClient.useSession();
+	const refreshBilling = useRefreshBilling();
 	const [brickError, setBrickError] = useState<string | null>(null);
+	const [checkoutError, setCheckoutError] = useState<string | null>(null);
 	const plan = PLAN_CATALOG[planId];
+	const isFree = snapshot.subscription.planId === "free";
+
+	const showError = (message: string) => {
+		setCheckoutError(message);
+		toast.error(message);
+	};
+
+	const createSubscription = useMutation(
+		orpc.billing.createSubscription.mutationOptions({
+			onMutate: () => setCheckoutError(null),
+			onSuccess: () => {
+				refreshBilling();
+				toast.success("¡Tu plan está activo!");
+				onCompleted();
+			},
+			onError: (err) => showError(err.message),
+		})
+	);
+
+	const changePlan = useMutation(
+		orpc.billing.changePlan.mutationOptions({
+			onMutate: () => setCheckoutError(null),
+			onSuccess: () => {
+				refreshBilling();
+				toast.success("Tu plan fue actualizado.");
+				onCompleted();
+			},
+			onError: (err) => showError(err.message),
+		})
+	);
+
+	const processing = createSubscription.isPending || changePlan.isPending;
+
+	const submit: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, deviceId, payerEmail }) => {
+		const email = payerEmail ?? session?.user.email;
+
+		if (!email) {
+			showError("Necesitamos un correo para procesar el pago.");
+			return;
+		}
+
+		const mutation = isFree ? createSubscription : changePlan;
+
+		await mutation.mutateAsync({
+			backUrl: window.location.href.includes("localhost")
+				? "https://unoutspoken-arty-clayton.ngrok-free.dev/"
+				: window.location.href,
+			cardTokenId,
+			deviceId,
+			payerEmail: email,
+			planId,
+		});
+	};
 
 	return (
-		<div className="flex flex-col gap-5">
-			<div className="flex items-center justify-between gap-3 rounded-xl border bg-muted/40 px-4 py-3">
+		<section className="flex flex-col gap-5">
+			<article className="flex items-center justify-between gap-3 rounded-xl border bg-muted/40 px-4 py-3">
 				<div className="flex flex-col gap-0.5">
 					<span className="font-medium text-sm">{plan.displayName}</span>
 					<span className="text-muted-foreground text-xs">Primer cobro hoy, luego cada mes</span>
 				</div>
-				<div className="flex items-baseline gap-1">
+				<p className="flex items-baseline gap-1">
 					<span className="font-heading text-lg tabular-nums leading-none">
 						{penCurrencyFormatter.format(plan.priceMonthlyPen)}
 					</span>
 					<span className="text-muted-foreground text-xs">/mes</span>
-				</div>
-			</div>
+				</p>
+			</article>
+
+			{checkoutError && (
+				<Alert variant="error">
+					<WarningCircleIcon />
+					<AlertTitle>No pudimos procesar el pago</AlertTitle>
+					<AlertDescription>{checkoutError}</AlertDescription>
+				</Alert>
+			)}
 
 			{brickError && (
 				<Alert variant="error">
@@ -373,77 +447,56 @@ function PlanCheckout({
 				</Alert>
 			)}
 
-			<Suspense
-				fallback={
-					<div className="flex min-h-48 items-center justify-center">
-						<Loader />
-					</div>
-				}
-			>
-				<PaymentBrick
-					amount={plan.priceMonthlyPen}
-					onBrickError={(message) => {
-						setBrickError(message);
-						toast.error(message);
-					}}
-					onTokenReady={async (args) => {
-						setBrickError(null);
-						await onTokenReady(args);
-					}}
-					payerEmail={payerEmail}
-				/>
-			</Suspense>
+			<div className="relative">
+				<Suspense
+					fallback={
+						<div className="flex min-h-48 items-center justify-center">
+							<Loader />
+						</div>
+					}
+				>
+					<PaymentBrick
+						amount={plan.priceMonthlyPen}
+						onBrickError={(message) => {
+							setBrickError(message);
+							toast.error(message);
+						}}
+						onTokenReady={async (args) => {
+							setBrickError(null);
+							await submit(args);
+						}}
+						payerEmail={session?.user.email}
+					/>
+				</Suspense>
 
-			<div className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
-				<ShieldCheckIcon className="size-3.5 shrink-0" />
-				<span>Pago protegido por Mercado Pago. No guardamos los datos de tu tarjeta.</span>
+				{processing && (
+					<div
+						className="fade-in-0 absolute inset-0 z-10 flex animate-in flex-col items-center justify-center gap-4 bg-background duration-200"
+						role="status"
+					>
+						<DashRing className="size-8 text-foreground" />
+						<p className="max-w-xs text-balance text-center text-sm">
+							<span className="font-medium">Procesando tu pago</span>
+							<span className="mt-1 block text-muted-foreground text-xs">
+								Estamos validando tu tarjeta con Mercado Pago. No cierres esta ventana.
+							</span>
+						</p>
+					</div>
+				)}
 			</div>
-		</div>
+
+			<footer className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
+				<ShieldCheckIcon className="size-3.5 shrink-0" />
+				Pago protegido por Mercado Pago. No guardamos los datos de tu tarjeta.
+			</footer>
+		</section>
 	);
 }
 
 function BillingSheetContent(): React.ReactElement {
-	const { data: session } = authClient.useSession();
-	const queryClient = useQueryClient();
 	const [view, setView] = useState<View>({ kind: "overview" });
-	const [checkoutError, setCheckoutError] = useState<string | null>(null);
-
-	const showCheckoutError = (message: string) => {
-		setCheckoutError(message);
-		toast.error(message);
-	};
+	const refreshBilling = useRefreshBilling();
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
-
-	const refreshBilling = () => {
-		queryClient.invalidateQueries({ queryKey: orpc.billing.getSnapshot.queryKey() });
-		queryClient.invalidateQueries({ queryKey: orpc.viewer.usage.queryKey() });
-	};
-
-	const createSubscription = useMutation(
-		orpc.billing.createSubscription.mutationOptions({
-			onMutate: () => setCheckoutError(null),
-			onSuccess: () => {
-				refreshBilling();
-				setCheckoutError(null);
-				toast.success("¡Tu plan está activo!");
-				setView({ kind: "overview" });
-			},
-			onError: (err) => showCheckoutError(err.message),
-		})
-	);
-
-	const changePlan = useMutation(
-		orpc.billing.changePlan.mutationOptions({
-			onMutate: () => setCheckoutError(null),
-			onSuccess: () => {
-				refreshBilling();
-				setCheckoutError(null);
-				toast.success("Tu plan fue actualizado.");
-				setView({ kind: "overview" });
-			},
-			onError: (err) => showCheckoutError(err.message),
-		})
-	);
 
 	const cancelSubscription = useMutation(
 		orpc.billing.cancelSubscription.mutationOptions({
@@ -494,32 +547,9 @@ function BillingSheetContent(): React.ReactElement {
 	const hasAccess = hasActiveSubscriptionAccess(snapshot.subscription.status);
 	const canCancelSubscription = !isFree && hasAccess;
 
-	const submitCheckout: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, payerEmail }) => {
-		if (view.kind !== "checkout") {
-			return;
-		}
-		const email = payerEmail ?? session?.user.email;
-		if (!email) {
-			showCheckoutError("Necesitamos un correo para procesar el pago.");
-			return;
-		}
-		const mutation = isFree ? createSubscription : changePlan;
-		await mutation
-			.mutateAsync({
-				backUrl: window.location.href,
-				cardTokenId,
-				payerEmail: email,
-				planId: view.planId,
-			})
-			.catch(() => undefined);
-	};
-
 	const inUpgradeFlow = view.kind !== "overview";
 	const header = HEADER_COPY[view.kind];
-	const goBack = () => {
-		setCheckoutError(null);
-		setView(view.kind === "checkout" ? { kind: "selector" } : { kind: "overview" });
-	};
+	const goBack = () => setView(view.kind === "checkout" ? { kind: "selector" } : { kind: "overview" });
 
 	return (
 		<>
@@ -538,23 +568,10 @@ function BillingSheetContent(): React.ReactElement {
 			<SheetPanel>
 				{view.kind === "overview" && <PlanOverview snapshot={snapshot} />}
 				{view.kind === "selector" && (
-					<PlanSelector
-						onSelectPlan={(planId) => {
-							setCheckoutError(null);
-							setView({ kind: "checkout", planId });
-						}}
-						snapshot={snapshot}
-					/>
-				)}
-				{view.kind === "checkout" && checkoutError && (
-					<Alert variant="error">
-						<WarningCircleIcon />
-						<AlertTitle>No pudimos procesar el pago</AlertTitle>
-						<AlertDescription>{checkoutError}</AlertDescription>
-					</Alert>
+					<PlanSelector onSelectPlan={(planId) => setView({ kind: "checkout", planId })} snapshot={snapshot} />
 				)}
 				{view.kind === "checkout" && (
-					<PlanCheckout onTokenReady={submitCheckout} payerEmail={session?.user.email} planId={view.planId} />
+					<PlanCheckout onCompleted={() => setView({ kind: "overview" })} planId={view.planId} snapshot={snapshot} />
 				)}
 			</SheetPanel>
 

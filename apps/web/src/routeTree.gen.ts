@@ -19,6 +19,7 @@ import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-su
 import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
 import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
+import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
@@ -26,7 +27,6 @@ import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/da
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
 import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
 import { Route as ProtectedDashLettersIndexRouteImport } from './routes/_protected/dash/letters/index'
-import { Route as ApiWebhooksMercadopagoSplatRouteImport } from './routes/api/webhooks/mercadopago/$'
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 import { Route as ProtectedDashLettersGenerationIdRouteImport } from './routes/_protected/dash/letters/$generationId'
@@ -80,6 +80,11 @@ const ProtectedDashIndexRoute = ProtectedDashIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
+const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
+  id: '/api/webhooks/mercadopago',
+  path: '/api/webhooks/mercadopago',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
@@ -117,12 +122,6 @@ const ProtectedDashLettersIndexRoute =
     path: '/letters/',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
-const ApiWebhooksMercadopagoSplatRoute =
-  ApiWebhooksMercadopagoSplatRouteImport.update({
-    id: '/api/webhooks/mercadopago/$',
-    path: '/api/webhooks/mercadopago/$',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiWebhooksCalSplatRoute = ApiWebhooksCalSplatRouteImport.update({
   id: '/api/webhooks/cal/$',
   path: '/api/webhooks/cal/$',
@@ -155,11 +154,11 @@ export interface FileRoutesByFullPath {
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/dash/': typeof ProtectedDashIndexRoute
   '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
-  '/api/webhooks/mercadopago/$': typeof ApiWebhooksMercadopagoSplatRoute
   '/dash/letters/': typeof ProtectedDashLettersIndexRoute
   '/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
@@ -176,11 +175,11 @@ export interface FileRoutesByTo {
   '/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/dash': typeof ProtectedDashIndexRoute
   '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
-  '/api/webhooks/mercadopago/$': typeof ApiWebhooksMercadopagoSplatRoute
   '/dash/letters': typeof ProtectedDashLettersIndexRoute
   '/dash/resumes': typeof ProtectedDashResumesIndexRoute
 }
@@ -200,11 +199,11 @@ export interface FileRoutesById {
   '/_protected/dash/suggested': typeof ProtectedDashSuggestedRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
   '/_protected/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/_protected/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
   '/api/webhooks/cal/$': typeof ApiWebhooksCalSplatRoute
-  '/api/webhooks/mercadopago/$': typeof ApiWebhooksMercadopagoSplatRoute
   '/_protected/dash/letters/': typeof ProtectedDashLettersIndexRoute
   '/_protected/dash/resumes/': typeof ProtectedDashResumesIndexRoute
 }
@@ -224,11 +223,11 @@ export interface FileRouteTypes {
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/api/webhooks/mercadopago'
     | '/dash/'
     | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
-    | '/api/webhooks/mercadopago/$'
     | '/dash/letters/'
     | '/dash/resumes/'
   fileRoutesByTo: FileRoutesByTo
@@ -245,11 +244,11 @@ export interface FileRouteTypes {
     | '/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/api/webhooks/mercadopago'
     | '/dash'
     | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
-    | '/api/webhooks/mercadopago/$'
     | '/dash/letters'
     | '/dash/resumes'
   id:
@@ -268,11 +267,11 @@ export interface FileRouteTypes {
     | '/_protected/dash/suggested'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/api/webhooks/mercadopago'
     | '/_protected/dash/'
     | '/_protected/dash/letters/$generationId'
     | '/_protected/dash/resumes/$resumeId'
     | '/api/webhooks/cal/$'
-    | '/api/webhooks/mercadopago/$'
     | '/_protected/dash/letters/'
     | '/_protected/dash/resumes/'
   fileRoutesById: FileRoutesById
@@ -287,8 +286,8 @@ export interface RootRouteChildren {
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
+  ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
   ApiWebhooksCalSplatRoute: typeof ApiWebhooksCalSplatRoute
-  ApiWebhooksMercadopagoSplatRoute: typeof ApiWebhooksMercadopagoSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -363,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
+    '/api/webhooks/mercadopago': {
+      id: '/api/webhooks/mercadopago'
+      path: '/api/webhooks/mercadopago'
+      fullPath: '/api/webhooks/mercadopago'
+      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rpc/$': {
       id: '/api/rpc/$'
       path: '/api/rpc/$'
@@ -411,13 +417,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dash/letters/'
       preLoaderRoute: typeof ProtectedDashLettersIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
-    }
-    '/api/webhooks/mercadopago/$': {
-      id: '/api/webhooks/mercadopago/$'
-      path: '/api/webhooks/mercadopago/$'
-      fullPath: '/api/webhooks/mercadopago/$'
-      preLoaderRoute: typeof ApiWebhooksMercadopagoSplatRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/webhooks/cal/$': {
       id: '/api/webhooks/cal/$'
@@ -492,8 +491,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
+  ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
   ApiWebhooksCalSplatRoute: ApiWebhooksCalSplatRoute,
-  ApiWebhooksMercadopagoSplatRoute: ApiWebhooksMercadopagoSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

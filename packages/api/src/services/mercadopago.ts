@@ -90,45 +90,46 @@ function normalize(response: MercadopagoPreapprovalResponse): ProviderSubscripti
 export interface CreateSubscriptionInput {
 	backUrl: string;
 	cardTokenId: string;
+	/** Mercado Pago device fingerprint (`window.MP_DEVICE_SESSION_ID`) — sent as `X-Meli-Session-Id`. */
+	deviceId?: string;
 	idempotencyKey: string;
 	payerEmail: string;
 	planId: PaidPlanId;
 	userId: string;
 }
 
-const CARD_TOKEN_SERVICE_NOT_FOUND = "Card token service not found";
-const CARD_TOKEN_SUBSCRIPTION_MESSAGE =
-	"Mercado Pago rechazó el token de tarjeta para suscripciones. Si estás probando con credenciales TEST-*, este flujo no crea suscripciones autorizadas con tarjeta.";
-
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
 }
 
-function isCardTokenServiceNotFound(error: unknown): boolean {
-	if (error instanceof Error && error.message.includes(CARD_TOKEN_SERVICE_NOT_FOUND)) {
-		return true;
-	}
-
-	if (!isRecord(error)) {
-		return false;
+/**
+ * Extract the message Mercado Pago returned on a failed API call. The SDK throws the raw response
+ * body (a plain object, not an `Error`) for API errors — e.g. `CC_VAL_433 Credit card validation has
+ * failed` on a declined preapproval. Network/timeout failures arrive as real `Error` instances and
+ * are left for the caller to rethrow as a genuine 5xx.
+ */
+function mercadopagoApiErrorMessage(error: unknown): string | null {
+	if (error instanceof Error || !isRecord(error)) {
+		return null;
 	}
 
 	const message = error.message;
-	const status = error.status;
-
-	if (message === CARD_TOKEN_SERVICE_NOT_FOUND && (status === 404 || status === "404")) {
-		return true;
+	if (typeof message === "string" && message.length > 0) {
+		return message;
 	}
 
-	return isCardTokenServiceNotFound(error.cause) || isCardTokenServiceNotFound(error.response);
+	return mercadopagoApiErrorMessage(error.cause) ?? mercadopagoApiErrorMessage(error.response);
 }
 
+/**
+ * Surface Mercado Pago's own error message to the client as a `BAD_REQUEST` so the checkout sheet can
+ * display it verbatim. The original provider body is kept as `cause` for logs. Anything that is not a
+ * Mercado Pago API error body (e.g. network/timeout `Error`s) is rethrown unchanged as a 5xx.
+ */
 function normalizeCreatePreapprovalError(error: unknown): never {
-	if (isCardTokenServiceNotFound(error)) {
-		throw new ORPCError("BAD_REQUEST", {
-			cause: "mercadopago_card_token_service_not_found",
-			message: CARD_TOKEN_SUBSCRIPTION_MESSAGE,
-		});
+	const message = mercadopagoApiErrorMessage(error);
+	if (message !== null) {
+		throw new ORPCError("BAD_REQUEST", { cause: error, message });
 	}
 
 	throw error;
@@ -153,6 +154,9 @@ export async function createPreapproval(input: CreateSubscriptionInput): Promise
 			},
 			requestOptions: {
 				idempotencyKey: input.idempotencyKey,
+				// Device fingerprint: Mercado Pago's antifraud rejects recurring-card validation
+				// (CC_VAL_433) when this is missing on `status: "authorized"` preapprovals.
+				meliSessionId: input.deviceId,
 			},
 		});
 
