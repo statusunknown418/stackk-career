@@ -13,15 +13,15 @@ export type MercadopagoPreapprovalStatus = (typeof mercadopagoPreapprovalStatusE
  * Mapping rationale:
  * - `authorized` → `active` (recurring billing live)
  * - `pending` → `trialing` (awaiting first authorization)
- * - `paused` → `past_due` (provider paused for failed payment / dunning)
- * - `cancelled` → `canceled` (user or system canceled)
+ * - `paused` → `paused` (user-requested pause stops future renewals without provider refund flow)
+ * - `cancelled` → `canceled` (provider-side hard cancellation)
  * - `finished` → `expired` (recurrence ended naturally)
  */
 export function normalizePreapprovalStatus(status: MercadopagoPreapprovalStatus): SubscriptionStatus {
 	const map: Record<MercadopagoPreapprovalStatus, SubscriptionStatus> = {
 		authorized: "active",
 		pending: "trialing",
-		paused: "past_due",
+		paused: "paused",
 		cancelled: "canceled",
 		finished: "expired",
 	};

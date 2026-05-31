@@ -24,7 +24,7 @@ const Devtools =
 			default: () => (
 				<>
 					<TanStackDevtools
-						config={{ position: "top-right", panelLocation: "top" }}
+						config={{ position: "top-left", panelLocation: "top" }}
 						eventBusConfig={{ debug: false }}
 						plugins={[pacerDevtoolsPlugin()]}
 					/>

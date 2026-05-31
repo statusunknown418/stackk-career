@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Frame, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 import {
@@ -80,7 +81,10 @@ export function ResumePendingCards({
 
 	useEffect(() => {
 		if (completedCount > completedCountRef.current) {
-			queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() }),
+				invalidateBillingQueries(queryClient),
+			]);
 		}
 		completedCountRef.current = completedCount;
 	}, [completedCount, queryClient]);

@@ -12,9 +12,10 @@ import {
 	type PlanId,
 	type SubscriptionStatus,
 } from "@stackk-career/schemas/subscriptions";
-import { addMonths, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { Invoice, MercadoPagoConfig, PreApproval } from "mercadopago";
 import { localPlanIdForProviderPlan, type PaidPlanId, providerPlanIdForLocalPlan } from "../lib/mercadopago-mapping";
+import { deriveBillingWindow } from "./billing-window";
 import {
 	type ApplyProviderSubscriptionStateInput,
 	applyProviderSubscriptionState,
@@ -189,9 +190,10 @@ export async function fetchAuthorizedPayment(
 }
 
 /**
- * Cancel a Mercado Pago preapproval. The local row is **not** mutated here — webhook delivery
- * eventually reconciles status, or callers can immediately invoke {@link applyProviderCheckoutResult}
- * with the returned state.
+ * Cancel a Mercado Pago preapproval. Use only when replacing or rolling back a provider
+ * preapproval; user-requested plan cancellation should pause instead to avoid provider refunds.
+ * The local row is **not** mutated here — webhook delivery eventually reconciles status, or callers
+ * can immediately invoke {@link applyProviderCheckoutResult} with the returned state.
  */
 export async function cancelPreapproval(preapprovalId: string): Promise<ProviderSubscriptionState> {
 	const response = await getPreApproval().update({
@@ -201,16 +203,17 @@ export async function cancelPreapproval(preapprovalId: string): Promise<Provider
 	return normalize(mercadopagoPreapprovalResponseSchema.parse(response));
 }
 
-interface DerivePeriodInput {
-	dateCreated: Date;
-	lastChargedDate: Date | null;
-	nextPaymentDate: Date | null;
-}
-
-function deriveBillingWindow(input: DerivePeriodInput): { currentPeriodEnd: Date; currentPeriodStart: Date } {
-	const start = input.lastChargedDate ?? input.dateCreated;
-	const end = input.nextPaymentDate ?? addMonths(start, 1);
-	return { currentPeriodEnd: end, currentPeriodStart: start };
+/**
+ * Pause a Mercado Pago preapproval for user-requested cancellation. Mercado Pago documents
+ * `paused` as the non-destructive alternative to `cancelled`, so this stops future renewals
+ * without requesting provider-side cancellation/refund behavior.
+ */
+export async function pausePreapproval(preapprovalId: string): Promise<ProviderSubscriptionState> {
+	const response = await getPreApproval().update({
+		id: preapprovalId,
+		body: { status: "paused" },
+	});
+	return normalize(mercadopagoPreapprovalResponseSchema.parse(response));
 }
 
 interface ApplyProviderCheckoutResultInput {

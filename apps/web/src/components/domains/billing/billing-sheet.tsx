@@ -32,8 +32,10 @@ import {
 	SheetPopup,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { ShineBorder } from "@/components/ui/shine-border";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { cn } from "@/lib/utils";
 import { type client, orpc } from "@/utils/orpc";
 import type { PaymentBrickProps } from "./payment-brick";
@@ -54,8 +56,6 @@ const penCurrencyFormatter = new Intl.NumberFormat("es-PE", {
 
 const PAID_PLAN_IDS = ["pro", "max"] as const satisfies readonly PaidPlanIdInput[];
 
-const PLAN_RANK: Record<string, number> = { free: 0, pro: 1, max: 2 };
-
 const NEAR_LIMIT_RATIO = 0.8;
 
 const USAGE_METRICS: { key: CachedUsageLimitKey; label: string }[] = [
@@ -70,6 +70,7 @@ const STATUS_BADGE: Record<SubscriptionStatus, { label: string; variant: BadgePr
 	active: { label: "Activo", variant: "success" },
 	trialing: { label: "Prueba", variant: "info" },
 	past_due: { label: "Pago pendiente", variant: "warning" },
+	paused: { label: "Pausado", variant: "outline" },
 	canceled: { label: "Cancelado", variant: "outline" },
 	expired: { label: "Expirado", variant: "error" },
 };
@@ -156,7 +157,7 @@ function UsageRow({ label, limit, used }: { label: string; limit: LimitValue; us
 		return (
 			<div className="flex flex-col gap-2 opacity-55">
 				<div className="flex items-center justify-between gap-3 text-sm">
-					<span className="inline-flex items-center gap-1.5 text-muted-foreground">
+					<span className="inline-flex items-center gap-1.5">
 						<LockSimpleIcon className="size-3.5" />
 						{label}
 					</span>
@@ -267,8 +268,7 @@ function PlanSelector({
 	onSelectPlan: (planId: PaidPlanIdInput) => void;
 	snapshot: BillingSnapshot;
 }): React.ReactElement {
-	const currentRank = PLAN_RANK[snapshot.subscription.planId];
-	const recommendedId = PAID_PLAN_IDS.find((planId) => PLAN_RANK[planId] > currentRank);
+	const recommendedId = "max" satisfies PaidPlanIdInput;
 
 	return (
 		<div className="flex flex-col gap-3">
@@ -279,33 +279,34 @@ function PlanSelector({
 
 				return (
 					<div
-						className={cn(
-							"flex flex-col gap-4 rounded-xl border p-5 transition-colors",
-							isRecommended && "border-primary bg-muted/30 ring-1 ring-primary/15",
-							isCurrent && "bg-muted/40"
-						)}
+						className={cn("relative flex flex-col gap-4 rounded-xl border p-5 transition-colors", isCurrent && "ring")}
 						key={planId}
 					>
-						<div className="flex items-start justify-between gap-3">
-							<div className="flex flex-wrap items-center gap-2">
+						{isRecommended && <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />}
+
+						{isRecommended && isCurrent !== isRecommended && (
+							<Badge className="w-max" size="sm" variant="default">
+								<SealCheckIcon weight="fill" />
+								Recomendado
+							</Badge>
+						)}
+
+						<div className="flex justify-between gap-2">
+							<div className="flex items-start gap-2">
 								<span className="font-heading text-lg leading-none">{plan.displayName}</span>
-								{isRecommended && (
-									<Badge size="sm" variant="default">
-										<SealCheckIcon weight="fill" />
-										Recomendado
-									</Badge>
-								)}
+
 								{isCurrent && (
 									<Badge size="sm" variant="outline">
 										Actual
 									</Badge>
 								)}
 							</div>
+
 							<div className="flex items-baseline gap-1">
 								<span className="font-heading text-xl tabular-nums leading-none">
 									{penCurrencyFormatter.format(plan.priceMonthlyPen)}
 								</span>
-								<span className="text-muted-foreground text-xs">/mes</span>
+								<span className="text-muted-foreground text-xs">x mes</span>
 							</div>
 						</div>
 
@@ -324,12 +325,7 @@ function PlanSelector({
 							})}
 						</div>
 
-						<Button
-							className="w-full"
-							disabled={isCurrent}
-							onClick={() => onSelectPlan(planId)}
-							variant={isRecommended ? "default" : "outline"}
-						>
+						<Button className="w-full" disabled={isCurrent} onClick={() => onSelectPlan(planId)} variant={"outline"}>
 							{isCurrent ? "Tu plan actual" : `Elegir ${plan.displayName}`}
 						</Button>
 					</div>
@@ -343,8 +339,7 @@ function useRefreshBilling(): () => void {
 	const queryClient = useQueryClient();
 
 	return () => {
-		queryClient.invalidateQueries({ queryKey: orpc.billing.getSnapshot.queryKey() });
-		queryClient.invalidateQueries({ queryKey: orpc.viewer.usage.queryKey() });
+		invalidateBillingQueries(queryClient);
 	};
 }
 
@@ -359,6 +354,7 @@ function PlanCheckout({
 }): React.ReactElement {
 	const { data: session } = authClient.useSession();
 	const refreshBilling = useRefreshBilling();
+
 	const [brickError, setBrickError] = useState<string | null>(null);
 	const [checkoutError, setCheckoutError] = useState<string | null>(null);
 	const plan = PLAN_CATALOG[planId];
@@ -435,7 +431,13 @@ function PlanCheckout({
 				<Alert variant="error">
 					<WarningCircleIcon />
 					<AlertTitle>No pudimos procesar el pago</AlertTitle>
-					<AlertDescription>{checkoutError}</AlertDescription>
+					<AlertDescription>
+						<span>{checkoutError}</span>
+						<span>
+							Asegúrate de que las compras por internet estén activadas. Si el problema continúa, intenta con otra
+							tarjeta; aceptamos Visa, Mastercard, Diners Club, American Express y entre otraas.
+						</span>
+					</AlertDescription>
 				</Alert>
 			)}
 
@@ -485,8 +487,8 @@ function PlanCheckout({
 				)}
 			</div>
 
-			<footer className="flex items-center justify-center gap-1.5 text-muted-foreground text-xs">
-				<ShieldCheckIcon className="size-3.5 shrink-0" />
+			<footer className="flex justify-center gap-1.5 text-muted-foreground text-xs">
+				<ShieldCheckIcon className="size-3 text-success" />
 				Pago protegido por Mercado Pago. No guardamos los datos de tu tarjeta.
 			</footer>
 		</section>
@@ -498,11 +500,11 @@ function BillingSheetContent(): React.ReactElement {
 	const refreshBilling = useRefreshBilling();
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
 
-	const cancelSubscription = useMutation(
-		orpc.billing.cancelSubscription.mutationOptions({
+	const pauseSubscription = useMutation(
+		orpc.billing.pauseSubscription.mutationOptions({
 			onSuccess: () => {
 				refreshBilling();
-				toast.success("Tu suscripción fue cancelada.");
+				toast.success("Tu suscripción fue pausada.");
 			},
 			onError: (err) => toast.error(err.message),
 		})
@@ -545,7 +547,7 @@ function BillingSheetContent(): React.ReactElement {
 	const snapshot = snapshotQuery.data;
 	const isFree = snapshot.subscription.planId === "free";
 	const hasAccess = hasActiveSubscriptionAccess(snapshot.subscription.status);
-	const canCancelSubscription = !isFree && hasAccess;
+	const canPauseSubscription = !isFree && hasAccess;
 
 	const inUpgradeFlow = view.kind !== "overview";
 	const header = HEADER_COPY[view.kind];
@@ -581,14 +583,14 @@ function BillingSheetContent(): React.ReactElement {
 						<SparkleIcon weight="fill" />
 						{isFree ? "Mejorar plan" : "Cambiar plan"}
 					</Button>
-					{canCancelSubscription && (
+					{canPauseSubscription && (
 						<Button
-							loading={cancelSubscription.isPending}
-							onClick={() => cancelSubscription.mutate(undefined)}
+							loading={pauseSubscription.isPending}
+							onClick={() => pauseSubscription.mutate(undefined)}
 							size="sm"
 							variant="ghost-muted"
 						>
-							Cancelar ahora
+							Pausar ahora
 						</Button>
 					)}
 				</SheetFooter>

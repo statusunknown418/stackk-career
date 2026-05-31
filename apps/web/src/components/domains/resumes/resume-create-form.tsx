@@ -9,6 +9,7 @@ import { Dropzone } from "@/components/ui/dropzone";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { orpc } from "@/utils/orpc";
 
 interface ResumeCreateFormProps {
@@ -30,8 +31,11 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 	const queryClient = useQueryClient();
 	const createBlankMutation = useMutation(
 		orpc.resumes.create.mutationOptions({
-			onSuccess: ({ resumeId }) => {
-				queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
+			onSuccess: async ({ resumeId }) => {
+				await Promise.all([
+					queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() }),
+					invalidateBillingQueries(queryClient),
+				]);
 				onClose();
 				navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });
 			},

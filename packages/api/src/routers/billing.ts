@@ -1,7 +1,12 @@
 import { ORPCError } from "@orpc/server";
 import { createSubscriptionInputSchema } from "@stackk-career/schemas/api/billing";
 import { protectedProcedure } from "../index";
-import { applyProviderCheckoutResult, cancelPreapproval, createPreapproval } from "../services/mercadopago";
+import {
+	applyProviderCheckoutResult,
+	cancelPreapproval,
+	createPreapproval,
+	pausePreapproval,
+} from "../services/mercadopago";
 import { getActiveSubscriptionForUser, getUsageSnapshot } from "../services/subscriptions";
 
 export const billingRouter = {
@@ -121,19 +126,19 @@ export const billingRouter = {
 	}),
 
 	/**
-	 * @description Cancel the Mercado Pago preapproval immediately and mirror the returned provider
-	 * state locally. Mercado Pago does not expose a native period-end cancellation primitive here.
+	 * @description Pause the Mercado Pago preapproval immediately and mirror the returned provider
+	 * state locally. Pausing stops future renewals without provider-side cancellation/refund behavior.
 	 */
-	cancelSubscription: protectedProcedure.handler(async ({ context }) => {
+	pauseSubscription: protectedProcedure.handler(async ({ context }) => {
 		const userId = context.session.user.id;
 		const subscription = await getActiveSubscriptionForUser(context.db, userId);
 
 		context.log?.set({
-			billing: { action: "cancel_subscription", planId: subscription.planId, userId },
+			billing: { action: "pause_subscription", planId: subscription.planId, userId },
 		});
 
 		if (subscription.planId === "free") {
-			throw new ORPCError("BAD_REQUEST", { message: "El plan free no se puede cancelar" });
+			throw new ORPCError("BAD_REQUEST", { message: "El plan free no se puede pausar" });
 		}
 
 		const preapprovalId = subscription.providerSubscriptionId;
@@ -143,7 +148,7 @@ export const billingRouter = {
 			});
 		}
 
-		const state = await cancelPreapproval(preapprovalId);
+		const state = await pausePreapproval(preapprovalId);
 		await applyProviderCheckoutResult(context.db, { state, userId });
 
 		return getUsageSnapshot(context.db, userId);

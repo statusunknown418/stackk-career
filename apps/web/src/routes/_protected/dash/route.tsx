@@ -32,6 +32,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
@@ -43,9 +44,12 @@ function DashLayout() {
 	const matchRoute = useLocation();
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
+
 	const [billingOpen, setBillingOpen] = useState(false);
+
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
 	const planLabel = snapshotQuery.data?.plan.displayName ?? "Plan";
+	const planMeta = snapshotQuery.data?.plan.id;
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
@@ -136,9 +140,11 @@ function DashLayout() {
 						<TooltipContent>Avanzar</TooltipContent>
 					</Tooltip>
 
-					<Button className="ml-auto" onClick={() => setBillingOpen(true)} size="sm" variant="outline">
+					<Button className="ml-auto" onClick={() => setBillingOpen(true)} size="sm" variant="ghost">
 						<SparkleIcon weight="fill" />
-						{planLabel}
+						<span className={cn(planMeta === "pro" && "text-indigo-400", planMeta === "max" && "text-pink-400")}>
+							{planLabel}
+						</span>
 					</Button>
 				</nav>
 

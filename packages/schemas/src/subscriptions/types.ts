@@ -4,7 +4,7 @@ export const planIdEnum = ["free", "pro", "max"] as const;
 export const planIdSchema = z.enum(planIdEnum);
 export type PlanId = (typeof planIdEnum)[number];
 
-export const subscriptionStatusEnum = ["active", "past_due", "canceled", "expired", "trialing"] as const;
+export const subscriptionStatusEnum = ["active", "past_due", "paused", "canceled", "expired", "trialing"] as const;
 export type SubscriptionStatus = (typeof subscriptionStatusEnum)[number];
 
 export const subscriptionProviderEnum = ["system", "mercadopago"] as const;
