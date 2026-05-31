@@ -2,6 +2,7 @@
 
 import { IdentificationCardIcon, PaperPlaneRightIcon, ReadCvLogoIcon, WrenchIcon } from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
+import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { ComponentType } from "react";
 import { useState } from "react";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
@@ -73,6 +74,13 @@ export function LettersChatPanel({
 	// Keep all messages in chronological order so we can select versions.
 	const chatMessages = messages;
 
+	// Una vez que ya existe una carta, el submit exige texto: regenerar "sin cambios"
+	// vive en el popover de "Regenerar" del panel derecho. Así un submit vacío por
+	// inercia no quema una versión. La primera generación (sin artifact aún) sí se
+	// permite vacía, por si el auto-trigger no corrió.
+	const hasArtifact = messages.some((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE);
+	const canSubmit = !isPending && (extraPrompt.trim().length > 0 || !hasArtifact);
+
 	return (
 		<section className="flex h-full flex-col gap-4">
 			<Conversation className="flex-1">
@@ -132,7 +140,7 @@ export function LettersChatPanel({
 											type="button"
 										>
 											<span className="flex items-center gap-2 font-semibold text-sm">
-												📄 Versión {versionNumber}/5
+												📄 Versión {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
 											</span>
 											<span className="font-normal text-muted-foreground text-xs">
 												{isActive ? "Visualizando" : "Haz clic para cargar"}
@@ -156,6 +164,9 @@ export function LettersChatPanel({
 				className="flex flex-col gap-2 border-border border-t pt-4"
 				onSubmit={async (e) => {
 					e.preventDefault();
+					if (!canSubmit) {
+						return;
+					}
 					const trimmed = extraPrompt.trim();
 					try {
 						await onTriggerAsync({ extraPrompt: trimmed || undefined });
@@ -180,7 +191,7 @@ export function LettersChatPanel({
 					/>
 				</Field>
 
-				<Button className="self-end" disabled={isPending} size="sm" type="submit">
+				<Button className="self-end" disabled={!canSubmit} size="sm" type="submit">
 					<PaperPlaneRightIcon weight="bold" />
 					{isPending ? "Generando…" : "Generar carta"}
 				</Button>

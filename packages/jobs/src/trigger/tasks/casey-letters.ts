@@ -127,9 +127,9 @@ export const caseyLettersTask = schemaTask({
 
 		// Persist each tool call as a chat row so el panel izquierdo los renderiza inline
 		// (fidelidad al diagrama: getUserMetadata → message, getSelectedResume → message).
-		// Compartimos el `order` del artifact: la query del get ordena por
-		// (order asc, createdAt asc), así que los tools quedan entre el turno del usuario
-		// y el siguiente mensaje sin colisionar con el artifact (que el chat filtra).
+		// La API reserva `artifactOrder - 1` para los tools: la query del get ordena por
+		// (order asc, createdAt asc), así que insertarlos un escalón antes del artifact los
+		// renderiza ANTES de su tarjeta de versión (que el chat filtra), no después.
 		if (toolCalls.length > 0) {
 			metadata.set("step", "persisting_tool_calls");
 			const [artifactRow] = await db
@@ -137,14 +137,14 @@ export const caseyLettersTask = schemaTask({
 				.from(messages)
 				.where(eq(messages.id, messageId))
 				.limit(1);
-			const artifactOrder = artifactRow?.order ?? 0;
+			const toolOrder = (artifactRow?.order ?? 1) - 1;
 
 			await db.insert(messages).values(
 				toolCalls.map((call) => ({
 					generationId,
 					isAssistant: true,
 					isTool: true,
-					order: artifactOrder,
+					order: toolOrder,
 					toolMeta: { toolId: call.toolCallId, toolName: call.toolName },
 				}))
 			);

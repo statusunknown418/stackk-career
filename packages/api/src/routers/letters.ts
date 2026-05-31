@@ -7,6 +7,7 @@ import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-l
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import {
 	createCoverLetterGenerationInputSchema,
+	MAX_COVER_LETTER_VERSIONS,
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
@@ -212,10 +213,30 @@ export const lettersRouter = {
 		}
 
 		const existing = await context.db
-			.select({ id: messages.id })
+			.select({ order: messages.order, error: messages.error, objectType: messages.objectType })
 			.from(messages)
 			.where(eq(messages.generationId, gen.id));
-		const baseOrder = existing.length;
+
+		// Límite real de versiones (la UI lo refleja, pero el tope vive acá). Solo cuentan
+		// artifacts NO fallidos — un run que reventó no debe consumir cuota.
+		const versionCount = existing.filter((m) => m.objectType === COVER_LETTER_OBJECT_TYPE && m.error === null).length;
+		if (versionCount >= MAX_COVER_LETTER_VERSIONS) {
+			context.log?.set({ outcome: "version_limit_reached" });
+			throw new ORPCError("BAD_REQUEST", {
+				message: `Alcanzaste el límite de ${MAX_COVER_LETTER_VERSIONS} versiones para esta carta.`,
+			});
+		}
+
+		// `order` monotónico = max(order) + 1. NO usar el count de filas: es racy con
+		// triggers concurrentes y se infla con los tool-messages que el task inserta luego.
+		const maxOrder = existing.reduce((acc, m) => Math.max(acc, m.order ?? -1), -1);
+		const baseOrder = maxOrder + 1;
+
+		// Layout del turno para que en el chat los tool-calls salgan ANTES de su versión:
+		//   [extraPrompt del user] → [tool-calls del task @ toolOrder] → [artifact @ artifactOrder]
+		// El task inserta los tools en `artifactOrder - 1` (= toolOrder), justo antes.
+		const toolOrder = input.extraPrompt ? baseOrder + 1 : baseOrder;
+		const artifactOrder = toolOrder + 1;
 
 		if (input.extraPrompt) {
 			await context.db.insert(messages).values({
@@ -232,7 +253,7 @@ export const lettersRouter = {
 			id: messageId,
 			isAssistant: true,
 			objectType: COVER_LETTER_OBJECT_TYPE,
-			order: input.extraPrompt ? baseOrder + 1 : baseOrder,
+			order: artifactOrder,
 		});
 
 		try {

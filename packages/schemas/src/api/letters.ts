@@ -10,6 +10,14 @@ export const coverLetterLanguageSchema = z.enum(["es", "en"]);
 export type CoverLetterLanguage = z.infer<typeof coverLetterLanguageSchema>;
 
 /**
+ * Máximo de versiones (generaciones del artifact) por carta. Fuente única de
+ * verdad — el server lo enforcea en `letters.trigger` y la UI lo usa para el
+ * badge "Versión n/N", el diálogo de límite y el guard del botón. Solo cuentan
+ * versiones no fallidas.
+ */
+export const MAX_COVER_LETTER_VERSIONS = 5;
+
+/**
  * Input for the dialog at /letters: pick the target job position, which CV to link,
  * and the output language. The API creates a `generation` of type "cover-letter"
  * with the linked resumeId + language and returns its id, which becomes

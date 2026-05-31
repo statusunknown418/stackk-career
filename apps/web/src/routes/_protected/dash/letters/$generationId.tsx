@@ -2,6 +2,7 @@ import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-l
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -61,11 +62,15 @@ function RouteComponent() {
 	const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
 	const [showLimitDialog, setShowLimitDialog] = useState(false);
 	const autoTriggeredRef = useRef(false);
+	// Evita disparar dos runs en paralelo (doble-click, auto-trigger + manual). El realtime
+	// solo trackea un runHandle, así que dos triggers simultáneos perderían uno.
+	const inFlightRef = useRef(false);
 
 	const coverLetterMessages = data
 		? data.messages.filter((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE)
 		: [];
-	const generationCount = coverLetterMessages.length;
+	// El límite cuenta solo versiones NO fallidas — un run que reventó no consume cuota.
+	const generationCount = coverLetterMessages.filter((m) => !m.error).length;
 
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
@@ -84,12 +89,20 @@ function RouteComponent() {
 	const triggerMutateAsync = triggerMutation.mutateAsync;
 	const onTriggerAsync = useCallback(
 		async (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => {
-			if (generationCount >= 5) {
+			if (inFlightRef.current) {
+				return;
+			}
+			if (generationCount >= MAX_COVER_LETTER_VERSIONS) {
 				setShowLimitDialog(true);
 				return;
 			}
+			inFlightRef.current = true;
 			setSelectedMessageId(null);
-			return await triggerMutateAsync({ generationId, ...input });
+			try {
+				return await triggerMutateAsync({ generationId, ...input });
+			} finally {
+				inFlightRef.current = false;
+			}
 		},
 		[generationId, triggerMutateAsync, generationCount]
 	);
@@ -176,8 +189,8 @@ function RouteComponent() {
 					<AlertDialogHeader>
 						<AlertDialogTitle>Límite de generaciones alcanzado</AlertDialogTitle>
 						<AlertDialogDescription>
-							Has alcanzado el límite máximo de 5 versiones para esta carta de presentación. Si deseas realizar más
-							cambios, te sugerimos crear una nueva carta.
+							Has alcanzado el límite máximo de {MAX_COVER_LETTER_VERSIONS} versiones para esta carta de presentación.
+							Si deseas realizar más cambios, te sugerimos crear una nueva carta.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

@@ -12,6 +12,7 @@ import {
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { jsPDF } from "jspdf";
 import { useState } from "react";
@@ -98,9 +99,10 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 ] as const;
 
 /**
- * Serialize the (possibly partial) cover letter to plain text suitable for clipboard
- * + .txt download. Returns null si alguna sección falta o todavía es un chunk
- * incompleto — el caller usa eso para deshabilitar Copy/Download mientras streamea.
+ * Serialize the (possibly partial) cover letter to plain text for the clipboard Copy
+ * button. Returns null si alguna sección falta o todavía es un chunk incompleto — el
+ * caller usa eso para deshabilitar Copy/Download mientras streamea. (El Download genera
+ * un PDF con jsPDF a partir del mismo artifact, no un .txt.)
  */
 function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined): string | null {
 	if (!artifact) {
@@ -131,8 +133,8 @@ function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined)
  * Inherits the app's neutral palette (bg-background / bg-card) — no landing tokens.
  *
  * Header buttons (top-right):
- *   - Copy (clipboard) — disabled mientras streamea o la carta está incompleta.
- *   - Download (.txt) — idem.
+ *   - Copy (clipboard, texto plano) — disabled mientras streamea o la carta está incompleta.
+ *   - Download (PDF vía jsPDF) — idem.
  *   - "Regenerar" — popover con presets de tono que firen un nuevo run.
  */
 export function LettersArtifactPanel({
@@ -270,7 +272,11 @@ export function LettersArtifactPanel({
 								<Shimmer>CASEY redactando…</Shimmer>
 							</Badge>
 						)}
-						{!(error || isStreaming) && hasContent && <Badge variant="secondary">Versión {activeVersion}/5</Badge>}
+						{!(error || isStreaming) && hasContent && (
+							<Badge variant="secondary">
+								Versión {activeVersion}/{MAX_COVER_LETTER_VERSIONS}
+							</Badge>
+						)}
 						{!(error || isStreaming || hasContent) && <Badge variant="secondary">Esperando datos</Badge>}
 					</FrameDescription>
 				</div>
@@ -306,7 +312,10 @@ export function LettersArtifactPanel({
 										aria-label="Regenerar carta"
 										disabled={!canRegenerate}
 										onClick={(e) => {
-											if (generationCount >= 5) {
+											// En el límite no abrimos el popover de presets: cancelamos la apertura y
+											// disparamos onTriggerAsync sin preset, que detecta el tope y muestra el
+											// diálogo de límite (única vía que tiene el panel para señalarlo).
+											if (generationCount >= MAX_COVER_LETTER_VERSIONS) {
 												e.preventDefault();
 												e.stopPropagation();
 												onTriggerAsync({});

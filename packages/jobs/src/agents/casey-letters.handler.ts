@@ -7,7 +7,6 @@ import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
 export const CASEY_LETTERS_MODEL: LanguageModel = "anthropic/claude-sonnet-4-6";
 export const CASEY_LETTERS_FALLBACK_MODEL: LanguageModel = "anthropic/claude-haiku-4-5";
-export const CASEY_LETTERS_OBJECT_TYPE = "cover-letter-v1";
 
 const CASEY_TIMEOUT_MS = Number(process.env.CASEY_LETTERS_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
 const CASEY_MAX_STEPS = Number(process.env.CASEY_LETTERS_MAX_STEPS ?? 6); // 3 tools + buffer
@@ -56,7 +55,7 @@ Example C — CV SPARSE / estudiante postulando a primera práctica. The CV only
   "greeting": "Estimada/o equipo de Yape:",
   "body": "Postulo al rol de Practicante de Data Science. Soy estudiante de pregrado en la Pontificia Universidad Católica del Perú; las cursos de la carrera me están dando las bases de estadística, programación y análisis de datos que necesito para empezar a trabajar.\\n\\nMe interesa Yape porque es uno de los pocos productos peruanos que opera a escala masiva, y quiero entrar al mundo de data science aplicado a un problema real de pagos en vez de a un dataset académico. Busco una pasantía donde aportar lo que vengo aprendiendo y crecer con un equipo que ya está resolviendo cosas difíciles.",
   "closing": "Quedo atento a coordinar una conversación cuando puedan.",
-  "signature": "Atentamente,\\nJoseph Melgarejo\\na20202635@pucp.edu.pe"
+  "signature": "Atentamente,\\nValeria Cáceres\\na20214567@pucp.edu.pe"
 }
 \`\`\`
 
@@ -107,7 +106,7 @@ Example C — SPARSE CV / student applying to their first internship. The CV onl
   "greeting": "Hi Cursor team:",
   "body": "I'm applying for the Software Engineering Intern role. I'm an undergraduate student at Pontificia Universidad Católica del Perú; my coursework is giving me the foundations in algorithms, systems programming, and clean code that I need to start contributing.\\n\\nCursor catches my attention because it's one of the few products genuinely re-thinking what an IDE can be once a model is in the loop, instead of bolting AI onto an existing editor. I'd like an internship where I can ship to production and learn from a team operating at this end of the curve.",
   "closing": "I'd love to set up a short call when it works for you.",
-  "signature": "Best,\\nJoseph Melgarejo\\na20202635@pucp.edu.pe"
+  "signature": "Best,\\nValeria Cáceres\\na20214567@pucp.edu.pe"
 }
 \`\`\`
 

@@ -47,7 +47,6 @@ export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"me motiva la oportunidad",
 	"agregar valor",
 	"aportar valor",
-	"habilidades transferibles",
 	"estoy emocionado",
 	"me emociona",
 
@@ -98,7 +97,6 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 	"leverage my skills",
 	"i'm eager to",
 	"bring value",
-	"transferable skills",
 
 	// Refusal / meta-comment patterns
 	"my cv does not include",
