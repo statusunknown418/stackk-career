@@ -90,7 +90,7 @@ function normalize(response: MercadopagoPreapprovalResponse): ProviderSubscripti
 export interface CreateSubscriptionInput {
 	backUrl: string;
 	cardTokenId: string;
-	/** Mercado Pago device fingerprint (`window.MP_DEVICE_SESSION_ID`) — sent as `X-Meli-Session-Id`. */
+	/** Mercado Pago device fingerprint (`window.MP_DEVICE_SESSION_ID`) — sent as `X-Meli-Session-Id` when present. */
 	deviceId?: string;
 	idempotencyKey: string;
 	payerEmail: string;

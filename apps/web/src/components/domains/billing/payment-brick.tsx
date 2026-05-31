@@ -5,6 +5,10 @@ import Loader from "@/components/loader";
 
 let sdkInitialized = false;
 
+interface MercadoPagoWindow extends Window {
+	MP_DEVICE_SESSION_ID?: string;
+}
+
 function ensureSdkInitialized(): void {
 	if (sdkInitialized) {
 		return;
@@ -67,12 +71,13 @@ export default function PaymentBrick({ amount, payerEmail, onBrickError, onToken
 			}}
 			onError={(error) => onBrickError(error.message ?? "No pudimos cargar el formulario de pago.")}
 			onSubmit={async ({ formData }) => {
-				const deviceId =
-					typeof window === "undefined"
-						? undefined
-						: (window as { MP_DEVICE_SESSION_ID?: string }).MP_DEVICE_SESSION_ID;
+				const deviceId = (window as MercadoPagoWindow).MP_DEVICE_SESSION_ID;
 
-				await onTokenReady({ cardTokenId: formData.token, deviceId, payerEmail: formData.payer.email });
+				await onTokenReady({
+					cardTokenId: formData.token,
+					deviceId: typeof deviceId === "string" && deviceId.length > 0 ? deviceId : undefined,
+					payerEmail: formData.payer.email,
+				});
 			}}
 		/>
 	);

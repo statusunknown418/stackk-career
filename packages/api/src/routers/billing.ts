@@ -21,7 +21,12 @@ export const billingRouter = {
 	createSubscription: protectedProcedure.input(createSubscriptionInputSchema).handler(async ({ input, context }) => {
 		const userId = context.session.user.id;
 		context.log?.set({
-			billing: { action: "create_subscription", planId: input.planId, userId },
+			billing: {
+				action: "create_subscription",
+				deviceFingerprintPresent: Boolean(input.deviceId),
+				planId: input.planId,
+				userId,
+			},
 		});
 
 		const state = await createPreapproval({
@@ -61,6 +66,7 @@ export const billingRouter = {
 			billing: {
 				action: "change_plan",
 				currentPlanId: subscription.planId,
+				deviceFingerprintPresent: Boolean(input.deviceId),
 				nextPlanId: input.planId,
 				userId,
 			},
