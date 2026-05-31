@@ -12,6 +12,7 @@ import {
 } from "@stackk-career/schemas/ai/resume-analysis";
 import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { k02DetailedAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-detailed-analysis";
+import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { and, eq, isNull, ne } from "drizzle-orm";
@@ -81,6 +82,7 @@ export const k02DetailedAnalysisTask = schemaTask({
 			.where(and(eq(resumeAnalyses.id, analysisId), eq(resumeAnalyses.status, "pending")));
 
 		metadata.set("step", "analyzing");
+
 		if (priorAnalysis) {
 			metadata.set("reanalysis", {
 				parentAnalysisId: priorAnalysis.analysisId,
@@ -153,10 +155,17 @@ export const k02DetailedAnalysisTask = schemaTask({
 			attempt: ctx.attempt.number,
 		});
 
-		await db
+		const updated = await db
 			.update(resumeAnalyses)
 			.set({ status: "failed", error: message, model: K02_DETAILED_ANALYSIS_MODEL })
-			.where(and(eq(resumeAnalyses.id, payload.analysisId), ne(resumeAnalyses.status, "ready")));
+			.where(and(eq(resumeAnalyses.id, payload.analysisId), ne(resumeAnalyses.status, "ready")))
+			.returning({ userId: resumeAnalyses.userId });
+
+		if (updated[0]) {
+			await db.$cache.invalidate({
+				tags: [viewerUsageTag(updated[0].userId, "resume_analyses_per_cycle")],
+			});
+		}
 	},
 });
 

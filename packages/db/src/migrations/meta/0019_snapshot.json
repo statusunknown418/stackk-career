@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7871ee35-5398-4270-b7eb-705b6955a6cd",
-  "prevId": "616906b4-a7a1-4478-93b5-a00cd75de32f",
+  "id": "6d6f0d9c-d6af-4ab1-9d95-659849d3eff7",
+  "prevId": "dee2a58c-c5d9-4130-b098-e9c597bba183",
   "tables": {
     "account": {
       "name": "account",
@@ -608,6 +608,21 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "resumeId": {
+          "name": "resumeId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'es'"
         },
         "createdAt": {
           "name": "createdAt",
@@ -1479,14 +1494,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "cancelAtPeriodEnd": {
-          "name": "cancelAtPeriodEnd",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "createdAt": {
           "name": "createdAt",

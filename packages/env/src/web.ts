@@ -9,6 +9,8 @@ export const env = createEnv({
 		VITE_CAL_COM_GENERAL_COACHING_LINK: z.string().min(1).optional(),
 		VITE_CAL_COM_ORIGIN: z.url().optional(),
 		VITE_CAL_COM_PRE_INTERVIEW_LINK: z.string().min(1).optional(),
+
+		VITE_MERCADOPAGO_PUBLIC_KEY: z.string().min(1),
 	},
 	runtimeEnv: (import.meta as unknown as { env: Record<string, string> }).env,
 	emptyStringAsUndefined: true,

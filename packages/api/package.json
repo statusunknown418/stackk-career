@@ -30,7 +30,8 @@
     "date-fns": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
-    "evlog": "catalog:"
+    "evlog": "catalog:",
+    "mercadopago": "^3.0.0"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",

@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3d15827e-b881-4c47-8c52-569cbd046da9",
-  "prevId": "9a0e4763-1f9d-4c10-811e-fe293feea90c",
+  "id": "dee2a58c-c5d9-4130-b098-e9c597bba183",
+  "prevId": "7871ee35-5398-4270-b7eb-705b6955a6cd",
   "tables": {
     "account": {
       "name": "account",
@@ -608,21 +608,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "resumeId": {
-          "name": "resumeId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'es'"
         },
         "createdAt": {
           "name": "createdAt",
@@ -1481,13 +1466,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "providerPreapprovalId": {
-          "name": "providerPreapprovalId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "currentPeriodStart": {
           "name": "currentPeriodStart",
           "type": "integer",
@@ -1501,14 +1479,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "cancelAtPeriodEnd": {
-          "name": "cancelAtPeriodEnd",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "createdAt": {
           "name": "createdAt",
@@ -1539,11 +1509,6 @@
         "user_subscriptions_provider_sub_idx": {
           "name": "user_subscriptions_provider_sub_idx",
           "columns": ["providerSubscriptionId"],
-          "isUnique": false
-        },
-        "user_subscriptions_provider_preapproval_idx": {
-          "name": "user_subscriptions_provider_preapproval_idx",
-          "columns": ["providerPreapprovalId"],
           "isUnique": false
         }
       },

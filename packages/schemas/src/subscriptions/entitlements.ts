@@ -1,14 +1,5 @@
-import { PLAN_CATALOG } from "./catalog";
-import type { EntitlementMap, LimitKey, LimitValue, PlanId } from "./types";
+import type { LimitValue } from "./types";
 import { unlimitedSentinel } from "./types";
-
-export function getEntitlements(planId: PlanId): EntitlementMap {
-	return PLAN_CATALOG[planId].entitlements;
-}
-
-export function getLimit(planId: PlanId, key: LimitKey): LimitValue {
-	return PLAN_CATALOG[planId].entitlements[key];
-}
 
 export function isUnlimited(value: LimitValue): value is typeof unlimitedSentinel {
 	return value === unlimitedSentinel;

@@ -10,6 +10,7 @@ import { tasks } from "@trigger.dev/sdk";
 import { eq, inArray } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
+import { assertSingleQuota } from "./subscriptions";
 
 export interface CaptureBookingInput {
 	bookingStatus?: string;
@@ -39,6 +40,16 @@ export async function captureBooking(input: CaptureBookingInput, log?: RequestLo
 		userId: input.userId,
 		videoCallUrl: input.videoCallUrl ?? null,
 	};
+
+	const [existing] = await db
+		.select({ id: coachingSessions.id })
+		.from(coachingSessions)
+		.where(eq(coachingSessions.calBookingUid, input.calBookingUid))
+		.limit(1);
+
+	if (!existing && values.bookingStatus !== "cancelled") {
+		await assertSingleQuota(db, input.userId, "coaching_sessions_per_cycle");
+	}
 
 	try {
 		await db
@@ -84,17 +95,20 @@ export async function captureBooking(input: CaptureBookingInput, log?: RequestLo
 }
 
 export async function cancelBooking(calBookingUid: string, log?: RequestLogger): Promise<void> {
-	const updated = await db
+	const [updated] = await db
 		.update(coachingSessions)
 		.set({ bookingStatus: "cancelled" })
 		.where(eq(coachingSessions.calBookingUid, calBookingUid))
-		.returning({ id: coachingSessions.id });
+		.returning({ id: coachingSessions.id, userId: coachingSessions.userId });
+
+	if (updated) {
+		await invalidateViewerUsage(db, updated.userId, ["coaching_sessions_per_cycle"]);
+	}
 
 	log?.set({
 		coaching: {
 			action: "cancel",
 			calBookingUid,
-			found: updated.length > 0,
 		},
 	});
 }
@@ -127,24 +141,25 @@ export async function rescheduleBooking(input: RescheduleBookingInput, log?: Req
 		updates.videoCallUrl = input.videoCallUrl;
 	}
 
-	const updated = await db
+	const [updated] = await db
 		.update(coachingSessions)
 		.set(updates)
 		.where(inArray(coachingSessions.calBookingUid, lookupUids))
-		.returning({ id: coachingSessions.id });
+		.returning({ id: coachingSessions.id, userId: coachingSessions.userId });
 
-	const found = updated.length > 0;
+	if (updated) {
+		await invalidateViewerUsage(db, updated.userId, ["coaching_sessions_per_cycle"]);
+	}
 
 	log?.set({
 		coaching: {
 			action: "reschedule",
 			calBookingUid: input.calBookingUid,
-			found,
 			priorCalBookingUid: input.priorCalBookingUid ?? null,
 		},
 	});
 
-	return found;
+	return !!updated;
 }
 
 export function verifySignature(rawBody: string, signature: string | null): boolean {

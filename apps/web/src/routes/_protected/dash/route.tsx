@@ -4,8 +4,12 @@ import {
 	BriefcaseIcon,
 	GearIcon,
 	SidebarSimpleIcon,
+	SparkleIcon,
 } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { BillingSheet } from "@/components/domains/billing/billing-sheet";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -28,6 +32,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
 	component: DashLayout,
@@ -38,6 +43,9 @@ function DashLayout() {
 	const matchRoute = useLocation();
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
+	const [billingOpen, setBillingOpen] = useState(false);
+	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
+	const planLabel = snapshotQuery.data?.plan.displayName ?? "Plan";
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
@@ -76,7 +84,7 @@ function DashLayout() {
 					<SidebarMenu>
 						<SidebarGroupLabel>Extras</SidebarGroupLabel>
 						<SidebarMenuItem>
-							<SidebarMenuButton>
+							<SidebarMenuButton onClick={() => setBillingOpen(true)}>
 								<GearIcon />
 								Configuración
 							</SidebarMenuButton>
@@ -127,12 +135,19 @@ function DashLayout() {
 
 						<TooltipContent>Avanzar</TooltipContent>
 					</Tooltip>
+
+					<Button className="ml-auto" onClick={() => setBillingOpen(true)} size="sm" variant="outline">
+						<SparkleIcon weight="fill" />
+						{planLabel}
+					</Button>
 				</nav>
 
 				<div className="min-h-0 overflow-y-auto">
 					<Outlet />
 				</div>
 			</SidebarInset>
+
+			<BillingSheet onOpenChange={setBillingOpen} open={billingOpen} />
 		</SidebarProvider>
 	);
 }

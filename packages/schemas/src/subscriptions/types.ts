@@ -5,11 +5,9 @@ export const planIdSchema = z.enum(planIdEnum);
 export type PlanId = (typeof planIdEnum)[number];
 
 export const subscriptionStatusEnum = ["active", "past_due", "canceled", "expired", "trialing"] as const;
-export const subscriptionStatusSchema = z.enum(subscriptionStatusEnum);
 export type SubscriptionStatus = (typeof subscriptionStatusEnum)[number];
 
 export const subscriptionProviderEnum = ["system", "mercadopago"] as const;
-export const subscriptionProviderSchema = z.enum(subscriptionProviderEnum);
 export type SubscriptionProvider = (typeof subscriptionProviderEnum)[number];
 
 export const limitKeyEnum = [
@@ -40,7 +38,6 @@ export type CachedUsageLimitKey = Exclude<LimitKey, "messages_per_generation">;
 export const cachedUsageLimitKeys: readonly CachedUsageLimitKey[] = limitKeyEnum.filter(
 	(key): key is CachedUsageLimitKey => key !== "messages_per_generation"
 );
-export const cachedUsageLimitKeySchema = limitKeySchema.exclude(["messages_per_generation"]);
 
 /**
  * Drizzle cache tag for a single user's usage counter. Source of truth for both api reads

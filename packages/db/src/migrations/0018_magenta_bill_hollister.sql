@@ -1,1 +1,0 @@
-ALTER TABLE `generations` ADD `language` text DEFAULT 'es' NOT NULL;
