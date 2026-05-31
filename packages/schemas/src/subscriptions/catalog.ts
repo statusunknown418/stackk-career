@@ -46,7 +46,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 		displayName: "Free",
 		priceMonthlyPen: 0,
 		entitlements: {
-			resumes_total: 1,
+			resumes_total: 3,
 			resume_creation_generations_per_cycle: 1,
 			conversation_generations_per_cycle: 0,
 			resume_analyses_per_cycle: 3,

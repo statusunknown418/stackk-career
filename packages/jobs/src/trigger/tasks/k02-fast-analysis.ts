@@ -3,6 +3,7 @@ import { messages } from "@stackk-career/db/schema/messages";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import { k02FastAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-fast-analysis";
+import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { idempotencyKeys, logger, metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import { and, eq, ne } from "drizzle-orm";
@@ -154,9 +155,16 @@ export const k02FastAnalysisTask = schemaTask({
 			attempt: ctx.attempt.number,
 		});
 
-		await db
+		const updated = await db
 			.update(resumeAnalyses)
 			.set({ status: "failed", error: message, model: K02_FAST_ANALYSIS_MODEL })
-			.where(and(eq(resumeAnalyses.id, payload.analysisId), ne(resumeAnalyses.status, "ready")));
+			.where(and(eq(resumeAnalyses.id, payload.analysisId), ne(resumeAnalyses.status, "ready")))
+			.returning({ userId: resumeAnalyses.userId });
+
+		if (updated[0]) {
+			await db.$cache.invalidate({
+				tags: [viewerUsageTag(updated[0].userId, "resume_analyses_per_cycle")],
+			});
+		}
 	},
 });
