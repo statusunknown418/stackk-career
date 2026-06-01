@@ -36,6 +36,7 @@ export const billingRouter = {
 		const state = await createPreapproval({
 			backUrl: input.backUrl,
 			cardTokenId: input.cardTokenId,
+			deviceId: input.deviceId,
 			idempotencyKey: `subscription:${userId}:${input.planId}:${input.cardTokenId}`,
 			payerEmail: input.payerEmail,
 			planId: input.planId,
@@ -82,6 +83,7 @@ export const billingRouter = {
 		const state = await createPreapproval({
 			backUrl: input.backUrl,
 			cardTokenId: input.cardTokenId,
+			deviceId: input.deviceId,
 			idempotencyKey: `change-plan:${userId}:${input.planId}:${input.cardTokenId}`,
 			payerEmail: input.payerEmail,
 			planId: input.planId,

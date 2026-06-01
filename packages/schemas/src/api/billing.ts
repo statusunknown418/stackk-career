@@ -10,6 +10,7 @@ export type PaidPlanIdInput = z.infer<typeof paidPlanIdSchema>;
 export const createSubscriptionInputSchema = z.object({
 	backUrl: z.url(),
 	cardTokenId: z.string().min(1),
+	deviceId: z.string().min(1).optional(),
 	payerEmail: z.email(),
 	planId: paidPlanIdSchema,
 });

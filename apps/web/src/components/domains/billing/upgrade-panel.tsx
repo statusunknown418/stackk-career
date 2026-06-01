@@ -43,7 +43,7 @@ export function UpgradePanel({
 
 			<EmptyHeader>
 				<EmptyMedia className="size-18" variant="icon">
-					<BatteryLowIcon className="size-9" weight="fill" />
+					<BatteryLowIcon className="size-9 animate-pulse" weight="fill" />
 				</EmptyMedia>
 
 				<EmptyTitle>{title}</EmptyTitle>

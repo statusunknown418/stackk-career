@@ -3,6 +3,12 @@ import { env } from "@stackk-career/env/web";
 import { useEffect, useState } from "react";
 import Loader from "@/components/loader";
 
+declare global {
+	interface Window {
+		MP_DEVICE_SESSION_ID?: string;
+	}
+}
+
 let sdkInitialized = false;
 
 function ensureSdkInitialized(): void {
@@ -19,7 +25,11 @@ export interface PaymentBrickProps {
 	/** Surface a recoverable brick-level error (init/render/processing) to the parent. */
 	onBrickError: (message: string) => void;
 	/** Forward the card token, device fingerprint, and payer email produced by the brick to the billing mutation. */
-	onTokenReady: (args: { cardTokenId: string; payerEmail: string | undefined }) => Promise<void>;
+	onTokenReady: (args: {
+		cardTokenId: string;
+		deviceId: string | undefined;
+		payerEmail: string | undefined;
+	}) => Promise<void>;
 	/** Pre-fill the payer email so the brick hides its email field and the user does not retype it. */
 	payerEmail?: string;
 }
@@ -65,6 +75,7 @@ export default function PaymentBrick({ amount, payerEmail, onBrickError, onToken
 			onSubmit={async ({ formData }) => {
 				await onTokenReady({
 					cardTokenId: formData.token,
+					deviceId: window.MP_DEVICE_SESSION_ID,
 					payerEmail: formData.payer.email,
 				});
 			}}

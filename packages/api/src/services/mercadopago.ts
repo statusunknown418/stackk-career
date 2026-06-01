@@ -91,6 +91,7 @@ function normalize(response: MercadopagoPreapprovalResponse): ProviderSubscripti
 export interface CreateSubscriptionInput {
 	backUrl: string;
 	cardTokenId: string;
+	deviceId?: string;
 	idempotencyKey: string;
 	payerEmail: string;
 	planId: PaidPlanId;
@@ -153,6 +154,7 @@ export async function createPreapproval(input: CreateSubscriptionInput): Promise
 			},
 			requestOptions: {
 				idempotencyKey: input.idempotencyKey,
+				meliSessionId: input.deviceId,
 			},
 		});
 

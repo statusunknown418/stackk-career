@@ -398,7 +398,7 @@ function PlanCheckout({
 
 	const processing = createSubscription.isPending || changePlan.isPending;
 
-	const submit: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, payerEmail }) => {
+	const submit: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, deviceId, payerEmail }) => {
 		const email = payerEmail ?? session?.user.email;
 
 		if (!email) {
@@ -413,6 +413,7 @@ function PlanCheckout({
 				? "https://unoutspoken-arty-clayton.ngrok-free.dev/"
 				: window.location.href,
 			cardTokenId,
+			deviceId,
 			payerEmail: email,
 			planId,
 		});
