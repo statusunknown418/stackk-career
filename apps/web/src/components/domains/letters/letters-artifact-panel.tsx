@@ -196,62 +196,56 @@ export function LettersArtifactPanel({
 		}
 
 		try {
-			const doc = new jsPDF({
-				orientation: "portrait",
-				unit: "mm",
-				format: "a4",
-			});
+			const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-			const pageWidth = 210;
 			const pageHeight = 297;
 			const margin = 25;
-			const contentWidth = pageWidth - margin * 2;
+			const contentWidth = 210 - margin * 2;
+			const lineHeight = 5;
+			const maxY = pageHeight - margin;
 
-			doc.setFont("helvetica", "normal");
 			doc.setFontSize(11);
-
 			let cursorY = margin;
 
-			// Saludo
-			doc.setFont("helvetica", "bold");
-			const greetingLines = doc.splitTextToSize(greeting, contentWidth);
-			doc.text(greetingLines, margin, cursorY);
-			cursorY += greetingLines.length * 5 + 8;
+			// Pagina LÍNEA por línea: agrega página cuando la próxima línea se pasaría del
+			// margen inferior. jsPDF no pagina dentro de un solo text(), así que escribir el
+			// párrafo entero de una recortaba cualquier párrafo más alto que una página.
+			const splitToLines = (value: string): string[] => {
+				const lines = doc.splitTextToSize(value, contentWidth);
+				return Array.isArray(lines) ? lines : [lines];
+			};
+			const writeBlock = (value: string, gapAfter: number) => {
+				for (const line of splitToLines(value)) {
+					if (cursorY + lineHeight > maxY) {
+						doc.addPage();
+						cursorY = margin;
+					}
+					doc.text(line, margin, cursorY);
+					cursorY += lineHeight;
+				}
+				cursorY += gapAfter;
+			};
 
-			// Cuerpo
+			// Saludo (bold)
+			doc.setFont("helvetica", "bold");
+			writeBlock(greeting, 8);
+
+			// Cuerpo (normal), párrafo por párrafo
 			doc.setFont("helvetica", "normal");
-			const paragraphs = body.split("\n\n");
-			for (const p of paragraphs) {
-				if (!p.trim()) {
-					continue;
+			for (const p of body.split("\n\n")) {
+				const trimmed = p.trim();
+				if (trimmed) {
+					writeBlock(trimmed, 6);
 				}
-				const bodyLines = doc.splitTextToSize(p.trim(), contentWidth);
-				if (cursorY + bodyLines.length * 5 > pageHeight - margin) {
-					doc.addPage();
-					cursorY = margin;
-				}
-				doc.text(bodyLines, margin, cursorY);
-				cursorY += bodyLines.length * 5 + 6;
 			}
 
 			// Cierre
-			if (cursorY + 15 > pageHeight - margin) {
-				doc.addPage();
-				cursorY = margin;
-			}
 			cursorY += 4;
-			const closingLines = doc.splitTextToSize(closing, contentWidth);
-			doc.text(closingLines, margin, cursorY);
-			cursorY += closingLines.length * 5 + 8;
+			writeBlock(closing, 8);
 
-			// Firma
-			const signatureLines = doc.splitTextToSize(signature, contentWidth);
-			if (cursorY + signatureLines.length * 5 > pageHeight - margin) {
-				doc.addPage();
-				cursorY = margin;
-			}
+			// Firma (bold)
 			doc.setFont("helvetica", "bold");
-			doc.text(signatureLines, margin, cursorY);
+			writeBlock(signature, 0);
 
 			doc.save("carta-de-presentacion.pdf");
 			toast.success("Carta descargada como PDF");

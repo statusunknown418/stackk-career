@@ -42,6 +42,21 @@ function toErrorOrUndefined(value: unknown): Error | undefined {
 	return new Error(String(value));
 }
 
+function limitDialogCopy(language: CoverLetterLanguage): { description: string; ok: string; title: string } {
+	if (language === "en") {
+		return {
+			title: "Generation limit reached",
+			description: `You've reached the maximum of ${MAX_COVER_LETTER_VERSIONS} versions for this cover letter. To make more changes, we suggest creating a new letter.`,
+			ok: "Got it",
+		};
+	}
+	return {
+		title: "Límite de generaciones alcanzado",
+		description: `Has alcanzado el límite máximo de ${MAX_COVER_LETTER_VERSIONS} versiones para esta carta de presentación. Si deseas realizar más cambios, te sugerimos crear una nueva carta.`,
+		ok: "Entendido",
+	};
+}
+
 export const Route = createFileRoute("/_protected/dash/letters/$generationId")({
 	component: RouteComponent,
 	loader: ({ context, params }) =>
@@ -66,11 +81,12 @@ function RouteComponent() {
 	// solo trackea un runHandle, así que dos triggers simultáneos perderían uno.
 	const inFlightRef = useRef(false);
 
+	// Versiones válidas = artifacts NO fallidos. Numeración, cuota y cards derivan todas
+	// de esta lista para que coincidan (un run que reventó no es una versión navegable).
 	const coverLetterMessages = data
-		? data.messages.filter((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE)
+		? data.messages.filter((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && !m.error)
 		: [];
-	// El límite cuenta solo versiones NO fallidas — un run que reventó no consume cuota.
-	const generationCount = coverLetterMessages.filter((m) => !m.error).length;
+	const generationCount = coverLetterMessages.length;
 
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
@@ -107,16 +123,29 @@ function RouteComponent() {
 		[generationId, triggerMutateAsync, generationCount]
 	);
 
+	// `id: runHandle?.runId` da estado fresco del hook por run. Sin esto el hook keya su
+	// SWR (run/streams/error) por un useId() estable de por vida del mount, arrastrando el
+	// run COMPLETED y los chunks del run anterior al siguiente (carta stale con Copy/Download
+	// habilitados, sin spinner). Con id por run, cada generación arranca limpia.
 	const realtime = useRealtimeRunWithStreams<typeof caseyLettersTask, LetterStreams>(runHandle?.runId, {
 		accessToken: runHandle?.accessToken,
 		enabled: Boolean(runHandle),
-		onComplete: () => {
+		id: runHandle?.runId,
+	});
+
+	// Completion manejada por NUESTRO effect, no por el onComplete del hook: ese callback
+	// dispara UNA sola vez por mount (su hasCalledOnCompleteRef nunca se resetea al cambiar
+	// de runId), así que toda regeneración después de la primera dejaría el chat/historial
+	// congelado y filtraría runHandle. Acá refrescamos + limpiamos en CADA run que termina.
+	const currentRunFinishedAt = realtime.run?.finishedAt;
+	useEffect(() => {
+		if (runHandle && currentRunFinishedAt) {
 			queryClient.invalidateQueries({
 				queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
 			});
 			setRunHandle(null);
-		},
-	});
+		}
+	}, [runHandle, currentRunFinishedAt, queryClient, generationId]);
 
 	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
 	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` se setea ANTES
@@ -146,7 +175,10 @@ function RouteComponent() {
 		? (coverLetterSchema.safeParse(selectedMessage.object).data ?? undefined)
 		: undefined;
 	const cachedArtifact = data?.latestArtifact ?? undefined;
-	const isStreaming = Boolean(runHandle && realtime.run?.status !== "COMPLETED");
+	// Streaming mientras haya run activo y aún no haya terminado. Si el hook todavía no
+	// recibió el primer SSE del run nuevo (realtime.run undefined) también contamos como
+	// streaming, para no mostrar la carta vieja con Copy/Download habilitados.
+	const isStreaming = Boolean(runHandle) && !realtime.run?.finishedAt;
 	const artifact = isStreaming ? streamedArtifact : (streamedArtifact ?? selectedArtifact ?? cachedArtifact);
 
 	const error = toErrorOrUndefined(realtime.error);
@@ -157,6 +189,7 @@ function RouteComponent() {
 
 	const activeMessageId = selectedMessageId || (coverLetterMessages.at(-1)?.id ?? null);
 	const activeVersion = coverLetterMessages.findIndex((m) => m.id === activeMessageId) + 1;
+	const dialogCopy = limitDialogCopy(data.generation.language);
 
 	return (
 		<>
@@ -164,6 +197,7 @@ function RouteComponent() {
 				<LettersChatPanel
 					isPending={isPending || isStreaming}
 					jobPosition={data.generation.title ?? "el puesto"}
+					language={data.generation.language}
 					messages={data.messages}
 					onSelectVersion={setSelectedMessageId}
 					onTriggerAsync={onTriggerAsync}
@@ -187,15 +221,12 @@ function RouteComponent() {
 			<AlertDialog onOpenChange={setShowLimitDialog} open={showLimitDialog}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Límite de generaciones alcanzado</AlertDialogTitle>
-						<AlertDialogDescription>
-							Has alcanzado el límite máximo de {MAX_COVER_LETTER_VERSIONS} versiones para esta carta de presentación.
-							Si deseas realizar más cambios, te sugerimos crear una nueva carta.
-						</AlertDialogDescription>
+						<AlertDialogTitle>{dialogCopy.title}</AlertDialogTitle>
+						<AlertDialogDescription>{dialogCopy.description}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<Button render={<AlertDialogClose />} variant="outline">
-							Entendido
+							{dialogCopy.ok}
 						</Button>
 					</AlertDialogFooter>
 				</AlertDialogContent>

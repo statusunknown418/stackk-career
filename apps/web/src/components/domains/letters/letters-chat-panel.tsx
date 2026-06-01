@@ -2,6 +2,7 @@
 
 import { IdentificationCardIcon, PaperPlaneRightIcon, ReadCvLogoIcon, WrenchIcon } from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { ComponentType } from "react";
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface LettersChatPanelMessage {
+	error: string | null;
 	id: string;
 	isAssistant: boolean | null;
 	isTool: boolean | null;
@@ -24,6 +26,7 @@ interface LettersChatPanelMessage {
 interface LettersChatPanelProps {
 	isPending: boolean;
 	jobPosition: string;
+	language: CoverLetterLanguage;
 	messages: readonly LettersChatPanelMessage[];
 	onSelectVersion: (messageId: string) => void;
 	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
@@ -36,16 +39,63 @@ interface ToolPresentation {
 	label: string;
 }
 
-const TOOL_PRESENTATION: Record<string, ToolPresentation> = {
-	getSelectedResume: { Icon: ReadCvLogoIcon, label: "CASEY leyó tu CV" },
-	getUserMetadata: { Icon: IdentificationCardIcon, label: "CASEY revisó tu perfil" },
-};
+/**
+ * Copy por idioma. El panel derecho (artifact) ya se localiza vía la carta; este panel
+ * antes quedaba hardcodeado en español aun con la carta en inglés. `language` viene del
+ * `generations.language` y selecciona todo el chrome del chat.
+ */
+const CHAT_COPY = {
+	es: {
+		introPrefix: "Voy a redactar tu carta para",
+		introResume: "usando el CV",
+		toneHint: "Si quieres orientar el tono o resaltar algo, escríbelo abajo.",
+		versionsTip:
+			"💡 Puedes hacer clic en las versiones generadas en el chat para ver su contenido en el panel de la derecha.",
+		version: "Versión",
+		viewing: "Visualizando",
+		clickToLoad: "Haz clic para cargar",
+		failed: "Esta versión falló",
+		fieldLabel: "Indicación adicional",
+		placeholder: "Ej. Tono más cálido. Menciona que tengo experiencia en fintech.",
+		generating: "Generando…",
+		generate: "Generar carta",
+		toolReadCv: "CASEY leyó tu CV",
+		toolReadProfile: "CASEY revisó tu perfil",
+		toolGeneric: "CASEY consultó una herramienta",
+	},
+	en: {
+		introPrefix: "I'll write your letter for",
+		introResume: "using the CV",
+		toneHint: "If you'd like to steer the tone or highlight something, write it below.",
+		versionsTip: "💡 Click any generated version in the chat to view its content in the right-hand panel.",
+		version: "Version",
+		viewing: "Viewing",
+		clickToLoad: "Click to load",
+		failed: "This version failed",
+		fieldLabel: "Additional instruction",
+		placeholder: "E.g. Warmer tone. Mention my fintech experience.",
+		generating: "Generating…",
+		generate: "Generate letter",
+		toolReadCv: "CASEY read your CV",
+		toolReadProfile: "CASEY reviewed your profile",
+		toolGeneric: "CASEY used a tool",
+	},
+} as const;
 
-function toolPresentation(toolName: string | undefined): ToolPresentation {
-	if (toolName && TOOL_PRESENTATION[toolName]) {
-		return TOOL_PRESENTATION[toolName];
+type ChatCopy = (typeof CHAT_COPY)[CoverLetterLanguage];
+
+function toolPresentation(toolName: string | undefined, copy: ChatCopy): ToolPresentation {
+	if (toolName === "getSelectedResume") {
+		return { Icon: ReadCvLogoIcon, label: copy.toolReadCv };
 	}
-	return { Icon: WrenchIcon, label: toolName ?? "CASEY consultó una herramienta" };
+	if (toolName === "getUserMetadata") {
+		return { Icon: IdentificationCardIcon, label: copy.toolReadProfile };
+	}
+	return { Icon: WrenchIcon, label: toolName ?? copy.toolGeneric };
+}
+
+function isCoverLetterArtifact(m: LettersChatPanelMessage): boolean {
+	return m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE;
 }
 
 /**
@@ -53,16 +103,17 @@ function toolPresentation(toolName: string | undefined): ToolPresentation {
  *
  * Builds on the AI Elements components: <Conversation> (sticky scroll-to-bottom),
  * <Message>/<MessageContent> (user/assistant bubbles). Submitting the form calls
- * `onTriggerAsync` (the route owns the underlying mutation so the artifact panel
- * can fire it too). The textarea clears only on a successful submit so the user
- * doesn't lose text if the trigger fails.
+ * `onTriggerAsync` (the route owns the underlying mutation so the artifact panel can
+ * fire it too). The textarea clears only on a successful submit.
  *
- * Tool calls (`isTool: true`) render as inline muted rows with a friendly Spanish
- * label per the Letters architecture diagram (getUserMetadata → message, etc).
+ * Tool calls (`isTool: true`) render as inline muted rows; failed versions render as a
+ * non-clickable "failed" row and are excluded from version numbering (only successful /
+ * in-flight versions are navigable).
  */
 export function LettersChatPanel({
 	isPending,
 	jobPosition,
+	language,
 	messages,
 	onSelectVersion,
 	onTriggerAsync,
@@ -70,15 +121,17 @@ export function LettersChatPanel({
 	selectedMessageId,
 }: LettersChatPanelProps) {
 	const [extraPrompt, setExtraPrompt] = useState("");
+	const copy = CHAT_COPY[language] ?? CHAT_COPY.es;
 
-	// Keep all messages in chronological order so we can select versions.
-	const chatMessages = messages;
+	// Versiones navegables = artifacts NO fallidos. La numeración deriva de esta lista
+	// (computada una vez, no por mensaje) para que coincida con el panel derecho y la cuota.
+	const validVersions = messages.filter((m) => isCoverLetterArtifact(m) && !m.error);
+	const latestValidId = validVersions.at(-1)?.id ?? null;
 
-	// Una vez que ya existe una carta, el submit exige texto: regenerar "sin cambios"
-	// vive en el popover de "Regenerar" del panel derecho. Así un submit vacío por
-	// inercia no quema una versión. La primera generación (sin artifact aún) sí se
-	// permite vacía, por si el auto-trigger no corrió.
-	const hasArtifact = messages.some((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE);
+	// Una vez que existe una versión EXITOSA (o en curso), el submit exige texto: regenerar
+	// "sin cambios" vive en el popover del panel derecho. Si solo hubo fallidas, se permite
+	// submit vacío para reintentar.
+	const hasArtifact = validVersions.length > 0;
 	const canSubmit = !isPending && (extraPrompt.trim().length > 0 || !hasArtifact);
 
 	return (
@@ -88,28 +141,25 @@ export function LettersChatPanel({
 					<Message from="assistant">
 						<MessageContent>
 							<p className="text-sm">
-								Voy a redactar tu carta para <strong>{jobPosition}</strong>
+								{copy.introPrefix} <strong>{jobPosition}</strong>
 								{resumeTitle && (
 									<>
 										{" "}
-										usando el CV <strong>{resumeTitle}</strong>
+										{copy.introResume} <strong>{resumeTitle}</strong>
 									</>
 								)}
 								.
 							</p>
-							<p className="mt-1 text-muted-foreground text-xs">
-								Si quieres orientar el tono o resaltar algo, escríbelo abajo.
-							</p>
+							<p className="mt-1 text-muted-foreground text-xs">{copy.toneHint}</p>
 							<p className="mt-2 border-border/40 border-t pt-2 font-medium text-muted-foreground text-xs">
-								💡 Puedes hacer clic en las versiones generadas en el chat para ver su contenido en el panel de la
-								derecha.
+								{copy.versionsTip}
 							</p>
 						</MessageContent>
 					</Message>
 
-					{chatMessages.map((m) => {
+					{messages.map((m) => {
 						if (m.isTool === true) {
-							const { Icon, label } = toolPresentation(m.toolMeta?.toolName);
+							const { Icon, label } = toolPresentation(m.toolMeta?.toolName, copy);
 							return (
 								<div className="flex items-center gap-2 px-3 py-1 text-muted-foreground text-xs" key={m.id}>
 									<Icon className="size-3.5" weight="duotone" />
@@ -118,13 +168,22 @@ export function LettersChatPanel({
 							);
 						}
 
-						if (m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE) {
-							const coverLetterMessages = messages.filter(
-								(msg) => msg.isAssistant === true && msg.objectType === COVER_LETTER_OBJECT_TYPE
-							);
-							const versionNumber = coverLetterMessages.findIndex((item) => item.id === m.id) + 1;
-							const isActive =
-								selectedMessageId === m.id || (selectedMessageId === null && m.id === coverLetterMessages.at(-1)?.id);
+						if (isCoverLetterArtifact(m)) {
+							// Versión fallida: fila distinta, NO clickeable, fuera de la numeración.
+							if (m.error) {
+								return (
+									<Message from="assistant" key={m.id}>
+										<MessageContent>
+											<div className="flex w-full items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/8 p-3 font-medium text-destructive text-sm">
+												⚠️ {copy.failed}
+											</div>
+										</MessageContent>
+									</Message>
+								);
+							}
+
+							const versionNumber = validVersions.findIndex((item) => item.id === m.id) + 1;
+							const isActive = selectedMessageId === m.id || (selectedMessageId === null && m.id === latestValidId);
 
 							return (
 								<Message from="assistant" key={m.id}>
@@ -140,10 +199,10 @@ export function LettersChatPanel({
 											type="button"
 										>
 											<span className="flex items-center gap-2 font-semibold text-sm">
-												📄 Versión {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
+												📄 {copy.version} {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
 											</span>
 											<span className="font-normal text-muted-foreground text-xs">
-												{isActive ? "Visualizando" : "Haz clic para cargar"}
+												{isActive ? copy.viewing : copy.clickToLoad}
 											</span>
 										</button>
 									</MessageContent>
@@ -178,14 +237,14 @@ export function LettersChatPanel({
 			>
 				<Field>
 					<FieldLabel className="sr-only" htmlFor="extra-prompt">
-						Indicación adicional
+						{copy.fieldLabel}
 					</FieldLabel>
 					<Textarea
 						disabled={isPending}
 						id="extra-prompt"
 						maxLength={2000}
 						onChange={(e) => setExtraPrompt(e.target.value)}
-						placeholder="Ej. Tono más cálido. Menciona que tengo experiencia en fintech."
+						placeholder={copy.placeholder}
 						rows={3}
 						value={extraPrompt}
 					/>
@@ -193,7 +252,7 @@ export function LettersChatPanel({
 
 				<Button className="self-end" disabled={!canSubmit} size="sm" type="submit">
 					<PaperPlaneRightIcon weight="bold" />
-					{isPending ? "Generando…" : "Generar carta"}
+					{isPending ? copy.generating : copy.generate}
 				</Button>
 			</form>
 		</section>

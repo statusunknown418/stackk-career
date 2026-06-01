@@ -11,18 +11,30 @@ import { z } from "zod";
  *   messages.objectType = COVER_LETTER_OBJECT_TYPE
  *   messages.object     = CoverLetter
  */
+// `.max()` generoso por campo: una carta real queda muy por debajo, pero corta dumps /
+// echos del prompt inyectados (Output.object rechaza el output si excede → reintento).
 export const coverLetterSchema = z.object({
-	greeting: z.string().min(1).describe("Saludo personalizado. Ej: 'Estimada Carolina:' o 'Hola equipo de Yape:'."),
+	greeting: z
+		.string()
+		.min(1)
+		.max(300)
+		.describe("Saludo personalizado. Ej: 'Estimada Carolina:' o 'Hola equipo de Yape:'."),
 	body: z
 		.string()
 		.min(1)
+		.max(6000)
 		.describe(
 			"Cuerpo principal. 2-4 párrafos. Conecta la experiencia del CV con el puesto, concreto y sin clichés. Sin frases huecas tipo 'soy un team player apasionado'."
 		),
-	closing: z.string().min(1).describe("Cierre con CTA suave. Ej: 'Me encantaría conversar cuando le convenga.'"),
+	closing: z
+		.string()
+		.min(1)
+		.max(800)
+		.describe("Cierre con CTA suave. Ej: 'Me encantaría conversar cuando le convenga.'"),
 	signature: z
 		.string()
 		.min(1)
+		.max(500)
 		.describe("Firma con nombre del usuario. Ej: 'Atentamente, María González' o 'Saludos, Joseph'."),
 });
 

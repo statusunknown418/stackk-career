@@ -24,10 +24,9 @@ import { coverLetterArtifactStream } from "../streams";
 const MAX_RESUME_PLAINTEXT_CHARS = 8000;
 
 /**
- * Switch to Haiku 4.5 on the last retry attempt. The first two attempts use
- * Sonnet (mejor calidad para redacción). Si Sonnet falla 2x — probablemente
- * timeout, rate limit transiente o un edge case del modelo — el tercer intento
- * cambia a Haiku como fallback antes de surfaecer el error al usuario.
+ * Attempt en el que se cambia a `CASEY_LETTERS_FALLBACK_MODEL`. Modelo del proyecto =
+ * Grok (xAI); hoy primary y fallback apuntan al mismo slug, así que es un hook para que
+ * a futuro se pueda degradar a otra variante de Grok en el último intento sin tocar el task.
  */
 const FALLBACK_ON_ATTEMPT = Number(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT ?? 3);
 
@@ -48,7 +47,7 @@ export const caseyLettersTask = schemaTask({
 	) => {
 		const db = getTriggerDb();
 
-		// Sonnet en attempts 1-2; Haiku como fallback en el último intento si los anteriores fallaron.
+		// Grok primary; fallback (mismo slug hoy) en el último intento si los anteriores fallaron.
 		const modelForAttempt =
 			ctx.attempt.number >= FALLBACK_ON_ATTEMPT ? CASEY_LETTERS_FALLBACK_MODEL : CASEY_LETTERS_MODEL;
 		const modelSlug = String(modelForAttempt);
@@ -138,6 +137,14 @@ export const caseyLettersTask = schemaTask({
 				.where(eq(messages.id, messageId))
 				.limit(1);
 			const toolOrder = (artifactRow?.order ?? 1) - 1;
+
+			// Idempotente ante retries: run() corre de cero en cada reintento (maxAttempts 3),
+			// así que sin esto un intento que insertó tools y luego falló duplicaría los chips
+			// ("CASEY leyó tu CV" ×2). Borramos los tool-rows previos de ESTE turno (mismo
+			// `order` reservado, único por turno con el esquema max+1) antes de re-insertar.
+			await db
+				.delete(messages)
+				.where(and(eq(messages.generationId, generationId), eq(messages.isTool, true), eq(messages.order, toolOrder)));
 
 			await db.insert(messages).values(
 				toolCalls.map((call) => ({

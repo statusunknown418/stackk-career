@@ -130,10 +130,11 @@ export interface CoverLetterValidationResult {
 }
 
 /**
- * Escanea body + closing del artifact buscando frases clichés literales
- * (case-insensitive). El greeting + signature se excluyen porque la firma
- * podría contener nombres propios que coincidan y el saludo casi nunca es
- * donde caen los problemas.
+ * Escanea los 4 campos del artifact (greeting + body + closing + signature) buscando
+ * frases clichés/refusal literales (case-insensitive). Antes solo miraba body+closing,
+ * pero una negativa o un dump inyectado puede caer en el saludo o la firma. Las frases
+ * del banlist son multi-palabra (clichés/refusals), no nombres sueltos, así que el riesgo
+ * de falso positivo por un nombre propio en la firma es bajo.
  *
  * Devuelve `ok=true` si no encontró ninguna; `false` con la lista exacta
  * de qué encontró si sí. El caller decide qué hacer (loggear, reintentar,
@@ -143,7 +144,7 @@ export function validateCoverLetter(
 	letter: CoverLetter,
 	language: CoverLetterLanguage = "es"
 ): CoverLetterValidationResult {
-	const haystack = `${letter.body} ${letter.closing}`.toLowerCase();
+	const haystack = `${letter.greeting} ${letter.body} ${letter.closing} ${letter.signature}`.toLowerCase();
 	const foundPhrases: string[] = [];
 
 	for (const phrase of getClichePhrases(language)) {

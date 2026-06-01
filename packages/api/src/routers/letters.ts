@@ -11,7 +11,7 @@ import {
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 
@@ -135,7 +135,11 @@ export const lettersRouter = {
 				.select()
 				.from(messages)
 				.where(eq(messages.generationId, generation.id))
-				.orderBy(asc(messages.order), asc(messages.createdAt));
+				// `rowid` (orden de inserción) como tiebreak final: order + createdAt (segundos)
+				// pueden empatar — los 2 tool-rows comparten order, y dos triggers concurrentes
+				// pueden colisionar en order. El rowid garantiza un render estable y determinista
+				// (tools en orden de llamada; versiones en orden de creación) pase lo que pase.
+				.orderBy(asc(messages.order), asc(messages.createdAt), sql`rowid`);
 
 			// Latest assistant message tagged as a cover-letter artifact = current letter.
 			const latestArtifactMessage = [...messageRows]
@@ -217,8 +221,13 @@ export const lettersRouter = {
 			.from(messages)
 			.where(eq(messages.generationId, gen.id));
 
-		// Límite real de versiones (la UI lo refleja, pero el tope vive acá). Solo cuentan
+		// Límite de versiones (la UI lo refleja, pero el tope se valida acá). Solo cuentan
 		// artifacts NO fallidos — un run que reventó no debe consumir cuota.
+		// NOTA: es un read-check, no atómico. Cubre el caso común (triggers secuenciales + el
+		// guard inFlightRef del cliente por pestaña). Dos triggers REALMENTE simultáneos
+		// (multi-pestaña/dispositivo) podrían pasar ambos y dejar 6 versiones — tope "suave" de
+		// UX, no de seguridad/billing. Un tope estrictamente atómico requeriría una constraint
+		// de DB o transacción interactiva (a verificar contra Turso antes de shippear).
 		const versionCount = existing.filter((m) => m.objectType === COVER_LETTER_OBJECT_TYPE && m.error === null).length;
 		if (versionCount >= MAX_COVER_LETTER_VERSIONS) {
 			context.log?.set({ outcome: "version_limit_reached" });
