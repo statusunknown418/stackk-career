@@ -24,8 +24,8 @@ function Classic({ className, ...props }: ClassicProps) {
 							key={index.toString()}
 							style={{
 								transform: `rotate(${index * 30}deg) translate(146%)`,
-								animation: "loading-ui-classic-fade var(--duration, 1.2s) linear infinite",
-								animationDelay: `calc(var(--duration, 1.2s) / 12 * ${index - 12})`,
+								animation: "loading-ui-classic-fade var(--duration, 1s) linear infinite",
+								animationDelay: `calc(var(--duration, 1s) / 12 * ${index - 10})`,
 							}}
 						/>
 					))}

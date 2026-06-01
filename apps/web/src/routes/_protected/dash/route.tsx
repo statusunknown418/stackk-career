@@ -1,15 +1,14 @@
 import {
 	ArrowCircleLeftIcon,
 	ArrowCircleRightIcon,
-	BriefcaseIcon,
 	GearIcon,
 	SidebarSimpleIcon,
 	SparkleIcon,
 } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
 import { BillingSheet } from "@/components/domains/billing/billing-sheet";
+import { useBillingSheet } from "@/components/domains/billing/use-billing-sheet";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -32,28 +31,33 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "@/components/user-menu";
 import { getSidebarState } from "@/functions/get-sidebar-state";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash")({
 	component: DashLayout,
-	loader: () => getSidebarState(),
+	loader: async ({ context }) => {
+		await context.queryClient.ensureQueryData(orpc.billing.getSnapshot.queryOptions());
+		return getSidebarState();
+	},
 });
 
 function DashLayout() {
 	const matchRoute = useLocation();
 	const sidebarState = Route.useLoaderData();
 	const router = useRouter();
-	const [billingOpen, setBillingOpen] = useState(false);
+	const openBillingSheet = useBillingSheet((state) => state.openBillingSheet);
+
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
 	const planLabel = snapshotQuery.data?.plan.displayName ?? "Plan";
+	const planMeta = snapshotQuery.data?.plan.id;
 
 	return (
 		<SidebarProvider defaultOpenLeft={sidebarState.left} defaultOpenRight={sidebarState.right}>
 			<Sidebar className="py-1 pl-0.5" collapsible="icon" variant="inset">
 				<SidebarHeader>
 					<SidebarMenuButton>
-						<BriefcaseIcon />
-						<span className="text-nowrap">STK Career</span>
+						<span className="text-nowrap">Assendia</span>
 					</SidebarMenuButton>
 				</SidebarHeader>
 
@@ -84,7 +88,7 @@ function DashLayout() {
 					<SidebarMenu>
 						<SidebarGroupLabel>Extras</SidebarGroupLabel>
 						<SidebarMenuItem>
-							<SidebarMenuButton onClick={() => setBillingOpen(true)}>
+							<SidebarMenuButton onClick={() => openBillingSheet()}>
 								<GearIcon />
 								Configuración
 							</SidebarMenuButton>
@@ -136,9 +140,14 @@ function DashLayout() {
 						<TooltipContent>Avanzar</TooltipContent>
 					</Tooltip>
 
-					<Button className="ml-auto" onClick={() => setBillingOpen(true)} size="sm" variant="outline">
-						<SparkleIcon weight="fill" />
-						{planLabel}
+					<Button className="ml-auto" onClick={() => openBillingSheet()} size="sm" variant="ghost">
+						<SparkleIcon
+							className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}
+							weight="fill"
+						/>
+						<span className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}>
+							{planLabel}
+						</span>
 					</Button>
 				</nav>
 
@@ -147,7 +156,7 @@ function DashLayout() {
 				</div>
 			</SidebarInset>
 
-			<BillingSheet onOpenChange={setBillingOpen} open={billingOpen} />
+			<BillingSheet />
 		</SidebarProvider>
 	);
 }

@@ -17,7 +17,7 @@ import { z } from "zod";
 import { protectedProcedure } from "..";
 import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
-import { assertMultipleQuotas } from "../services/subscriptions";
+import { assertSingleQuota } from "../services/subscriptions";
 
 export const resumesRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {
@@ -83,7 +83,7 @@ export const resumesRouter = {
 	create: protectedProcedure.input(createResumeInputSchema).handler(async ({ context, input }) => {
 		const { email, id: userId, name } = context.session.user;
 
-		await assertMultipleQuotas(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
+		await assertSingleQuota(context.db, userId, "resumes_total");
 
 		const firstChildPosition = generateLexoKeyBetween(null, null);
 
@@ -94,7 +94,7 @@ export const resumesRouter = {
 				.insert(generations)
 				.values({
 					owner: userId,
-					type: "resume-creation",
+					type: "resume-manual",
 					title,
 				})
 				.returning({ id: generations.id });
@@ -190,7 +190,7 @@ export const resumesRouter = {
 			});
 		}
 
-		await invalidateViewerUsage(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
+		await invalidateViewerUsage(context.db, userId, ["resumes_total"]);
 
 		context.log?.set({
 			outcome: "success",

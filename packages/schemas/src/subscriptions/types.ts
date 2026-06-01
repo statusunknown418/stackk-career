@@ -4,7 +4,7 @@ export const planIdEnum = ["free", "pro", "max"] as const;
 export const planIdSchema = z.enum(planIdEnum);
 export type PlanId = (typeof planIdEnum)[number];
 
-export const subscriptionStatusEnum = ["active", "past_due", "canceled", "expired", "trialing"] as const;
+export const subscriptionStatusEnum = ["active", "past_due", "paused", "canceled", "expired", "trialing"] as const;
 export type SubscriptionStatus = (typeof subscriptionStatusEnum)[number];
 
 export const subscriptionProviderEnum = ["system", "mercadopago"] as const;
@@ -29,7 +29,7 @@ export type LimitKey = (typeof limitKeyEnum)[number];
  *
  * Mapping to underlying tables:
  * - `resumes_total` → `resumes` (all-time count, not period-scoped)
- * - `resume_creation_generations_per_cycle` → `generations` WHERE `type = "resume-creation"` (per cycle)
+ * - `resume_creation_generations_per_cycle` → `generations` WHERE `type = "resume-creation"` (per cycle; AI-from-source only, not manual)
  * - `conversation_generations_per_cycle` → `generations` WHERE `type = "conversation"` (per cycle)
  * - `resume_analyses_per_cycle` → `resume_analyses` (per cycle)
  * - `coaching_sessions_per_cycle` → `coaching_sessions` (per cycle)

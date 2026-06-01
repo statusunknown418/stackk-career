@@ -1,6 +1,7 @@
 import { createResumeInputSchema } from "@stackk-career/schemas/api/resumes";
+import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
@@ -9,6 +10,7 @@ import { Dropzone } from "@/components/ui/dropzone";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { orpc } from "@/utils/orpc";
 
 interface ResumeCreateFormProps {
@@ -28,10 +30,21 @@ const parseTargetRole = (value: string): string | undefined => {
 export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProps): React.ReactElement {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const snapshot = useQuery(orpc.billing.getSnapshot.queryOptions()).data;
+	// AI-from-PDF parsing consumes the per-cycle resume-creation quota; manual "desde cero" does not.
+	const canUseAi =
+		snapshot == null ||
+		hasQuotaRemaining(
+			snapshot.entitlements.resume_creation_generations_per_cycle,
+			snapshot.usage.resume_creation_generations_per_cycle
+		);
 	const createBlankMutation = useMutation(
 		orpc.resumes.create.mutationOptions({
-			onSuccess: ({ resumeId }) => {
-				queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
+			onSuccess: async ({ resumeId }) => {
+				await Promise.all([
+					queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() }),
+					invalidateBillingQueries(queryClient),
+				]);
 				onClose();
 				navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });
 			},
@@ -96,7 +109,9 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 
 			<section className="flex flex-col gap-3">
 				<p className="text-muted-foreground text-sm">
-					También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente.
+					{canUseAi
+						? "También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente."
+						: "Has alcanzado el límite de generaciones con IA de este ciclo. Crea tu CV desde cero o mejora tu plan para subir un PDF."}
 				</p>
 
 				<form.Subscribe selector={(state) => state.values.targetRole}>
@@ -107,7 +122,7 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 						return (
 							<Dropzone<{ generationId: string | undefined }>
 								autoUpload
-								disabled={isBusy}
+								disabled={isBusy || !canUseAi}
 								endpoint="resumeUploader"
 								input={{ generationId: undefined }}
 								onClientUploadComplete={(files) => {

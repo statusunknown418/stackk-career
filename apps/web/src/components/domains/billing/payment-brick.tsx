@@ -3,6 +3,12 @@ import { env } from "@stackk-career/env/web";
 import { useEffect, useState } from "react";
 import Loader from "@/components/loader";
 
+declare global {
+	interface Window {
+		MP_DEVICE_SESSION_ID?: string;
+	}
+}
+
 let sdkInitialized = false;
 
 function ensureSdkInitialized(): void {
@@ -67,12 +73,11 @@ export default function PaymentBrick({ amount, payerEmail, onBrickError, onToken
 			}}
 			onError={(error) => onBrickError(error.message ?? "No pudimos cargar el formulario de pago.")}
 			onSubmit={async ({ formData }) => {
-				const deviceId =
-					typeof window === "undefined"
-						? undefined
-						: (window as { MP_DEVICE_SESSION_ID?: string }).MP_DEVICE_SESSION_ID;
-
-				await onTokenReady({ cardTokenId: formData.token, deviceId, payerEmail: formData.payer.email });
+				await onTokenReady({
+					cardTokenId: formData.token,
+					deviceId: window.MP_DEVICE_SESSION_ID,
+					payerEmail: formData.payer.email,
+				});
 			}}
 		/>
 	);

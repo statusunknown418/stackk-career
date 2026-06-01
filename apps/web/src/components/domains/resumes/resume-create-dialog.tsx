@@ -11,6 +11,7 @@ import {
 	DialogPopup,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { orpc } from "@/utils/orpc";
 import { ResumeCreateForm } from "./resume-create-form";
 import { ResumeImportProgress } from "./resume-import-progress";
@@ -40,7 +41,10 @@ function ResumeCreateFlow({ onClose, open }: ResumeCreateFlowProps): React.React
 	const accessToken = tokenQuery.data?.token;
 
 	const handleComplete = (resumeId: string) => {
-		queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() });
+		Promise.all([
+			queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryKey() }),
+			invalidateBillingQueries(queryClient),
+		]);
 		setParserRunId(undefined);
 		onClose();
 		navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });

@@ -250,8 +250,9 @@ export const agentsRouter = {
 				hasFileUrl: Boolean(input.fileUrl),
 			});
 
-			// Parsing produces a resume + a `resume-creation` generation, same as `resumes.create`. Gate both
-			// limits at this entry point so the upload path can't outrun the per-cycle generation cap.
+			// AI-from-source parse: creates a new resume + a `resume-creation` generation. Gate both the
+			// all-time resume ceiling and the per-cycle AI generation cap so the upload path can't outrun
+			// either. Manual `resumes.create` only consumes `resumes_total`, never this AI quota.
 			await assertMultipleQuotas(context.db, userId, ["resumes_total", "resume_creation_generations_per_cycle"]);
 
 			if (input.fileId) {

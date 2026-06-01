@@ -19,12 +19,15 @@ export interface PlanCatalogEntry {
  *
  * What each resource gates, its counting scope, and where it is enforced:
  *
- * - **`resumes_total`** — Total resumes a user may own. All-time count (NOT reset per cycle), derived
- *   from the `resumes` table. Enforced at `resumes.create` and `agents.triggerK02ParseResume` (upload/parse).
+ * - **`resumes_total`** — Total resumes a user may own, manual or AI. All-time count (NOT reset per
+ *   cycle), derived from the `resumes` table. Enforced at `resumes.create` and
+ *   `agents.triggerK02ParseResume` (upload/parse).
  *
- * - **`resume_creation_generations_per_cycle`** — Resume-creation generations started per billing cycle,
- *   counted from `generations` WHERE `type = "resume-creation"` within the period. Enforced at
- *   `resumes.create`, `generations.create` (non-conversation), and `agents.triggerK02ParseResume`.
+ * - **`resume_creation_generations_per_cycle`** — AI-generated-from-source resumes started per billing
+ *   cycle (the PDF/upload parser path), counted from `generations` WHERE `type = "resume-creation"`
+ *   within the period. Enforced at `generations.create` (non-conversation) and
+ *   `agents.triggerK02ParseResume`. Manual `resumes.create` does NOT consume this — manual resumes
+ *   insert a `resume-manual` generation and are bounded only by `resumes_total`.
  *
  * - **`conversation_generations_per_cycle`** — Chat/conversation generations started per billing cycle,
  *   counted from `generations` WHERE `type = "conversation"`. Enforced at `generations.create` (conversation).
@@ -46,7 +49,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 		displayName: "Free",
 		priceMonthlyPen: 0,
 		entitlements: {
-			resumes_total: 3,
+			resumes_total: 2,
 			resume_creation_generations_per_cycle: 1,
 			conversation_generations_per_cycle: 0,
 			resume_analyses_per_cycle: 3,

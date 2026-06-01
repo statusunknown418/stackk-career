@@ -24,7 +24,7 @@ export function viewerSubscriptionTag(userId: string): string {
  * When to call:
  * - `generations.create` with `type: "resume-creation"` → `["resume_creation_generations_per_cycle"]`
  * - `generations.create` with `type: "conversation"` → `["conversation_generations_per_cycle"]`
- * - `resumes.create` (also inserts a generation) → `["resumes_total", "resume_creation_generations_per_cycle"]`
+ * - `resumes.create` (manual; inserts a `resume-manual` generation) → `["resumes_total"]`
  * - `resumeAnalyses` insert → `["resume_analyses_per_cycle"]`
  * - `coachingSessions` insert (e.g. `captureBooking`) → `["coaching_sessions_per_cycle"]`
  *
@@ -56,7 +56,7 @@ export async function invalidateViewerUsage(
  * Invalidate the cached subscription row **and every usage counter** for a single user.
  *
  * @description Call this whenever the subscription itself changes: plan upgrade/downgrade, status
- * transition (`active` → `past_due` / `canceled` / `expired`), or — most importantly — billing
+ * transition (`active` → `past_due` / `paused` / `canceled` / `expired`), or — most importantly — billing
  * period rollover. Because every usage counter's SQL is bounded by `currentPeriodStart` /
  * `currentPeriodEnd`, any cached count from the prior cycle becomes stale the moment those dates
  * move, so they must be wiped alongside the subscription row.
@@ -64,7 +64,7 @@ export async function invalidateViewerUsage(
  * When to call:
  * - subscription bootstrap on signup (creates the `free` row) — optional; cache is empty anyway
  * - Mercado Pago webhook: `subscription created`, `payment approved`, `payment failed`,
- *   `canceled`, `expired`, `renewal period rollover`
+ *   `paused`, `canceled`, `expired`, `renewal period rollover`
  * - manual admin overrides that mutate `user_subscriptions` for a user
  * - cycle rollover cron / scheduled task
  *

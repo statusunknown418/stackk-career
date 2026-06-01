@@ -1,9 +1,11 @@
 import { FileMdIcon, PlusCircleIcon } from "@phosphor-icons/react";
+import { hasQuotaRemaining, isUnlimited } from "@stackk-career/schemas/subscriptions";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { RouteIcon } from "lucide-react";
 import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { UpgradeDialog } from "@/components/domains/billing/upgrade-dialog";
 import { ResumeCard, ResumeCardSkeleton } from "@/components/domains/resumes/resume-card";
 import { ResumeCreateDialog } from "@/components/domains/resumes/resume-create-dialog";
 import { ResumePendingCards } from "@/components/domains/resumes/resume-pending-cards";
@@ -49,6 +51,7 @@ function RouteComponent() {
 	const { data: session } = authClient.useSession();
 	const userId = session?.user?.id;
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+	const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
 
 	const tokenQuery = useQuery({
 		...orpc.viewer.realtimeToken.queryOptions(),
@@ -56,7 +59,23 @@ function RouteComponent() {
 		staleTime: 29 * 60 * 1000,
 	});
 
-	const openDialog = () => setIsCreateDialogOpen(true);
+	const snapshot = useQuery(orpc.billing.getSnapshot.queryOptions()).data;
+
+	const resumeLimit = snapshot?.entitlements.resumes_total;
+	const maxResumes = resumeLimit != null && !isUnlimited(resumeLimit) ? resumeLimit : data.length;
+
+	// Manual creation is bounded only by the all-time CV total. The per-cycle AI quota
+	// (`resume_creation_generations_per_cycle`) gates the PDF-upload path inside the dialog, not this entry.
+	const canCreateResume =
+		snapshot == null || hasQuotaRemaining(snapshot.entitlements.resumes_total, snapshot.usage.resumes_total);
+
+	const handleCreate = () => {
+		if (canCreateResume) {
+			setIsCreateDialogOpen(true);
+		} else {
+			setIsUpgradeOpen(true);
+		}
+	};
 
 	const hasResumeContent = data.length > 0;
 
@@ -70,19 +89,19 @@ function RouteComponent() {
 						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
 					</FrameDescription>
 
-					<Button className="mt-4 max-w-max" disabled={data.length >= 5} onClick={openDialog}>
+					<Button className="mt-4 max-w-max" onClick={handleCreate}>
 						<PlusCircleIcon />
 						Crear nuevo
 					</Button>
 				</article>
 
-				<Meter className="max-w-sm" max={5} min={0} value={data.length}>
+				<Meter className="max-w-sm" max={maxResumes} min={0} value={data.length}>
 					<div className="flex justify-between">
 						<MeterLabel className="inline-flex items-center gap-1.5">
 							<FileMdIcon />
 							CVs creados
 						</MeterLabel>
-						<MeterValue>{(_formatted, value) => `${value} / 5`}</MeterValue>
+						<MeterValue>{(_formatted, value) => `${value} / ${maxResumes}`}</MeterValue>
 					</div>
 
 					<MeterTrack>
@@ -116,7 +135,7 @@ function RouteComponent() {
 						</EmptyHeader>
 
 						<EmptyContent>
-							<Button onClick={openDialog} size="sm">
+							<Button onClick={handleCreate} size="sm">
 								<PlusCircleIcon />
 								Crear CV
 							</Button>
@@ -126,6 +145,12 @@ function RouteComponent() {
 			</section>
 
 			<ResumeCreateDialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen} />
+			<UpgradeDialog
+				description={`Tu plan incluye hasta ${maxResumes} CVs. Mejora a Pro o Max para crear más.`}
+				onOpenChange={setIsUpgradeOpen}
+				open={isUpgradeOpen}
+				title="Alcanzaste el límite de CVs"
+			/>
 		</section>
 	);
 }
