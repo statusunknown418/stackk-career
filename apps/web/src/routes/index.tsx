@@ -133,7 +133,7 @@ function LandingPage() {
 	return (
 		<div className="relative isolate overflow-x-clip">
 			{/* Subtle film grain over the whole page — premium finish, CSS only */}
-			<div aria-hidden="true" className="grain-overlay pointer-events-none fixed inset-0 z-[60] opacity-[0.04]" />
+			<div aria-hidden="true" className="grain-overlay pointer-events-none fixed inset-0 z-60 opacity-[0.04]" />
 			<LandingNav />
 			<main className="-mt-16">
 				<Hero />

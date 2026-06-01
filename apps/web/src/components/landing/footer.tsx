@@ -38,7 +38,7 @@ export function LandingFooter() {
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
-					className="mt-10 max-w-[640px] font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-[1.25] tracking-tight md:mt-14"
+					className="mt-10 max-w-160 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-tight tracking-tight md:mt-14"
 					initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
 					transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.15 }}
 					viewport={{ once: true, margin: "-10% 0px" }}
@@ -67,7 +67,7 @@ export function LandingFooter() {
 							/>
 							<span className="font-bold font-display text-2xl text-foreground tracking-tight">ASSENDIA</span>
 						</a>
-						<p className="mt-4 max-w-[300px] text-foreground/70 text-sm leading-relaxed">
+						<p className="mt-4 max-w-75 text-foreground/70 text-sm leading-relaxed">
 							Score CV, IA y coaching humano en una sola suscripción. Hecho en Perú para LATAM.
 						</p>
 					</div>

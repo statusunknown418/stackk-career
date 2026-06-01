@@ -34,7 +34,7 @@ function PricingHeader() {
 						Planes · precios en soles
 					</span>
 				</Reveal>
-				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-[0.96] tracking-tighter">
+				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-none tracking-tighter">
 					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 				</h2>
 				<Reveal delay={0.2}>
@@ -84,12 +84,12 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			{featured && (
 				<div
 					aria-hidden="true"
-					className="absolute -top-px right-8 left-8 h-[2px] bg-gradient-to-r from-transparent via-oxblood to-transparent"
+					className="absolute -top-px right-8 left-8 h-0.5 bg-gradient-to-r from-transparent via-oxblood to-transparent"
 				/>
 			)}
 
 			<div className="flex items-center justify-between gap-3">
-				<h3 className="font-display font-semibold text-[1.6rem] text-foreground tracking-tight">{plan.name}</h3>
+				<h3 className="font-display font-semibold text-2xl text-foreground tracking-tight">{plan.name}</h3>
 			</div>
 			<p className="mt-2 text-foreground/65 text-sm leading-normal">{plan.tagline}</p>
 
@@ -184,10 +184,10 @@ function SingleSessionStrip() {
 				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
 					<div className="md:col-span-7">
 						<span className="font-mono text-foreground/60 text-xs uppercase tracking-widest">Sin suscripción</span>
-						<h3 className="mt-2 font-display font-semibold text-[1.6rem] text-foreground leading-[1.15] tracking-tight">
+						<h3 className="mt-2 font-display font-semibold text-2xl text-foreground leading-tight tracking-tight">
 							Sesión única: {SINGLE_SESSION.tagline}
 						</h3>
-						<p className="mt-3 max-w-[560px] text-foreground/65 text-sm leading-relaxed">{SINGLE_SESSION.body}</p>
+						<p className="mt-3 max-w-140 text-foreground/65 text-sm leading-relaxed">{SINGLE_SESSION.body}</p>
 					</div>
 
 					<div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
@@ -248,20 +248,20 @@ function ClosingMoment() {
 
 	return (
 		<div className="relative px-6 pt-10 pb-28 sm:pt-16 sm:pb-36" ref={containerRef}>
-			<div className="mx-auto max-w-[820px] border-border border-t pt-20 text-center sm:pt-28">
+			<div className="mx-auto max-w-205 border-border border-t pt-20 text-center sm:pt-28">
 				<motion.span
 					aria-hidden="true"
 					className="inline-block size-1.5 rounded-full bg-oxblood shadow-[0_0_16px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
 					style={reduced ? undefined : { opacity: dotOpacity, scale: dotScale }}
 				/>
 				<motion.p
-					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-[1.05] tracking-tight"
+					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-none tracking-tight"
 					style={reduced ? undefined : { opacity: lineOpacity, y: lineY, scale: lineScale }}
 				>
 					¿Cumpliste tu objetivo?
 				</motion.p>
 				<motion.p
-					className="mx-auto mt-6 max-w-[600px] text-balance text-base text-foreground/70 leading-[1.65]"
+					className="mx-auto mt-6 max-w-150 text-balance text-base text-foreground/70 leading-relaxed"
 					style={reduced ? undefined : { opacity: bodyOpacity, y: bodyY }}
 				>
 					Cancelas en un clic, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}

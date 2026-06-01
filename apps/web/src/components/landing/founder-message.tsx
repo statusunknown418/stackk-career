@@ -161,7 +161,7 @@ export function FounderMessage() {
 			    that owns full-bleed Platzi green. */}
 			<motion.div
 				aria-hidden="true"
-				className="absolute inset-y-6 left-1/2 -z-10 w-[calc(100%-2rem)] max-w-[1280px] border-[6px] border-black bg-oxblood md:inset-y-8 md:w-[calc(100%-3rem)] md:border-[12px]"
+				className="absolute inset-y-6 left-1/2 -z-10 w-[calc(100%-2rem)] max-w-320 border-6 border-black bg-oxblood md:inset-y-8 md:w-[calc(100%-3rem)] md:border-[12px]"
 				style={
 					reduced
 						? { x: "-50%" }
@@ -188,7 +188,7 @@ export function FounderMessage() {
 			</motion.div>
 
 			<motion.div
-				className="relative mx-auto grid w-full max-w-[1180px] grid-cols-12 gap-6 px-6 py-12 md:px-12 md:py-16"
+				className="relative mx-auto grid w-full max-w-295 grid-cols-12 gap-6 px-6 py-12 md:px-12 md:py-16"
 				style={reduced ? undefined : { y: innerY }}
 			>
 				{/* Eyebrow — small editorial marker */}
@@ -221,7 +221,7 @@ export function FounderMessage() {
 					Carta abierta del equipo ASSENDIA
 				</h2>
 
-				<div className="col-span-12 col-start-1 mt-6 flex flex-col gap-6 font-display font-medium text-[clamp(1.4rem,3vw,2.4rem)] text-neutral-950 leading-[1.22] tracking-[-0.022em] md:col-span-9 md:col-start-2 md:mt-8 md:gap-7">
+				<div className="col-span-12 col-start-1 mt-6 flex flex-col gap-6 font-display font-medium text-[clamp(1.4rem,3vw,2.4rem)] text-neutral-950 leading-tight tracking-tight md:col-span-9 md:col-start-2 md:mt-8 md:gap-7">
 					{stanzas.map((stanza) => (
 						<p className="text-balance" key={stanza.id}>
 							{stanza.words.map((word) => (
@@ -242,7 +242,7 @@ export function FounderMessage() {
 				>
 					<SignatureMark />
 					<div className="flex flex-col gap-1">
-						<span className="font-display-italic font-light text-base text-neutral-950 leading-tight md:text-[1.2rem]">
+						<span className="font-display-italic font-light text-base text-neutral-950 leading-tight md:text-xl">
 							Equipo ASSENDIA
 						</span>
 						<span className="font-mono text-neutral-950/65 text-xs uppercase tracking-widest">Lima, Perú</span>
@@ -273,7 +273,7 @@ function Word({ word, reduced }: { reduced: boolean; word: WordToken }) {
 	const inner = (
 		<>
 			{word.emphasis ? (
-				<span aria-hidden="true" className="absolute -inset-x-1 -inset-y-0.5 rounded-[6px] bg-[oklch(0_0_0/0.10)]" />
+				<span aria-hidden="true" className="absolute -inset-x-1 -inset-y-0.5 rounded-md bg-[oklch(0_0_0/0.10)]" />
 			) : null}
 			<span className="relative">{word.text}</span>
 		</>

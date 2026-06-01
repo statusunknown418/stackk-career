@@ -54,10 +54,10 @@ function ReasonsStrip() {
 							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
 							<span>El producto</span>
 						</div>
-						<h2 className="mt-3 max-w-[860px] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-none tracking-tight">
+						<h2 className="mt-3 max-w-215 font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-none tracking-tight">
 							<WordReveal>Una suscripción que reúne las herramientas que te aseguran tu próxima entrevista.</WordReveal>
 						</h2>
-						<p className="mt-5 max-w-[620px] text-base text-foreground/65 leading-relaxed">
+						<p className="mt-5 max-w-155 text-base text-foreground/65 leading-relaxed">
 							Un Agente especializado de IA y un coach senior, juntos para potenciarte.
 						</p>
 					</header>
@@ -102,7 +102,7 @@ function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) 
 	if (!sticky) {
 		return (
 			<div className="px-6 pt-12 pb-20 md:pt-16 md:pb-28">
-				<div className="mx-auto flex max-w-[1000px] flex-col gap-6">
+				<div className="mx-auto flex max-w-250 flex-col gap-6">
 					{reasons.map((reason, i) => (
 						<Reveal delay={i * 0.06} key={reason.title}>
 							<StaticReasonCard displayNumber={formatStackNumber(i)} reason={reason} />
@@ -117,7 +117,7 @@ function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) 
 		<div className="px-6 pt-12 pb-20 md:pt-16 md:pb-28">
 			{/* Wrapper height = one card screen per reason. Extra room at the end
 			    lets the final card settle before the section releases. */}
-			<div className="relative mx-auto max-w-[1000px]">
+			<div className="relative mx-auto max-w-250">
 				{reasons.map((reason, i) => (
 					<StackReasonCard displayNumber={formatStackNumber(i)} index={i} key={reason.title} reason={reason} />
 				))}
@@ -206,7 +206,7 @@ function ReasonCardContent({
 			{/* Big ghost number — the editorial anchor for each reason */}
 			<span
 				aria-hidden="true"
-				className="pointer-events-none absolute top-[-2.5rem] right-[-1rem] select-none font-bold font-display text-[clamp(11rem,22vw,18rem)] text-foreground/[0.05] leading-none tracking-tighter"
+				className="pointer-events-none absolute -top-10 -right-4 select-none font-bold font-display text-[clamp(11rem,22vw,18rem)] text-foreground/[0.05] leading-none tracking-tighter"
 			>
 				{displayNumber}
 			</span>
@@ -218,7 +218,7 @@ function ReasonCardContent({
 				</span>
 			</header>
 
-			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-[1.05] tracking-tight">
+			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-none tracking-tight">
 				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
 			</h3>
 
@@ -380,7 +380,7 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 
 					{/* Title */}
 					<motion.h3
-						className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-[1.04] tracking-[-0.028em]"
+						className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight"
 						style={{ opacity: titleOpacity, y: titleY }}
 					>
 						{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
@@ -499,7 +499,7 @@ function ScrollProgressRail({ progress, railScale }: ScrollProgressRailProps) {
 			<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">El argumento</span>
 
 			{/* Thin scrubbing bar */}
-			<div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-border">
+			<div className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-border">
 				<motion.span
 					aria-hidden="true"
 					className="absolute inset-y-0 left-0 origin-left rounded-full bg-oxblood"
@@ -540,7 +540,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 				<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
 			</header>
 
-			<h3 className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-[1.04] tracking-[-0.028em]">
+			<h3 className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight">
 				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
 			</h3>
 

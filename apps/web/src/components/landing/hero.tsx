@@ -37,9 +37,7 @@ export function Hero() {
 								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/40" />
 								<span className="relative size-2 rounded-full bg-oxblood" />
 							</span>
-							<span className="font-medium text-foreground/75 text-xs tracking-[0.02em]">
-								Hecho en Perú, para LATAM
-							</span>
+							<span className="font-medium text-foreground/75 text-xs tracking-wide">Hecho en Perú, para LATAM</span>
 						</span>
 					</motion.div>
 
@@ -86,7 +84,7 @@ export function Hero() {
 						whileInView={fadeIn}
 					>
 						<a
-							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:translate-y-[-1px] hover:shadow-cta-hover"
+							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
 							href="/setup"
 						>
 							Analiza mi CV gratis
@@ -145,14 +143,14 @@ export function Hero() {
 							</div>
 							<div className="relative mt-auto pt-8">
 								<div className="flex items-baseline gap-3">
-									<span className="font-display font-semibold text-[34px] text-foreground/35 tabular-nums leading-none tracking-tight line-through decoration-2">
+									<span className="font-display font-semibold text-4xl text-foreground/35 tabular-nums leading-none tracking-tight line-through decoration-2">
 										47
 									</span>
 									<ArrowRightIcon className="text-foreground/40" size={18} weight="bold" />
 									<span className="font-display font-semibold text-[clamp(3.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-tighter">
 										95
 									</span>
-									<span className="font-display font-medium text-[20px] text-foreground/30 tabular-nums tracking-tight">
+									<span className="font-display font-medium text-foreground/30 text-xl tabular-nums tracking-tight">
 										/100
 									</span>
 								</div>
@@ -173,7 +171,7 @@ export function Hero() {
 
 						<OutcomeCard className="lg:col-span-2" reducedMotion={motionDisabled}>
 							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Juega de tu lado</p>
-							<p className="mt-3 font-display font-semibold text-[28px] text-foreground leading-[1] tracking-tight">
+							<p className="mt-3 font-display font-semibold text-3xl text-foreground leading-none tracking-tight">
 								Coach 1:1 senior
 							</p>
 							<p className="mt-4 font-mono text-foreground/70 text-xs uppercase tracking-widest">
@@ -183,7 +181,7 @@ export function Hero() {
 
 						<OutcomeCard reducedMotion={motionDisabled}>
 							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Primera entrevista</p>
-							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-tighter">
+							<p className="mt-3 font-display font-semibold text-4xl text-foreground tabular-nums leading-none tracking-tighter">
 								Día 18
 							</p>
 							<div className="mt-4 flex items-center gap-1">
@@ -207,9 +205,9 @@ export function Hero() {
 
 						<OutcomeCard reducedMotion={motionDisabled}>
 							<p className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Tu inversión</p>
-							<p className="mt-3 font-display font-semibold text-[40px] text-foreground tabular-nums leading-none tracking-tighter">
+							<p className="mt-3 font-display font-semibold text-4xl text-foreground tabular-nums leading-none tracking-tighter">
 								S/79
-								<span className="font-medium text-[16px] text-foreground/50 tracking-tight">/mes</span>
+								<span className="font-medium text-base text-foreground/50 tracking-tight">/mes</span>
 								<span className="ml-2 font-medium font-mono text-foreground/55 text-xs tracking-tight">≈ US$23</span>
 							</p>
 							<p className="mt-4 font-mono text-foreground/55 text-xs uppercase tracking-widest">

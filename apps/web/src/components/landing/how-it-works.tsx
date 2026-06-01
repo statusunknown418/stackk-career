@@ -604,7 +604,7 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 
 			<div className="relative">
 				{/* Base hairline */}
-				<div className="h-px w-full bg-foreground/[0.12]" />
+				<div className="h-px w-full bg-foreground/12" />
 
 				{/* Filled progress — scroll-linked width */}
 				<motion.div aria-hidden="true" className="absolute inset-y-0 left-0 h-px bg-oxblood" style={{ width: fill }} />
@@ -699,10 +699,7 @@ function HowItWorksStatic() {
 					const isFirstOfPhase = idx === step.phase.stepRange[0];
 					const titleParts = isLast ? splitLastTitle(step.title) : null;
 					return (
-						<li
-							className="relative border-foreground/[0.1] border-t py-10 first:border-t-0 first:pt-0"
-							key={step.index}
-						>
+						<li className="relative border-foreground/10 border-t py-10 first:border-t-0 first:pt-0" key={step.index}>
 							{isFirstOfPhase && (
 								<div className="mb-4 flex items-center gap-2 font-mono text-oxblood text-xs uppercase tracking-widest">
 									<span className="font-display-italic font-light text-base text-foreground/65 leading-none">
@@ -764,7 +761,7 @@ function HowItWorksStatic() {
 				})}
 			</ol>
 
-			<div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-foreground/[0.08] border-t pt-6 font-mono text-foreground/55 text-xs uppercase tracking-widest sm:flex-row sm:items-center sm:justify-between">
+			<div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-foreground/8 border-t pt-6 font-mono text-foreground/55 text-xs uppercase tracking-widest sm:flex-row sm:items-center sm:justify-between">
 				<span>Sobre 240+ procesos reales</span>
 				<span className="flex items-center gap-2 text-foreground/70">
 					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />

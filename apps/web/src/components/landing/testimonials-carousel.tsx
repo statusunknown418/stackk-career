@@ -59,7 +59,7 @@ function FeaturedTestimonial() {
 
 	return (
 		<header
-			className="mx-auto mb-14 max-w-[920px] text-center"
+			className="mx-auto mb-14 max-w-230 text-center"
 			onMouseEnter={() => setPaused(true)}
 			onMouseLeave={() => setPaused(false)}
 		>
@@ -77,7 +77,7 @@ function FeaturedTestimonial() {
 				<AnimatePresence initial={false} mode="wait">
 					<motion.blockquote
 						animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
-						className="text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-[1.15] tracking-tight"
+						className="text-balance font-display font-medium text-[clamp(1.5rem,3.4vw,2.75rem)] text-foreground leading-tight tracking-tight"
 						exit={reduced ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(8px)" }}
 						initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16, filter: "blur(8px)" }}
 						key={active.id}
@@ -155,7 +155,7 @@ export function TestimonialsCarousel() {
 			<div className="mx-auto max-w-7xl">
 				<FeaturedTestimonial />
 
-				<div className="relative h-[640px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)] md:h-[760px]">
+				<div className="relative h-160 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)] md:h-190">
 					<div className="grid h-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 						{TESTIMONIAL_COLUMNS.map((column, idx) => (
 							<TestimonialColumn
@@ -210,7 +210,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 					{testimonial.initials}
 				</span>
 				<div className="min-w-0 flex-1">
-					<p className="truncate font-display font-semibold text-[13.5px] text-foreground leading-tight tracking-tight">
+					<p className="truncate font-display font-semibold text-foreground text-sm leading-tight tracking-tight">
 						{testimonial.name}
 					</p>
 					<p className="truncate font-display-italic font-light text-foreground/60 text-xs leading-tight">
@@ -219,7 +219,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 				</div>
 			</header>
 
-			<blockquote className="text-[13.5px] text-foreground/80 leading-relaxed">“{testimonial.quote}”</blockquote>
+			<blockquote className="text-foreground/80 text-sm leading-relaxed">“{testimonial.quote}”</blockquote>
 
 			<footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-border border-t pt-3">
 				{testimonial.chip && (

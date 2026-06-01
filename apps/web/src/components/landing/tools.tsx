@@ -169,7 +169,7 @@ function ToolRow({ idx, tool }: { idx: number; tool: Tool }) {
 				</span>
 				<h3
 					className={`mt-1 font-display font-semibold leading-tight tracking-tight ${
-						isHuman ? "text-[1.35rem] text-foreground md:text-[1.5rem]" : "text-[1.2rem] text-foreground"
+						isHuman ? "text-[1.35rem] text-foreground md:text-[1.5rem]" : "text-foreground text-xl"
 					}`}
 				>
 					{tool.name}

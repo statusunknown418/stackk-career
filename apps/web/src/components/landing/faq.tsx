@@ -57,7 +57,7 @@ export function Faq() {
 						</motion.div>
 
 						<motion.h2
-							className="mt-5 font-bold font-display text-[clamp(2.1rem,4.6vw,3.4rem)] text-foreground leading-[1] tracking-tight"
+							className="mt-5 font-bold font-display text-[clamp(2.1rem,4.6vw,3.4rem)] text-foreground leading-none tracking-tight"
 							style={reduced ? undefined : { y: titleY, transformOrigin: "left top" }}
 						>
 							Preguntas <br className="hidden sm:block" />
@@ -65,7 +65,7 @@ export function Faq() {
 								frecuentes
 								<svg
 									aria-hidden="true"
-									className="absolute -bottom-1.5 left-0 h-[8px] w-full text-oxblood"
+									className="absolute -bottom-1.5 left-0 h-2 w-full text-oxblood"
 									fill="none"
 									preserveAspectRatio="none"
 									viewBox="0 0 240 8"
@@ -87,7 +87,7 @@ export function Faq() {
 						</motion.h2>
 
 						<motion.p
-							className="mt-6 max-w-[420px] text-base text-foreground/70 leading-relaxed"
+							className="mt-6 max-w-105 text-base text-foreground/70 leading-relaxed"
 							style={reduced ? undefined : { opacity: introOpacity }}
 						>
 							Si tu duda no está acá, te responde una persona del equipo en menos de 24 horas. Nunca un bot.
@@ -164,7 +164,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 			<button
 				aria-controls={panelId}
 				aria-expanded={isOpen}
-				className="flex w-full cursor-pointer items-start gap-6 py-6 text-left transition-transform duration-300 ease-out hover:-translate-y-[1px]"
+				className="flex w-full cursor-pointer items-start gap-6 py-6 text-left transition-transform duration-300 ease-out hover:-translate-y-px"
 				id={triggerId}
 				onClick={onToggle}
 				type="button"
@@ -172,7 +172,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 				<span className="mt-1 font-mono text-foreground/55 text-xs tabular-nums tracking-widest">
 					{(idx + 1).toString().padStart(2, "0")}
 				</span>
-				<span className="flex-1 font-display font-medium text-[1.08rem] text-foreground leading-[1.35] tracking-tight transition-colors duration-200 group-hover/row:text-foreground">
+				<span className="flex-1 font-display font-medium text-foreground text-lg leading-snug tracking-tight transition-colors duration-200 group-hover/row:text-foreground">
 					{item.q}
 				</span>
 				<span
@@ -206,7 +206,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 					>
 						<motion.p
 							animate={{ y: 0, filter: "blur(0px)" }}
-							className="ml-[2.6rem] max-w-[58ch] pr-2 pb-7 text-base text-foreground/72 leading-[1.65]"
+							className="ml-[2.6rem] max-w-[58ch] pr-2 pb-7 text-base text-foreground/72 leading-relaxed"
 							exit={{ y: -6, filter: "blur(4px)" }}
 							initial={{ y: 8, filter: "blur(4px)" }}
 							transition={{ duration: 0.45, ease: EASE_OUT_QUINT, delay: 0.05 }}
