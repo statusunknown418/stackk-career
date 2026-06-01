@@ -72,7 +72,7 @@ export const InlineEntry = withForm({
 		};
 
 		return (
-			<article className={"group/entry relative flex gap-3"} data-current={isCurrent}>
+			<article className={"group/entry relative flex gap-3"} data-block-id={block.id} data-current={isCurrent}>
 				{showRailDot && (
 					<div aria-hidden="true" className="relative w-2 flex-none">
 						<span className="absolute -top-3 -bottom-3 left-1/2 w-px -translate-x-1/2 bg-border/60" />
