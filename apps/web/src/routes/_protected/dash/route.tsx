@@ -142,10 +142,10 @@ function DashLayout() {
 
 					<Button className="ml-auto" onClick={() => openBillingSheet()} size="sm" variant="ghost">
 						<SparkleIcon
-							className={cn(planMeta === "pro" && "text-indigo-400", planMeta === "max" && "text-pink-400")}
+							className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}
 							weight="fill"
 						/>
-						<span className={cn(planMeta === "pro" && "text-indigo-400", planMeta === "max" && "text-pink-400")}>
+						<span className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}>
 							{planLabel}
 						</span>
 					</Button>
