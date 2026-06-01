@@ -144,6 +144,7 @@ function RouteComponent() {
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [areSectionsOpen, setAreSectionsOpen] = useState(true);
 	const [highlightedBlockId, setHighlightedBlockId] = useState<number | null>(null);
+	const [highlightedBlockVersion, setHighlightedBlockVersion] = useState(0);
 
 	const handleSelectSection = (id: number | null) => {
 		setHighlightedBlockId(null);
@@ -294,8 +295,6 @@ function RouteComponent() {
 			toast.error("No se encontró el bloque correspondiente.");
 			return;
 		}
-		// A targeted block may live in a non-focused (dimmed) section, so clear any
-		// section focus to restore full opacity before pulsing the block.
 		if (focusedSectionId !== null) {
 			navigate({
 				to: "/dash/resumes/$resumeId",
@@ -306,6 +305,7 @@ function RouteComponent() {
 		}
 
 		setHighlightedBlockId(edit.targetBlockId);
+		setHighlightedBlockVersion((version) => version + 1);
 	};
 
 	const deleteBlock = useDeleteBlock({ form });
@@ -449,6 +449,7 @@ function RouteComponent() {
 						focusedSectionId={focusedSectionId}
 						form={form}
 						highlightedBlockId={highlightedBlockId}
+						highlightedBlockVersion={highlightedBlockVersion}
 						rootBlocks={rootBlocks}
 					/>
 				</article>

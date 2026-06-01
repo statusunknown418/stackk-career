@@ -316,9 +316,6 @@
 	}
 }
 
-/* Transient pulse applied imperatively by ResumeDocument when a suggestion's
-   "Ver" CTA targets a specific block. The attribute is added on highlight and
-   removed on animationend, so re-highlighting a different block replays it. */
 [data-block-highlight] {
 	border-radius: var(--radius-md);
 	animation: block-highlight 1.8s var(--ease-out-quint);

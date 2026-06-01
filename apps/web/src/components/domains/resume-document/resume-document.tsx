@@ -16,9 +16,10 @@ export const ResumeDocument = withForm({
 		blockIndexById: propType<Map<number, number>>(),
 		focusedSectionId: propType<number | null>(),
 		highlightedBlockId: propType<number | null>(),
+		highlightedBlockVersion: propType<number>(),
 		rootBlocks: propType<BlockNode[]>(),
 	},
-	render: ({ form, blockIndexById, focusedSectionId, highlightedBlockId, rootBlocks }) => {
+	render: ({ form, blockIndexById, focusedSectionId, highlightedBlockId, highlightedBlockVersion, rootBlocks }) => {
 		const prefersReducedMotion = useReducedMotion();
 		const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
 		const containerRef = useRef<HTMLElement>(null);
@@ -32,13 +33,8 @@ export const ResumeDocument = withForm({
 				block: "start",
 			});
 		}, [focusedSectionId, prefersReducedMotion]);
-
-		// When a suggestion's "Ver" CTA targets a specific block, scroll it into
-		// view and replay a one-shot pulse. The data-block-highlight attribute is
-		// set imperatively (React does not own it) and removed on animationend, so
-		// highlighting another block later replays the animation cleanly.
 		useEffect(() => {
-			if (highlightedBlockId === null) {
+			if (highlightedBlockId === null || highlightedBlockVersion === 0) {
 				return;
 			}
 
@@ -57,15 +53,19 @@ export const ResumeDocument = withForm({
 				return;
 			}
 
-			target.setAttribute("data-block-highlight", "");
+			target.removeAttribute("data-block-highlight");
 			const handleEnd = () => target.removeAttribute("data-block-highlight");
-			target.addEventListener("animationend", handleEnd, { once: true });
+			const frameId = window.requestAnimationFrame(() => {
+				target.setAttribute("data-block-highlight", "");
+				target.addEventListener("animationend", handleEnd, { once: true });
+			});
 
 			return () => {
+				window.cancelAnimationFrame(frameId);
 				target.removeEventListener("animationend", handleEnd);
 				target.removeAttribute("data-block-highlight");
 			};
-		}, [highlightedBlockId, prefersReducedMotion]);
+		}, [highlightedBlockId, highlightedBlockVersion, prefersReducedMotion]);
 
 		const registerSection = (id: number) => (el: HTMLElement | null) => {
 			if (el) {

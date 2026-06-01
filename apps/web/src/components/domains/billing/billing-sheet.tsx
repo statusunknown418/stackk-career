@@ -443,7 +443,7 @@ function PlanCheckout({
 						<span>{checkoutError}</span>
 						<span>
 							Asegúrate de que las compras por internet estén activadas. Si el problema continúa, intenta con otra
-							tarjeta; aceptamos Visa, Mastercard, Diners Club, American Express y entre otraas.
+							tarjeta; aceptamos Visa, Mastercard, Diners Club, American Express y entre otras.
 						</span>
 					</AlertDescription>
 				</Alert>
