@@ -314,4 +314,61 @@ export const lettersRouter = {
 			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "No pudimos iniciar la generación" });
 		}
 	}),
+
+	/**
+	 * Persist USER edits to a generated cover letter (the four sections are editable in the
+	 * UI). Overwrites the targeted artifact message's `object` + `text` IN PLACE — it is not
+	 * a new generation, so no quota is consumed and no task is triggered.
+	 */
+	updateArtifact: protectedProcedure
+		.input(
+			z.object({
+				generationId: z.string().nonempty(),
+				messageId: z.string().nonempty(),
+				artifact: coverLetterSchema,
+			})
+		)
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			context.log?.set({
+				action: "update_cover_letter_artifact",
+				generation: { id: input.generationId },
+				message: { id: input.messageId },
+				user: { id: userId },
+			});
+
+			// Ownership: the generation must belong to the user.
+			const [gen] = await context.db
+				.select({ id: generations.id })
+				.from(generations)
+				.where(
+					and(
+						eq(generations.id, input.generationId),
+						eq(generations.owner, userId),
+						eq(generations.type, "cover-letter")
+					)
+				)
+				.limit(1);
+
+			if (!gen) {
+				context.log?.set({ outcome: "generation_not_found" });
+				throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
+			}
+
+			// Scope the update to this generation's artifact message; the objectType guard makes
+			// sure a non-artifact row (user/tool message) can never be overwritten.
+			await context.db
+				.update(messages)
+				.set({ object: input.artifact, text: input.artifact.body })
+				.where(
+					and(
+						eq(messages.id, input.messageId),
+						eq(messages.generationId, gen.id),
+						eq(messages.objectType, COVER_LETTER_OBJECT_TYPE)
+					)
+				);
+
+			context.log?.set({ outcome: "updated" });
+			return { messageId: input.messageId, ok: true };
+		}),
 };

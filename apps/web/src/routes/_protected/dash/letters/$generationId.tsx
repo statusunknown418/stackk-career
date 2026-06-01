@@ -102,6 +102,24 @@ function RouteComponent() {
 		})
 	);
 
+	// Ediciones manuales del usuario sobre la carta mostrada (no regenera, no consume versión).
+	const updateArtifactMutation = useMutation(
+		orpc.letters.updateArtifact.mutationOptions({
+			onError: (err) => toast.error(err.message),
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
+				});
+			},
+		})
+	);
+	const updateArtifactMutateAsync = updateArtifactMutation.mutateAsync;
+	const onSaveArtifact = useCallback(
+		(messageId: string, edited: CoverLetter) =>
+			updateArtifactMutateAsync({ artifact: edited, generationId, messageId }),
+		[generationId, updateArtifactMutateAsync]
+	);
+
 	const triggerMutateAsync = triggerMutation.mutateAsync;
 	const onTriggerAsync = useCallback(
 		async (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => {
@@ -206,6 +224,7 @@ function RouteComponent() {
 				/>
 
 				<LettersArtifactPanel
+					activeMessageId={activeMessageId}
 					activeVersion={activeVersion > 0 ? activeVersion : 1}
 					artifact={artifact}
 					currentLanguage={data.generation.language}
@@ -214,6 +233,7 @@ function RouteComponent() {
 					hasContent={Boolean(artifact) || data.latestArtifact !== null}
 					isPending={isPending}
 					isStreaming={isStreaming}
+					onSaveArtifact={onSaveArtifact}
 					onTriggerAsync={onTriggerAsync}
 				/>
 			</section>
