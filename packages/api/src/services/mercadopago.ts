@@ -91,8 +91,6 @@ function normalize(response: MercadopagoPreapprovalResponse): ProviderSubscripti
 export interface CreateSubscriptionInput {
 	backUrl: string;
 	cardTokenId: string;
-	/** Mercado Pago device fingerprint (`window.MP_DEVICE_SESSION_ID`) — sent as `X-Meli-Session-Id` when present. */
-	deviceId?: string;
 	idempotencyKey: string;
 	payerEmail: string;
 	planId: PaidPlanId;
@@ -155,9 +153,6 @@ export async function createPreapproval(input: CreateSubscriptionInput): Promise
 			},
 			requestOptions: {
 				idempotencyKey: input.idempotencyKey,
-				// Device fingerprint: Mercado Pago's antifraud rejects recurring-card validation
-				// (CC_VAL_433) when this is missing on `status: "authorized"` preapprovals.
-				meliSessionId: input.deviceId,
 			},
 		});
 

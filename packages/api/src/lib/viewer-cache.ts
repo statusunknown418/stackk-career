@@ -24,7 +24,7 @@ export function viewerSubscriptionTag(userId: string): string {
  * When to call:
  * - `generations.create` with `type: "resume-creation"` → `["resume_creation_generations_per_cycle"]`
  * - `generations.create` with `type: "conversation"` → `["conversation_generations_per_cycle"]`
- * - `resumes.create` (also inserts a generation) → `["resumes_total", "resume_creation_generations_per_cycle"]`
+ * - `resumes.create` (manual; inserts a `resume-manual` generation) → `["resumes_total"]`
  * - `resumeAnalyses` insert → `["resume_analyses_per_cycle"]`
  * - `coachingSessions` insert (e.g. `captureBooking`) → `["coaching_sessions_per_cycle"]`
  *

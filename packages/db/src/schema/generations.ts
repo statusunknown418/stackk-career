@@ -6,7 +6,10 @@ import { fileMetadata } from "./file-metadata";
 import { messages } from "./messages";
 import { resumeAnalyses } from "./resume-analyses";
 
-export const generationTypes = ["conversation", "resume-creation"] as const;
+// `resume-creation` = AI-generated resume from an uploaded source (PDF parser). `resume-manual` =
+// blank-editor resume created by hand. Only `resume-creation` counts toward the per-cycle AI quota
+// (`resume_creation_generations_per_cycle`); manual resumes are bounded solely by `resumes_total`.
+export const generationTypes = ["conversation", "resume-creation", "resume-manual"] as const;
 export type GenerationTypes = (typeof generationTypes)[number];
 
 export const generations = sqliteTable(

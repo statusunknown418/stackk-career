@@ -28,7 +28,6 @@ export const billingRouter = {
 		context.log?.set({
 			billing: {
 				action: "create_subscription",
-				deviceFingerprintPresent: Boolean(input.deviceId),
 				planId: input.planId,
 				userId,
 			},
@@ -37,7 +36,6 @@ export const billingRouter = {
 		const state = await createPreapproval({
 			backUrl: input.backUrl,
 			cardTokenId: input.cardTokenId,
-			deviceId: input.deviceId,
 			idempotencyKey: `subscription:${userId}:${input.planId}:${input.cardTokenId}`,
 			payerEmail: input.payerEmail,
 			planId: input.planId,
@@ -71,7 +69,6 @@ export const billingRouter = {
 			billing: {
 				action: "change_plan",
 				currentPlanId: subscription.planId,
-				deviceFingerprintPresent: Boolean(input.deviceId),
 				nextPlanId: input.planId,
 				userId,
 			},
@@ -85,7 +82,6 @@ export const billingRouter = {
 		const state = await createPreapproval({
 			backUrl: input.backUrl,
 			cardTokenId: input.cardTokenId,
-			deviceId: input.deviceId,
 			idempotencyKey: `change-plan:${userId}:${input.planId}:${input.cardTokenId}`,
 			payerEmail: input.payerEmail,
 			planId: input.planId,
