@@ -39,6 +39,7 @@ import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { cn } from "@/lib/utils";
 import { type client, orpc } from "@/utils/orpc";
 import type { PaymentBrickProps } from "./payment-brick";
+import { type BillingSheetView, useBillingSheet } from "./use-billing-sheet";
 
 const PaymentBrick = lazy(() => import("./payment-brick"));
 
@@ -99,15 +100,21 @@ function formatResetDate(date: Date): string {
 	return format(date, "d MMM", { locale: es });
 }
 
-interface BillingSheetProps {
-	onOpenChange: (open: boolean) => void;
-	open: boolean;
-}
+export function BillingSheet(): React.ReactElement {
+	const open = useBillingSheet((state) => state.open);
+	const view = useBillingSheet((state) => state.view);
+	const closeBillingSheet = useBillingSheet((state) => state.closeBillingSheet);
 
-export function BillingSheet({ onOpenChange, open }: BillingSheetProps): React.ReactElement {
 	return (
-		<Sheet onOpenChange={onOpenChange} open={open}>
-			<SheetPopup side="right">{open ? <BillingSheetContent /> : null}</SheetPopup>
+		<Sheet
+			onOpenChange={(next) => {
+				if (!next) {
+					closeBillingSheet();
+				}
+			}}
+			open={open}
+		>
+			<SheetPopup side="right">{open ? <BillingSheetContent initialView={view} /> : null}</SheetPopup>
 		</Sheet>
 	);
 }
@@ -391,7 +398,7 @@ function PlanCheckout({
 
 	const processing = createSubscription.isPending || changePlan.isPending;
 
-	const submit: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, deviceId, payerEmail }) => {
+	const submit: PaymentBrickProps["onTokenReady"] = async ({ cardTokenId, payerEmail }) => {
 		const email = payerEmail ?? session?.user.email;
 
 		if (!email) {
@@ -406,7 +413,6 @@ function PlanCheckout({
 				? "https://unoutspoken-arty-clayton.ngrok-free.dev/"
 				: window.location.href,
 			cardTokenId,
-			deviceId,
 			payerEmail: email,
 			planId,
 		});
@@ -495,8 +501,8 @@ function PlanCheckout({
 	);
 }
 
-function BillingSheetContent(): React.ReactElement {
-	const [view, setView] = useState<View>({ kind: "overview" });
+function BillingSheetContent({ initialView }: { initialView: BillingSheetView }): React.ReactElement {
+	const [view, setView] = useState<View>(initialView === "selector" ? { kind: "selector" } : { kind: "overview" });
 	const refreshBilling = useRefreshBilling();
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
 

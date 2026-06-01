@@ -5,10 +5,6 @@ import Loader from "@/components/loader";
 
 let sdkInitialized = false;
 
-interface MercadoPagoWindow extends Window {
-	MP_DEVICE_SESSION_ID?: string;
-}
-
 function ensureSdkInitialized(): void {
 	if (sdkInitialized) {
 		return;
@@ -23,11 +19,7 @@ export interface PaymentBrickProps {
 	/** Surface a recoverable brick-level error (init/render/processing) to the parent. */
 	onBrickError: (message: string) => void;
 	/** Forward the card token, device fingerprint, and payer email produced by the brick to the billing mutation. */
-	onTokenReady: (args: {
-		cardTokenId: string;
-		deviceId: string | undefined;
-		payerEmail: string | undefined;
-	}) => Promise<void>;
+	onTokenReady: (args: { cardTokenId: string; payerEmail: string | undefined }) => Promise<void>;
 	/** Pre-fill the payer email so the brick hides its email field and the user does not retype it. */
 	payerEmail?: string;
 }
@@ -71,11 +63,8 @@ export default function PaymentBrick({ amount, payerEmail, onBrickError, onToken
 			}}
 			onError={(error) => onBrickError(error.message ?? "No pudimos cargar el formulario de pago.")}
 			onSubmit={async ({ formData }) => {
-				const deviceId = (window as MercadoPagoWindow).MP_DEVICE_SESSION_ID;
-
 				await onTokenReady({
 					cardTokenId: formData.token,
-					deviceId: typeof deviceId === "string" && deviceId.length > 0 ? deviceId : undefined,
 					payerEmail: formData.payer.email,
 				});
 			}}

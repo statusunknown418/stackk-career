@@ -62,12 +62,6 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				href: appCss,
 			},
 		],
-		scripts: [
-			{
-				src: "https://www.mercadopago.com/v2/security.js",
-				view: "checkout",
-			},
-		],
 	}),
 	server: {
 		middleware: [createMiddleware().server(evlogErrorHandler)],
