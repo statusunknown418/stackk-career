@@ -15,6 +15,7 @@ export const limitKeyEnum = [
 	"resume_creation_generations_per_cycle",
 	"conversation_generations_per_cycle",
 	"resume_analyses_per_cycle",
+	"resume_inline_ai_suggestions",
 	"messages_per_generation",
 	"coaching_sessions_per_cycle",
 ] as const;
@@ -32,6 +33,7 @@ export type LimitKey = (typeof limitKeyEnum)[number];
  * - `resume_creation_generations_per_cycle` → `generations` WHERE `type = "resume-creation"` (per cycle; AI-from-source only, not manual)
  * - `conversation_generations_per_cycle` → `generations` WHERE `type = "conversation"` (per cycle)
  * - `resume_analyses_per_cycle` → `resume_analyses` (per cycle)
+ * - `resume_inline_ai_suggestions` → `messages` WHERE `objectType = "resume-suggestion"` AND `isAssistant = false`, owned via `generations.owner` (per cycle)
  * - `coaching_sessions_per_cycle` → `coaching_sessions` (per cycle)
  */
 export type CachedUsageLimitKey = Exclude<LimitKey, "messages_per_generation">;
@@ -58,6 +60,7 @@ export const entitlementMapSchema = z.object({
 	resume_creation_generations_per_cycle: limitValueSchema,
 	conversation_generations_per_cycle: limitValueSchema,
 	resume_analyses_per_cycle: limitValueSchema,
+	resume_inline_ai_suggestions: limitValueSchema,
 	messages_per_generation: limitValueSchema,
 	coaching_sessions_per_cycle: limitValueSchema,
 });
@@ -68,6 +71,7 @@ export const usageSnapshotSchema = z.object({
 	resume_creation_generations_per_cycle: z.number().int().nonnegative(),
 	conversation_generations_per_cycle: z.number().int().nonnegative(),
 	resume_analyses_per_cycle: z.number().int().nonnegative(),
+	resume_inline_ai_suggestions: z.number().int().nonnegative(),
 	coaching_sessions_per_cycle: z.number().int().nonnegative(),
 });
 export type UsageSnapshot = z.infer<typeof usageSnapshotSchema>;

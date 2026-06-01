@@ -11,6 +11,7 @@ import { toError } from "@stackk-career/schemas/utils/to-error";
 import { eq } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { buildSuggestionPrompt, loadResumeContext, RESUME_SUGGESTIONS_MODEL_SLUG } from "../lib/resume-suggestions";
+import { invalidateViewerUsage } from "../lib/viewer-cache";
 import { assertSingleQuota } from "../services/subscriptions";
 
 const MAX_ERROR_LEN = 1000;
@@ -41,9 +42,9 @@ export const suggestionsRouter = {
 				throw new ORPCError("NOT_FOUND", { message: "CV no encontrado" });
 			}
 
-			// A suggestion writes a counted `isAssistant: false` message on the resume's generation, so it
-			// consumes `messages_per_generation` exactly like `messages.create` — gate before doing the work.
-			await assertSingleQuota(context.db, userId, "messages_per_generation", { generationId: resume.generationId });
+			// Each inline "Generar" request writes one counted `objectType: "resume-suggestion"`,
+			// `isAssistant: false` message; gate on the dedicated per-cycle quota before doing the work.
+			await assertSingleQuota(context.db, userId, "resume_inline_ai_suggestions");
 
 			const { profile, blocks } = await loadResumeContext(context, userId, input.resumeId);
 			const { system, prompt } = buildSuggestionPrompt({ input, profile, blocks });
@@ -57,6 +58,8 @@ export const suggestionsRouter = {
 					content: { input, system, prompt },
 				})
 				.returning({ id: messages.id });
+
+			await invalidateViewerUsage(context.db, userId, ["resume_inline_ai_suggestions"]);
 
 			context.log?.set({
 				generation: { id: resume.generationId },
