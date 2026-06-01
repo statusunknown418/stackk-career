@@ -215,7 +215,6 @@ function RouteComponent() {
 				<LettersChatPanel
 					isPending={isPending || isStreaming}
 					jobPosition={data.generation.title ?? "el puesto"}
-					language={data.generation.language}
 					messages={data.messages}
 					onSelectVersion={setSelectedMessageId}
 					onTriggerAsync={onTriggerAsync}

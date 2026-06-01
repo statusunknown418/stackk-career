@@ -2,7 +2,6 @@
 
 import { IdentificationCardIcon, PaperPlaneRightIcon, ReadCvLogoIcon, WrenchIcon } from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { ComponentType } from "react";
 import { useState } from "react";
@@ -26,7 +25,6 @@ interface LettersChatPanelMessage {
 interface LettersChatPanelProps {
 	isPending: boolean;
 	jobPosition: string;
-	language: CoverLetterLanguage;
 	messages: readonly LettersChatPanelMessage[];
 	onSelectVersion: (messageId: string) => void;
 	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
@@ -40,49 +38,30 @@ interface ToolPresentation {
 }
 
 /**
- * Copy por idioma. El panel derecho (artifact) ya se localiza vía la carta; este panel
- * antes quedaba hardcodeado en español aun con la carta en inglés. `language` viene del
- * `generations.language` y selecciona todo el chrome del chat.
+ * Chrome del chat panel — SIEMPRE en español (es el idioma de la app: sidebar, panel derecho,
+ * etc. también lo están). El idioma de la carta (es/en) afecta SOLO el contenido del artifact,
+ * no la UI. No localizar este chrome al idioma de la carta o queda inconsistente con la app.
  */
 const CHAT_COPY = {
-	es: {
-		introPrefix: "Voy a redactar tu carta para",
-		introResume: "usando el CV",
-		toneHint: "Si quieres orientar el tono o resaltar algo, escríbelo abajo.",
-		versionsTip:
-			"💡 Puedes hacer clic en las versiones generadas en el chat para ver su contenido en el panel de la derecha.",
-		version: "Versión",
-		viewing: "Visualizando",
-		clickToLoad: "Haz clic para cargar",
-		failed: "Esta versión falló",
-		fieldLabel: "Indicación adicional",
-		placeholder: "Ej. Tono más cálido. Menciona que tengo experiencia en fintech.",
-		generating: "Generando…",
-		generate: "Generar carta",
-		toolReadCv: "CASEY leyó tu CV",
-		toolReadProfile: "CASEY revisó tu perfil",
-		toolGeneric: "CASEY consultó una herramienta",
-	},
-	en: {
-		introPrefix: "I'll write your letter for",
-		introResume: "using the CV",
-		toneHint: "If you'd like to steer the tone or highlight something, write it below.",
-		versionsTip: "💡 Click any generated version in the chat to view its content in the right-hand panel.",
-		version: "Version",
-		viewing: "Viewing",
-		clickToLoad: "Click to load",
-		failed: "This version failed",
-		fieldLabel: "Additional instruction",
-		placeholder: "E.g. Warmer tone. Mention my fintech experience.",
-		generating: "Generating…",
-		generate: "Generate letter",
-		toolReadCv: "CASEY read your CV",
-		toolReadProfile: "CASEY reviewed your profile",
-		toolGeneric: "CASEY used a tool",
-	},
+	introPrefix: "Voy a redactar tu carta para",
+	introResume: "usando el CV",
+	toneHint: "Si quieres orientar el tono o resaltar algo, escríbelo abajo.",
+	versionsTip:
+		"💡 Puedes hacer clic en las versiones generadas en el chat para ver su contenido en el panel de la derecha.",
+	version: "Versión",
+	viewing: "Visualizando",
+	clickToLoad: "Haz clic para cargar",
+	failed: "Esta versión falló",
+	fieldLabel: "Indicación adicional",
+	placeholder: "Ej. Tono más cálido. Menciona que tengo experiencia en fintech.",
+	generating: "Generando…",
+	generate: "Generar carta",
+	toolReadCv: "CASEY leyó tu CV",
+	toolReadProfile: "CASEY revisó tu perfil",
+	toolGeneric: "CASEY consultó una herramienta",
 } as const;
 
-type ChatCopy = (typeof CHAT_COPY)[CoverLetterLanguage];
+type ChatCopy = typeof CHAT_COPY;
 
 function toolPresentation(toolName: string | undefined, copy: ChatCopy): ToolPresentation {
 	if (toolName === "getSelectedResume") {
@@ -113,7 +92,6 @@ function isCoverLetterArtifact(m: LettersChatPanelMessage): boolean {
 export function LettersChatPanel({
 	isPending,
 	jobPosition,
-	language,
 	messages,
 	onSelectVersion,
 	onTriggerAsync,
@@ -121,7 +99,7 @@ export function LettersChatPanel({
 	selectedMessageId,
 }: LettersChatPanelProps) {
 	const [extraPrompt, setExtraPrompt] = useState("");
-	const copy = CHAT_COPY[language] ?? CHAT_COPY.es;
+	const copy = CHAT_COPY;
 
 	// Versiones navegables = artifacts NO fallidos. La numeración deriva de esta lista
 	// (computada una vez, no por mensaje) para que coincida con el panel derecho y la cuota.
