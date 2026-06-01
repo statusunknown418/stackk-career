@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { FeatureGate } from "@/components/domains/billing/feature-gate";
 import { CoachingTimeline } from "@/components/domains/coaching/coaching-timeline";
 import { FrameDescription } from "@/components/ui/frame";
 
@@ -22,7 +23,9 @@ function RouteComponent() {
 				</FrameDescription>
 			</header>
 
-			<CoachingTimeline />
+			<FeatureGate limitKey="coaching_sessions_per_cycle">
+				<CoachingTimeline />
+			</FeatureGate>
 		</section>
 	);
 }

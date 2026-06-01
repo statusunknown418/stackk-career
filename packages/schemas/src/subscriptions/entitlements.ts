@@ -1,17 +1,17 @@
-import { PLAN_CATALOG } from "./catalog";
-import type { EntitlementMap, LimitKey, LimitValue, PlanId } from "./types";
+import type { LimitValue } from "./types";
 import { unlimitedSentinel } from "./types";
-
-export function getEntitlements(planId: PlanId): EntitlementMap {
-	return PLAN_CATALOG[planId].entitlements;
-}
-
-export function getLimit(planId: PlanId, key: LimitKey): LimitValue {
-	return PLAN_CATALOG[planId].entitlements[key];
-}
 
 export function isUnlimited(value: LimitValue): value is typeof unlimitedSentinel {
 	return value === unlimitedSentinel;
+}
+
+/**
+ * Whether a plan grants any access to a feature: `unlimited` or a positive limit. A `0` limit means
+ * the feature is gated for this plan (e.g. coaching on `free`). Used by the frontend to blur/lock
+ * premium surfaces without re-deriving plan logic.
+ */
+export function hasFeatureAccess(limit: LimitValue): boolean {
+	return isUnlimited(limit) || limit > 0;
 }
 
 export function hasQuotaRemaining(limit: LimitValue, currentUsage: number): boolean {

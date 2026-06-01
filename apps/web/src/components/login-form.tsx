@@ -39,7 +39,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 										authClient.signIn.social({
 											provider: "google",
 											newUserCallbackURL: "/setup",
-											callbackURL: search.redirect,
+											callbackURL: search.redirect ?? "/dash",
 											fetchOptions: {
 												onRequest: () => {
 													isLoading(true);

@@ -110,6 +110,8 @@
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
 
+	--animate-shine: shine var(--duration) infinite linear;
+
 	@keyframes skeleton {
 		to {
 			background-position: -200% 0;
@@ -208,7 +210,6 @@
 			translate: 0 0;
 		}
 	}
-
 	@keyframes aurora-1 {
 		from {
 			transform: translate(0, 0) scale(1);
@@ -426,6 +427,18 @@
 		to {
 			opacity: 1;
 			transform: translateY(0);
+		}
+	}
+
+	@keyframes shine {
+		0% {
+			background-position: 0% 0%;
+		}
+		50% {
+			background-position: 100% 100%;
+		}
+		to {
+			background-position: 0% 0%;
 		}
 	}
 }

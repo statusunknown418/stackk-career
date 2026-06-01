@@ -6,7 +6,7 @@ import { user } from "./auth";
 export const planIdEnum = ["free", "pro", "max"] as const;
 export type PlanIdDb = (typeof planIdEnum)[number];
 
-export const subscriptionStatusEnum = ["active", "past_due", "canceled", "expired", "trialing"] as const;
+export const subscriptionStatusEnum = ["active", "past_due", "paused", "canceled", "expired", "trialing"] as const;
 export type SubscriptionStatusDb = (typeof subscriptionStatusEnum)[number];
 
 export const subscriptionProviderEnum = ["system", "mercadopago"] as const;
@@ -30,11 +30,9 @@ export const userSubscriptions = sqliteTable(
 
 		providerCustomerId: t.text(),
 		providerSubscriptionId: t.text(),
-		providerPreapprovalId: t.text(),
 
 		currentPeriodStart: t.integer({ mode: "timestamp" }).notNull(),
 		currentPeriodEnd: t.integer({ mode: "timestamp" }).notNull(),
-		cancelAtPeriodEnd: t.integer({ mode: "boolean" }).notNull().default(false),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })
@@ -49,7 +47,6 @@ export const userSubscriptions = sqliteTable(
 		uniqueIndex("user_subscriptions_user_id_unique").on(t.userId),
 		index("user_subscriptions_status_idx").on(t.status),
 		index("user_subscriptions_provider_sub_idx").on(t.providerSubscriptionId),
-		index("user_subscriptions_provider_preapproval_idx").on(t.providerPreapprovalId),
 	]
 );
 

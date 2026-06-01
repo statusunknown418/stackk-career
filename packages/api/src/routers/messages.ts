@@ -4,6 +4,7 @@ import { messages } from "@stackk-career/db/schema/messages";
 import { createMessageInputSchema, listMessagesInputSchema } from "@stackk-career/schemas/api/messages";
 import { and, asc, eq } from "drizzle-orm";
 import { protectedProcedure } from "../index";
+import { assertSingleQuota } from "../services/subscriptions";
 
 export const messagesRouter = {
 	create: protectedProcedure.input(createMessageInputSchema).handler(async ({ input, context }) => {
@@ -31,6 +32,10 @@ export const messagesRouter = {
 			context.log?.set({ outcome: "generation_not_found" });
 			context.log?.error(error);
 			throw error;
+		}
+
+		if (!input.isAssistant) {
+			await assertSingleQuota(context.db, userId, "messages_per_generation", { generationId: input.generationId });
 		}
 
 		const [row] = await context.db.insert(messages).values(input).returning({ id: messages.id });
