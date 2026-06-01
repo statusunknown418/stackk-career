@@ -108,17 +108,9 @@ export const Route = createFileRoute("/")({
 			{ name: "theme-color", content: "#0a0a0a" },
 		],
 		links: [
+			// Fonts are self-hosted via @fontsource (see index.css) — no external
+			// Google Fonts request, so no render-blocking stylesheet or preconnects.
 			{ rel: "canonical", href: SITE_URL },
-			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
-			{
-				rel: "preconnect",
-				href: "https://fonts.gstatic.com",
-				crossOrigin: "anonymous",
-			},
-			{
-				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:wght@400;500&display=swap",
-			},
 		],
 		scripts: [
 			{

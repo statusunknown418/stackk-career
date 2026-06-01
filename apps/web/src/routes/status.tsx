@@ -18,12 +18,7 @@ export const Route = createFileRoute("/status")({
 		],
 		links: [
 			{ rel: "icon", href: "/favicon.ico" },
-			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
-			{
-				rel: "preconnect",
-				href: "https://fonts.gstatic.com",
-				crossOrigin: "anonymous",
-			},
+			// Fonts are self-hosted via @fontsource (see index.css) — no Google Fonts preconnect needed.
 		],
 	}),
 });

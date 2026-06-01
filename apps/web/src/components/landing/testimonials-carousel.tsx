@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useInterval } from "@/hooks/use-interval";
 import { TESTIMONIALS, type Testimonial } from "./data";
 
 const REST = TESTIMONIALS.slice(1);
@@ -45,15 +46,12 @@ function FeaturedTestimonial() {
 		setActiveIndex(((index % TESTIMONIALS.length) + TESTIMONIALS.length) % TESTIMONIALS.length);
 	}, []);
 
-	useEffect(() => {
-		if (reduced || paused) {
-			return;
-		}
-		const id = setInterval(() => {
-			setActiveIndex((prev) => (prev + 1) % TESTIMONIALS.length);
-		}, ROTATE_INTERVAL_MS);
-		return () => clearInterval(id);
-	}, [reduced, paused]);
+	// Auto-advance every few seconds, paused on hover or when the user prefers
+	// reduced motion. `null` delay stops the timer (see useInterval).
+	useInterval(
+		() => setActiveIndex((prev) => (prev + 1) % TESTIMONIALS.length),
+		reduced || paused ? null : ROTATE_INTERVAL_MS
+	);
 
 	const active = TESTIMONIALS[activeIndex];
 
