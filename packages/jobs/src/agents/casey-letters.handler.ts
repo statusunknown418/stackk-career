@@ -5,10 +5,10 @@ import { type LanguageModel, Output, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
-// Modelo del proyecto = Grok (xAI) vía el AI gateway, NO Anthropic. Mismo slug que
-// usa el resto del repo (packages/api/src/lib/resume-suggestions.ts).
-export const CASEY_LETTERS_MODEL: LanguageModel = "xai/grok-4.1-fast-non-reasoning";
-export const CASEY_LETTERS_FALLBACK_MODEL: LanguageModel = "xai/grok-4.1-fast-non-reasoning";
+// Modelo de CASEY vía el AI gateway = Gemini 3.1 Flash Lite (mismo slug que usa
+// k02-fast-analysis en el repo). NO Anthropic.
+export const CASEY_LETTERS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
+export const CASEY_LETTERS_FALLBACK_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 
 const CASEY_TIMEOUT_MS = Number(process.env.CASEY_LETTERS_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
 const CASEY_MAX_STEPS = Number(process.env.CASEY_LETTERS_MAX_STEPS ?? 6); // 3 tools + buffer
