@@ -179,6 +179,24 @@ async function readCachedUsageCounter(
 		return rows?.value ?? 0;
 	}
 
+	if (metric === "resume_inline_ai_suggestions") {
+		const [rows] = await db
+			.select({ value: count() })
+			.from(messages)
+			.innerJoin(generations, eq(messages.generationId, generations.id))
+			.where(
+				and(
+					eq(generations.owner, userId),
+					eq(messages.objectType, "resume-suggestion"),
+					eq(messages.isAssistant, false),
+					between(messages.createdAt, currentPeriodStart, currentPeriodEnd)
+				)
+			)
+			.$withCache(cacheConfig);
+
+		return rows?.value ?? 0;
+	}
+
 	return 0;
 }
 
@@ -193,20 +211,23 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 	const plan = PLAN_CATALOG[subscription.planId];
 	const effectivePlan = PLAN_CATALOG[getEffectivePlanId(subscription)];
 
-	const [resumeCreationGens, conversationGens, analyses, coaching, totalResumes] = await Promise.allSettled([
-		readCachedUsageCounter(db, userId, "resume_creation_generations_per_cycle", period),
-		readCachedUsageCounter(db, userId, "conversation_generations_per_cycle", period),
-		readCachedUsageCounter(db, userId, "resume_analyses_per_cycle", period),
-		readCachedUsageCounter(db, userId, "coaching_sessions_per_cycle", period),
-		readCachedUsageCounter(db, userId, "resumes_total", period),
-	]);
+	const [resumeCreationGens, conversationGens, analyses, coaching, totalResumes, inlineSuggestions] =
+		await Promise.allSettled([
+			readCachedUsageCounter(db, userId, "resume_creation_generations_per_cycle", period),
+			readCachedUsageCounter(db, userId, "conversation_generations_per_cycle", period),
+			readCachedUsageCounter(db, userId, "resume_analyses_per_cycle", period),
+			readCachedUsageCounter(db, userId, "coaching_sessions_per_cycle", period),
+			readCachedUsageCounter(db, userId, "resumes_total", period),
+			readCachedUsageCounter(db, userId, "resume_inline_ai_suggestions", period),
+		]);
 
 	if (
 		resumeCreationGens.status === "rejected" ||
 		conversationGens.status === "rejected" ||
 		analyses.status === "rejected" ||
 		coaching.status === "rejected" ||
-		totalResumes.status === "rejected"
+		totalResumes.status === "rejected" ||
+		inlineSuggestions.status === "rejected"
 	) {
 		throw new ORPCError("INTERNAL_SERVER_ERROR", {
 			message: "No se pudo encontrar uso para alguno de los modelos",
@@ -219,6 +240,7 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 		conversation_generations_per_cycle: conversationGens.value,
 		resume_analyses_per_cycle: analyses.value,
 		coaching_sessions_per_cycle: coaching.value,
+		resume_inline_ai_suggestions: inlineSuggestions.value,
 	};
 
 	const remaining = {
@@ -235,6 +257,10 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 		coaching_sessions_per_cycle: remainingQuota(
 			entitlements.coaching_sessions_per_cycle,
 			usage.coaching_sessions_per_cycle
+		),
+		resume_inline_ai_suggestions: remainingQuota(
+			entitlements.resume_inline_ai_suggestions,
+			usage.resume_inline_ai_suggestions
 		),
 	} satisfies UsageSnapshotResult["remaining"];
 

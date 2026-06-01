@@ -61,9 +61,10 @@ const NEAR_LIMIT_RATIO = 0.8;
 
 const USAGE_METRICS: { key: CachedUsageLimitKey; label: string }[] = [
 	{ key: "resumes_total", label: "CVs" },
-	{ key: "resume_creation_generations_per_cycle", label: "Generaciones de CV" },
+	{ key: "resume_creation_generations_per_cycle", label: "Creaciones de CV con AI" },
 	{ key: "conversation_generations_per_cycle", label: "Conversaciones" },
 	{ key: "resume_analyses_per_cycle", label: "Análisis de CV" },
+	{ key: "resume_inline_ai_suggestions", label: "Sugerencias con AI" },
 	{ key: "coaching_sessions_per_cycle", label: "Sesiones de coaching" },
 ];
 

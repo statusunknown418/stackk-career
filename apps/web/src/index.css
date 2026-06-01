@@ -611,6 +611,29 @@
 	--sidebar-ring: var(--color-neutral-400);
 }
 
+@keyframes block-highlight {
+	0% {
+		box-shadow: 0 0 0 0 transparent;
+		background-color: transparent;
+	}
+	12% {
+		box-shadow: 0 0 0 4px color-mix(in srgb, var(--info) 65%, transparent);
+		background-color: color-mix(in srgb, var(--info) 14%, transparent);
+	}
+	100% {
+		box-shadow: 0 0 0 4px transparent;
+		background-color: transparent;
+	}
+}
+
+/* Transient pulse applied imperatively by ResumeDocument when a suggestion's
+   "Ver" CTA targets a specific block. The attribute is added on highlight and
+   removed on animationend, so re-highlighting a different block replays it. */
+[data-block-highlight] {
+	border-radius: var(--radius-md);
+	animation: block-highlight 1.8s var(--ease-out-quint);
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
