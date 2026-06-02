@@ -1,16 +1,18 @@
 import {
 	type MotionValue,
 	motion,
+	useInView,
 	useMotionValueEvent,
 	useReducedMotion,
 	useScroll,
 	useSpring,
 	useTransform,
 } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { WHY_REASONS } from "./data";
 
 const LEADING_NUMBER_RE = /^(\d+)(\s.*)?$/;
@@ -95,7 +97,7 @@ const STACK_TOP_STEP_REM = 1.75;
 
 function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) {
 	const reduced = useReducedMotion() ?? false;
-	const isDesktop = useIsDesktop();
+	const isDesktop = useMediaQuery("md");
 	const sticky = isDesktop && !reduced;
 
 	// Static fallback — normal flow, no sticky, no transforms.
@@ -267,6 +269,10 @@ interface PinnedPriceMomentProps {
 	reason: (typeof WHY_REASONS)[number];
 }
 
+interface PriceScrubStageProps extends PinnedPriceMomentProps {
+	containerRef: { current: HTMLDivElement | null };
+}
+
 // Helper — clamped linear fade utility for legibility. Motion's useTransform
 // already clamps by default when given matched-length input/output arrays.
 // Named with the `use` prefix so React's hooks lint sees it as a custom hook.
@@ -276,7 +282,7 @@ function useRangeFade(scroll: MotionValue<number>, enter: number, settle: number
 
 function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	const reduced = useReducedMotion() ?? false;
-	const isDesktop = useIsDesktop();
+	const isDesktop = useMediaQuery("md");
 
 	// Gate BEFORE any useScroll-with-target hook. The scrub lives in its own
 	// child so useScroll only runs when its target element is actually mounted.
@@ -297,7 +303,20 @@ function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 
 function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
+	// The pinned scrub owns a spring + ~18 scroll-driven transforms. Mount them
+	// only while the section is near the viewport; once the reader scrolls past,
+	// the whole subtree unmounts and its scroll subscriptions go with it. The
+	// container keeps its height so the pin's scroll length never changes.
+	const inView = useInView(containerRef, { margin: "200px 0px" });
 
+	return (
+		<div className="relative h-[108vh]" ref={containerRef}>
+			{inView && <PriceScrubStage containerRef={containerRef} reason={reason} />}
+		</div>
+	);
+}
+
+function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 	const { scrollYProgress } = useScroll({
 		target: containerRef,
 		offset: ["start 80%", "end end"],
@@ -356,113 +375,109 @@ function PinnedPriceScrub({ reason }: PinnedPriceMomentProps) {
 	const railScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
 	return (
-		// Tall container — its height determines how long the section stays pinned.
-		// 220vh: ~120vh of pinned scrubbing past the initial pin attachment.
-		<div className="relative h-[108vh]" ref={containerRef}>
-			<div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background px-6">
-				<article className="relative mx-auto flex w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-14">
-					{/* Green corner block — the brand anchor. Scroll-linked scale. */}
-					<motion.span
-						aria-hidden="true"
-						className="pointer-events-none absolute top-0 right-0 h-40 w-40 origin-top-right bg-oxblood md:h-56 md:w-56"
-						style={{
-							scale: cornerScale,
-							opacity: cornerOpacity,
-							clipPath: "polygon(100% 0, 100% 100%, 0 0)",
-						}}
-					/>
+		<div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background px-6">
+			<article className="relative mx-auto flex w-full max-w-7xl flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-14">
+				{/* Green corner block — the brand anchor. Scroll-linked scale. */}
+				<motion.span
+					aria-hidden="true"
+					className="pointer-events-none absolute top-0 right-0 h-40 w-40 origin-top-right bg-oxblood md:h-56 md:w-56"
+					style={{
+						scale: cornerScale,
+						opacity: cornerOpacity,
+						clipPath: "polygon(100% 0, 100% 100%, 0 0)",
+					}}
+				/>
 
-					{/* Header chrome — Razón 02 meta */}
-					<motion.header className="relative flex items-center gap-2" style={{ opacity: headerOpacity, y: headerY }}>
-						<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-						<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
-					</motion.header>
+				{/* Header chrome — Razón 02 meta */}
+				<motion.header className="relative flex items-center gap-2" style={{ opacity: headerOpacity, y: headerY }}>
+					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
+					<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
+				</motion.header>
 
-					{/* Title */}
-					<motion.h3
-						className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight"
-						style={{ opacity: titleOpacity, y: titleY }}
-					>
-						{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
-					</motion.h3>
+				{/* Title */}
+				<motion.h3
+					className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight"
+					style={{ opacity: titleOpacity, y: titleY }}
+				>
+					{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
+				</motion.h3>
 
-					{/* The math — three columns: Ellos / vs / Nosotros */}
-					<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-8 md:mt-14 md:grid-cols-[1fr_auto_1fr]">
-						{/* ELLOS — Wonsulting side */}
-						<div className="flex flex-col items-start text-left md:items-end md:text-right">
-							{/* Both prices with a single strike that sweeps across them */}
-							<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4 gap-y-1">
-								<motion.span
-									className="flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-tighter"
-									style={{ opacity: price2299Opacity, y: price2299Y }}
-								>
-									<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
-									250
-								</motion.span>
+				{/* The math — three columns: Ellos / vs / Nosotros */}
+				<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-8 md:mt-14 md:grid-cols-[1fr_auto_1fr]">
+					{/* ELLOS — Wonsulting side */}
+					<div className="flex flex-col items-start text-left md:items-end md:text-right">
+						{/* Both prices with a single strike that sweeps across them */}
+						<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4 gap-y-1">
+							<motion.span
+								className="flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-tighter"
+								style={{ opacity: price2299Opacity, y: price2299Y }}
+							>
+								<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
+								250
+							</motion.span>
 
-								{/* Drawn strike — scaleX origin-left, scroll-linked.
+							{/* Drawn strike — scaleX origin-left, scroll-linked.
 								    Sits over both prices, sweeping across in sync with scroll. */}
-								<motion.span
-									aria-hidden="true"
-									className="pointer-events-none absolute inset-x-0 top-1/2 h-[2.5px] origin-left bg-foreground/70"
-									style={{ scaleX: strikeScale }}
-								/>
-							</div>
-
 							<motion.span
-								className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest"
-								style={{ opacity: ellosSubOpacity }}
-							>
-								Pagas más por menos
-							</motion.span>
+								aria-hidden="true"
+								className="pointer-events-none absolute inset-x-0 top-1/2 h-[2.5px] origin-left bg-foreground/70"
+								style={{ scaleX: strikeScale }}
+							/>
 						</div>
 
-						{/* VS — italic punctuation, the pivot */}
 						<motion.span
-							aria-hidden="true"
-							className="origin-center self-center justify-self-center font-display-italic font-light text-[clamp(3rem,6vw,5.5rem)] text-foreground/30 leading-none"
-							style={{ scale: vsScale, opacity: vsOpacity, rotate: vsRotate }}
+							className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest"
+							style={{ opacity: ellosSubOpacity }}
 						>
-							vs
+							Pagas más por menos
 						</motion.span>
-
-						{/* NOSOTROS — ASSENDIA side */}
-						<div className="flex flex-col items-end text-right md:items-start md:text-left">
-							<div className="mt-3 flex items-baseline gap-2">
-								<motion.span
-									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-tighter"
-									style={{ opacity: solesMarkOpacity, y: solesMarkY }}
-								>
-									S/
-								</motion.span>
-								<motion.span
-									aria-live="polite"
-									className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground tabular-nums leading-none tracking-tighter"
-									style={{ opacity: numberOpacity }}
-								>
-									{counterText}
-								</motion.span>
-								<motion.span
-									className="font-mono text-foreground/60 text-xs tracking-tight"
-									style={{ opacity: perMesOpacity }}
-								>
-									/mes
-								</motion.span>
-							</div>
-
-							<motion.span
-								className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest"
-								style={{ opacity: nosotrosSubOpacity }}
-							>
-								Pagas menos por mucho más
-							</motion.span>
-						</div>
 					</div>
 
-					{/* Scroll progress rail — bottom edge of the card */}
-					<ScrollProgressRail progress={scrollYProgress} railScale={railScale} />
-				</article>
-			</div>
+					{/* VS — italic punctuation, the pivot */}
+					<motion.span
+						aria-hidden="true"
+						className="origin-center self-center justify-self-center font-display-italic font-light text-[clamp(3rem,6vw,5.5rem)] text-foreground/30 leading-none"
+						style={{ scale: vsScale, opacity: vsOpacity, rotate: vsRotate }}
+					>
+						vs
+					</motion.span>
+
+					{/* NOSOTROS — ASSENDIA side */}
+					<div className="flex flex-col items-end text-right md:items-start md:text-left">
+						<div className="mt-3 flex items-baseline gap-2">
+							<motion.span
+								className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-tighter"
+								style={{ opacity: solesMarkOpacity, y: solesMarkY }}
+							>
+								S/
+							</motion.span>
+							<motion.span
+								aria-live="polite"
+								className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground tabular-nums leading-none tracking-tighter"
+								style={{ opacity: numberOpacity }}
+							>
+								{counterText}
+							</motion.span>
+							<motion.span
+								className="font-mono text-foreground/60 text-xs tracking-tight"
+								style={{ opacity: perMesOpacity }}
+							>
+								/mes
+							</motion.span>
+						</div>
+
+						<motion.span
+							className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest"
+							style={{ opacity: nosotrosSubOpacity }}
+						>
+							Pagas menos por mucho más
+						</motion.span>
+					</div>
+				</div>
+
+				{/* Scroll progress rail — bottom edge of the card */}
+				<ScrollProgressRail progress={scrollYProgress} railScale={railScale} />
+			</article>
 		</div>
 	);
 }
@@ -580,22 +595,4 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 			</div>
 		</article>
 	);
-}
-
-// matchMedia hook — drives the pinned/static split. Below 900px we drop the
-// scroll-pinned scrub for the static composition (mirrors how-it-works.tsx).
-// SSR-safe: starts false so the static fallback renders first, then syncs.
-function useIsDesktop(breakpoint = 900): boolean {
-	const [isDesktop, setIsDesktop] = useState(false);
-	useEffect(() => {
-		if (typeof window === "undefined") {
-			return;
-		}
-		const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
-		const sync = () => setIsDesktop(mq.matches);
-		sync();
-		mq.addEventListener("change", sync);
-		return () => mq.removeEventListener("change", sync);
-	}, [breakpoint]);
-	return isDesktop;
 }

@@ -3,14 +3,16 @@
 import {
 	type MotionValue,
 	motion,
+	useInView,
 	useMotionValueEvent,
 	useReducedMotion,
 	useScroll,
 	useSpring,
 	useTransform,
 } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Reveal } from "@/components/ui/reveal";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { HOW_STEPS } from "./data";
 
 /**
@@ -77,7 +79,7 @@ const TRAVEL_VW = -((PANEL_COUNT - 1) * 100);
 
 export function HowItWorks() {
 	const reduced = useReducedMotion();
-	const isDesktop = useIsDesktop();
+	const isDesktop = useMediaQuery("md");
 
 	if (reduced || !isDesktop) {
 		return <HowItWorksStatic />;
@@ -91,6 +93,28 @@ export function HowItWorks() {
 
 function HowItWorksScrub() {
 	const sectionRef = useRef<HTMLElement>(null);
+	// Only mount the scroll-linked stage (the spring + ~40 scroll-driven
+	// subscriptions + the panels' looping SVG graphics) while the section is near
+	// the viewport. Once the user scrolls ~200px past it, the whole subtree
+	// unmounts so nothing animates off-screen — the same gating idea as
+	// hero-aurora-shader.tsx. The section keeps its full height, so scroll never
+	// jumps when the stage mounts/unmounts.
+	const inView = useInView(sectionRef, { margin: "200px 0px" });
+
+	return (
+		<section
+			aria-labelledby="how-heading"
+			className="relative bg-background"
+			id="camino"
+			ref={sectionRef}
+			style={{ height: `${PANEL_COUNT * 42}vh` }}
+		>
+			{inView && <ScrubStage sectionRef={sectionRef} />}
+		</section>
+	);
+}
+
+function ScrubStage({ sectionRef }: { sectionRef: { current: HTMLElement | null } }) {
 	const { scrollYProgress } = useScroll({
 		target: sectionRef,
 		offset: ["start start", "end end"],
@@ -126,31 +150,23 @@ function HowItWorksScrub() {
 	const railFill = useTransform(progress, [0, 1], ["0%", "100%"]);
 
 	return (
-		<section
-			aria-labelledby="how-heading"
-			className="relative bg-background"
-			id="camino"
-			ref={sectionRef}
-			style={{ height: `${PANEL_COUNT * 42}vh` }}
-		>
-			<div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden">
-				<ScrubHeader activeIdx={activeIdx} dayText={dayText} progress={progress} />
+		<div className="sticky top-0 flex h-screen w-full flex-col overflow-hidden">
+			<ScrubHeader activeIdx={activeIdx} dayText={dayText} progress={progress} />
 
-				<div className="relative flex-1 overflow-hidden">
-					<motion.ol
-						aria-label="Pasos del camino ASSENDIA"
-						className="flex h-full will-change-transform"
-						style={{ x: stripX, width: `${PANEL_COUNT * 100}vw` }}
-					>
-						{STEPS.map((step, idx) => (
-							<Panel idx={idx} key={step.index} progress={progress} step={step} />
-						))}
-					</motion.ol>
-				</div>
-
-				<ScrubRail activeIdx={activeIdx} fill={railFill} progress={progress} />
+			<div className="relative flex-1 overflow-hidden">
+				<motion.ol
+					aria-label="Pasos del camino ASSENDIA"
+					className="flex h-full will-change-transform"
+					style={{ x: stripX, width: `${PANEL_COUNT * 100}vw` }}
+				>
+					{STEPS.map((step, idx) => (
+						<Panel idx={idx} key={step.index} progress={progress} step={step} />
+					))}
+				</motion.ol>
 			</div>
-		</section>
+
+			<ScrubRail activeIdx={activeIdx} fill={railFill} progress={progress} />
+		</div>
 	);
 }
 
@@ -784,19 +800,4 @@ function splitLastTitle(title: string): { head: string; tail: string } {
 	const tailWords = parts.slice(-2).join(" ");
 	const headWords = parts.slice(0, -2).join(" ");
 	return { head: headWords, tail: tailWords };
-}
-
-function useIsDesktop(breakpoint = 900): boolean {
-	const [isDesktop, setIsDesktop] = useState(false);
-	useEffect(() => {
-		if (typeof window === "undefined") {
-			return;
-		}
-		const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
-		const sync = () => setIsDesktop(mq.matches);
-		sync();
-		mq.addEventListener("change", sync);
-		return () => mq.removeEventListener("change", sync);
-	}, [breakpoint]);
-	return isDesktop;
 }

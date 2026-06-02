@@ -3,11 +3,12 @@
 import { QuotesIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useMemo, useRef } from "react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const EASE_OUT_QUINT = [0.16, 1, 0.3, 1] as const;
 
 // Word reveal timing — matches the section-title WordReveal: each word rises +
-// unblurs in reading order, staggered. The stagger RESETS per stanza so a long
+// fades in reading order, staggered. The stagger RESETS per stanza so a long
 // letter never accumulates a multi-second delay; each paragraph stays snappy.
 const WORD_REVEAL_DURATION = 0.55;
 const WORD_STAGGER = 0.05;
@@ -115,7 +116,14 @@ const CHUNKS: readonly Stanza[] = [
 
 export function FounderMessage() {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
 	const sectionRef = useRef<HTMLElement>(null);
+
+	// The scroll-linked background choreography (scale / radius / sheen / tilt)
+	// only runs on desktop and never under reduced-motion. Mobile renders the
+	// static composition instead — that's where Core Web Vitals are tightest, so
+	// we don't pay for per-frame scroll transforms or a scroll subscription there.
+	const animate = !reduced && isDesktop;
 
 	// Flattened per-stanza word tokens — precomputed once. Drives the staggered
 	// whileInView word reveal below (stagger resets per stanza).
@@ -163,9 +171,9 @@ export function FounderMessage() {
 				aria-hidden="true"
 				className="absolute inset-y-6 left-1/2 -z-10 w-[calc(100%-2rem)] max-w-320 border-6 border-black bg-oxblood md:inset-y-8 md:w-[calc(100%-3rem)] md:border-[12px]"
 				style={
-					reduced
-						? { x: "-50%" }
-						: { rotate: cardRotate, scale: bgScale, borderRadius: bgRadius, transformOrigin: "50% 50%", x: "-50%" }
+					animate
+						? { rotate: cardRotate, scale: bgScale, borderRadius: bgRadius, transformOrigin: "50% 50%", x: "-50%" }
+						: { x: "-50%" }
 				}
 			>
 				{/* Subtle inner darker layer to add depth without breaking the flat
@@ -183,13 +191,13 @@ export function FounderMessage() {
 				<motion.div
 					aria-hidden="true"
 					className="pointer-events-none absolute inset-0 [background:linear-gradient(115deg,transparent_38%,oklch(1_0_0/0.16)_50%,transparent_62%)]"
-					style={reduced ? undefined : { x: sheenX }}
+					style={animate ? { x: sheenX } : undefined}
 				/>
 			</motion.div>
 
 			<motion.div
 				className="relative mx-auto grid w-full max-w-295 grid-cols-12 gap-6 px-6 py-12 md:px-12 md:py-16"
-				style={reduced ? undefined : { y: innerY }}
+				style={animate ? { y: innerY } : undefined}
 			>
 				{/* Eyebrow — small editorial marker */}
 				<motion.div
@@ -255,7 +263,7 @@ export function FounderMessage() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Word — a single word that rises + unblurs into place as its stanza enters   */
+/* Word — a single word that rises + fades into place as its stanza enters     */
 /* view, mirroring the section-title WordReveal. Delay is its in-stanza index  */
 /* (capped) × the stagger, so each paragraph plays as its own short sweep.      */
 /* Emphasized words keep their stronger weight + a soft pill behind them.      */
@@ -288,10 +296,10 @@ function Word({ word, reduced }: { reduced: boolean; word: WordToken }) {
 			) : (
 				<motion.span
 					className={className}
-					initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
+					initial={{ opacity: 0, y: 18 }}
 					transition={{ delay, duration: WORD_REVEAL_DURATION, ease: EASE_OUT_QUINT }}
-					viewport={{ margin: "-15% 0px", once: false }}
-					whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+					viewport={{ margin: "-15% 0px", once: true }}
+					whileInView={{ opacity: 1, y: 0 }}
 				>
 					{inner}
 				</motion.span>
