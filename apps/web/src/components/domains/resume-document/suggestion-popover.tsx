@@ -4,11 +4,15 @@ import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { ArrowClockwiseIcon, SparkleIcon } from "@phosphor-icons/react";
 import { type SuggestResumeBlockInput, suggestResumeBlockOutputSchema } from "@stackk-career/schemas/api/suggestions";
 import { sanitizeResumeRichTextHtml } from "@stackk-career/schemas/db/resume-blocks";
+import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Classic } from "@/components/loading-ui/classic";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { invalidateBillingQueries } from "@/lib/billing-cache";
+import { orpc } from "@/utils/orpc";
 import { InlineTextEditor } from "./inline-text-editor";
 
 interface Props {
@@ -22,15 +26,24 @@ const SUGGESTION_SLOTS = [0, 1, 2, 3] as const;
 export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 	const [open, setOpen] = useState(false);
 
+	const queryClient = useQueryClient();
+	const snapshot = useQuery(orpc.billing.getSnapshot.queryOptions()).data;
+	const hasQuota =
+		snapshot == null ||
+		hasQuotaRemaining(snapshot.entitlements.resume_inline_ai_suggestions, snapshot.usage.resume_inline_ai_suggestions);
+
 	const { object, submit, isLoading, stop, error } = useObject({
 		schema: suggestResumeBlockOutputSchema,
 		api: "/api/resume-suggestions",
+		onFinish: async () => {
+			await invalidateBillingQueries(queryClient);
+		},
 	});
 
 	const handleOpenChange = (next: boolean) => {
 		setOpen(next);
 		onOpenChange?.(next);
-		if (next) {
+		if (next && hasQuota) {
 			submit(input);
 		} else {
 			stop();
@@ -48,7 +61,14 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 		<Popover onOpenChange={handleOpenChange} open={open}>
 			<PopoverTrigger
 				render={
-					<Button aria-label="Mejorar con IA" size="sm" type="button" variant="ghost">
+					<Button
+						aria-label="Mejorar con IA"
+						disabled={!hasQuota}
+						size="sm"
+						title={hasQuota ? undefined : "Alcanzaste el límite de sugerencias con IA de tu plan"}
+						type="button"
+						variant="ghost"
+					>
 						<SparkleIcon /> Generar
 					</Button>
 				}

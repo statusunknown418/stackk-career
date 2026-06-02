@@ -28,14 +28,18 @@ const skillProficiencyOptions = buildLabeledOptions(SKILL_PROFICIENCIES, SKILL_P
 const languageProficiencyOptions = buildLabeledOptions(LANGUAGE_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
 
 interface SkillChipProps {
+	blockId: number;
 	deleteLabel: string;
 	onDelete: () => void;
 	proficiencyControl: ReactNode;
 	valueEditor: ReactNode;
 }
 
-const SkillChip = ({ deleteLabel, onDelete, proficiencyControl, valueEditor }: SkillChipProps) => (
-	<li className="group/chip relative grid min-w-0 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 transition-colors focus-within:border-border hover:border-border sm:grid-cols-[minmax(0,1fr)_7rem] sm:items-center">
+const SkillChip = ({ blockId, deleteLabel, onDelete, proficiencyControl, valueEditor }: SkillChipProps) => (
+	<li
+		className="group/chip relative grid min-w-0 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 transition-colors focus-within:border-border hover:border-border sm:grid-cols-[minmax(0,1fr)_7rem] sm:items-center"
+		data-block-id={blockId}
+	>
 		<div className="min-w-0">{valueEditor}</div>
 		<div className="min-w-0 transition-transform duration-200 ease-out sm:justify-self-end sm:group-focus-within/chip:-translate-x-8 [@media(hover:hover)]:sm:group-hover/chip:-translate-x-8">
 			{proficiencyControl}
@@ -119,7 +123,7 @@ export const InlineSkills = withForm({
 			};
 
 			return (
-				<div className="space-y-2">
+				<div className="space-y-2" data-block-id={primaryLine.id}>
 					<ul className="grid gap-2 lg:grid-cols-2">
 						{items.map((item) => {
 							if (item.blockType !== "skill_item") {
@@ -131,6 +135,7 @@ export const InlineSkills = withForm({
 							}
 							return (
 								<SkillChip
+									blockId={item.id}
 									deleteLabel="Eliminar idioma"
 									key={getBlockKey(item.id)}
 									onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
@@ -220,7 +225,7 @@ export const InlineSkills = withForm({
 					};
 
 					return (
-						<div className="group/line flex flex-col gap-2" key={getBlockKey(line.id)}>
+						<div className="group/line flex flex-col gap-2" data-block-id={line.id} key={getBlockKey(line.id)}>
 							<div className="relative min-w-0">
 								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
 									{(field) => (
@@ -265,6 +270,7 @@ export const InlineSkills = withForm({
 									}
 									return (
 										<SkillChip
+											blockId={item.id}
 											deleteLabel="Eliminar habilidad"
 											key={getBlockKey(item.id)}
 											onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}

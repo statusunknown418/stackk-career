@@ -1,4 +1,4 @@
-import { CaretDownIcon, CopyIcon, DotsThreeOutlineIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CopyIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
@@ -29,13 +29,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Group, GroupSeparator } from "@/components/ui/group";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	blockIdFromFieldName,
@@ -150,8 +143,11 @@ function RouteComponent() {
 
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 	const [areSectionsOpen, setAreSectionsOpen] = useState(true);
+	const [highlightedBlockId, setHighlightedBlockId] = useState<number | null>(null);
+	const [highlightedBlockVersion, setHighlightedBlockVersion] = useState(0);
 
 	const handleSelectSection = (id: number | null) => {
+		setHighlightedBlockId(null);
 		navigate({
 			to: "/dash/resumes/$resumeId",
 			params: { resumeId: params.resumeId },
@@ -288,30 +284,28 @@ function RouteComponent() {
 		await deleteMutation.mutateAsync({ id: params.resumeId });
 	};
 
-	const findFocusAncestor = (
-		blocks: typeof form.state.values.blocks,
-		blockId: number
-	): (typeof blocks)[number] | null => {
-		const node = blocks.find((block) => block.id === blockId);
-		if (!node) {
-			return null;
-		}
-		if (node.blockType === "section" || node.blockType === "contact") {
-			return node;
-		}
-		return node.parentBlockId === null ? null : findFocusAncestor(blocks, node.parentBlockId);
-	};
-
 	const handleViewSection = (edit: ResumeEdit) => {
 		if (!edit.targetBlockId) {
 			return;
 		}
-		const ancestor = findFocusAncestor(form.state.values.blocks, edit.targetBlockId);
-		if (!ancestor) {
-			toast.error("No se encontró la sección correspondiente.");
+
+		const exists = form.state.values.blocks.some((block) => block.id === edit.targetBlockId);
+
+		if (!exists) {
+			toast.error("No se encontró el bloque correspondiente.");
 			return;
 		}
-		handleSelectSection(ancestor.id);
+		if (focusedSectionId !== null) {
+			navigate({
+				to: "/dash/resumes/$resumeId",
+				params: { resumeId: params.resumeId },
+				search: {},
+				replace: true,
+			});
+		}
+
+		setHighlightedBlockId(edit.targetBlockId);
+		setHighlightedBlockVersion((version) => version + 1);
 	};
 
 	const deleteBlock = useDeleteBlock({ form });
@@ -360,7 +354,7 @@ function RouteComponent() {
 
 	return (
 		<section className="flex h-full min-h-0 flex-col overflow-hidden">
-			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 py-2.5 ps-1 pe-4 backdrop-blur-md md:flex-row md:justify-between">
+			<header className="flex shrink-0 flex-col items-center gap-4 border-b bg-background/80 py-2.5 ps-1 pe-4 backdrop-blur-md md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -397,41 +391,27 @@ function RouteComponent() {
 
 				<article className="flex items-center gap-2">
 					<Group>
-						<NewSectionSheet form={form} />
+						<NewSectionSheet form={form} size="sm" />
 
 						<GroupSeparator />
 
-						<DropdownMenu>
-							<Button render={<DropdownMenuTrigger />} size="icon" variant="outline">
-								<DotsThreeOutlineIcon weight="fill" />
-							</Button>
+						<Button size="sm" variant="outline">
+							<ExportIcon />
+							Exportar
+						</Button>
 
-							<DropdownMenuContent align="start">
-								<DropdownMenuItem>
-									<ExportIcon />
-									Exportar
-								</DropdownMenuItem>
+						<GroupSeparator />
 
-								<DropdownMenuItem>
-									<CopyIcon />
-									Clonar
-								</DropdownMenuItem>
-
-								<DropdownMenuSeparator />
-
-								<DropdownMenuItem
-									onClick={(event) => {
-										event.preventDefault();
-										setIsDeleteOpen(true);
-									}}
-									variant="destructive"
-								>
-									<TrashSimpleIcon />
-									Borrar
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<Button size="sm" variant="outline">
+							<CopyIcon />
+							Duplicar
+						</Button>
 					</Group>
+
+					<Button onClick={() => setIsDeleteOpen(true)} size="sm" variant="destructive-outline">
+						<TrashSimpleIcon />
+						Borrar
+					</Button>
 				</article>
 			</header>
 
@@ -468,6 +448,8 @@ function RouteComponent() {
 						blockIndexById={blockIndexById}
 						focusedSectionId={focusedSectionId}
 						form={form}
+						highlightedBlockId={highlightedBlockId}
+						highlightedBlockVersion={highlightedBlockVersion}
 						rootBlocks={rootBlocks}
 					/>
 				</article>
@@ -484,7 +466,7 @@ function RouteComponent() {
 
 					<AlertDialogFooter>
 						<Button disabled={deleteMutation.isPending} render={<AlertDialogClose />} variant="outline">
-							Cancelar
+							No, retrocede porfa
 						</Button>
 						<Button disabled={deleteMutation.isPending} onClick={handleDelete} variant="destructive">
 							{deleteMutation.isPending ? <Loader /> : <TrashSimpleIcon />}

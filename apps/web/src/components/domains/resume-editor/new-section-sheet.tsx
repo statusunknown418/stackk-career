@@ -5,7 +5,7 @@ import { mapParseBlocks } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ComponentType } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ResumeFormApi } from "@/lib/forms/resume-form";
@@ -24,6 +24,7 @@ interface NewSectionSheetProps {
 	previousPosition?: string | null;
 	// When false, suppress the built-in header trigger button. Defaults to true.
 	showTrigger?: boolean;
+	size?: ButtonProps["size"];
 }
 
 interface SectionOption {
@@ -53,6 +54,7 @@ export const NewSectionSheet = ({
 	open,
 	previousPosition,
 	showTrigger = true,
+	size = "default",
 }: NewSectionSheetProps) => {
 	const params = Route.useParams();
 	const { data } = useSuspenseQuery(orpc.resumes.get.queryOptions({ input: { id: params.resumeId } }));
@@ -98,7 +100,7 @@ export const NewSectionSheet = ({
 	return (
 		<Sheet onOpenChange={onOpenChange} open={open}>
 			{showTrigger && (
-				<Button render={<SheetTrigger />} variant="outline">
+				<Button render={<SheetTrigger />} size={size} variant="outline">
 					<PlusCircleIcon />
 					Agregar sección
 				</Button>

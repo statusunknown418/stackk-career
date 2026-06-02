@@ -36,6 +36,11 @@ export interface PlanCatalogEntry {
  *   `resume_analyses` excluding `status = "failed"`. Enforced at `agents.triggerK02FastAnalysis` and
  *   `agents.triggerK02DetailedAnalysis`.
  *
+ * - **`resume_inline_ai_suggestions`** — Inline "Generar" AI suggestions for a single resume block
+ *   (descriptions, summaries, etc.) requested per billing cycle, counted from `messages` WHERE
+ *   `objectType = "resume-suggestion"` AND `isAssistant = false` (one row written per request), scoped to
+ *   the user via `generations.owner`. Enforced at `suggestions.prepareSuggestion`.
+ *
  * - **`messages_per_generation`** — User-authored messages (`isAssistant = false`) allowed within a SINGLE
  *   generation. Per-generation, NOT per-cycle, and read live (excluded from the cached counters). Enforced
  *   at `messages.create` and `suggestions.prepareSuggestion` (each suggestion writes one counted message).
@@ -53,6 +58,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_creation_generations_per_cycle: 1,
 			conversation_generations_per_cycle: 0,
 			resume_analyses_per_cycle: 3,
+			resume_inline_ai_suggestions: 3,
 			messages_per_generation: 10,
 			coaching_sessions_per_cycle: 0,
 		},
@@ -66,6 +72,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_creation_generations_per_cycle: 3,
 			conversation_generations_per_cycle: 75,
 			resume_analyses_per_cycle: 50,
+			resume_inline_ai_suggestions: 150,
 			messages_per_generation: 50,
 			coaching_sessions_per_cycle: 1,
 		},
@@ -79,6 +86,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_creation_generations_per_cycle: 100,
 			conversation_generations_per_cycle: 150,
 			resume_analyses_per_cycle: 500,
+			resume_inline_ai_suggestions: 500,
 			messages_per_generation: 500,
 			coaching_sessions_per_cycle: 3,
 		},

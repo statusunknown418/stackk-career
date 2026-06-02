@@ -31,6 +31,9 @@ const handlePost = async ({ request }: { request: Request }) => {
 		if (err instanceof ORPCError && err.code === "UNAUTHORIZED") {
 			return new Response("Unauthorized", { status: 401 });
 		}
+		if (err instanceof ORPCError && err.code === "FORBIDDEN") {
+			return new Response("Quota exceeded", { status: 403 });
+		}
 		throw err;
 	}
 
