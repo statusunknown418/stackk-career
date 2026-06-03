@@ -87,7 +87,7 @@ export const ResumeDocument = withForm({
 					{contactBlock && contactBlock.blockType === "contact" && contactIndex !== undefined && (
 						<section
 							className={cn(
-								"mb-10 scroll-mt-44 transition-opacity delay-100 duration-250 ease-out-quint",
+								"mb-5 scroll-mt-44 transition-opacity delay-100 duration-250 ease-out-quint",
 								focusedSectionId !== null && focusedSectionId !== contactBlock.id && "opacity-40"
 							)}
 							data-block-id={contactBlock.id}

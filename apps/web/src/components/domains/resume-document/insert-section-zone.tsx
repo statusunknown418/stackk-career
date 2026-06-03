@@ -16,7 +16,7 @@ export const InsertSectionZone = ({ form, nextPosition, previousPosition }: Inse
 	const [open, setOpen] = useState(false);
 
 	return (
-		<div className="group/zone relative flex h-10 items-center justify-center">
+		<div className="group/zone relative my-1 flex h-2 items-center justify-center transition-all duration-150 focus-within:h-8 hover:h-8">
 			<span
 				aria-hidden="true"
 				className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-border opacity-0 transition-opacity duration-150 group-focus-within/zone:opacity-100 [@media(hover:hover)]:group-hover/zone:opacity-100"
