@@ -113,6 +113,9 @@ DO NOT default to Spanish. DO NOT pick a language based on the example phrases i
 - Target role: ${profile?.targetRole ?? "unspecified"}
 - Industry: ${profile?.industry ?? "unspecified"}
 - Experience level: ${profile?.experience ?? "unspecified"}
+- Languages spoken: ${profile?.languages ?? "unspecified"}
+- Stuck point in job search: ${profile?.stuckReason ?? "unspecified"}
+
 
 # Block being improved
 - Block type: ${input.blockType}

@@ -13,6 +13,9 @@ export const onboardingProfile = sqliteTable("onboarding_profile", (t) => ({
 	targetRole: t.text(),
 	urgency: t.text(),
 	location: t.text(),
+	languages: t.text(),
+	stuckReason: t.text(),
+	referrer: t.text(),
 
 	createdAt: t
 		.integer({ mode: "timestamp" })
