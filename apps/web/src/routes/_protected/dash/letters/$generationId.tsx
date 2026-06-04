@@ -21,7 +21,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Frame, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { orpc } from "@/utils/orpc";
 
@@ -58,8 +58,28 @@ function limitDialogCopy(language: CoverLetterLanguage): { description: string; 
 	};
 }
 
-const PENDING_BAR_WIDTHS = ["w-11/12", "w-4/5", "w-full", "w-3/4", "w-2/3"] as const;
-const PENDING_SECTIONS = ["saludo", "cuerpo", "cierre"] as const;
+// Forma del skeleton = forma real de una carta (saludo corto, cuerpo largo, cierre medio, firma
+// corta). El cuerpo (`primary`) va en una tarjeta prominente; el resto, filas planas — espeja el
+// layout final para que la transición skeleton → carta no salte.
+const PENDING_LETTER_SECTIONS = [
+	{ bars: ["w-2/5"], key: "greeting", label: "w-16", primary: false },
+	{ bars: ["w-full", "w-11/12", "w-5/6", "w-4/5", "w-3/4", "w-2/3"], key: "body", label: "w-20", primary: true },
+	{ bars: ["w-3/4", "w-1/2"], key: "closing", label: "w-16", primary: false },
+	{ bars: ["w-1/3"], key: "signature", label: "w-14", primary: false },
+] as const;
+
+function PendingLetterSection({ bars, label, primary }: { bars: readonly string[]; label: string; primary: boolean }) {
+	return (
+		<div className={`rounded-2xl border bg-card px-4 pt-3.5 pb-4${primary ? "min-h-44 flex-1" : ""}`}>
+			<Skeleton className={`mb-3 h-3 rounded-full ${label}`} />
+			<div className="flex flex-col gap-2">
+				{bars.map((w) => (
+					<Skeleton className={`h-3 rounded-full ${w}`} key={w} />
+				))}
+			</div>
+		</div>
+	);
+}
 
 /** Esqueleto de las 2 columnas mientras el loader trae la carta — evita el blanco + spinner. */
 function LetterPagePending() {
@@ -79,19 +99,19 @@ function LetterPagePending() {
 
 			<Frame>
 				<FrameHeader>
-					<FrameTitle className="font-light text-xl tracking-tight">Tu carta de presentación</FrameTitle>
+					<Skeleton className="h-5 w-24 rounded-full" />
 				</FrameHeader>
-				<FramePanel className="flex flex-1 flex-col gap-3">
-					{PENDING_SECTIONS.map((id) => (
-						<div className="rounded-xl border border-border p-4" key={id}>
-							<Skeleton className="mb-3 h-3 w-24 rounded-full" />
-							<div className="flex flex-col gap-2">
-								{PENDING_BAR_WIDTHS.map((w) => (
-									<Skeleton className={`h-3 rounded-full ${w}`} key={w} />
-								))}
-							</div>
-						</div>
-					))}
+				<FramePanel className="flex flex-1 flex-col overflow-y-auto">
+					<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
+						{PENDING_LETTER_SECTIONS.map((section) => (
+							<PendingLetterSection
+								bars={section.bars}
+								key={section.key}
+								label={section.label}
+								primary={section.primary}
+							/>
+						))}
+					</div>
 				</FramePanel>
 			</Frame>
 		</section>
@@ -154,10 +174,62 @@ function RouteComponent() {
 
 	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
 
+	// Optimista: al disparar, reflejamos en el chat AL INSTANTE la instrucción del user (burbuja)
+	// + el placeholder de la nueva versión, sin esperar el round-trip + refetch. Antes la
+	// instrucción solo aparecía tras el invalidate de onSuccess, por eso "se demoraba" en el
+	// historial. El refetch posterior reemplaza estas filas optimistas por las reales del server;
+	// onError hace rollback. La forma calca un row de `messages` para no romper el tipo del caché.
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
-			onMutate: () => setTriggering(true),
-			onError: (err) => toast.error(err.message),
+			onMutate: async ({ extraPrompt }) => {
+				setTriggering(true);
+				await queryClient.cancelQueries({ queryKey: lettersGetKey });
+				const previous = queryClient.getQueryData<typeof data>(lettersGetKey);
+				queryClient.setQueryData<typeof data>(lettersGetKey, (old) => {
+					if (!old) {
+						return old;
+					}
+					const maxOrder = old.messages.reduce((acc, m) => Math.max(acc, m.order ?? -1), -1);
+					const makeRow = (
+						order: number,
+						fields: { isAssistant: boolean; objectType: string | null; text: string | null }
+					) =>
+						({
+							id: `optimistic_${crypto.randomUUID()}`,
+							generationId,
+							parentMessageId: null,
+							analysisId: null,
+							content: null,
+							text: fields.text,
+							error: null,
+							model: null,
+							order,
+							toolMeta: null,
+							isTool: false,
+							isAssistant: fields.isAssistant,
+							objectType: fields.objectType,
+							object: null,
+							createdAt: new Date(),
+						}) as (typeof old.messages)[number];
+					const trimmed = extraPrompt?.trim();
+					const artifactRow = makeRow(maxOrder + (trimmed ? 2 : 1), {
+						isAssistant: true,
+						objectType: COVER_LETTER_OBJECT_TYPE,
+						text: null,
+					});
+					const rows = trimmed
+						? [makeRow(maxOrder + 1, { isAssistant: false, objectType: null, text: trimmed }), artifactRow]
+						: [artifactRow];
+					return { ...old, messages: [...old.messages, ...rows] };
+				});
+				return { previous };
+			},
+			onError: (err, _vars, context) => {
+				if (context?.previous) {
+					queryClient.setQueryData(lettersGetKey, context.previous);
+				}
+				toast.error(err.message);
+			},
 			onSuccess: (result) => {
 				if (result.runId && result.publicAccessToken) {
 					setRunHandle({ accessToken: result.publicAccessToken, runId: result.runId });
@@ -305,12 +377,17 @@ function RouteComponent() {
 	// `!realtime.error` evita que un error de suscripción (token expirado, SSE caído) sin `finishedAt`
 	// deje `isStreaming` en true para siempre y trabe Regenerar/Copiar/Descargar hasta recargar.
 	const isStreaming = Boolean(runHandle) && !realtime.run?.finishedAt && !realtime.error;
-	const artifact = isStreaming ? streamedArtifact : (streamedArtifact ?? selectedArtifact ?? cachedArtifact);
 
 	// "Generando" = hay un run activo (isStreaming) o un trigger recién disparado (triggering).
-	// `triggering` da feedback inmediato al clickear Regenerar y se limpia al settlear la mutation;
+	// `triggering` da feedback inmediato al clickear Generar y se limpia al settlear la mutation;
 	// `isStreaming` se limpia con `finishedAt`. Ninguno depende de un flag que pueda quedar colgado.
 	const isGenerating = isStreaming || triggering;
+
+	// Mientras se genera (desde el click, AUNQUE el run aún no arranque) preferimos SOLO el stream:
+	// así no mostramos la carta vieja durante el round-trip a Trigger.dev (se sentía como una traba).
+	// `streamedArtifact` es undefined hasta el primer chunk → el panel muestra skeleton + "CASEY está
+	// leyendo tu CV…" de inmediato. En idle sí caemos a la versión seleccionada / la última persistida.
+	const artifact = isGenerating ? streamedArtifact : (streamedArtifact ?? selectedArtifact ?? cachedArtifact);
 
 	const error = realtime.error;
 

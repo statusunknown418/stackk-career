@@ -15,18 +15,18 @@ import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { jsPDF } from "jspdf";
-import { useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { type ReactNode, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
-import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CoverLetterSection } from "./cover-letter-section";
+import { CoverLetterSection, LetterSectionShell, SECTION_SKELETON_LINES } from "./cover-letter-section";
 
 interface LettersArtifactPanelProps {
 	/** Id del artifact-message actualmente mostrado (al que se guardan las ediciones). */
@@ -46,6 +46,11 @@ interface LettersArtifactPanelProps {
 }
 
 const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
+
+// Ease-out exponencial para el cross-fade del cuerpo (carta editable ↔ vista de streaming):
+// entra rápido, asienta suave, sin rebote. Solo opacity, nunca propiedades de layout.
+const PANEL_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const PANEL_FADE_DURATION = 0.22;
 
 // El cuerpo de la carta puede venir como texto plano (lo que escribe CASEY) o como
 // HTML (cuando el usuario lo editó con el editor enriquecido TipTap). Estos helpers
@@ -172,14 +177,14 @@ const allSectionsFilled = (letter: CoverLetter): boolean =>
 			htmlToText(letter.signature).trim()
 	);
 
+// `primary` = la sección dominante (el cuerpo): se muestra como Card prominente; el resto (saludo,
+// cierre, firma) son filas planas compactas, dándole jerarquía a la carta.
 const SECTION_DEFS = [
-	{ icon: HandWavingIcon, key: "greeting", label: "Saludo" },
-	{ icon: ParagraphIcon, key: "body", label: "Cuerpo" },
-	{ icon: PenNibIcon, key: "closing", label: "Cierre" },
-	{ icon: SealIcon, key: "signature", label: "Firma" },
+	{ icon: HandWavingIcon, key: "greeting", label: "Saludo", primary: false },
+	{ icon: ParagraphIcon, key: "body", label: "Cuerpo", primary: true },
+	{ icon: PenNibIcon, key: "closing", label: "Cierre", primary: false },
+	{ icon: SealIcon, key: "signature", label: "Firma", primary: false },
 ] as const;
-
-const SECTION_LABEL_CLASS = "flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wide";
 
 /**
  * Carta editable EN SITIO: cada sección es un editor TipTap (prose) sobre el que el usuario
@@ -232,33 +237,24 @@ function EditableLetter({
 	};
 
 	return (
-		<FramePanel className="flex flex-1 flex-col gap-3 overflow-y-auto">
-			<p className="px-1 text-muted-foreground text-xs">
-				Edita cualquier sección directamente; se guarda solo
-				{saving ? <span className="text-foreground/70"> · Guardando…</span> : null}
-			</p>
-			{SECTION_DEFS.map((def) => {
-				const Icon = def.icon;
-				return (
-					<Card key={def.key}>
-						<CardHeader>
-							<CardTitle className={SECTION_LABEL_CLASS}>
-								<Icon className="size-3.5" weight="duotone" />
-								{def.label}
-							</CardTitle>
-						</CardHeader>
-						<CardPanel>
-							<InlineTextEditor
-								onBlur={commit}
-								onChange={(value) => setField(def.key, value)}
-								placeholder={`${def.label}…`}
-								value={bodyToHtml(draft[def.key])}
-								variant="prose"
-							/>
-						</CardPanel>
-					</Card>
-				);
-			})}
+		<FramePanel className="flex flex-1 flex-col overflow-y-auto">
+			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
+				<p className="px-1 text-muted-foreground text-xs">
+					Edita cualquier sección directamente; se guarda solo
+					{saving ? <span className="text-foreground/70"> · Guardando…</span> : null}
+				</p>
+				{SECTION_DEFS.map((def) => (
+					<LetterSectionShell icon={def.icon} isStreaming={false} key={def.key} label={def.label} primary={def.primary}>
+						<InlineTextEditor
+							onBlur={commit}
+							onChange={(value) => setField(def.key, value)}
+							placeholder={`${def.label}…`}
+							value={bodyToHtml(draft[def.key])}
+							variant="prose"
+						/>
+					</LetterSectionShell>
+				))}
+			</div>
 		</FramePanel>
 	);
 }
@@ -274,11 +270,6 @@ interface RegeneratePreset {
 }
 
 const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
-	{
-		description: "Misma carta, otra pasada del modelo.",
-		extraPrompt: undefined,
-		label: "Sin cambios",
-	},
 	{
 		description: "Más respetuosa, sin informalidades.",
 		extraPrompt: "Haz la carta más formal y respetuosa. Quita cualquier informalidad o coloquialismo.",
@@ -437,10 +428,13 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 function ReadOnlyLetter({
 	artifact,
 	isStreaming,
+	preparing,
 	showLoaders,
 }: {
 	artifact: DeepPartial<CoverLetter> | undefined;
 	isStreaming: boolean;
+	/** Generando pero aún sin contenido: mostramos un mensaje cálido encima del skeleton. */
+	preparing: boolean;
 	showLoaders: boolean;
 }) {
 	// La sección "activa" (la que CASEY está escribiendo) = la última con contenido; las que vienen
@@ -451,24 +445,33 @@ function ReadOnlyLetter({
 	}, 0);
 
 	return (
-		<FramePanel className="flex flex-1 flex-col gap-3 overflow-y-auto">
-			{SECTION_DEFS.map((def, i) => {
-				const value = artifact?.[def.key];
-				const text = typeof value === "string" ? value : undefined;
-				// Cualquier sección puede haber quedado como HTML tras una edición → la normalizamos
-				// para mostrarla con su formato.
-				const richHtml = text ? bodyToHtml(text) : undefined;
-				return (
-					<CoverLetterSection
-						icon={def.icon}
-						isStreaming={isStreaming && i === activeIndex}
-						key={def.key}
-						label={def.label}
-						richHtml={richHtml}
-						showSkeleton={showLoaders && !text}
-					/>
-				);
-			})}
+		<FramePanel className="flex flex-1 flex-col overflow-y-auto">
+			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
+				{preparing && (
+					<p className="px-1 text-muted-foreground text-sm">
+						<Shimmer>CASEY está leyendo tu CV y redactando tu carta…</Shimmer>
+					</p>
+				)}
+				{SECTION_DEFS.map((def, i) => {
+					const value = artifact?.[def.key];
+					const text = typeof value === "string" ? value : undefined;
+					// Cualquier sección puede haber quedado como HTML tras una edición → la normalizamos
+					// para mostrarla con su formato.
+					const richHtml = text ? bodyToHtml(text) : undefined;
+					return (
+						<CoverLetterSection
+							icon={def.icon}
+							isStreaming={isStreaming && i === activeIndex}
+							key={def.key}
+							label={def.label}
+							primary={def.primary}
+							richHtml={richHtml}
+							showSkeleton={showLoaders && !text}
+							skeletonLines={SECTION_SKELETON_LINES[def.key]}
+						/>
+					);
+				})}
+			</div>
 		</FramePanel>
 	);
 }
@@ -500,18 +503,28 @@ export function LettersArtifactPanel({
 	onSaveArtifact,
 	onTriggerAsync,
 }: LettersArtifactPanelProps) {
-	const showLoaders = !error && isStreaming;
+	// Skeletons durante TODO el generado (incluida la ventana previa al stream, mientras CASEY lee
+	// el CV), no solo en streaming — así no hay un hueco frío entre "disparé" y "primer chunk".
+	const showLoaders = !error && isPending;
 	const hasStreamedContent = Boolean(artifact);
-	const canRegenerate = hasContent && !(isPending || isStreaming);
+	// Generando pero todavía sin contenido nuevo (primer draft o el gap antes del primer chunk):
+	// mostramos el mensaje cálido. En una regeneración con carta previa, `artifact` aún tiene la
+	// anterior, así que `preparing` es false y se ve la carta vieja hasta que arranca el stream.
+	const preparing = showLoaders && !hasStreamedContent;
+	const canRegenerate = hasContent && !isPending;
 	const formattedText = formatCoverLetterAsText(artifact);
-	const canExport = Boolean(formattedText) && !isStreaming;
+	const canExport = Boolean(formattedText) && !isPending;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
-	// La carta completa actual (las 4 secciones presentes). Si está y no estamos streameando,
-	// se muestra editable EN SITIO: cada sección es un editor y se autoguarda al salir del campo
-	// (no consume versión; persiste vía onSaveArtifact). No hay botón de "editar".
+	const reduceMotion = useReducedMotion();
+	const panelTransition = { duration: reduceMotion ? 0 : PANEL_FADE_DURATION, ease: PANEL_EASE };
+
+	// La carta completa actual (las 4 secciones presentes). Si está y NO estamos generando
+	// (ni streameando ni con un trigger recién disparado), se muestra editable EN SITIO: cada
+	// sección es un editor y se autoguarda al salir del campo (no consume versión; persiste vía
+	// onSaveArtifact). El `!isPending` evita re-montar el editor en la ventana previa al stream.
 	const completeLetter = toCompleteCoverLetter(artifact);
-	const canEditInline = Boolean(completeLetter) && !isStreaming && Boolean(activeMessageId);
+	const canEditInline = Boolean(completeLetter) && !isPending && Boolean(activeMessageId);
 
 	const visiblePresets = REGENERATE_PRESETS.filter(
 		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
@@ -551,24 +564,60 @@ export function LettersArtifactPanel({
 		}
 	};
 
+	// Cuerpo con cross-fade: al pasar de la carta editable a la vista de streaming (y viceversa)
+	// el contenido NO se reemplaza de golpe — la vista saliente se desvanece y la entrante aparece
+	// con un fade. El `key` por modo deja que AnimatePresence (mode="wait") orqueste el dissolve.
+	let body: ReactNode = null;
+	if (canEditInline && completeLetter && activeMessageId) {
+		body = (
+			<motion.div
+				animate={{ opacity: 1 }}
+				className="flex min-h-0 flex-1 flex-col"
+				exit={{ opacity: 0 }}
+				initial={{ opacity: 0 }}
+				key="editable"
+				transition={panelTransition}
+			>
+				<EditableLetter
+					activeMessageId={activeMessageId}
+					key={activeMessageId}
+					letter={completeLetter}
+					onSaveArtifact={onSaveArtifact}
+				/>
+			</motion.div>
+		);
+	} else if (hasStreamedContent || showLoaders) {
+		body = (
+			<motion.div
+				animate={{ opacity: 1 }}
+				className="flex min-h-0 flex-1 flex-col"
+				exit={{ opacity: 0 }}
+				initial={{ opacity: 0 }}
+				key="readonly"
+				transition={panelTransition}
+			>
+				<ReadOnlyLetter artifact={artifact} isStreaming={isStreaming} preparing={preparing} showLoaders={showLoaders} />
+			</motion.div>
+		);
+	}
+
 	return (
-		<Frame className={className ?? "h-full max-h-[85svh]"}>
+		<Frame className={className ?? "h-full min-h-0"}>
 			<FrameHeader className="flex-row items-start justify-between gap-3">
 				<div className="flex flex-col gap-1.5">
-					<FrameTitle className="font-light text-xl tracking-tight">Tu carta de presentación</FrameTitle>
 					<FrameDescription>
 						{error && <Badge variant="secondary">Error</Badge>}
-						{!error && isStreaming && (
+						{!error && isPending && (
 							<Badge variant="secondary">
 								<Shimmer>CASEY redactando…</Shimmer>
 							</Badge>
 						)}
-						{!(error || isStreaming) && hasContent && (
+						{!(error || isPending) && hasContent && (
 							<Badge variant="secondary">
 								Versión {activeVersion}/{MAX_COVER_LETTER_VERSIONS}
 							</Badge>
 						)}
-						{!(error || isStreaming || hasContent) && <Badge variant="secondary">Esperando datos</Badge>}
+						{!(error || isPending || hasContent) && <Badge variant="secondary">Lista para empezar</Badge>}
 					</FrameDescription>
 				</div>
 
@@ -589,18 +638,9 @@ export function LettersArtifactPanel({
 				/>
 			</FrameHeader>
 
-			{canEditInline && completeLetter && activeMessageId ? (
-				<EditableLetter
-					activeMessageId={activeMessageId}
-					key={activeMessageId}
-					letter={completeLetter}
-					onSaveArtifact={onSaveArtifact}
-				/>
-			) : (
-				(hasStreamedContent || showLoaders) && (
-					<ReadOnlyLetter artifact={artifact} isStreaming={isStreaming} showLoaders={showLoaders} />
-				)
-			)}
+			<AnimatePresence initial={false} mode="popLayout">
+				{body}
+			</AnimatePresence>
 
 			{error && (
 				<Alert className="mt-4" variant="error">
