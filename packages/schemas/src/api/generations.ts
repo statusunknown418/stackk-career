@@ -8,6 +8,14 @@ export const createGenerationInputSchema = insertGenerationSchema.required({
 	title: true,
 });
 
+export const listGenerationsInputSchema = z
+	.object({
+		limit: z.number().int().min(1).max(200).optional().default(50),
+		offset: z.number().int().min(0).optional().default(0),
+	})
+	.optional()
+	.default({ limit: 50, offset: 0 });
+
 export const getGenerationInputSchema = selectGenerationSchema.pick({ id: true });
 export const getResumeAnalysisInputSchema = selectResumeAnalysisSchema.pick({ generationId: true });
 export const getResumeAnalysisHistoryInputSchema = getResumeAnalysisInputSchema;
@@ -53,6 +61,7 @@ export const resumeAnalysisHistoryItemSchema = selectResumeAnalysisSchema
 export const resumeAnalysisHistorySchema = z.array(resumeAnalysisHistoryItemSchema);
 
 export type CreateGenerationInput = z.infer<typeof createGenerationInputSchema>;
+export type ListGenerationsInput = z.infer<typeof listGenerationsInputSchema>;
 export type GetGenerationInput = z.infer<typeof getGenerationInputSchema>;
 export type GetResumeAnalysisInput = z.infer<typeof getResumeAnalysisInputSchema>;
 export type GetResumeAnalysisHistoryInput = z.infer<typeof getResumeAnalysisHistoryInputSchema>;
