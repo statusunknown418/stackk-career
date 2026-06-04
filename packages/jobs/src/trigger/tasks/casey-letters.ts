@@ -24,9 +24,9 @@ import { coverLetterArtifactStream } from "../streams";
 const MAX_RESUME_PLAINTEXT_CHARS = 8000;
 
 /**
- * Attempt en el que se cambia a `CASEY_LETTERS_FALLBACK_MODEL`. Modelo del proyecto =
- * Grok (xAI); hoy primary y fallback apuntan al mismo slug, así que es un hook para que
- * a futuro se pueda degradar a otra variante de Grok en el último intento sin tocar el task.
+ * Attempt en el que se cambia a `CASEY_LETTERS_FALLBACK_MODEL`. Modelo de CASEY =
+ * google/gemini-3.1-flash-lite; hoy primary y fallback apuntan al MISMO slug (no-op), así que esto
+ * es solo un hook para poder degradar a otra variante en el último intento a futuro sin tocar el task.
  */
 const FALLBACK_ON_ATTEMPT = Number(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT ?? 3);
 
@@ -47,7 +47,7 @@ export const caseyLettersTask = schemaTask({
 	) => {
 		const db = getTriggerDb();
 
-		// Grok primary; fallback (mismo slug hoy) en el último intento si los anteriores fallaron.
+		// Gemini primary; fallback (mismo slug hoy) en el último intento si los anteriores fallaron.
 		const modelForAttempt =
 			ctx.attempt.number >= FALLBACK_ON_ATTEMPT ? CASEY_LETTERS_FALLBACK_MODEL : CASEY_LETTERS_MODEL;
 		const modelSlug = String(modelForAttempt);
@@ -299,5 +299,5 @@ async function loadResumeAsPlaintext(
 	const safeCut = lastNewline > 0 ? head.slice(0, lastNewline) : head;
 	const omittedChars = full.length - safeCut.length;
 
-	return `${safeCut}\n\n[…CV truncado — ${omittedChars} caracteres omitidos para acotar el contexto. Si necesitás un dato puntual que no aparece arriba, omitilo en la carta en vez de improvisarlo…]`;
+	return `${safeCut}\n\n[…CV truncado — ${omittedChars} caracteres omitidos para acotar el contexto. Si falta un dato puntual que no aparece arriba, omítelo en la carta en vez de inventarlo…]`;
 }

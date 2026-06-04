@@ -2,31 +2,29 @@
 
 import {
 	ArrowsClockwiseIcon,
-	CheckIcon,
 	CopyIcon,
 	DownloadSimpleIcon,
 	HandWavingIcon,
 	ParagraphIcon,
-	PencilSimpleIcon,
 	PenNibIcon,
 	SealIcon,
 	TriangleDashedIcon,
-	XIcon,
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { jsPDF } from "jspdf";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CoverLetterSection } from "./cover-letter-section";
 
@@ -48,6 +46,54 @@ interface LettersArtifactPanelProps {
 }
 
 const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
+
+// El cuerpo de la carta puede venir como texto plano (lo que escribe CASEY) o como
+// HTML (cuando el usuario lo editó con el editor enriquecido TipTap). Estos helpers
+// normalizan en ambos sentidos — el schema sigue siendo un único `string`.
+// Detecta SOLO los tags que el editor TipTap (StarterKit prose) emite — no cualquier `<token>`.
+// Así un texto plano como `Promise<T>`, `<empresa>` o `<a@b.com>` NO se confunde con HTML: se
+// escapa bien y no se pierde al renderizar / copiar / exportar a PDF.
+const HTML_TAG_RE = /<\/?(?:p|br|strong|em|ul|ol|li)(?:>|\s|\/)/i;
+const BR_RE = /<br\s*\/?>/gi;
+const BLOCK_CLOSE_RE = /<\/(?:p|div|li)>/gi;
+const ANY_TAG_RE = /<[^>]+>/g;
+const MULTI_NEWLINE_RE = /\n{3,}/g;
+const PARAGRAPH_SPLIT_RE = /\n{2,}/;
+
+const isHtmlBody = (value: string): boolean => HTML_TAG_RE.test(value);
+
+const escapeHtml = (value: string): string =>
+	value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+/** Texto plano (párrafos separados por `\n\n`) → HTML `<p>…</p>`. Si ya es HTML, lo deja igual. */
+function bodyToHtml(value: string): string {
+	if (isHtmlBody(value)) {
+		return value;
+	}
+	return value
+		.split(PARAGRAPH_SPLIT_RE)
+		.map((paragraph) => paragraph.trim())
+		.filter(Boolean)
+		.map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
+		.join("");
+}
+
+/** HTML del editor → texto plano (para PDF / copiar / validar vacío). Si ya es plano, lo deja igual. */
+function htmlToText(value: string): string {
+	if (!isHtmlBody(value)) {
+		return value;
+	}
+	return value
+		.replace(BR_RE, "\n")
+		.replace(BLOCK_CLOSE_RE, "\n\n")
+		.replace(ANY_TAG_RE, "")
+		.replaceAll("&nbsp;", " ")
+		.replaceAll("&lt;", "<")
+		.replaceAll("&gt;", ">")
+		.replaceAll("&amp;", "&")
+		.replace(MULTI_NEWLINE_RE, "\n\n")
+		.trim();
+}
 
 /** Extrae el artifact completo (4 secciones string) para editar, o null si está incompleto. */
 function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undefined): CoverLetter | null {
@@ -99,10 +145,10 @@ function downloadCoverLetterPdf(letter: CoverLetter) {
 	};
 
 	doc.setFont("helvetica", "bold");
-	writeBlock(letter.greeting, 8);
+	writeBlock(htmlToText(letter.greeting), 8);
 
 	doc.setFont("helvetica", "normal");
-	for (const p of letter.body.split("\n\n")) {
+	for (const p of htmlToText(letter.body).split("\n\n")) {
 		const trimmed = p.trim();
 		if (trimmed) {
 			writeBlock(trimmed, 6);
@@ -110,37 +156,58 @@ function downloadCoverLetterPdf(letter: CoverLetter) {
 	}
 
 	cursorY += 4;
-	writeBlock(letter.closing, 8);
+	writeBlock(htmlToText(letter.closing), 8);
 
 	doc.setFont("helvetica", "bold");
-	writeBlock(letter.signature, 0);
+	writeBlock(htmlToText(letter.signature), 0);
 
 	doc.save("carta-de-presentacion.pdf");
 }
 
-/** Estado + acciones para editar la carta a mano. Extraído a un hook para mantener baja la
- * complejidad cognitiva del componente. */
-function useCoverLetterEditor(
-	artifact: DeepPartial<CoverLetter> | undefined,
-	activeMessageId: string | null,
-	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>
-) {
-	const [draft, setDraft] = useState<CoverLetter | null>(null);
+const allSectionsFilled = (letter: CoverLetter): boolean =>
+	Boolean(
+		htmlToText(letter.greeting).trim() &&
+			htmlToText(letter.body).trim() &&
+			htmlToText(letter.closing).trim() &&
+			htmlToText(letter.signature).trim()
+	);
+
+const SECTION_DEFS = [
+	{ icon: HandWavingIcon, key: "greeting", label: "Saludo" },
+	{ icon: ParagraphIcon, key: "body", label: "Cuerpo" },
+	{ icon: PenNibIcon, key: "closing", label: "Cierre" },
+	{ icon: SealIcon, key: "signature", label: "Firma" },
+] as const;
+
+const SECTION_LABEL_CLASS = "flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wide";
+
+/**
+ * Carta editable EN SITIO: cada sección es un editor TipTap (prose) sobre el que el usuario
+ * escribe directamente — sin botón de "editar" ni modo aparte. Al salir de un campo (blur) se
+ * autoguarda vía `onSaveArtifact` solo si hubo cambios. El componente se monta con `key =
+ * activeMessageId`, así que cambiar de versión lo re-crea con el contenido correcto y un guardado
+ * (misma versión) no lo resetea.
+ */
+function EditableLetter({
+	activeMessageId,
+	letter,
+	onSaveArtifact,
+}: {
+	activeMessageId: string;
+	letter: CoverLetter;
+	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>;
+}) {
+	const [draft, setDraft] = useState<CoverLetter>(letter);
+	const dirtyRef = useRef(false);
 	const [saving, setSaving] = useState(false);
 
-	const start = () => {
-		const complete = toCompleteCoverLetter(artifact);
-		if (complete) {
-			setDraft(complete);
-		}
-	};
-
 	const setField = (key: keyof CoverLetter, value: string) => {
-		setDraft((prev) => (prev ? { ...prev, [key]: value } : prev));
+		dirtyRef.current = true;
+		setDraft((prev) => ({ ...prev, [key]: value }));
 	};
 
-	const save = async () => {
-		if (!(draft && activeMessageId)) {
+	const commit = async () => {
+		if (!dirtyRef.current || saving) {
 			return;
 		}
 		const trimmed: CoverLetter = {
@@ -149,31 +216,52 @@ function useCoverLetterEditor(
 			closing: draft.closing.trim(),
 			signature: draft.signature.trim(),
 		};
-		if (!(trimmed.greeting && trimmed.body && trimmed.closing && trimmed.signature)) {
+		if (!allSectionsFilled(trimmed)) {
 			toast.error(EMPTY_SECTION_MESSAGE);
 			return;
 		}
+		dirtyRef.current = false;
 		setSaving(true);
 		try {
 			await onSaveArtifact(activeMessageId, trimmed);
-			toast.success("Cambios guardados");
-			setDraft(null);
 		} catch {
-			// Toast emitido por la route.
+			dirtyRef.current = true; // Reintenta en el próximo blur. El toast lo emite la route.
 		} finally {
 			setSaving(false);
 		}
 	};
 
-	return { cancel: () => setDraft(null), draft, isEditing: draft !== null, save, saving, setField, start };
+	return (
+		<FramePanel className="flex flex-1 flex-col gap-3 overflow-y-auto">
+			<p className="px-1 text-muted-foreground text-xs">
+				Edita cualquier sección directamente; se guarda solo
+				{saving ? <span className="text-foreground/70"> · Guardando…</span> : null}
+			</p>
+			{SECTION_DEFS.map((def) => {
+				const Icon = def.icon;
+				return (
+					<Card key={def.key}>
+						<CardHeader>
+							<CardTitle className={SECTION_LABEL_CLASS}>
+								<Icon className="size-3.5" weight="duotone" />
+								{def.label}
+							</CardTitle>
+						</CardHeader>
+						<CardPanel>
+							<InlineTextEditor
+								onBlur={commit}
+								onChange={(value) => setField(def.key, value)}
+								placeholder={`${def.label}…`}
+								value={bodyToHtml(draft[def.key])}
+								variant="prose"
+							/>
+						</CardPanel>
+					</Card>
+				);
+			})}
+		</FramePanel>
+	);
 }
-
-const SECTION_DEFS = [
-	{ icon: HandWavingIcon, key: "greeting", label: "Saludo" },
-	{ icon: ParagraphIcon, key: "body", label: "Cuerpo" },
-	{ icon: PenNibIcon, key: "closing", label: "Cierre" },
-	{ icon: SealIcon, key: "signature", label: "Firma" },
-] as const;
 
 interface RegeneratePreset {
 	description: string;
@@ -193,18 +281,18 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	},
 	{
 		description: "Más respetuosa, sin informalidades.",
-		extraPrompt: "Hacé la carta más formal y respetuosa. Quitá cualquier informalidad o coloquialismo.",
+		extraPrompt: "Haz la carta más formal y respetuosa. Quita cualquier informalidad o coloquialismo.",
 		label: "Más formal",
 	},
 	{
 		description: "Métricas y resultados específicos del CV.",
 		extraPrompt:
-			"Hacé la carta más concreta. Citá métricas, stacks o resultados específicos del CV en cada párrafo del cuerpo.",
+			"Haz la carta más concreta. Cita métricas, stacks o resultados específicos del CV en cada párrafo del cuerpo.",
 		label: "Más concreta",
 	},
 	{
 		description: "Tono más cercano sin perder profesionalismo.",
-		extraPrompt: "Hacé la carta más cálida y personal sin perder profesionalismo. Suaviza el cuerpo y el cierre.",
+		extraPrompt: "Haz la carta más cálida y personal sin perder profesionalismo. Suaviza el cuerpo y el cierre.",
 		label: "Más cálida",
 	},
 	// Switch idioma. Solo muestra el del idioma opuesto al actual; el preset persiste
@@ -213,14 +301,14 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	// gana sobre instrucciones del user message en Claude).
 	{
 		description: "Cambia el idioma del thread a inglés.",
-		extraPrompt: "Reescribí la carta completa en inglés (American English) manteniendo el mismo contenido.",
+		extraPrompt: "Reescribe la carta completa en inglés (American English) manteniendo el mismo contenido.",
 		label: "En inglés",
 		language: "en",
 		onlyIfCurrentLanguage: "es",
 	},
 	{
 		description: "Cambia el idioma del thread a español.",
-		extraPrompt: "Reescribí la carta completa en español (LATAM neutro) manteniendo el mismo contenido.",
+		extraPrompt: "Reescribe la carta completa en español (peruano neutro profesional) manteniendo el mismo contenido.",
 		label: "En español",
 		language: "es",
 		onlyIfCurrentLanguage: "en",
@@ -250,47 +338,27 @@ function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined)
 	if (typeof signature !== "string" || !signature) {
 		return null;
 	}
-	return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}\n`;
+	return `${htmlToText(greeting)}\n\n${htmlToText(body)}\n\n${htmlToText(closing)}\n\n${htmlToText(signature)}\n`;
 }
 
 interface ArtifactToolbarProps {
-	canEdit: boolean;
 	canExport: boolean;
 	canRegenerate: boolean;
 	generationCount: number;
-	handleCancelEdit: () => void;
 	handleCopy: () => void | Promise<void>;
 	handleDownload: () => void;
 	handleRegenerate: (preset: RegeneratePreset) => void | Promise<void>;
-	handleSaveEdit: () => void | Promise<void>;
-	handleStartEdit: () => void;
 	hasContent: boolean;
-	isEditing: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
 	popoverOpen: boolean;
-	saving: boolean;
 	setPopoverOpen: (open: boolean) => void;
 	visiblePresets: readonly RegeneratePreset[];
 }
 
-/** Botonera del header: Cancelar/Guardar (edición) o Copy/Download/Editar/Regenerar (vista). */
+/** Botonera del header: Copiar / Descargar PDF / Regenerar. (La edición es inline, no hay botón.) */
 function ArtifactToolbar(props: ArtifactToolbarProps) {
-	if (props.isEditing) {
-		return (
-			<div className="flex items-center gap-1.5">
-				<Button disabled={props.saving} onClick={props.handleCancelEdit} size="sm" type="button" variant="ghost">
-					<XIcon weight="bold" />
-					Cancelar
-				</Button>
-				<Button disabled={props.saving} onClick={props.handleSaveEdit} size="sm" type="button">
-					<CheckIcon className={cn(props.saving && "animate-spin")} weight="bold" />
-					{props.saving ? "Guardando…" : "Guardar"}
-				</Button>
-			</div>
-		);
-	}
 	if (!props.hasContent) {
 		return null;
 	}
@@ -315,16 +383,6 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 				variant="outline"
 			>
 				<DownloadSimpleIcon weight="bold" />
-			</Button>
-			<Button
-				aria-label="Editar carta"
-				disabled={!props.canEdit}
-				onClick={props.handleStartEdit}
-				size="icon-sm"
-				type="button"
-				variant="outline"
-			>
-				<PencilSimpleIcon weight="bold" />
 			</Button>
 			<Popover onOpenChange={props.setPopoverOpen} open={props.popoverOpen}>
 				<PopoverTrigger
@@ -375,57 +433,39 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 	);
 }
 
-/** Cuerpo del panel: textareas editables (modo edición) o las 4 secciones read-only (vista). */
-function ArtifactSections({
+/** Vista de solo lectura de la carta: durante el streaming de CASEY o para mostrarla sin editar. */
+function ReadOnlyLetter({
 	artifact,
-	draft,
-	isEditing,
 	isStreaming,
-	onFieldChange,
 	showLoaders,
 }: {
 	artifact: DeepPartial<CoverLetter> | undefined;
-	draft: CoverLetter | null;
-	isEditing: boolean;
 	isStreaming: boolean;
-	onFieldChange: (key: keyof CoverLetter, value: string) => void;
 	showLoaders: boolean;
 }) {
-	if (isEditing && draft) {
-		return (
-			<FramePanel className="flex flex-1 flex-col gap-4 overflow-y-auto">
-				{SECTION_DEFS.map((def) => (
-					<div className="flex flex-col gap-1.5" key={def.key}>
-						<label
-							className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wide"
-							htmlFor={`edit-${def.key}`}
-						>
-							<def.icon className="size-3.5" weight="duotone" />
-							{def.label}
-						</label>
-						<Textarea
-							id={`edit-${def.key}`}
-							onChange={(e) => onFieldChange(def.key, e.target.value)}
-							rows={def.key === "body" ? 12 : 2}
-							value={draft[def.key]}
-						/>
-					</div>
-				))}
-			</FramePanel>
-		);
-	}
+	// La sección "activa" (la que CASEY está escribiendo) = la última con contenido; las que vienen
+	// después aún no empezaron. Solo la activa muestra "redactando…"; las pendientes, solo skeleton.
+	const activeIndex = SECTION_DEFS.reduce((acc, def, i) => {
+		const v = artifact?.[def.key];
+		return typeof v === "string" && v.trim() ? i : acc;
+	}, 0);
+
 	return (
 		<FramePanel className="flex flex-1 flex-col gap-3 overflow-y-auto">
-			{SECTION_DEFS.map((def) => {
-				const text = artifact?.[def.key];
+			{SECTION_DEFS.map((def, i) => {
+				const value = artifact?.[def.key];
+				const text = typeof value === "string" ? value : undefined;
+				// Cualquier sección puede haber quedado como HTML tras una edición → la normalizamos
+				// para mostrarla con su formato.
+				const richHtml = text ? bodyToHtml(text) : undefined;
 				return (
 					<CoverLetterSection
 						icon={def.icon}
-						isStreaming={isStreaming && !text}
+						isStreaming={isStreaming && i === activeIndex}
 						key={def.key}
 						label={def.label}
+						richHtml={richHtml}
 						showSkeleton={showLoaders && !text}
-						text={typeof text === "string" ? text : undefined}
 					/>
 				);
 			})}
@@ -467,17 +507,11 @@ export function LettersArtifactPanel({
 	const canExport = Boolean(formattedText) && !isStreaming;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
-	// Edición manual de la carta mostrada (no consume versión; persiste vía onSaveArtifact).
-	const {
-		cancel: handleCancelEdit,
-		draft,
-		isEditing,
-		save: handleSaveEdit,
-		saving,
-		setField: setDraftField,
-		start: handleStartEdit,
-	} = useCoverLetterEditor(artifact, activeMessageId, onSaveArtifact);
-	const canEdit = canExport && !isEditing && Boolean(activeMessageId);
+	// La carta completa actual (las 4 secciones presentes). Si está y no estamos streameando,
+	// se muestra editable EN SITIO: cada sección es un editor y se autoguarda al salir del campo
+	// (no consume versión; persiste vía onSaveArtifact). No hay botón de "editar".
+	const completeLetter = toCompleteCoverLetter(artifact);
+	const canEditInline = Boolean(completeLetter) && !isStreaming && Boolean(activeMessageId);
 
 	const visiblePresets = REGENERATE_PRESETS.filter(
 		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
@@ -529,8 +563,7 @@ export function LettersArtifactPanel({
 								<Shimmer>CASEY redactando…</Shimmer>
 							</Badge>
 						)}
-						{isEditing && <Badge variant="secondary">Editando</Badge>}
-						{!(error || isStreaming || isEditing) && hasContent && (
+						{!(error || isStreaming) && hasContent && (
 							<Badge variant="secondary">
 								Versión {activeVersion}/{MAX_COVER_LETTER_VERSIONS}
 							</Badge>
@@ -540,37 +573,33 @@ export function LettersArtifactPanel({
 				</div>
 
 				<ArtifactToolbar
-					canEdit={canEdit}
 					canExport={canExport}
 					canRegenerate={canRegenerate}
 					generationCount={generationCount}
-					handleCancelEdit={handleCancelEdit}
 					handleCopy={handleCopy}
 					handleDownload={handleDownload}
 					handleRegenerate={handleRegenerate}
-					handleSaveEdit={handleSaveEdit}
-					handleStartEdit={handleStartEdit}
 					hasContent={hasContent}
-					isEditing={isEditing}
 					isPending={isPending}
 					isStreaming={isStreaming}
 					onTriggerAsync={onTriggerAsync}
 					popoverOpen={popoverOpen}
-					saving={saving}
 					setPopoverOpen={setPopoverOpen}
 					visiblePresets={visiblePresets}
 				/>
 			</FrameHeader>
 
-			{(isEditing || hasStreamedContent || showLoaders) && (
-				<ArtifactSections
-					artifact={artifact}
-					draft={draft}
-					isEditing={isEditing}
-					isStreaming={isStreaming}
-					onFieldChange={setDraftField}
-					showLoaders={showLoaders}
+			{canEditInline && completeLetter && activeMessageId ? (
+				<EditableLetter
+					activeMessageId={activeMessageId}
+					key={activeMessageId}
+					letter={completeLetter}
+					onSaveArtifact={onSaveArtifact}
 				/>
+			) : (
+				(hasStreamedContent || showLoaders) && (
+					<ReadOnlyLetter artifact={artifact} isStreaming={isStreaming} showLoaders={showLoaders} />
+				)
 			)}
 
 			{error && (

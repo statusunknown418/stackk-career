@@ -21,6 +21,8 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Frame, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { Skeleton } from "@/components/ui/skeleton";
 import { orpc } from "@/utils/orpc";
 
 interface LetterStreams {
@@ -32,14 +34,13 @@ interface RunHandle {
 	runId: string;
 }
 
-function toErrorOrUndefined(value: unknown): Error | undefined {
-	if (!value) {
-		return;
+// El ?v de la URL solo vale si apunta a una versión válida actual; un id stale/foráneo se ignora
+// (cae a la última versión) para que la vista y el destino de guardado nunca diverjan.
+function resolveValidVersionId(raw: string | null, versions: ReadonlyArray<{ id: string }>): string | null {
+	if (raw && versions.some((m) => m.id === raw)) {
+		return raw;
 	}
-	if (value instanceof Error) {
-		return value;
-	}
-	return new Error(String(value));
+	return null;
 }
 
 function limitDialogCopy(language: CoverLetterLanguage): { description: string; ok: string; title: string } {
@@ -57,8 +58,54 @@ function limitDialogCopy(language: CoverLetterLanguage): { description: string; 
 	};
 }
 
+const PENDING_BAR_WIDTHS = ["w-11/12", "w-4/5", "w-full", "w-3/4", "w-2/3"] as const;
+const PENDING_SECTIONS = ["saludo", "cuerpo", "cierre"] as const;
+
+/** Esqueleto de las 2 columnas mientras el loader trae la carta — evita el blanco + spinner. */
+function LetterPagePending() {
+	return (
+		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr]">
+			<Frame>
+				<FrameHeader>
+					<Skeleton className="h-4 w-2/3 rounded-full" />
+				</FrameHeader>
+				<FramePanel className="flex flex-1 flex-col gap-3">
+					<Skeleton className="h-3 w-full rounded-full" />
+					<Skeleton className="h-3 w-4/5 rounded-full" />
+					<Skeleton className="mt-2 h-16 w-full rounded-xl" />
+					<Skeleton className="mt-auto h-24 w-full rounded-xl" />
+				</FramePanel>
+			</Frame>
+
+			<Frame>
+				<FrameHeader>
+					<FrameTitle className="font-light text-xl tracking-tight">Tu carta de presentación</FrameTitle>
+				</FrameHeader>
+				<FramePanel className="flex flex-1 flex-col gap-3">
+					{PENDING_SECTIONS.map((id) => (
+						<div className="rounded-xl border border-border p-4" key={id}>
+							<Skeleton className="mb-3 h-3 w-24 rounded-full" />
+							<div className="flex flex-col gap-2">
+								{PENDING_BAR_WIDTHS.map((w) => (
+									<Skeleton className={`h-3 rounded-full ${w}`} key={w} />
+								))}
+							</div>
+						</div>
+					))}
+				</FramePanel>
+			</Frame>
+		</section>
+	);
+}
+
 export const Route = createFileRoute("/_protected/dash/letters/$generationId")({
 	component: RouteComponent,
+	pendingComponent: LetterPagePending,
+	// `v` = id del mensaje-artifact de la versión que se está viendo. Vive en la URL para que
+	// sobreviva al refresh y sea compartible; ausente = se muestra la última versión.
+	validateSearch: (search: Record<string, unknown>): { v?: string } => ({
+		v: typeof search.v === "string" && search.v.length > 0 ? search.v : undefined,
+	}),
 	loader: ({ context, params }) =>
 		context.queryClient.ensureQueryData(
 			orpc.letters.get.queryOptions({ input: { generationId: params.generationId } })
@@ -69,13 +116,30 @@ function RouteComponent() {
 	const { generationId } = Route.useParams();
 	const queryClient = useQueryClient();
 	const { data } = useQuery(orpc.letters.get.queryOptions({ input: { generationId } }));
+	const lettersGetKey = orpc.letters.get.queryKey({ input: { generationId } });
 
 	// The route owns the trigger mutation so both panels can fire it (chat from
 	// the textarea, artifact from the "Regenerar" presets) and the realtime
 	// subscription stays attached at this level through the panel re-renders.
 	const [runHandle, setRunHandle] = useState<RunHandle | null>(null);
-	const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
 	const [showLimitDialog, setShowLimitDialog] = useState(false);
+
+	// La versión seleccionada vive en la URL (?v=<messageId>): sobrevive al refresh y es
+	// compartible. Sin `v` = se muestra la última versión.
+	const navigate = Route.useNavigate();
+	const rawSelectedVersionId = Route.useSearch().v ?? null;
+	const selectVersion = useCallback(
+		(messageId: string) => {
+			navigate({ replace: true, search: (prev) => ({ ...prev, v: messageId }) });
+		},
+		[navigate]
+	);
+	const clearSelectedVersion = useCallback(() => {
+		navigate({ replace: true, search: (prev) => ({ ...prev, v: undefined }) });
+	}, [navigate]);
+	// Feedback inmediato al disparar un run: true desde el click hasta que la mutation settlea
+	// (ahí el realtime/isStreaming toma el relevo). Atado al ciclo de la mutation, así que no se cuelga.
+	const [triggering, setTriggering] = useState(false);
 	const autoTriggeredRef = useRef(false);
 	// Evita disparar dos runs en paralelo (doble-click, auto-trigger + manual). El realtime
 	// solo trackea un runHandle, así que dos triggers simultáneos perderían uno.
@@ -88,28 +152,56 @@ function RouteComponent() {
 		: [];
 	const generationCount = coverLetterMessages.length;
 
+	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
+
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
+			onMutate: () => setTriggering(true),
 			onError: (err) => toast.error(err.message),
 			onSuccess: (result) => {
 				if (result.runId && result.publicAccessToken) {
 					setRunHandle({ accessToken: result.publicAccessToken, runId: result.runId });
 				}
-				queryClient.invalidateQueries({
-					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
-				});
+				queryClient.invalidateQueries({ queryKey: lettersGetKey });
 			},
+			onSettled: () => setTriggering(false),
 		})
 	);
 
 	// Ediciones manuales del usuario sobre la carta mostrada (no regenera, no consume versión).
+	// Optimista: reflejamos la edición en el caché al instante (con rollback si falla), así
+	// guardar se siente inmediato y no hay parpadeo de refetch al cambiar de versión.
 	const updateArtifactMutation = useMutation(
 		orpc.letters.updateArtifact.mutationOptions({
-			onError: (err) => toast.error(err.message),
-			onSuccess: () => {
-				queryClient.invalidateQueries({
-					queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
+			onMutate: async ({ artifact, messageId }) => {
+				await queryClient.cancelQueries({ queryKey: lettersGetKey });
+				const previous = queryClient.getQueryData<typeof data>(lettersGetKey);
+				queryClient.setQueryData<typeof data>(lettersGetKey, (old) => {
+					if (!old) {
+						return old;
+					}
+					const messages = old.messages.map((m) => (m.id === messageId ? { ...m, object: artifact } : m));
+					// Si editamos el artifact más reciente, reflejarlo también en `latestArtifact`
+					// (lo que muestra la vista por defecto cuando no hay versión seleccionada).
+					const lastArtifact = [...messages]
+						.reverse()
+						.find((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && m.object !== null);
+					return {
+						...old,
+						messages,
+						latestArtifact: lastArtifact?.id === messageId ? artifact : old.latestArtifact,
+					};
 				});
+				return { previous };
+			},
+			onError: (err, _vars, context) => {
+				if (context?.previous) {
+					queryClient.setQueryData(lettersGetKey, context.previous);
+				}
+				toast.error(err.message);
+			},
+			onSettled: () => {
+				queryClient.invalidateQueries({ queryKey: lettersGetKey });
 			},
 		})
 	);
@@ -131,14 +223,14 @@ function RouteComponent() {
 				return;
 			}
 			inFlightRef.current = true;
-			setSelectedMessageId(null);
+			clearSelectedVersion();
 			try {
 				return await triggerMutateAsync({ generationId, ...input });
 			} finally {
 				inFlightRef.current = false;
 			}
 		},
-		[generationId, triggerMutateAsync, generationCount]
+		[generationId, triggerMutateAsync, generationCount, clearSelectedVersion]
 	);
 
 	// `id: runHandle?.runId` da estado fresco del hook por run. Sin esto el hook keya su
@@ -157,12 +249,26 @@ function RouteComponent() {
 	// congelado y filtraría runHandle. Acá refrescamos + limpiamos en CADA run que termina.
 	const currentRunFinishedAt = realtime.run?.finishedAt;
 	useEffect(() => {
-		if (runHandle && currentRunFinishedAt) {
-			queryClient.invalidateQueries({
-				queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
-			});
-			setRunHandle(null);
+		if (!(runHandle && currentRunFinishedAt)) {
+			return;
 		}
+		// Refrescamos la data persistida y SOLO soltamos el runHandle cuando el refetch terminó.
+		// Si lo soltáramos antes, el realtime se deshabilita y `streamedArtifact` se vacía mientras
+		// el refetch sigue en vuelo → la carta desaparecería ("Esperando datos") por 1-2s. Esperar
+		// al refetch hace el handoff (stream → data persistida) sin parpadeo.
+		let cancelled = false;
+		queryClient
+			.invalidateQueries({
+				queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setRunHandle(null);
+				}
+			});
+		return () => {
+			cancelled = true;
+		};
 	}, [runHandle, currentRunFinishedAt, queryClient, generationId]);
 
 	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
@@ -196,10 +302,17 @@ function RouteComponent() {
 	// Streaming mientras haya run activo y aún no haya terminado. Si el hook todavía no
 	// recibió el primer SSE del run nuevo (realtime.run undefined) también contamos como
 	// streaming, para no mostrar la carta vieja con Copy/Download habilitados.
-	const isStreaming = Boolean(runHandle) && !realtime.run?.finishedAt;
+	// `!realtime.error` evita que un error de suscripción (token expirado, SSE caído) sin `finishedAt`
+	// deje `isStreaming` en true para siempre y trabe Regenerar/Copiar/Descargar hasta recargar.
+	const isStreaming = Boolean(runHandle) && !realtime.run?.finishedAt && !realtime.error;
 	const artifact = isStreaming ? streamedArtifact : (streamedArtifact ?? selectedArtifact ?? cachedArtifact);
 
-	const error = toErrorOrUndefined(realtime.error);
+	// "Generando" = hay un run activo (isStreaming) o un trigger recién disparado (triggering).
+	// `triggering` da feedback inmediato al clickear Regenerar y se limpia al settlear la mutation;
+	// `isStreaming` se limpia con `finishedAt`. Ninguno depende de un flag que pueda quedar colgado.
+	const isGenerating = isStreaming || triggering;
+
+	const error = realtime.error;
 
 	if (!data) {
 		return null;
@@ -213,10 +326,10 @@ function RouteComponent() {
 		<>
 			<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr]">
 				<LettersChatPanel
-					isPending={isPending || isStreaming}
+					isPending={isGenerating}
 					jobPosition={data.generation.title ?? "el puesto"}
 					messages={data.messages}
-					onSelectVersion={setSelectedMessageId}
+					onSelectVersion={selectVersion}
 					onTriggerAsync={onTriggerAsync}
 					resumeTitle={data.resume?.title ?? null}
 					selectedMessageId={selectedMessageId}
@@ -230,7 +343,7 @@ function RouteComponent() {
 					error={error}
 					generationCount={generationCount}
 					hasContent={Boolean(artifact) || data.latestArtifact !== null}
-					isPending={isPending}
+					isPending={isGenerating}
 					isStreaming={isStreaming}
 					onSaveArtifact={onSaveArtifact}
 					onTriggerAsync={onTriggerAsync}

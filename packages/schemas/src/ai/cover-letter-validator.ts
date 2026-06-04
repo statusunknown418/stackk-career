@@ -108,23 +108,11 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 	"if you could provide",
 ] as const;
 
-/**
- * Mantenido para back-compat con el system prompt anterior que importaba
- * un solo array. Hoy contiene ambos idiomas concatenados (es + en).
- *
- * @deprecated usar getClichePhrases(language) — esto se quita cuando todos
- * los call sites hayan migrado.
- */
-export const COVER_LETTER_CLICHE_PHRASES = [
-	...COVER_LETTER_CLICHE_PHRASES_ES,
-	...COVER_LETTER_CLICHE_PHRASES_EN,
-] as const;
-
 export function getClichePhrases(language: CoverLetterLanguage): readonly string[] {
 	return language === "en" ? COVER_LETTER_CLICHE_PHRASES_EN : COVER_LETTER_CLICHE_PHRASES_ES;
 }
 
-export interface CoverLetterValidationResult {
+interface CoverLetterValidationResult {
 	foundPhrases: readonly string[];
 	ok: boolean;
 }
