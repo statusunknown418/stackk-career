@@ -5,5 +5,5 @@ export { resumeStatusEnum };
 export type ResumeStatus = (typeof resumeStatusEnum)[number];
 
 export const selectResumeSchema = createSelectSchema(resumes);
-export const insertResumeSchema = createInsertSchema(resumes);
+export const insertResumeSchema = createInsertSchema(resumes).strict();
 export const updateResumeSchema = createUpdateSchema(resumes);
