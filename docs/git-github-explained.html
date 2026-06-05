@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Git & GitHub, explicado — IMPULSA</title>
+		<style>
+		:root {
+			--ink: #f5f5f7;
+			--paper: #13171f;
+			--card: #1f242d;
+			--card-2: #2a2f38;
+			--green: #a4e635;
+			--green-deep: #7ecc1f;
+			--rule: rgba(245, 245, 247, 0.1);
+			--muted: #a8acb6;
+			--red: #ff6b6b;
+			--amber: #ffb454;
+			--blue: #7aa2ff;
+		}
+		* {
+			box-sizing: border-box;
+		}
+		body {
+			margin: 0;
+			font-family: "Inter Variable", Inter, system-ui, sans-serif;
+			font-size: 15px;
+			-webkit-font-smoothing: antialiased;
+			line-height: 1.6;
+			color: var(--ink);
+			background: var(--paper);
+		}
+		.wrap {
+			max-width: 920px;
+			padding: 48px 24px 110px;
+			margin: 0 auto;
+		}
+		.eyebrow {
+			font-family: "Geist Mono", ui-monospace, monospace;
+			font-size: 12px;
+			color: var(--green);
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+		}
+		h1 {
+			margin: 0.2em 0 0.15em;
+			font-family: "Geist Variable", Geist, system-ui, sans-serif;
+			font-size: clamp(2rem, 5vw, 3.4rem);
+			font-weight: 700;
+			line-height: 1.03;
+			letter-spacing: -0.035em;
+		}
+		.lead {
+			max-width: 62ch;
+			font-size: 1.14rem;
+			color: var(--muted);
+		}
+		h2 {
+			margin: 60px 0 6px;
+			font-family: "Geist Variable", Geist, system-ui, sans-serif;
+			font-size: 1.55rem;
+			font-weight: 700;
+			letter-spacing: -0.025em;
+		}
+		.step-no {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.95rem;
+			color: var(--green);
+		}
+		.sub {
+			max-width: 64ch;
+			margin: 0 0 20px;
+			color: var(--muted);
+		}
+		code {
+			padding: 1px 6px;
+			font-family: "Geist Mono", ui-monospace, monospace;
+			font-size: 0.88em;
+			color: #d7f7a0;
+			background: var(--card-2);
+			border-radius: 5px;
+		}
+		b {
+			color: var(--ink);
+		}
+		.card {
+			padding: 26px;
+			margin: 8px 0;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-radius: 16px;
+		}
+
+		/* === two copies === */
+		.copies {
+			display: grid;
+			grid-template-columns: 1fr 90px 1fr;
+			gap: 0;
+			align-items: center;
+		}
+		@media (max-width: 680px) {
+			.copies {
+				grid-template-columns: 1fr;
+				gap: 18px;
+			}
+			.copies .midcol {
+				transform: rotate(90deg);
+			}
+		}
+		.machine {
+			padding: 20px;
+			text-align: center;
+			background: var(--card-2);
+			border: 1px solid var(--rule);
+			border-radius: 14px;
+		}
+		.machine .icon {
+			font-size: 2rem;
+		}
+		.machine h4 {
+			margin: 6px 0 2px;
+			font-family: "Geist Variable", Geist, sans-serif;
+		}
+		.machine .tag {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.72rem;
+			color: var(--muted);
+		}
+		.machine .rows {
+			margin-top: 14px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.78rem;
+			color: var(--muted);
+			text-align: left;
+		}
+		.machine .rows div {
+			padding: 3px 0;
+			border-top: 1px solid var(--rule);
+		}
+		.machine .rows .b-main {
+			color: var(--ink);
+		}
+		.midcol {
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+			align-items: center;
+			justify-content: center;
+		}
+
+		/* animated flow line */
+		.flow {
+			position: relative;
+			display: flex;
+			align-items: center;
+			width: 100%;
+			height: 24px;
+		}
+		.flow .line {
+			position: absolute;
+			right: 0;
+			left: 0;
+			height: 2px;
+			background: var(--rule);
+		}
+		.flow .pkt {
+			position: absolute;
+			top: 50%;
+			width: 9px;
+			height: 9px;
+			margin-top: -4.5px;
+			border-radius: 50%;
+		}
+		.flow.push .pkt {
+			background: var(--green);
+			animation: toRight 2.2s linear infinite;
+		}
+		.flow.pull .pkt {
+			background: var(--blue);
+			animation: toLeft 2.6s linear infinite;
+		}
+		.flow .pkt:nth-child(3) {
+			animation-delay: 0.7s;
+		}
+		.flow .pkt:nth-child(4) {
+			animation-delay: 1.4s;
+		}
+		@keyframes toRight {
+			from {
+				left: -2%;
+				opacity: 0;
+			}
+			10% {
+				opacity: 1;
+			}
+			90% {
+				opacity: 1;
+			}
+			to {
+				left: 102%;
+				opacity: 0;
+			}
+		}
+		@keyframes toLeft {
+			from {
+				left: 102%;
+				opacity: 0;
+			}
+			10% {
+				opacity: 1;
+			}
+			90% {
+				opacity: 1;
+			}
+			to {
+				left: -2%;
+				opacity: 0;
+			}
+		}
+		.flowlabel {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 4px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.74rem;
+		}
+		.flowlabel .push {
+			color: var(--green);
+		}
+		.flowlabel .pull {
+			color: var(--blue);
+		}
+
+		/* push/pull cards */
+		.ppgrid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+			margin-top: 8px;
+		}
+		@media (max-width: 680px) {
+			.ppgrid {
+				grid-template-columns: 1fr;
+			}
+		}
+		.pp {
+			padding: 20px;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-radius: 14px;
+		}
+		.pp.push {
+			border-left: 3px solid var(--green);
+		}
+		.pp.pull {
+			border-left: 3px solid var(--blue);
+		}
+		.pp h4 {
+			margin: 0 0 2px;
+			font-family: "Geist Mono", monospace;
+			font-size: 1rem;
+		}
+		.pp.push h4 {
+			color: var(--green);
+		}
+		.pp.pull h4 {
+			color: var(--blue);
+		}
+		.pp .dir {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.8rem;
+			color: var(--muted);
+		}
+		.pp p {
+			margin: 0.6em 0 0;
+			font-size: 0.9rem;
+			color: var(--muted);
+		}
+
+		/* commit chain */
+		.chain {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0;
+			align-items: center;
+			margin-top: 6px;
+			font-family: "Geist Mono", monospace;
+		}
+		.commit {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		.commit .ball {
+			display: grid;
+			place-items: center;
+			width: 38px;
+			height: 38px;
+			font-size: 0.8rem;
+			color: var(--ink);
+			background: var(--card-2);
+			border: 2px solid var(--blue);
+			border-radius: 50%;
+		}
+		.commit.head .ball {
+			border-color: var(--green);
+			box-shadow: 0 0 0 4px rgba(164, 230, 53, 0.14);
+		}
+		.commit small {
+			max-width: 88px;
+			margin-top: 6px;
+			font-size: 0.66rem;
+			line-height: 1.3;
+			color: var(--muted);
+			text-align: center;
+		}
+		.link {
+			width: 30px;
+			height: 2px;
+			background: var(--rule);
+		}
+
+		/* branch diagram */
+		.branchbox {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.84rem;
+			line-height: 2.1;
+			color: var(--muted);
+		}
+		.branchbox .g {
+			color: var(--green);
+		}
+		.branchbox .b {
+			color: var(--blue);
+		}
+		.branchbox .w {
+			color: var(--ink);
+		}
+
+		/* PR gate */
+		.gate {
+			display: grid;
+			grid-template-columns: 1fr auto 1.3fr auto 1fr;
+			gap: 14px;
+			align-items: center;
+			margin-top: 6px;
+		}
+		@media (max-width: 760px) {
+			.gate {
+				grid-template-columns: 1fr;
+				text-align: center;
+			}
+			.gate .arrow {
+				transform: rotate(90deg);
+			}
+		}
+		.gate .blk {
+			padding: 16px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.82rem;
+			text-align: center;
+			background: var(--card-2);
+			border: 1px solid var(--rule);
+			border-radius: 12px;
+		}
+		.gate .blk.branch {
+			color: var(--blue);
+			border-color: rgba(122, 162, 255, 0.4);
+		}
+		.gate .blk.main {
+			color: var(--green);
+			border-color: rgba(164, 230, 53, 0.4);
+		}
+		.gate .pr {
+			padding: 16px 18px;
+			text-align: left;
+			background: var(--card);
+			border: 1.5px solid var(--amber);
+			border-radius: 14px;
+		}
+		.gate .pr h4 {
+			margin: 0 0 8px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.86rem;
+			color: var(--amber);
+			text-align: center;
+		}
+		.gate .pr ul {
+			padding-left: 18px;
+			margin: 0;
+			font-size: 0.8rem;
+			color: var(--muted);
+		}
+		.gate .pr li {
+			margin: 3px 0;
+		}
+		.gate .arrow {
+			font-size: 1.3rem;
+			color: var(--muted);
+			text-align: center;
+		}
+
+		/* flow steps */
+		ol.flowsteps {
+			padding: 0;
+			margin: 10px 0;
+			list-style: none;
+			counter-reset: s;
+		}
+		ol.flowsteps li {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			padding: 12px 16px 12px 70px;
+			border-bottom: 1px solid var(--rule);
+		}
+		ol.flowsteps li::before {
+			position: absolute;
+			top: 11px;
+			left: 18px;
+			display: grid;
+			place-items: center;
+			width: 26px;
+			height: 26px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.8rem;
+			font-weight: 700;
+			color: var(--green);
+			content: counter(s);
+			counter-increment: s;
+			background: var(--card-2);
+			border-radius: 7px;
+		}
+		ol.flowsteps li code {
+			margin-right: 0;
+		}
+		ol.flowsteps li .d {
+			margin-top: 2px;
+			font-size: 0.86rem;
+			color: var(--muted);
+		}
+
+		/* glossary */
+		.gloss {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-top: 6px;
+		}
+		@media (max-width: 680px) {
+			.gloss {
+				grid-template-columns: 1fr;
+			}
+		}
+		.term {
+			padding: 14px 16px;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-radius: 12px;
+		}
+		.term b {
+			font-family: "Geist Mono", monospace;
+			color: var(--green);
+		}
+		.term span {
+			display: block;
+			margin-top: 2px;
+			font-size: 0.88rem;
+			color: var(--muted);
+		}
+
+		.foot {
+			padding-top: 20px;
+			margin-top: 70px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.8rem;
+			color: var(--muted);
+			border-top: 1px solid var(--rule);
+		}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<div class="eyebrow">┌─ git &amp; github · de cero ─┐</div>
+			<h1>Cómo funciona<br>el historial</h1>
+			<p class="lead">
+				Commits, ramas, push, pull y PRs — explicado con tu propio repo
+				<code>STACKKCAREER</code>. Léelo de arriba a abajo: cada pieza se apoya
+				en la anterior.
+			</p>
+
+			<!-- 1 -->
+			<h2><span class="step-no">01 ·</span> Existen DOS copias del proyecto</h2>
+			<p class="sub">
+				Lo que más confunde al inicio. Tu código vive en dos lugares a la vez, y
+				casi todo en git es mover cambios entre ellos.
+			</p>
+			<div class="card">
+				<div class="copies">
+					<div class="machine">
+						<div class="icon">💻</div>
+						<h4>Tu computadora</h4>
+						<div class="tag">"local"</div>
+						<div class="rows">
+							<div class="b-main">main</div>
+							<div>feat/letters-casey-i18n-export</div>
+							<div>… donde editas y commiteas</div>
+						</div>
+					</div>
+					<div class="midcol">
+						<div
+							style="font-family:'Geist Mono',monospace;font-size:.72rem;color:var(--muted)"
+						>
+							sincronizas<br>con ⇅
+						</div>
+					</div>
+					<div class="machine">
+						<div class="icon">☁️</div>
+						<h4>GitHub</h4>
+						<div class="tag">"remoto" = origin</div>
+						<div class="rows">
+							<div class="b-main">origin/main</div>
+							<div>origin/feat/…</div>
+							<div>… donde el equipo comparte + CI</div>
+						</div>
+					</div>
+				</div>
+				<p style="margin:18px 0 0;font-size:.9rem;color:var(--muted)">
+					<code>origin</code>
+					es solo el <b>apodo</b> de "tu GitHub remoto".
+					<code>origin/main</code>
+					= "así está main allá". <code>main</code> a secas = "así está aquí en
+					mi compu". <b>Pueden estar diferentes</b> — por eso existen push y
+					pull.
+				</p>
+			</div>
+
+			<!-- 2 -->
+			<h2><span class="step-no">02 ·</span> push vs pull = solo dirección</h2>
+			<p class="sub">
+				Una vez que entiendes que hay dos copias, esto es obvio: ¿en qué sentido
+				muevo los cambios?
+			</p>
+			<div class="card">
+				<div class="flow push">
+					<div class="line"></div>
+					<div class="pkt"></div>
+					<div class="pkt"></div>
+					<div class="pkt"></div>
+				</div>
+				<div class="flowlabel">
+					<span>💻 tu compu</span><span class="push">git push ▶ subir</span
+					><span>☁️ GitHub</span>
+				</div>
+				<div style="height:18px"></div>
+				<div class="flow pull">
+					<div class="line"></div>
+					<div class="pkt"></div>
+					<div class="pkt"></div>
+					<div class="pkt"></div>
+				</div>
+				<div class="flowlabel">
+					<span>💻 tu compu</span><span class="pull">◀ git pull · bajar</span
+					><span>☁️ GitHub</span>
+				</div>
+
+				<div class="ppgrid" style="margin-top:24px">
+					<div class="pp push">
+						<h4>git push</h4>
+						<div class="dir">tu compu ──▶ GitHub</div>
+						<p>
+							Ya hiciste commits locales y quieres que existan en GitHub (para
+							el PR, el equipo, el deploy).
+							<b>Es lo que hicimos con el lockfile</b>: commit → push → apareció
+							en el PR #14.
+						</p>
+					</div>
+					<div class="pp pull">
+						<h4>git pull</h4>
+						<div class="dir">GitHub ──▶ tu compu</div>
+						<p>
+							Alguien subió cambios a GitHub y los traes a tu compu para no
+							quedarte atrás. Usa <code>git pull --rebase</code> para no crear
+							merge-commits basura tipo "Merge X into X".
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- 3 -->
+			<h2>
+				<span class="step-no">03 ·</span>
+				El historial = cadena de commits
+			</h2>
+			<p class="sub">
+				Cada <code>git commit</code> es un punto de guardado: qué cambió, quién,
+				cuándo y un mensaje. El historial es esa cadena enlazada.
+			</p>
+			<div class="card">
+				<div class="chain">
+					<div class="commit">
+						<div class="ball">A</div>
+						<small>inicio</small>
+					</div>
+					<div class="link"></div>
+					<div class="commit">
+						<div class="ball">B</div>
+						<small>feat landing</small>
+					</div>
+					<div class="link"></div>
+					<div class="commit">
+						<div class="ball">C</div>
+						<small>feat letters</small>
+					</div>
+					<div class="link"></div>
+					<div class="commit head">
+						<div class="ball">D</div>
+						<small>fix lockfile ← HEAD</small>
+					</div>
+				</div>
+				<p style="margin:20px 0 0;font-size:.9rem;color:var(--muted)">
+					Cada commit apunta al anterior. Eso <b>es</b> el historial: puedes
+					viajar a cualquier punto, ver el diff o revertir. Como el historial de
+					Google Docs, pero <b>tú decides</b> cuándo se crea cada versión y le
+					pones nombre.
+				</p>
+			</div>
+
+			<!-- 4 -->
+			<h2><span class="step-no">04 ·</span> Ramas = líneas paralelas</h2>
+			<p class="sub">
+				<code>main</code>
+				es la rama oficial (lo que va a producción). No trabajas directo ahí —
+				creas una <b>rama</b> para experimentar sin romper lo oficial.
+			</p>
+			<div class="card">
+				<div class="branchbox">
+					<div>
+						<span class="w">main:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A ─► B
+						──────────────────► <span class="g">M</span>&nbsp;&nbsp;&nbsp;<span
+							style="color:var(--muted)"
+							>(estable; recibe el merge al final)</span
+						>
+					</div>
+					<div>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+							class="b"
+							>╲</span
+						>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+							class="b"
+							>╱</span
+						>
+					</div>
+					<div>
+						<span class="b"
+							>feat/letters:</span
+						>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="b"
+							>C ─► D ─► E</span
+						>&nbsp;&nbsp;&nbsp;<span style="color:var(--muted)"
+							>(experimentas tranquilo aquí)</span
+						>
+					</div>
+				</div>
+				<p style="margin:20px 0 0;font-size:.9rem;color:var(--muted)">
+					Si rompes algo en <code>feat/letters</code>, <code>main</code> sigue
+					sano. Cuando tu trabajo está listo, <b>traes</b> esos commits (C, D,
+					E) de vuelta a main. Ese "traer de vuelta" se llama <b>merge</b>.
+				</p>
+			</div>
+
+			<!-- 5 -->
+			<h2><span class="step-no">05 ·</span> ¿Por qué un Pull Request?</h2>
+			<p class="sub">
+				Podrías mergear tu rama a main tú solo con un comando. El PR agrega una
+				<b>puerta de control</b>
+				antes de que algo entre a lo oficial. Un PR es literalmente: "pido que
+				jalen mi rama hacia main".
+			</p>
+			<div class="card">
+				<div class="gate">
+					<div class="blk branch">
+						tu rama<br>feat/…<br>
+						<small style="color:var(--muted)">commits C,D,E</small>
+					</div>
+					<div class="arrow">▶</div>
+					<div class="pr">
+						<h4>PULL REQUEST · la puerta</h4>
+						<ul>
+							<li><b style="color:var(--ink)">Diff</b> — qué líneas cambian</li>
+							<li>
+								<b style="color:var(--ink)">Review</b>
+								— alguien comenta/aprueba
+							</li>
+							<li><b style="color:var(--ink)">CI</b> — corren los tests*</li>
+							<li><b style="color:var(--ink)">Registro</b>— queda el porqué</li>
+						</ul>
+					</div>
+					<div class="arrow">▶</div>
+					<div class="blk main">
+						main<br><small style="color:var(--muted)">oficial ✓</small>
+					</div>
+				</div>
+				<p style="margin:18px 0 0;font-size:.86rem;color:var(--muted)">
+					*Por eso importaba arreglar el lockfile: sin eso, el CI del PR
+					fallaba. Cuando apruebas el PR ("Merge"), GitHub
+					<b>fusiona los commits de tu rama dentro de main</b>
+					y recién ahí el cambio es oficial.
+				</p>
+			</div>
+
+			<!-- 6 -->
+			<h2><span class="step-no">06 ·</span> Todo junto, en tu flujo real</h2>
+			<p class="sub">
+				Los pasos 4 y 8 son los que conectan tu compu ⇄ GitHub: push sube, pull
+				baja.
+			</p>
+			<div class="card" style="padding:8px 10px">
+				<ol class="flowsteps">
+					<li>
+						<code>git checkout -b feat/algo</code
+						><span class="d">creas una rama (línea paralela)</span>
+					</li>
+					<li>…editas archivos…<span class="d">el trabajo real</span></li>
+					<li>
+						<code>git commit</code
+						><span class="d">punto de guardado <b>local</b> en tu compu</span>
+					</li>
+					<li>
+						<code>git push</code
+						><span class="d"><b>subes</b> la rama a GitHub (origin)</span>
+					</li>
+					<li>
+						abres un Pull Request<span class="d"
+							>propones meter esa rama a main</span
+						>
+					</li>
+					<li>review + CI<span class="d">la "puerta": se valida</span></li>
+					<li>
+						Merge<span class="d"
+							>los commits entran a <b>main</b> (oficial)</span
+						>
+					</li>
+					<li>
+						<code>git checkout main &amp;&amp; git pull</code
+						><span class="d"><b>bajas</b> el main actualizado a tu compu</span>
+					</li>
+				</ol>
+			</div>
+
+			<!-- glossary -->
+			<h2><span class="step-no">07 ·</span> Una frase por cada cosa</h2>
+			<div class="gloss">
+				<div class="term">
+					<b>commit</b><span>guardar una versión (local)</span>
+				</div>
+				<div class="term">
+					<b>push</b><span>subir tus commits a GitHub</span>
+				</div>
+				<div class="term">
+					<b>pull</b><span>bajar los commits nuevos de GitHub</span>
+				</div>
+				<div class="term">
+					<b>branch</b><span>línea paralela para no romper main</span>
+				</div>
+				<div class="term">
+					<b>pull request</b
+					><span>propuesta + puerta para meter tu rama a main</span>
+				</div>
+				<div class="term">
+					<b>merge</b
+					><span>fusionar los commits de la rama dentro de main</span>
+				</div>
+				<div class="term">
+					<b>origin</b><span>el apodo de tu GitHub remoto</span>
+				</div>
+				<div class="term">
+					<b>HEAD</b><span>el commit donde estás parado ahora</span>
+				</div>
+			</div>
+
+			<div class="foot">
+				para josephmelgarejo · repo STACKKCAREER ·
+				docs/git-github-explained.html · no commiteado
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Estructura de PRs — IMPULSA / Letters</title>
+		<style>
+		:root {
+			--ink: #f5f5f7;
+			--paper: #13171f;
+			--card: #1f242d;
+			--card-2: #2a2f38;
+			--green: #a4e635;
+			--green-deep: #7ecc1f;
+			--rule: rgba(245, 245, 247, 0.1);
+			--muted: #a8acb6;
+			--red: #ff6b6b;
+			--amber: #ffb454;
+			--blue: #7aa2ff;
+		}
+		* {
+			box-sizing: border-box;
+		}
+		html {
+			scroll-behavior: smooth;
+		}
+		body {
+			margin: 0;
+			font-family: "Inter Variable", Inter, system-ui, sans-serif;
+			font-size: 15px;
+			-webkit-font-smoothing: antialiased;
+			line-height: 1.55;
+			color: var(--ink);
+			background: var(--paper);
+		}
+		.wrap {
+			max-width: 980px;
+			padding: 48px 24px 96px;
+			margin: 0 auto;
+		}
+		.eyebrow {
+			font-family: "Geist Mono", ui-monospace, monospace;
+			font-size: 12px;
+			color: var(--green);
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+		}
+		h1 {
+			margin: 0.2em 0 0.1em;
+			font-family: "Geist Variable", Geist, system-ui, sans-serif;
+			font-size: clamp(2rem, 4.4vw, 3.1rem);
+			font-weight: 700;
+			line-height: 1.04;
+			letter-spacing: -0.035em;
+		}
+		h2 {
+			padding-bottom: 10px;
+			margin: 56px 0 16px;
+			font-family: "Geist Variable", Geist, system-ui, sans-serif;
+			font-size: 1.6rem;
+			font-weight: 700;
+			letter-spacing: -0.025em;
+			border-bottom: 1px solid var(--rule);
+		}
+		h3 {
+			margin: 24px 0 8px;
+			font-size: 1.05rem;
+		}
+		p {
+			color: var(--ink);
+		}
+		.muted {
+			color: var(--muted);
+		}
+		code,
+		kbd {
+			padding: 1px 6px;
+			font-family: "Geist Mono", ui-monospace, monospace;
+			font-size: 0.9em;
+			color: #d7f7a0;
+			background: var(--card-2);
+			border-radius: 5px;
+		}
+		.lead {
+			max-width: 62ch;
+			font-size: 1.12rem;
+			color: var(--muted);
+		}
+		a {
+			color: var(--green);
+		}
+
+		/* ---- stack diagram ---- */
+		.stack {
+			display: flex;
+			flex-direction: column;
+			gap: 0;
+			margin: 28px 0;
+		}
+		.node {
+			position: relative;
+			z-index: 1;
+			display: grid;
+			grid-template-columns: 92px 1fr auto;
+			gap: 16px;
+			align-items: center;
+			padding: 14px 18px;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-radius: 12px;
+		}
+		.node + .node {
+			margin-top: 30px;
+		}
+		.node + .node::before {
+			position: absolute;
+			top: -26px;
+			left: 36px;
+			font-family: "Geist Mono", monospace;
+			font-size: 11px;
+			color: var(--muted);
+			letter-spacing: 0.05em;
+			content: "▲ base";
+		}
+		.node .num {
+			font-family: "Geist Mono", monospace;
+			font-size: 1.25rem;
+			font-weight: 700;
+		}
+		.node .branch {
+			display: block;
+			margin-top: 2px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.82rem;
+			color: var(--green);
+			word-break: break-all;
+		}
+		.node .desc {
+			font-size: 0.92rem;
+			color: var(--muted);
+		}
+		.node .meta {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.78rem;
+			color: var(--muted);
+			text-align: right;
+			white-space: nowrap;
+		}
+		.badge {
+			display: inline-block;
+			padding: 2px 8px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.68rem;
+			vertical-align: middle;
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+			border-radius: 999px;
+		}
+		.b-open {
+			color: var(--green);
+			background: rgba(164, 230, 53, 0.14);
+			border: 1px solid rgba(164, 230, 53, 0.35);
+		}
+		.b-draft {
+			color: var(--muted);
+			background: rgba(168, 172, 182, 0.14);
+			border: 1px solid var(--rule);
+		}
+		.b-fat {
+			color: var(--red);
+			background: rgba(255, 107, 107, 0.14);
+			border: 1px solid rgba(255, 107, 107, 0.35);
+		}
+		.base-main {
+			background: var(--card-2);
+			border-style: dashed;
+		}
+		.base-main .branch {
+			color: var(--ink);
+		}
+
+		table {
+			width: 100%;
+			margin: 18px 0;
+			font-size: 0.9rem;
+			border-collapse: collapse;
+		}
+		th,
+		td {
+			padding: 10px 12px;
+			text-align: left;
+			border-bottom: 1px solid var(--rule);
+		}
+		th {
+			font-family: "Geist Mono", monospace;
+			font-size: 0.72rem;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+		}
+		td code {
+			padding: 0;
+			color: var(--green);
+			background: transparent;
+		}
+
+		.cards {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+			margin: 18px 0;
+		}
+		@media (max-width: 680px) {
+			.cards {
+				grid-template-columns: 1fr;
+			}
+			.node {
+				grid-template-columns: 60px 1fr;
+			}
+			.node .meta {
+				display: none;
+			}
+		}
+		.pcard {
+			padding: 18px 20px;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-left: 3px solid var(--rule);
+			border-radius: 12px;
+		}
+		.pcard.sev-high {
+			border-left-color: var(--red);
+		}
+		.pcard.sev-mid {
+			border-left-color: var(--amber);
+		}
+		.pcard.sev-low {
+			border-left-color: var(--blue);
+		}
+		.pcard.ok {
+			border-left-color: var(--green);
+		}
+		.pcard h3 {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			margin-top: 0;
+		}
+		.sev {
+			padding: 2px 7px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.66rem;
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+			border-radius: 999px;
+		}
+		.sev.hi {
+			color: var(--red);
+			background: rgba(255, 107, 107, 0.14);
+		}
+		.sev.mid {
+			color: var(--amber);
+			background: rgba(255, 180, 84, 0.14);
+		}
+		.sev.lo {
+			color: var(--blue);
+			background: rgba(122, 162, 255, 0.14);
+		}
+		.sev.good {
+			color: var(--green);
+			background: rgba(164, 230, 53, 0.14);
+		}
+		.pcard p {
+			margin: 0.4em 0 0;
+			font-size: 0.92rem;
+			color: var(--muted);
+		}
+		.pcard p strong {
+			color: var(--ink);
+		}
+
+		ol.steps {
+			padding: 0;
+			margin: 18px 0;
+			list-style: none;
+			counter-reset: s;
+		}
+		ol.steps li {
+			position: relative;
+			padding: 14px 18px 14px 56px;
+			margin-bottom: 12px;
+			background: var(--card);
+			border: 1px solid var(--rule);
+			border-radius: 12px;
+		}
+		ol.steps li::before {
+			position: absolute;
+			top: 14px;
+			left: 14px;
+			display: grid;
+			place-items: center;
+			width: 28px;
+			height: 28px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.85rem;
+			font-weight: 700;
+			color: #10140c;
+			content: counter(s);
+			counter-increment: s;
+			background: var(--green);
+			border-radius: 8px;
+		}
+		ol.steps li strong {
+			color: var(--ink);
+		}
+		ol.steps li span {
+			display: block;
+			margin-top: 3px;
+			font-size: 0.92rem;
+			color: var(--muted);
+		}
+		.foot {
+			padding-top: 20px;
+			margin-top: 64px;
+			font-family: "Geist Mono", monospace;
+			font-size: 0.82rem;
+			color: var(--muted);
+			border-top: 1px solid var(--rule);
+		}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<div class="eyebrow">┌─ git · pull requests ─┐</div>
+			<h1>Cómo están armados<br>nuestros PRs hoy</h1>
+			<p class="lead">
+				Spoiler: <strong style="color:var(--ink)">no es un caos</strong> —
+				usamos un patrón <em>stacked PR</em> legítimo. Pero hay 3 cosas
+				desordenadas que conviene arreglar. Esto es el mapa real, sacado del
+				repo.
+			</p>
+
+			<h2>1 · Qué es un “stacked PR”</h2>
+			<p class="muted">
+				En lugar de un PR gigante, partimos la feature de cartas (CASEY) en
+				capas pequeñas. Cada PR <strong>no</strong> apunta a <code>main</code>:
+				apunta al PR de abajo. Así cada review es chiquito y enfocado. Se
+				mergean <strong>de abajo hacia arriba</strong>.
+			</p>
+
+			<h2>2 · El stack real (main → #9 → … → #14)</h2>
+			<div class="stack">
+				<div class="node base-main">
+					<div class="num">main</div>
+					<div>
+						<span class="branch">main</span
+						><span class="desc">rama base de producción</span>
+					</div>
+					<div class="meta">—</div>
+				</div>
+				<div class="node">
+					<div class="num">#9</div>
+					<div>
+						<span class="branch">feat/letters-casey</span
+						><span class="desc"
+							>schemas: generation type + zod + migración db</span
+						>
+					</div>
+					<div class="meta">
+						1 commit · 7 files<br><span class="badge b-draft">draft</span>
+					</div>
+				</div>
+				<div class="node">
+					<div class="num">#10</div>
+					<div>
+						<span class="branch">feat/letters-casey-api</span
+						><span class="desc"
+							>UI slice: /letters dialog + chat/artifact view</span
+						>
+					</div>
+					<div class="meta">
+						1 commit · 12 files<br><span class="badge b-draft">draft</span>
+					</div>
+				</div>
+				<div class="node">
+					<div class="num">#11</div>
+					<div>
+						<span class="branch">feat/letters-casey-task</span
+						><span class="desc"
+							>CASEY Trigger.dev task — arquitectura de tools</span
+						>
+					</div>
+					<div class="meta">
+						2 commits · 8 files<br><span class="badge b-draft">draft</span>
+					</div>
+				</div>
+				<div class="node">
+					<div class="num">#12</div>
+					<div>
+						<span class="branch">feat/letters-casey-polish</span
+						><span class="desc"
+							>UX: streaming, auto-trigger, tool messages, presets</span
+						>
+					</div>
+					<div class="meta">
+						1 commit · 4 files<br><span class="badge b-open">open</span>
+					</div>
+				</div>
+				<div class="node">
+					<div class="num">#13</div>
+					<div>
+						<span class="branch">feat/letters-casey-quality</span
+						><span class="desc"
+							>few-shot, validador de clichés, Haiku fallback</span
+						>
+					</div>
+					<div class="meta">
+						1 commit · 3 files<br><span class="badge b-open">open</span>
+					</div>
+				</div>
+				<div class="node">
+					<div class="num">#14</div>
+					<div>
+						<span class="branch">feat/letters-casey-i18n-export</span
+						><span class="desc"
+							>i18n + export + hard rules + bug batch + lockfile ⟵ estás aquí</span
+						>
+					</div>
+					<div class="meta">
+						9 commits · 19 files<br>
+						<span class="badge b-fat">cajón de sastre</span>
+					</div>
+				</div>
+			</div>
+
+			<h2>3 · Lo que está BIEN ✅</h2>
+			<div class="cards">
+				<div class="pcard ok">
+					<h3>Patrón en capas <span class="sev good">ok</span></h3>
+					<p>
+						El stack en sí es una práctica reconocida (estilo Graphite). Cada PR
+						de abajo (#9–#13) es <strong>pequeño y de un solo concern</strong> —
+						3 a 12 archivos. Eso es exactamente lo que se busca.
+					</p>
+				</div>
+				<div class="pcard ok">
+					<h3>Landing NO contamina <span class="sev good">verificado</span></h3>
+					<p>
+						Confirmé con <code>git merge-base</code>:
+						<strong>feat/landing-polish (#7) NO es ancestro</strong>
+						de la rama de letters. El diff de #14 no arrastra el landing. Falsa
+						alarma despejada.
+					</p>
+				</div>
+			</div>
+
+			<h2>4 · Lo que está DESORDENADO ⚠️</h2>
+			<div class="cards">
+				<div class="pcard sev-high">
+					<h3>#14 es un cajón de sastre <span class="sev hi">alto</span></h3>
+					<p>
+						<strong>9 commits / 19 archivos</strong>
+						mezclando cosas no relacionadas: i18n, export, hard rules, “never
+						refuse”, hora en la lista, <em>y un</em>
+						<code>fix(web): bugfix batch</code>
+						(login redirect, dead links, sidebar) que
+						<strong>no es de letters</strong>. Debió ser 3–4 PRs chicos.
+					</p>
+				</div>
+				<div class="pcard sev-mid">
+					<h3>Draft / Open invertido <span class="sev mid">medio</span></h3>
+					<p>
+						La <strong>base</strong> del stack (#9, #10, #11) está en
+						<span class="badge b-draft">draft</span>
+						pero la
+						<strong>cima</strong>
+						(#12–#14) está
+						<span class="badge b-open">open</span>. Como se mergea de abajo
+						hacia arriba, tener la base en draft <strong>bloquea todo</strong>:
+						#14 no puede entrar hasta que #9 entre.
+					</p>
+				</div>
+				<div class="pcard sev-low">
+					<h3>
+						Ruido de <code>git pull</code> <span class="sev lo">bajo</span>
+					</h3>
+					<p>
+						El commit <code>b3d5321</code> es un self-merge (“Merge branch X
+						into X”) generado por <code>git pull</code> sin rebase. Ensucia el
+						historial. Solución: <code>git pull --rebase</code>.
+					</p>
+				</div>
+				<div class="pcard sev-low">
+					<h3>Branches huérfanas <span class="sev lo">bajo</span></h3>
+					<p>
+						Sólo locales, sin PR ni push:
+						<code>fix/letters-qa-cleanup</code>
+						(commits tipo stash/WIP),
+						<code>local/test-with-landing</code>, y la vieja
+						<code>feat/landing</code>
+						(#2 ya cerrado). Clutter para borrar.
+					</p>
+				</div>
+			</div>
+
+			<h2>5 · Tabla resumen</h2>
+			<table>
+				<thead>
+					<tr>
+						<th>PR</th>
+						<th>Rama</th>
+						<th>Base</th>
+						<th>Commits</th>
+						<th>Files</th>
+						<th>Estado</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>#9</td>
+						<td><code>feat/letters-casey</code></td>
+						<td>main</td>
+						<td>1</td>
+						<td>7</td>
+						<td>draft</td>
+					</tr>
+					<tr>
+						<td>#10</td>
+						<td><code>…-api</code></td>
+						<td>#9</td>
+						<td>1</td>
+						<td>12</td>
+						<td>draft</td>
+					</tr>
+					<tr>
+						<td>#11</td>
+						<td><code>…-task</code></td>
+						<td>#10</td>
+						<td>2</td>
+						<td>8</td>
+						<td>draft</td>
+					</tr>
+					<tr>
+						<td>#12</td>
+						<td><code>…-polish</code></td>
+						<td>#11</td>
+						<td>1</td>
+						<td>4</td>
+						<td>open</td>
+					</tr>
+					<tr>
+						<td>#13</td>
+						<td><code>…-quality</code></td>
+						<td>#12</td>
+						<td>1</td>
+						<td>3</td>
+						<td>open</td>
+					</tr>
+					<tr>
+						<td>#14</td>
+						<td><code>…-i18n-export</code></td>
+						<td>#13</td>
+						<td><strong style="color:var(--red)">9</strong></td>
+						<td><strong style="color:var(--red)">19</strong></td>
+						<td>open</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<h2>6 · Cómo lo ordenamos 🧹</h2>
+			<ol class="steps">
+				<li>
+					<strong>Decidir el destino del stack</strong
+					><span
+						>¿Mergeamos las 6 capas a <code>main</code> tal cual (de abajo hacia
+						arriba), o colapsamos todo en un solo squash-merge a
+						<code>main</code>? Si el review ya está hecho, squash es lo más
+						simple.</span
+					>
+				</li>
+				<li>
+					<strong>Quitar el draft de #9–#11</strong
+					><span
+						>Marcar “Ready for review” la base del stack para que se pueda
+						mergear bottom-up. Hoy están bloqueando.</span
+					>
+				</li>
+				<li>
+					<strong>(Opcional) Sacar el <code>fix(web)</code> de #14</strong
+					><span
+						>El bugfix batch de login/links/sidebar merece su propio PR — no es
+						i18n de cartas.</span
+					>
+				</li>
+				<li>
+					<strong>Borrar branches muertas</strong
+					><span
+						><code>local/test-with-landing</code>,
+						<code>fix/letters-qa-cleanup</code>, <code>feat/landing</code> si ya
+						no se usan.</span
+					>
+				</li>
+				<li>
+					<strong>Adoptar <code>git pull --rebase</code></strong
+					><span
+						>Para no volver a generar merge-commits de pull que ensucian el
+						historial.</span
+					>
+				</li>
+			</ol>
+
+			<div class="foot">
+				generado desde el estado real del repo ·
+				docs/pr-structure-explainer.html · no commiteado
+			</div>
+		</div>
+	</body>
+</html>
