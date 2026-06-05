@@ -1,78 +1,143 @@
-import { ArrowSquareOutIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { orpc } from "@/utils/orpc";
+import { createFileRoute } from "@tanstack/react-router";
+import { BentoGrid } from "@/components/landing/bento-grid";
+import { FAQ_ITEMS, PLANS } from "@/components/landing/data";
+import { Faq } from "@/components/landing/faq";
+import { LandingFooter } from "@/components/landing/footer";
+import { FounderMessage } from "@/components/landing/founder-message";
+import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { LandingNav } from "@/components/landing/nav";
+import { Pricing } from "@/components/landing/pricing";
+import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
+import { Tools } from "@/components/landing/tools";
+
+const SITE_URL = "https://assendia.com";
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+const SITE_NAME = "ASSENDIA";
+const TITLE = "ASSENDIA · Garantizamos tu próxima entrevista en menos de 3 meses";
+const DESCRIPTION =
+	"CV reescrito por IA en 1 minuto. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
+
+const structuredData = {
+	"@context": "https://schema.org",
+	"@graph": [
+		{
+			"@type": "Organization",
+			"@id": `${SITE_URL}#organization`,
+			name: SITE_NAME,
+			url: SITE_URL,
+			logo: `${SITE_URL}/assendia-logo.png`,
+			description: "Plataforma de empleo con IA + coaching humano para LATAM.",
+			areaServed: ["PE", "CO", "MX", "AR", "CL", "UY", "EC", "ES"],
+			foundingLocation: { "@type": "Place", name: "Lima, Perú" },
+		},
+		{
+			"@type": "WebSite",
+			"@id": `${SITE_URL}#website`,
+			url: SITE_URL,
+			name: SITE_NAME,
+			description: DESCRIPTION,
+			inLanguage: "es",
+			publisher: { "@id": `${SITE_URL}#organization` },
+		},
+		{
+			"@type": "Service",
+			"@id": `${SITE_URL}#service`,
+			name: "ASSENDIA · Coaching de carrera con IA",
+			provider: { "@id": `${SITE_URL}#organization` },
+			areaServed: "LATAM",
+			serviceType: "Career coaching, CV optimization, LinkedIn optimization, interview preparation",
+			aggregateRating: {
+				"@type": "AggregateRating",
+				ratingValue: "4.9",
+				reviewCount: "90",
+				bestRating: "5",
+				worstRating: "1",
+			},
+			offers: PLANS.map((plan) => ({
+				"@type": "Offer",
+				name: `ASSENDIA ${plan.name}`,
+				description: plan.tagline,
+				price: plan.priceSoles.toFixed(2),
+				priceCurrency: "PEN",
+				availability: "https://schema.org/InStock",
+				url: `${SITE_URL}/#planes`,
+			})),
+		},
+		{
+			"@type": "FAQPage",
+			"@id": `${SITE_URL}#faq`,
+			mainEntity: FAQ_ITEMS.map((item) => ({
+				"@type": "Question",
+				name: item.q,
+				acceptedAnswer: {
+					"@type": "Answer",
+					text: item.a,
+				},
+			})),
+		},
+	],
+};
 
 export const Route = createFileRoute("/")({
-	component: HomeComponent,
-	headers: () => ({
-		"Cache-Control": "public, max-age=86400, stale-while-revalidate=86400",
-	}),
-	staleTime: 24 * 60 * 60 * 1000, // Caching for 24 hours
+	component: LandingPage,
 	head: () => ({
 		meta: [
-			{
-				title: "Assendia",
-			},
-			{
-				name: "author",
-				content: "Stackk Studios",
-			},
+			{ title: TITLE },
+			{ name: "description", content: DESCRIPTION },
+			{ name: "robots", content: "index, follow" },
+			{ name: "author", content: SITE_NAME },
+			{ property: "og:type", content: "website" },
+			{ property: "og:site_name", content: SITE_NAME },
+			{ property: "og:title", content: TITLE },
+			{ property: "og:description", content: DESCRIPTION },
+			{ property: "og:url", content: SITE_URL },
+			{ property: "og:image", content: OG_IMAGE_URL },
+			{ property: "og:image:width", content: "1200" },
+			{ property: "og:image:height", content: "630" },
+			{ property: "og:image:alt", content: TITLE },
+			{ property: "og:locale", content: "es_PE" },
+			{ property: "og:locale:alternate", content: "es_MX" },
+			{ property: "og:locale:alternate", content: "es_AR" },
+			{ property: "og:locale:alternate", content: "es_CO" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:title", content: TITLE },
+			{ name: "twitter:description", content: DESCRIPTION },
+			{ name: "twitter:image", content: OG_IMAGE_URL },
+			{ name: "twitter:image:alt", content: TITLE },
+			{ name: "theme-color", content: "#0a0a0a" },
 		],
 		links: [
-			{ rel: "canonical", href: "https://assendia.com" },
-			{ rel: "alternate", href: "https://assendia.com", hrefLang: "es" },
-			{ rel: "alternate", href: "https://assendia.com", hrefLang: "x-default" },
-			{ rel: "icon", href: "/favicon.ico" },
-			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
+			// Fonts are self-hosted via @fontsource (see index.css) — no external
+			// Google Fonts request, so no render-blocking stylesheet or preconnects.
+			{ rel: "canonical", href: SITE_URL },
+		],
+		scripts: [
 			{
-				rel: "preconnect",
-				href: "https://fonts.gstatic.com",
-				crossOrigin: "anonymous",
+				type: "application/ld+json",
+				children: JSON.stringify(structuredData),
 			},
 		],
 	}),
 });
 
-function getStatusLabel(isLoading: boolean, isConnected: boolean): string {
-	if (isLoading) {
-		return "Checking...";
-	}
-	return isConnected ? "Connected" : "Disconnected";
-}
-
-function HomeComponent() {
-	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
-	const isConnected = Boolean(healthCheck.data);
-	const statusLabel = getStatusLabel(healthCheck.isLoading, isConnected);
-
+function LandingPage() {
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<h1 className="overflow-x-auto font-mono text-sm">Assendia</h1>
-			<div className="grid gap-6">
-				<section className="rounded-lg border p-4">
-					<h2 className="mb-2 font-medium">API Status</h2>
-					<div className="flex items-center gap-2">
-						<div className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
-						<span className="text-muted-foreground text-sm">{statusLabel}</span>
-					</div>
-				</section>
-			</div>
-
-			<section>
-				<Button render={<Link to="/login" />}>Login</Button>
-			</section>
-
-			<footer>
-				<Button render={<Link to="/terms" />}>
-					Términos <ArrowSquareOutIcon />
-				</Button>
-
-				<Button render={<Link to="/policy" />}>
-					Politicas <ArrowSquareOutIcon />
-				</Button>
-			</footer>
+		<div className="relative isolate overflow-x-clip">
+			{/* Subtle film grain over the whole page — premium finish, CSS only */}
+			<div aria-hidden="true" className="grain-overlay pointer-events-none fixed inset-0 z-60 opacity-[0.04]" />
+			<LandingNav />
+			<main className="-mt-16">
+				<Hero />
+				<Tools />
+				<BentoGrid />
+				<HowItWorks />
+				<TestimonialsCarousel />
+				<FounderMessage />
+				<Pricing />
+				<Faq />
+			</main>
+			<LandingFooter />
 		</div>
 	);
 }

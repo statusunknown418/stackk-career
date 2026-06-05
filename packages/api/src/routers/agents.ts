@@ -85,8 +85,9 @@ export const agentsRouter = {
 					parentAnalysisId: input.parentAnalysisId ?? null,
 					status: "pending",
 				});
-			} catch {
+			} catch (error) {
 				context.log?.set({ outcome: "pending_insert_failed" });
+				context.log?.error(error instanceof Error ? error : new Error("pending_insert_failed"));
 				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to register analysis" });
 			}
 
@@ -120,8 +121,9 @@ export const agentsRouter = {
 					analysisId,
 					publicAccessToken: handle.publicAccessToken,
 				};
-			} catch {
+			} catch (error) {
 				context.log?.set({ outcome: "trigger_failed" });
+				context.log?.error(error instanceof Error ? error : new Error("trigger_failed"));
 
 				await context.db
 					.update(resumeAnalyses)

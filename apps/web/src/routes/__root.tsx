@@ -53,7 +53,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Assendia",
+				title: "ASSENDIA · Tu próxima entrevista, garantizada",
+			},
+			{
+				name: "description",
+				content:
+					"Plataforma de empleo con IA + coaching humano para LATAM. CV reescrito por IA y coach senior real hasta tu próxima entrevista.",
 			},
 		],
 		links: [
@@ -61,6 +66,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 				rel: "stylesheet",
 				href: appCss,
 			},
+			{ rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+			{ rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
 		],
 	}),
 	server: {
@@ -71,14 +78,14 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootDocument() {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="es" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 
 			<body>
-				<ThemeProvider defaultTheme="light" storageKey="theme">
-					<div className="grid min-h-svh">
+				<ThemeProvider defaultTheme="dark" storageKey="theme">
+					<div className="grid min-h-svh grid-cols-1">
 						<Outlet />
 					</div>
 				</ThemeProvider>
