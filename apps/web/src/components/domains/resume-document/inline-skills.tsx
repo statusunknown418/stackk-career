@@ -262,24 +262,9 @@ export const InlineSkills = withForm({
 							key={getBlockKey(line.id)}
 						>
 							<div className="group/label relative flex select-none items-baseline pr-1 text-left font-bold text-foreground">
-								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
-									{(field) => (
-										<div className="min-w-0 pr-6">
-											<InlineTextEditor
-												className="w-full rounded-sm font-bold font-serif text-sm hover:bg-accent/40"
-												onBlur={() => field.handleBlur()}
-												onChange={(value) => field.handleChange(value)}
-												placeholder="Categoría"
-												value={(field.state.value ?? "") as string}
-												variant="plain"
-											/>
-										</div>
-									)}
-								</form.AppField>
-								<span className="mr-1 select-none font-bold">:</span>
 								<Button
 									aria-label="Eliminar categoría"
-									className="pointer-events-none absolute top-0.5 right-0 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/label:pointer-events-auto group-focus-within/label:translate-x-0 group-focus-within/label:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/label:pointer-events-auto [@media(hover:hover)]:group-hover/label:translate-x-0 [@media(hover:hover)]:group-hover/label:opacity-100"
+									className="pointer-events-none absolute top-0.5 left-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/label:pointer-events-auto group-focus-within/label:translate-x-0 group-focus-within/label:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/label:pointer-events-auto [@media(hover:hover)]:group-hover/label:translate-x-0 [@media(hover:hover)]:group-hover/label:opacity-100"
 									data-pending={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									disabled={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
@@ -293,6 +278,21 @@ export const InlineSkills = withForm({
 										<TrashIcon className="size-3.5" />
 									)}
 								</Button>
+								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
+									{(field) => (
+										<div className="min-w-0 pl-6">
+											<InlineTextEditor
+												className="w-full rounded-sm font-bold font-serif text-sm hover:bg-accent/40"
+												onBlur={() => field.handleBlur()}
+												onChange={(value) => field.handleChange(value)}
+												placeholder="Categoría"
+												value={(field.state.value ?? "") as string}
+												variant="plain"
+											/>
+										</div>
+									)}
+								</form.AppField>
+								<span className="mr-1 select-none font-bold">:</span>
 							</div>
 
 							<div className="flex flex-1 flex-wrap items-center gap-x-1 gap-y-1">
