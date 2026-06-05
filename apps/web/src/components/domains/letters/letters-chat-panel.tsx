@@ -113,8 +113,8 @@ export function LettersChatPanel({
 	const canSubmit = !isPending && (extraPrompt.trim().length > 0 || !hasArtifact);
 
 	return (
-		<section className="flex h-full flex-col gap-4">
-			<Conversation className="flex-1">
+		<section className="flex h-full min-h-0 flex-col gap-4">
+			<Conversation className="min-h-0 flex-1 overflow-y-auto">
 				<ConversationContent>
 					<Message from="assistant">
 						<MessageContent>
@@ -198,7 +198,7 @@ export function LettersChatPanel({
 			</Conversation>
 
 			<form
-				className="flex flex-col gap-2 border-border border-t pt-4"
+				className="flex shrink-0 flex-col gap-2 border-border border-t pt-4"
 				onSubmit={async (e) => {
 					e.preventDefault();
 					if (!canSubmit) {

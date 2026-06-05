@@ -84,7 +84,7 @@ function PendingLetterSection({ bars, label, primary }: { bars: readonly string[
 /** Esqueleto de las 2 columnas mientras el loader trae la carta — evita el blanco + spinner. */
 function LetterPagePending() {
 	return (
-		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr]">
+		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr] md:grid-rows-1">
 			<Frame>
 				<FrameHeader>
 					<Skeleton className="h-4 w-2/3 rounded-full" />
@@ -401,7 +401,7 @@ function RouteComponent() {
 
 	return (
 		<>
-			<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr]">
+			<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr] md:grid-rows-1">
 				<LettersChatPanel
 					isPending={isGenerating}
 					jobPosition={data.generation.title ?? "el puesto"}
