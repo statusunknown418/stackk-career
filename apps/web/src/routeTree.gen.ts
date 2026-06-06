@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as PolicyRouteImport } from './routes/policy'
+import { Route as MuyProntoRouteImport } from './routes/muy-pronto'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
@@ -44,6 +45,11 @@ const StatusRoute = StatusRouteImport.update({
 const PolicyRoute = PolicyRouteImport.update({
   id: '/policy',
   path: '/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MuyProntoRoute = MuyProntoRouteImport.update({
+  id: '/muy-pronto',
+  path: '/muy-pronto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -141,6 +147,7 @@ const ProtectedDashResumesResumeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
+  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
+    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
@@ -278,6 +290,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MuyProntoRoute: typeof MuyProntoRoute
   PolicyRoute: typeof PolicyRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/policy'
       fullPath: '/policy'
       preLoaderRoute: typeof PolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/muy-pronto': {
+      id: '/muy-pronto'
+      path: '/muy-pronto'
+      fullPath: '/muy-pronto'
+      preLoaderRoute: typeof MuyProntoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -482,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
+  MuyProntoRoute: MuyProntoRoute,
   PolicyRoute: PolicyRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,

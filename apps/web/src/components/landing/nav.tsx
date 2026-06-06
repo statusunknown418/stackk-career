@@ -1,13 +1,11 @@
 "use client";
 
-import { ArrowRightIcon, ListIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, ListIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useState } from "react";
-import { useTheme } from "@/components/theme-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetPanel, SheetPopup, SheetTrigger } from "@/components/ui/sheet";
 import { useActiveSection } from "@/hooks/use-active-section";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./data";
 
@@ -69,10 +67,9 @@ export function LandingNav() {
 				<span aria-hidden="true" className="hidden h-5 w-px bg-muted md:block" />
 
 				<div className="ml-auto flex items-center gap-1.5 md:ml-0">
-					<ThemeToggle />
 					<a
 						className="hidden rounded-full px-3 py-1.5 font-medium text-foreground/65 text-sm transition-colors hover:text-foreground md:inline-flex"
-						href="/login"
+						href="/muy-pronto"
 					>
 						Iniciar sesión
 					</a>
@@ -85,7 +82,7 @@ export function LandingNav() {
 								initial={{ opacity: 0, scale: 0.85, width: 0 }}
 								transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
 							>
-								<a className={buttonVariants({ size: "sm" })} href="/setup">
+								<a className={buttonVariants({ size: "sm" })} href="/muy-pronto">
 									Analiza mi CV gratis
 									<ArrowRightIcon weight="bold" />
 								</a>
@@ -96,27 +93,6 @@ export function LandingNav() {
 				</div>
 			</nav>
 		</header>
-	);
-}
-
-function ThemeToggle() {
-	// Source of truth comes from the existing ThemeProvider (`useTheme` returns the
-	// preference: "dark" | "light" | "system"). For the "system" case we read the OS
-	// preference declaratively with the repo's `useMediaQuery` (SSR-safe via
-	// `useSyncExternalStore`) — no MutationObserver, no useEffect needed here.
-	const { theme, setTheme } = useTheme();
-	const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
-	const isDark = theme === "dark" || (theme === "system" && systemDark);
-
-	return (
-		<button
-			aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-			className="grid size-9 shrink-0 place-items-center rounded-full border border-border text-foreground/70 transition-colors duration-200 hover:border-oxblood/50 hover:text-foreground"
-			onClick={() => setTheme(isDark ? "light" : "dark")}
-			type="button"
-		>
-			{isDark ? <SunIcon size={16} weight="bold" /> : <MoonIcon size={16} weight="bold" />}
-		</button>
 	);
 }
 
@@ -163,7 +139,7 @@ function MobileMenu() {
 							render={
 								<a
 									className="rounded-lg px-3 py-2 font-medium text-foreground/75 text-sm transition-colors hover:bg-muted hover:text-foreground"
-									href="/login"
+									href="/muy-pronto"
 								>
 									Iniciar sesión
 								</a>
@@ -171,7 +147,7 @@ function MobileMenu() {
 						/>
 						<SheetClose
 							render={
-								<a className={cn(buttonVariants({ size: "default" }), "w-full justify-center")} href="/setup">
+								<a className={cn(buttonVariants({ size: "default" }), "w-full justify-center")} href="/muy-pronto">
 									Analiza mi CV gratis
 									<ArrowRightIcon weight="bold" />
 								</a>

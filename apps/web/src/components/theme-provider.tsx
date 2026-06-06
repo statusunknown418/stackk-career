@@ -7,6 +7,8 @@ type Theme = "dark" | "light" | "system";
 interface ThemeProviderProps {
 	children: React.ReactNode;
 	defaultTheme?: Theme;
+	/** When set, locks the theme to this value and ignores any stored preference. */
+	forcedTheme?: Theme;
 	storageKey?: string;
 }
 
@@ -15,9 +17,14 @@ interface ThemeProviderState {
 	theme: Theme;
 }
 
-function getThemeScript(storageKey: string, defaultTheme: Theme) {
+function getThemeScript(storageKey: string, defaultTheme: Theme, forcedTheme?: Theme) {
 	const key = JSON.stringify(storageKey);
 	const fallback = JSON.stringify(defaultTheme);
+
+	if (forcedTheme) {
+		const forced = JSON.stringify(forcedTheme);
+		return `(function(){try{var t=${forced};var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`;
+	}
 
 	return `(function(){try{var t=localStorage.getItem(${key});if(t!=='light'&&t!=='dark'&&t!=='system'){t=${fallback}}var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`;
 }
@@ -40,15 +47,25 @@ function applyTheme(theme: Theme) {
 	root.style.colorScheme = resolved;
 }
 
-export function ThemeProvider({ children, defaultTheme = "system", storageKey = "theme" }: ThemeProviderProps) {
-	const [theme, setThemeState] = useState<Theme>(defaultTheme);
+export function ThemeProvider({
+	children,
+	defaultTheme = "system",
+	forcedTheme,
+	storageKey = "theme",
+}: ThemeProviderProps) {
+	const [theme, setThemeState] = useState<Theme>(forcedTheme ?? defaultTheme);
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
+		if (forcedTheme) {
+			setThemeState(forcedTheme);
+			setMounted(true);
+			return;
+		}
 		const stored = localStorage.getItem(storageKey);
 		setThemeState(stored === "light" || stored === "dark" || stored === "system" ? stored : defaultTheme);
 		setMounted(true);
-	}, [defaultTheme, storageKey]);
+	}, [defaultTheme, storageKey, forcedTheme]);
 
 	useEffect(() => {
 		if (!mounted) {
@@ -58,7 +75,7 @@ export function ThemeProvider({ children, defaultTheme = "system", storageKey = 
 	}, [theme, mounted]);
 
 	useEffect(() => {
-		if (!mounted || theme !== "system") {
+		if (!mounted || theme !== "system" || forcedTheme) {
 			return;
 		}
 
@@ -66,16 +83,19 @@ export function ThemeProvider({ children, defaultTheme = "system", storageKey = 
 		const onChange = () => applyTheme("system");
 		media.addEventListener("change", onChange);
 		return () => media.removeEventListener("change", onChange);
-	}, [theme, mounted]);
+	}, [theme, mounted, forcedTheme]);
 
 	const setTheme = (next: Theme) => {
+		if (forcedTheme) {
+			return;
+		}
 		localStorage.setItem(storageKey, next);
 		setThemeState(next);
 	};
 
 	return (
 		<ThemeProviderContext value={{ theme, setTheme }}>
-			<ScriptOnce>{getThemeScript(storageKey, defaultTheme)}</ScriptOnce>
+			<ScriptOnce>{getThemeScript(storageKey, defaultTheme, forcedTheme)}</ScriptOnce>
 			{children}
 		</ThemeProviderContext>
 	);

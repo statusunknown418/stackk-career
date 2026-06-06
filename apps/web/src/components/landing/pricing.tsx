@@ -140,7 +140,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 							? "bg-oxblood text-neutral-950 hover:bg-oxblood/90"
 							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
 					)}
-					href="/setup"
+					href="/muy-pronto"
 				>
 					{plan.cta}
 					<ArrowRightIcon weight="bold" />
@@ -208,7 +208,7 @@ function SingleSessionStrip() {
 									buttonVariants({ size: "default" }),
 									"w-full justify-center border-foreground bg-foreground text-background hover:bg-foreground/90 sm:w-auto"
 								)}
-								href="/setup"
+								href="/muy-pronto"
 							>
 								{SINGLE_SESSION.cta}
 								<ArrowRightIcon weight="bold" />

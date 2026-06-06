@@ -77,28 +77,42 @@ export function Hero() {
 
 					{/* CTAs */}
 					<motion.div
-						className="mt-10 flex flex-col flex-wrap items-start gap-x-5 gap-y-3 sm:flex-row sm:items-center"
+						className="mt-10 flex flex-col items-start gap-4"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.4 }}
 						viewport={viewport}
 						whileInView={fadeIn}
 					>
-						<a
-							className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
-							href="/setup"
-						>
-							Analiza mi CV gratis
-							<span className="inline-grid size-7 place-items-center rounded-full bg-background/15 transition-transform duration-200 group-hover:translate-x-0.5">
-								<ArrowRightIcon size={14} weight="bold" />
+						{/* Pre-launch flag — the product isn't live yet, so the CTA leads to the
+						    "Muy pronto" page instead of the real flow. */}
+						<span className="inline-flex items-center gap-2 rounded-full border border-oxblood/30 bg-oxblood/10 px-2.5 py-1 font-medium font-mono text-[0.7rem] text-oxblood uppercase tracking-widest">
+							<span aria-hidden="true" className="relative grid size-1.5 place-items-center">
+								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/40" />
+								<span className="relative size-1.5 rounded-full bg-oxblood" />
 							</span>
-						</a>
-						<a
-							className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
-							href="#planes"
-						>
-							Ver planes y precios
-							<ArrowRightIcon className="transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
-						</a>
+							Muy pronto
+						</span>
+						<div className="flex flex-col flex-wrap items-start gap-x-5 gap-y-3 sm:flex-row sm:items-center">
+							<a
+								className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
+								href="/muy-pronto"
+							>
+								Analiza mi CV gratis
+								<span className="inline-grid size-7 place-items-center rounded-full bg-background/15 transition-transform duration-200 group-hover:translate-x-0.5">
+									<ArrowRightIcon size={14} weight="bold" />
+								</span>
+							</a>
+							<a
+								className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
+								href="#planes"
+							>
+								Ver planes y precios
+								<ArrowRightIcon
+									className="transition-transform duration-200 group-hover:translate-x-0.5"
+									weight="bold"
+								/>
+							</a>
+						</div>
 					</motion.div>
 
 					{/* risk-reversal chips */}
