@@ -84,7 +84,7 @@ function RootDocument() {
 			</head>
 
 			<body>
-				<ThemeProvider forcedTheme="dark" storageKey="theme">
+				<ThemeProvider defaultTheme="dark" storageKey="theme">
 					<div className="grid min-h-svh grid-cols-1">
 						<Outlet />
 					</div>

@@ -9,10 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as PolicyRouteImport } from './routes/policy'
-import { Route as MuyProntoRouteImport } from './routes/muy-pronto'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
@@ -32,6 +32,11 @@ import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protect
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -45,11 +50,6 @@ const StatusRoute = StatusRouteImport.update({
 const PolicyRoute = PolicyRouteImport.update({
   id: '/policy',
   path: '/policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MuyProntoRoute = MuyProntoRouteImport.update({
-  id: '/muy-pronto',
-  path: '/muy-pronto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -147,10 +147,10 @@ const ProtectedDashResumesResumeIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -170,10 +170,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -194,10 +194,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
-  '/muy-pronto': typeof MuyProntoRoute
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -219,10 +219,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/dash'
     | '/setup'
     | '/api/resume-suggestions'
@@ -242,10 +242,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
-    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/setup'
     | '/api/resume-suggestions'
     | '/api/uploadthing'
@@ -265,10 +265,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_protected'
     | '/login'
-    | '/muy-pronto'
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/_protected/dash'
     | '/_protected/setup'
     | '/api/resume-suggestions'
@@ -290,10 +290,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
-  MuyProntoRoute: typeof MuyProntoRoute
   PolicyRoute: typeof PolicyRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
+  WaitlistRoute: typeof WaitlistRoute
   ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -304,6 +304,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -323,13 +330,6 @@ declare module '@tanstack/react-router' {
       path: '/policy'
       fullPath: '/policy'
       preLoaderRoute: typeof PolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/muy-pronto': {
-      id: '/muy-pronto'
-      path: '/muy-pronto'
-      fullPath: '/muy-pronto'
-      preLoaderRoute: typeof MuyProntoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -502,10 +502,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
-  MuyProntoRoute: MuyProntoRoute,
   PolicyRoute: PolicyRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
+  WaitlistRoute: WaitlistRoute,
   ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

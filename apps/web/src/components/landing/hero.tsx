@@ -1,4 +1,5 @@
 import { ArrowRightIcon, ShieldCheckIcon } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { CountUp } from "@/components/ui/count-up";
 import { LogoMarqueeRows } from "@/components/ui/logo-marquee-rows";
@@ -24,23 +25,6 @@ export function Hero() {
 				<HeroAuroraShader />
 
 				<div className="relative z-10 mx-auto w-full max-w-[1180px]">
-					{/* live badge */}
-					<motion.div
-						className="mb-10 flex items-center"
-						initial={fadeUp}
-						transition={{ duration: 0.6, ease: EASE_OUT_QUINT }}
-						viewport={viewport}
-						whileInView={fadeIn}
-					>
-						<span className="inline-flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pr-3.5 pl-2.5">
-							<span aria-hidden="true" className="relative grid size-2 place-items-center">
-								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/40" />
-								<span className="relative size-2 rounded-full bg-oxblood" />
-							</span>
-							<span className="font-medium text-foreground/75 text-xs tracking-wide">Hecho en Perú, para LATAM</span>
-						</span>
-					</motion.div>
-
 					{/* Headline, single bold weight, near-black */}
 					<motion.h1
 						className="max-w-[14ch] font-display font-semibold text-[clamp(2.5rem,8vw,6rem)] text-foreground leading-[0.95] tracking-tighter"
@@ -77,42 +61,29 @@ export function Hero() {
 
 					{/* CTAs */}
 					<motion.div
-						className="mt-10 flex flex-col items-start gap-4"
+						className="mt-10 flex flex-col flex-wrap items-start gap-x-5 gap-y-3 sm:flex-row sm:items-center"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.4 }}
 						viewport={viewport}
 						whileInView={fadeIn}
 					>
-						{/* Pre-launch flag — the product isn't live yet, so the CTA leads to the
-						    "Muy pronto" page instead of the real flow. */}
-						<span className="inline-flex items-center gap-2 rounded-full border border-oxblood/30 bg-oxblood/10 px-2.5 py-1 font-medium font-mono text-[0.7rem] text-oxblood uppercase tracking-widest">
-							<span aria-hidden="true" className="relative grid size-1.5 place-items-center">
-								<span className="absolute inline-flex size-full animate-ping rounded-full bg-oxblood/40" />
-								<span className="relative size-1.5 rounded-full bg-oxblood" />
-							</span>
-							Muy pronto
-						</span>
-						<div className="flex flex-col flex-wrap items-start gap-x-5 gap-y-3 sm:flex-row sm:items-center">
-							<a
-								className="group inline-flex h-13 items-center gap-3 rounded-full bg-oxblood py-3.5 pr-4 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
-								href="/muy-pronto"
-							>
-								Analiza mi CV gratis
-								<span className="inline-grid size-7 place-items-center rounded-full bg-background/15 transition-transform duration-200 group-hover:translate-x-0.5">
-									<ArrowRightIcon size={14} weight="bold" />
-								</span>
-							</a>
-							<a
-								className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
-								href="#planes"
-							>
-								Ver planes y precios
-								<ArrowRightIcon
-									className="transition-transform duration-200 group-hover:translate-x-0.5"
-									weight="bold"
-								/>
-							</a>
-						</div>
+						{/* Pre-launch: the product isn't live yet, so the CTA carries a "Muy pronto"
+						    tag (breathing dot keeps it alive) and leads to /waitlist. */}
+						<Link
+							className="group inline-flex h-13 items-center gap-2.5 rounded-full bg-oxblood py-3.5 pr-6 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
+							to="/waitlist"
+						>
+							Analiza mi CV gratis
+							<span aria-hidden="true" className="h-4 w-px bg-neutral-950/25" />
+							<span className="font-mono text-[0.65rem] text-neutral-950/70 uppercase tracking-widest">Muy pronto</span>
+						</Link>
+						<a
+							className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
+							href="#planes"
+						>
+							Ver planes y precios
+							<ArrowRightIcon className="transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
+						</a>
 					</motion.div>
 
 					{/* risk-reversal chips */}
