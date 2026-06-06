@@ -70,12 +70,14 @@ export function Hero() {
 						{/* Pre-launch: the product isn't live yet, so the CTA carries a "Muy pronto"
 						    tag (breathing dot keeps it alive) and leads to /waitlist. */}
 						<Link
-							className="group inline-flex h-13 items-center gap-2.5 rounded-full bg-oxblood py-3.5 pr-6 pl-6 font-semibold text-base text-neutral-950 tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
+							className="group inline-flex h-13 items-center gap-2.5 rounded-full bg-oxblood py-3.5 pr-6 pl-6 font-semibold text-base text-neutral-950 leading-none tracking-tight shadow-cta transition-all duration-200 hover:-translate-y-px hover:shadow-cta-hover"
 							to="/waitlist"
 						>
-							Analiza mi CV gratis
+							<span className="leading-none">Analiza mi CV gratis</span>
 							<span aria-hidden="true" className="h-4 w-px bg-neutral-950/25" />
-							<span className="font-mono text-[0.65rem] text-neutral-950/70 uppercase tracking-widest">Muy pronto</span>
+							<span className="font-mono text-[0.65rem] text-neutral-950/70 uppercase leading-none tracking-wide">
+								Muy pronto
+							</span>
 						</Link>
 						<a
 							className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
@@ -88,7 +90,7 @@ export function Hero() {
 
 					{/* risk-reversal chips */}
 					<motion.ul
-						className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-foreground/60 text-xs uppercase tracking-widest"
+						className="mt-9 flex flex-col items-start gap-2 text-foreground/60 text-xs uppercase sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2"
 						initial={fadeUp}
 						transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.5 }}
 						viewport={viewport}
@@ -98,9 +100,9 @@ export function Hero() {
 							<ShieldCheckIcon className="text-oxblood" size={13} weight="bold" />
 							<span>Garantía 90 días</span>
 						</li>
-						<li aria-hidden="true" className="size-1 rounded-full bg-foreground/25" />
+						<li aria-hidden="true" className="hidden size-1 rounded-full bg-foreground/25 sm:block" />
 						<li>Score gratis, sin tarjeta</li>
-						<li aria-hidden="true" className="size-1 rounded-full bg-foreground/25" />
+						<li aria-hidden="true" className="hidden size-1 rounded-full bg-foreground/25 sm:block" />
 						<li>Cancelas cuando quieras</li>
 					</motion.ul>
 
