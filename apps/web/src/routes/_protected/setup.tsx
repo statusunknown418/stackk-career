@@ -55,12 +55,13 @@ function RouteComponent() {
 		})
 	);
 
-	const showChat = Boolean(search.step && search.generationId);
-	const showAnalysis = Boolean(search.storeId);
+	const { generationId, storeId } = search;
+	const showChat = Boolean(search.step && generationId);
+	const showAnalysis = Boolean(storeId);
 
 	// If we have uploaded a resume file, switch to the split-screen analysis view
-	if (showChat && showAnalysis) {
-		return <SetupChatView fileId={search.storeId} generationId={search.generationId} />;
+	if (generationId && showChat && showAnalysis) {
+		return <SetupChatView fileId={storeId} generationId={generationId} />;
 	}
 
 	return (
@@ -86,7 +87,7 @@ function RouteComponent() {
 			<header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
 				<div className="flex items-center gap-2">
 					<Matrix cols={6} frames={wave} loop rows={6} size={3} />
-					<span className="font-bold text-foreground text-sm uppercase tracking-tight">Stackk Career</span>
+					<span className="font-semibold text-foreground text-sm uppercase tracking-tight">Assendia</span>
 				</div>
 				<div className="flex items-center gap-3">
 					{showChat && (
@@ -128,11 +129,11 @@ function RouteComponent() {
 									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
 									<span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
 								</span>
-								v.0.1 Stackk Career
+								v.0.1 Assendia
 							</div>
 
 							<h1 className="mb-6 bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text font-extrabold text-4xl text-transparent tracking-tight sm:text-5xl md:text-6xl md:leading-tight">
-								Diseña tu futuro profesional con Stackk
+								Diseña tu futuro profesional con Assendia
 							</h1>
 
 							<div className="mb-10 space-y-4 font-medium text-base text-muted-foreground leading-relaxed sm:text-lg">
@@ -141,15 +142,16 @@ function RouteComponent() {
 									A través de este breve cuestionario interactivo, personalizaremos tu perfil, analizaremos tus
 									preferencias y optimizaremos tu búsqueda de trabajo.
 								</p>
-								<p className="mt-6 text-foreground/60 text-sm italic">— El equipo de Stackk Career</p>
+								<p className="mt-6 text-foreground/60 text-sm italic">— El equipo de Assendia</p>
 							</div>
 
 							<div className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto">
 								<Button
-									className="w-full rounded-2xl px-8 py-6 font-bold text-base transition-all duration-300 sm:w-auto"
+									className="w-full sm:w-auto"
 									disabled={createGeneration.isPending}
 									loading={createGeneration.isPending}
 									onClick={() => createGeneration.mutate({ title: "Onboarding", summary: "Conociendo al usuario" })}
+									size="xl"
 								>
 									Comenzar cuestionario <CaretCircleRightIcon className="size-5" />
 								</Button>
@@ -161,7 +163,7 @@ function RouteComponent() {
 
 			{/* Footer */}
 			<footer className="relative z-10 mx-auto w-full max-w-5xl px-6 py-6 text-center text-muted-foreground/60 text-xs">
-				© {new Date().getFullYear()} Stackk Career. Todos los derechos reservados.
+				© {new Date().getFullYear()} Assendia. Todos los derechos reservados.
 			</footer>
 		</div>
 	);
