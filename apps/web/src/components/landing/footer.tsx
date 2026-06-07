@@ -1,19 +1,12 @@
 "use client";
 
-import {
-	ArrowUpRightIcon,
-	InstagramLogoIcon,
-	LinkedinLogoIcon,
-	ShieldCheckIcon,
-	XLogoIcon,
-} from "@phosphor-icons/react";
+import { ArrowUpRightIcon, InstagramLogoIcon, LinkedinLogoIcon, ShieldCheckIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { FOOTER_COLUMNS } from "./data";
 
-const SOCIAL_LINKS = [
+export const SOCIAL_LINKS = [
 	{ href: "https://linkedin.com/company/assendia", Icon: LinkedinLogoIcon, label: "LinkedIn" },
-	{ href: "https://instagram.com/assendia", Icon: InstagramLogoIcon, label: "Instagram" },
-	{ href: "https://x.com/assendia", Icon: XLogoIcon, label: "X" },
+	{ href: "https://www.instagram.com/statusunknown418/", Icon: InstagramLogoIcon, label: "Instagram" },
 ];
 
 const LEGAL_LINKS = [

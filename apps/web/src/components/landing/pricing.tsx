@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRightIcon, CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef } from "react";
 import { buttonVariants } from "@/components/ui/button";
@@ -132,7 +133,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			</div>
 
 			<Magnetic block className="mt-8" strength={0.22}>
-				<a
+				<Link
 					className={cn(
 						buttonVariants({ size: "lg" }),
 						"w-full",
@@ -140,11 +141,11 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 							? "bg-oxblood text-neutral-950 hover:bg-oxblood/90"
 							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
 					)}
-					href="/setup"
+					to="/waitlist"
 				>
 					{plan.cta}
 					<ArrowRightIcon weight="bold" />
-				</a>
+				</Link>
 			</Magnetic>
 		</motion.div>
 	);
@@ -203,16 +204,16 @@ function SingleSessionStrip() {
 							</p>
 						</div>
 						<Magnetic className="w-full shrink-0 sm:w-auto" strength={0.25}>
-							<a
+							<Link
 								className={cn(
 									buttonVariants({ size: "default" }),
 									"w-full justify-center border-foreground bg-foreground text-background hover:bg-foreground/90 sm:w-auto"
 								)}
-								href="/setup"
+								to="/waitlist"
 							>
 								{SINGLE_SESSION.cta}
 								<ArrowRightIcon weight="bold" />
-							</a>
+							</Link>
 						</Magnetic>
 					</div>
 				</div>

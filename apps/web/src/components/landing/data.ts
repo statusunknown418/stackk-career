@@ -481,8 +481,8 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
 	{
 		heading: "Cuenta",
 		links: [
-			{ label: "Iniciar sesión", href: "/login" },
-			{ label: "Crear cuenta", href: "/register" },
+			{ label: "Iniciar sesión", href: "/waitlist" },
+			{ label: "Crear cuenta", href: "/waitlist" },
 			{ label: "Score gratis", href: "#planes" },
 			{ label: "Sesión única", href: "#sesion-unica" },
 		],
