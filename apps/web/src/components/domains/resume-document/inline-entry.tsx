@@ -15,6 +15,7 @@ import { getBlockKey } from "@/components/domains/resume-document/block-key-regi
 import { useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
 import { Route } from "@/routes/_protected/dash/resumes/$resumeId";
 import { orpc } from "@/utils/orpc";
@@ -22,6 +23,12 @@ import { InlineBullet } from "./inline-bullet";
 import { InlineDateTrigger } from "./inline-date-trigger";
 import { InlineParagraph } from "./inline-paragraph";
 import { InlineTextEditor } from "./inline-text-editor";
+
+const workSettingOptions = [
+	{ value: "onsite", label: "Presencial" },
+	{ value: "hybrid", label: "Híbrido" },
+	{ value: "remote", label: "Remoto" },
+] as const;
 
 export const InlineEntry = withForm({
 	defaultValues: resumeFormDefaults,
@@ -120,36 +127,62 @@ export const InlineEntry = withForm({
 					</div>
 
 					<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
-						<form.AppField name={`blocks[${blockIndex}].content.location` as const}>
-							{(field) => (
-								<InlineTextEditor
-									onBlur={() => field.handleBlur()}
-									onChange={(value) => field.handleChange(value)}
-									placeholder="Ubicación"
-									value={(field.state.value ?? "") as string}
-									variant="plain"
-								/>
-							)}
-						</form.AppField>
+						<form.Subscribe selector={(state) => state.values.blocks[blockIndex]?.content as EntryBlockNode["content"]}>
+							{(content) => {
+								const currentWorkSetting = content?.workSetting ?? (content?.isRemote ? "remote" : "onsite");
+								const showLocation = !isExperience || currentWorkSetting !== "remote";
 
-						{isExperience && (
-							<form.AppField name={`blocks[${blockIndex}].content.isRemote` as const}>
-								{(field) => (
-									<label
-										className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-1 py-0.5 hover:bg-accent/40"
-										htmlFor={`blocks[${blockIndex}].content.isRemote`}
-									>
-										<Checkbox
-											checked={Boolean(field.state.value)}
-											id={`blocks[${blockIndex}].content.isRemote`}
-											onBlur={field.handleBlur}
-											onCheckedChange={(next) => field.handleChange(next === true)}
-										/>
-										<span>Remoto</span>
-									</label>
-								)}
-							</form.AppField>
-						)}
+								return (
+									<>
+										{showLocation && (
+											<form.AppField name={`blocks[${blockIndex}].content.location` as const}>
+												{(field) => (
+													<InlineTextEditor
+														onBlur={() => field.handleBlur()}
+														onChange={(value) => field.handleChange(value)}
+														placeholder="Ubicación"
+														value={(field.state.value ?? "") as string}
+														variant="plain"
+													/>
+												)}
+											</form.AppField>
+										)}
+
+										{isExperience && (
+											<form.AppField name={`blocks[${blockIndex}].content.workSetting` as const}>
+												{(field) => (
+													<Select
+														items={workSettingOptions}
+														onValueChange={(next) => {
+															field.handleChange(next as "remote" | "hybrid" | "onsite");
+															form.setFieldValue(`blocks[${blockIndex}].content.isRemote` as const, next === "remote");
+															if (next === "remote") {
+																form.setFieldValue(`blocks[${blockIndex}].content.location` as const, "");
+															}
+														}}
+														value={(field.state.value as string) ?? (content?.isRemote ? "remote" : "onsite")}
+													>
+														<SelectTrigger
+															className="h-6 w-24 shrink-0 rounded border border-border/60 bg-muted/20 px-1.5 py-0.5 text-[11px] hover:border-border"
+															size="sm"
+														>
+															<SelectValue placeholder="Modalidad" />
+														</SelectTrigger>
+														<SelectPopup>
+															{workSettingOptions.map((option) => (
+																<SelectItem key={option.value} value={option.value}>
+																	{option.label}
+																</SelectItem>
+															))}
+														</SelectPopup>
+													</Select>
+												)}
+											</form.AppField>
+										)}
+									</>
+								);
+							}}
+						</form.Subscribe>
 
 						<span aria-hidden="true">·</span>
 

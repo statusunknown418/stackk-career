@@ -9,6 +9,9 @@ export const onboardingProfileUpsertInputSchema = z
 		location: true,
 		targetRole: true,
 		urgency: true,
+		languages: true,
+		stuckReason: true,
+		referrer: true,
 	})
 	.partial();
 
