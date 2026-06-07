@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as PolicyRouteImport } from './routes/policy'
@@ -31,6 +32,11 @@ import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protect
 import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/policy': typeof PolicyRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
   '/_protected/setup': typeof ProtectedSetupRoute
   '/api/resume-suggestions': typeof ApiResumeSuggestionsRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/dash'
     | '/setup'
     | '/api/resume-suggestions'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/setup'
     | '/api/resume-suggestions'
     | '/api/uploadthing'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/status'
     | '/terms'
+    | '/waitlist'
     | '/_protected/dash'
     | '/_protected/setup'
     | '/api/resume-suggestions'
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   PolicyRoute: typeof PolicyRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
+  WaitlistRoute: typeof WaitlistRoute
   ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -291,6 +304,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -485,6 +505,7 @@ const rootRouteChildren: RootRouteChildren = {
   PolicyRoute: PolicyRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
+  WaitlistRoute: WaitlistRoute,
   ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
