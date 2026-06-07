@@ -1,30 +1,13 @@
 "use client";
 
 import { CheckCircleIcon } from "@phosphor-icons/react";
-import { joinWaitlistInputSchema } from "@stackk-career/schemas/api/waitlist";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { z } from "zod";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { orpc } from "@/utils/orpc";
-
-const emailFieldValidator = ({ value }: { value: string }): string | undefined => {
-	const trimmed = value.trim();
-	if (!trimmed) {
-		return; // opcional
-	}
-	return z.email().safeParse(trimmed).success ? undefined : "Correo inválido";
-};
-
-function FieldErrorText({ errors }: { errors: unknown[] }) {
-	const message = errors
-		.map((error) => (typeof error === "string" ? error : (error as { message?: string } | null)?.message))
-		.find(Boolean);
-	return message ? <p className="px-1 text-destructive text-xs">{message}</p> : null;
-}
 
 /** Captura de waitlist en /waitlist: nombre + teléfono (WhatsApp) + email para avisar al lanzar. */
 export function WaitlistForm() {
@@ -57,63 +40,56 @@ export function WaitlistForm() {
 
 	return (
 		<form
-			className="mt-10 flex w-full max-w-sm flex-col gap-3 text-left"
+			className="mt-10 flex w-full max-w-sm flex-col gap-2.5 text-left"
 			onSubmit={(event) => {
 				event.preventDefault();
 				form.handleSubmit();
 			}}
 		>
-			<form.Field name="name" validators={{ onSubmit: joinWaitlistInputSchema.shape.name }}>
+			<form.Field name="name">
 				{(field) => (
-					<div className="flex flex-col gap-1">
-						<Input
-							aria-label="Tu nombre"
-							autoComplete="name"
-							disabled={join.isPending}
-							onBlur={field.handleBlur}
-							onChange={(event) => field.handleChange(event.target.value)}
-							placeholder="Tu nombre"
-							value={field.state.value}
-						/>
-						<FieldErrorText errors={field.state.meta.errors} />
-					</div>
+					<Input
+						aria-label="Tu nombre"
+						autoComplete="name"
+						disabled={join.isPending}
+						onBlur={field.handleBlur}
+						onChange={(event) => field.handleChange(event.target.value)}
+						placeholder="Tu nombre"
+						required
+						value={field.state.value}
+					/>
 				)}
 			</form.Field>
 
-			<form.Field name="phone" validators={{ onSubmit: joinWaitlistInputSchema.shape.phone }}>
+			<form.Field name="phone">
 				{(field) => (
-					<div className="flex flex-col gap-1">
-						<Input
-							aria-label="Tu celular (WhatsApp)"
-							autoComplete="tel"
-							disabled={join.isPending}
-							inputMode="tel"
-							onBlur={field.handleBlur}
-							onChange={(event) => field.handleChange(event.target.value)}
-							placeholder="Tu celular (WhatsApp)"
-							type="tel"
-							value={field.state.value}
-						/>
-						<FieldErrorText errors={field.state.meta.errors} />
-					</div>
+					<Input
+						aria-label="Tu celular (WhatsApp)"
+						autoComplete="tel"
+						disabled={join.isPending}
+						inputMode="tel"
+						onBlur={field.handleBlur}
+						onChange={(event) => field.handleChange(event.target.value)}
+						placeholder="Tu celular (WhatsApp)"
+						required
+						type="tel"
+						value={field.state.value}
+					/>
 				)}
 			</form.Field>
 
-			<form.Field name="email" validators={{ onSubmit: emailFieldValidator }}>
+			<form.Field name="email">
 				{(field) => (
-					<div className="flex flex-col gap-1">
-						<Input
-							aria-label="Tu correo (opcional)"
-							autoComplete="email"
-							disabled={join.isPending}
-							onBlur={field.handleBlur}
-							onChange={(event) => field.handleChange(event.target.value)}
-							placeholder="Tu correo (opcional)"
-							type="email"
-							value={field.state.value}
-						/>
-						<FieldErrorText errors={field.state.meta.errors} />
-					</div>
+					<Input
+						aria-label="Tu correo (opcional)"
+						autoComplete="email"
+						disabled={join.isPending}
+						onBlur={field.handleBlur}
+						onChange={(event) => field.handleChange(event.target.value)}
+						placeholder="Tu correo (opcional)"
+						type="email"
+						value={field.state.value}
+					/>
 				)}
 			</form.Field>
 
