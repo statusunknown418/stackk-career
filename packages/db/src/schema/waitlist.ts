@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, sqliteTable } from "drizzle-orm/sqlite-core";
+import { sqliteTable, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 /**
  * Pre-launch waitlist: visitors leave their phone (WhatsApp) so we can reach out
@@ -22,5 +22,8 @@ export const waitlist = sqliteTable(
 			.$defaultFn(() => new Date())
 			.notNull(),
 	}),
-	(table) => [index("waitlist_createdAt").on(table.createdAt)]
+	// Unique on email → permite el upsert (onConflictDoUpdate) cuando alguien reenvía
+	// el mismo correo. email es nullable: en SQLite los NULL son distintos, así que los
+	// registros sin correo siempre insertan sin chocar.
+	(table) => [uniqueIndex("waitlist_email").on(table.email)]
 );

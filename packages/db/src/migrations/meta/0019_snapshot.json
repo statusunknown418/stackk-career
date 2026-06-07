@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "06f3f90b-0f16-4ee2-b4fb-bdf485f70da0",
+  "id": "292e9e49-75e8-43f0-a1c2-a76bd27acc52",
   "prevId": "dee2a58c-c5d9-4130-b098-e9c597bba183",
   "tables": {
     "account": {
@@ -1574,10 +1574,10 @@
         }
       },
       "indexes": {
-        "waitlist_createdAt": {
-          "name": "waitlist_createdAt",
-          "columns": ["createdAt"],
-          "isUnique": false
+        "waitlist_email": {
+          "name": "waitlist_email",
+          "columns": ["email"],
+          "isUnique": true
         }
       },
       "foreignKeys": {},

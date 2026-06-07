@@ -7,4 +7,4 @@ CREATE TABLE `waitlist` (
 	`createdAt` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `waitlist_createdAt` ON `waitlist` (`createdAt`);
+CREATE UNIQUE INDEX `waitlist_email` ON `waitlist` (`email`);

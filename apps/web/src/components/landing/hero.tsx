@@ -74,10 +74,8 @@ export function Hero() {
 							to="/waitlist"
 						>
 							<span className="leading-none">Analiza mi CV gratis</span>
-							<span aria-hidden="true" className="h-4 w-px bg-neutral-950/25" />
-							<span className="font-mono text-[0.65rem] text-neutral-950/70 uppercase leading-none tracking-wide">
-								Muy pronto
-							</span>
+							<span aria-hidden="true" className="h-4 w-px bg-current opacity-25" />
+							<span className="font-mono text-xs uppercase leading-none tracking-wide opacity-70">Muy pronto</span>
 						</Link>
 						<a
 							className="group inline-flex h-12 items-center gap-2 font-medium text-foreground/70 transition hover:text-foreground"
