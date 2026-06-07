@@ -2,12 +2,17 @@
 
 import {
 	ArrowsClockwiseIcon,
+	ChartBarIcon,
 	CopyIcon,
 	DownloadSimpleIcon,
 	HandWavingIcon,
+	HeartIcon,
+	type Icon,
 	ParagraphIcon,
 	PenNibIcon,
 	SealIcon,
+	SuitcaseSimpleIcon,
+	TranslateIcon,
 	TriangleDashedIcon,
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
@@ -262,6 +267,7 @@ function EditableLetter({
 interface RegeneratePreset {
 	description: string;
 	extraPrompt: string | undefined;
+	icon: Icon;
 	label: string;
 	/** Si está seteado, también persiste el cambio de idioma en la generation. */
 	language?: CoverLetterLanguage;
@@ -273,17 +279,20 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	{
 		description: "Más respetuosa, sin informalidades.",
 		extraPrompt: "Haz la carta más formal y respetuosa. Quita cualquier informalidad o coloquialismo.",
+		icon: SuitcaseSimpleIcon,
 		label: "Más formal",
 	},
 	{
 		description: "Métricas y resultados específicos del CV.",
 		extraPrompt:
 			"Haz la carta más concreta. Cita métricas, stacks o resultados específicos del CV en cada párrafo del cuerpo.",
+		icon: ChartBarIcon,
 		label: "Más concreta",
 	},
 	{
 		description: "Tono más cercano sin perder profesionalismo.",
 		extraPrompt: "Haz la carta más cálida y personal sin perder profesionalismo. Suaviza el cuerpo y el cierre.",
+		icon: HeartIcon,
 		label: "Más cálida",
 	},
 	// Switch idioma. Solo muestra el del idioma opuesto al actual; el preset persiste
@@ -293,6 +302,7 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	{
 		description: "Cambia el idioma del thread a inglés.",
 		extraPrompt: "Reescribe la carta completa en inglés (American English) manteniendo el mismo contenido.",
+		icon: TranslateIcon,
 		label: "En inglés",
 		language: "en",
 		onlyIfCurrentLanguage: "es",
@@ -300,6 +310,7 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	{
 		description: "Cambia el idioma del thread a español.",
 		extraPrompt: "Reescribe la carta completa en español (peruano neutro profesional) manteniendo el mismo contenido.",
+		icon: TranslateIcon,
 		label: "En español",
 		language: "es",
 		onlyIfCurrentLanguage: "en",
@@ -405,18 +416,24 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 				<PopoverPopup align="end" className="w-72">
 					<div className="flex flex-col gap-1">
 						<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
-						{props.visiblePresets.map((preset) => (
-							<button
-								className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
-								disabled={!props.canRegenerate}
-								key={preset.label}
-								onClick={() => props.handleRegenerate(preset)}
-								type="button"
-							>
-								<span className="font-medium">{preset.label}</span>
-								<span className="text-muted-foreground text-xs">{preset.description}</span>
-							</button>
-						))}
+						{props.visiblePresets.map((preset) => {
+							const PresetIcon = preset.icon;
+							return (
+								<button
+									className="flex items-start gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
+									disabled={!props.canRegenerate}
+									key={preset.label}
+									onClick={() => props.handleRegenerate(preset)}
+									type="button"
+								>
+									<PresetIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" weight="bold" />
+									<span className="flex flex-col gap-0.5">
+										<span className="font-medium">{preset.label}</span>
+										<span className="text-muted-foreground text-xs">{preset.description}</span>
+									</span>
+								</button>
+							);
+						})}
 					</div>
 				</PopoverPopup>
 			</Popover>
@@ -607,11 +624,6 @@ export function LettersArtifactPanel({
 				<div className="flex flex-col gap-1.5">
 					<FrameDescription>
 						{error && <Badge variant="secondary">Error</Badge>}
-						{!error && isPending && (
-							<Badge variant="secondary">
-								<Shimmer>CASEY redactando…</Shimmer>
-							</Badge>
-						)}
 						{!(error || isPending) && hasContent && (
 							<Badge variant="secondary">
 								Versión {activeVersion}/{MAX_COVER_LETTER_VERSIONS}

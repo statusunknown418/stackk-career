@@ -1,6 +1,14 @@
 "use client";
 
-import { IdentificationCardIcon, PaperPlaneRightIcon, ReadCvLogoIcon, WrenchIcon } from "@phosphor-icons/react";
+import {
+	CursorClickIcon,
+	EyeIcon,
+	FileTextIcon,
+	IdentificationCardIcon,
+	PaperPlaneRightIcon,
+	ReadCvLogoIcon,
+	WrenchIcon,
+} from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
 import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { ComponentType } from "react";
@@ -162,6 +170,9 @@ export function LettersChatPanel({
 
 							const versionNumber = validVersions.findIndex((item) => item.id === m.id) + 1;
 							const isActive = selectedMessageId === m.id || (selectedMessageId === null && m.id === latestValidId);
+							const { Icon: StatusIcon, label: statusLabel } = isActive
+								? { Icon: EyeIcon, label: copy.viewing }
+								: { Icon: CursorClickIcon, label: copy.clickToLoad };
 
 							return (
 								<Message from="assistant" key={m.id}>
@@ -177,10 +188,12 @@ export function LettersChatPanel({
 											type="button"
 										>
 											<span className="flex items-center gap-2 font-semibold text-sm">
-												📄 {copy.version} {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
+												<FileTextIcon className="size-4 shrink-0" weight="duotone" />
+												{copy.version} {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
 											</span>
-											<span className="font-normal text-muted-foreground text-xs">
-												{isActive ? copy.viewing : copy.clickToLoad}
+											<span className="flex items-center gap-1.5 font-normal text-muted-foreground text-xs">
+												<StatusIcon className="size-3.5 shrink-0" weight="bold" />
+												{statusLabel}
 											</span>
 										</button>
 									</MessageContent>

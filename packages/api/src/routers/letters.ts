@@ -11,7 +11,7 @@ import {
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 
@@ -25,15 +25,54 @@ export const lettersRouter = {
 				id: generations.id,
 				title: generations.title,
 				resumeId: generations.resumeId,
+				// CV base de la carta — sirve de diferenciador en el listado (varias cartas
+				// pueden compartir puesto pero usar CVs distintos). leftJoin: el CV puede no existir.
+				resumeTitle: resumes.title,
+				language: generations.language,
 				createdAt: generations.createdAt,
 				updatedAt: generations.updatedAt,
 			})
 			.from(generations)
+			.leftJoin(resumes, eq(resumes.id, generations.resumeId))
 			.where(and(eq(generations.owner, userId), eq(generations.type, "cover-letter")))
 			.orderBy(desc(generations.updatedAt))
 			.$withCache();
 
-		return rows;
+		if (rows.length === 0) {
+			return rows.map((row) => ({ ...row, preview: null as string | null }));
+		}
+
+		// Preview = body de la última versión de cada carta (messages.text = body del artifact).
+		// Una sola query con `inArray` evita N+1; en JS nos quedamos con el de mayor `order` por carta.
+		const generationIds = rows.map((row) => row.id);
+		const artifacts = await context.db
+			.select({ generationId: messages.generationId, text: messages.text, order: messages.order })
+			.from(messages)
+			.where(
+				and(
+					inArray(messages.generationId, generationIds),
+					eq(messages.objectType, COVER_LETTER_OBJECT_TYPE),
+					eq(messages.isAssistant, true),
+					isNotNull(messages.text),
+					isNull(messages.error)
+				)
+			)
+			.orderBy(asc(messages.generationId), desc(messages.order));
+
+		const PREVIEW_MAX_CHARS = 180;
+		const previewByGeneration = new Map<string, string>();
+		for (const artifact of artifacts) {
+			if (!artifact.text || previewByGeneration.has(artifact.generationId)) {
+				continue;
+			}
+			const clean = artifact.text.replace(/\s+/g, " ").trim();
+			previewByGeneration.set(
+				artifact.generationId,
+				clean.length > PREVIEW_MAX_CHARS ? `${clean.slice(0, PREVIEW_MAX_CHARS).trimEnd()}…` : clean
+			);
+		}
+
+		return rows.map((row) => ({ ...row, preview: previewByGeneration.get(row.id) ?? null }));
 	}),
 
 	createGeneration: protectedProcedure
