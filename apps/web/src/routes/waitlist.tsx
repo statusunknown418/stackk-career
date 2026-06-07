@@ -2,6 +2,7 @@ import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { SOCIAL_LINKS } from "@/components/landing/footer";
+import { WaitlistForm } from "@/components/landing/waitlist-form";
 
 const TITLE = "Muy pronto · ASSENDIA";
 const DESCRIPTION =
@@ -64,9 +65,7 @@ function ComingSoonPage() {
 				te acompañará hasta tu próxima entrevista.
 			</p>
 
-			<p className="mt-12 font-medium text-foreground/80 text-sm">
-				Síguenos y sé el primero en enterarte del lanzamiento.
-			</p>
+			<p className="mt-10 font-medium text-foreground text-sm">Síguenos en nuestras redes:</p>
 
 			<div className="mt-4 flex flex-wrap items-center justify-center gap-3">
 				{SOCIAL_LINKS.map(({ href, Icon, label }) => (
@@ -82,6 +81,10 @@ function ComingSoonPage() {
 					</a>
 				))}
 			</div>
+
+			<p className="mt-12 font-medium text-foreground text-sm">Déjanos tus datos y te escribimos apenas lancemos.</p>
+
+			<WaitlistForm />
 
 			<Link
 				className="group mt-14 inline-flex items-center gap-2 font-medium text-foreground/55 text-sm transition-colors hover:text-foreground"
