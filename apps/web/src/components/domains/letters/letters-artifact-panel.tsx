@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CoverLetterSection, LetterSectionShell, SECTION_SKELETON_LINES } from "./cover-letter-section";
+import { CoverLetterSection, type LetterSectionDef, LetterSectionShell } from "./cover-letter-section";
 import {
 	allSectionsFilled,
 	bodyToHtml,
@@ -69,7 +69,7 @@ const SECTION_DEFS = [
 	{ icon: ParagraphIcon, key: "body", label: "Cuerpo", primary: true },
 	{ icon: PenNibIcon, key: "closing", label: "Cierre", primary: false },
 	{ icon: SealIcon, key: "signature", label: "Firma", primary: false },
-] as const;
+] as const satisfies readonly LetterSectionDef[];
 
 /**
  * Carta editable EN SITIO: cada sección es un editor TipTap (prose) sobre el que el usuario
@@ -329,13 +329,10 @@ function ReadOnlyLetter({
 					const text = typeof value === "string" ? value : undefined;
 					return (
 						<CoverLetterSection
-							icon={def.icon}
+							def={def}
 							isStreaming={isStreaming && i === activeIndex}
 							key={def.key}
-							label={def.label}
-							primary={def.primary}
 							showSkeleton={showLoaders && !text}
-							skeletonLines={SECTION_SKELETON_LINES[def.key]}
 							text={text}
 						/>
 					);

@@ -25,6 +25,18 @@ export const SECTION_SKELETON_LINES: Record<"greeting" | "body" | "closing" | "s
 	signature: ["w-1/3"],
 };
 
+/**
+ * Identidad estática de una sección de la carta (icono, key, etiqueta, si es la sección primaria).
+ * Se pasa como un solo objeto `def` para no inflar la firma de `CoverLetterSection` con props que
+ * siempre viajan juntos. `key` indexa los anchos del skeleton en SECTION_SKELETON_LINES.
+ */
+export interface LetterSectionDef {
+	icon: Icon;
+	key: keyof typeof SECTION_SKELETON_LINES;
+	label: string;
+	primary: boolean;
+}
+
 interface LetterSectionShellProps {
 	children: ReactNode;
 	icon: Icon;
@@ -74,12 +86,10 @@ export function LetterSectionShell({
 }
 
 interface CoverLetterSectionProps {
-	icon: Icon;
+	/** Identidad estática de la sección (icono, key, etiqueta, primaria). */
+	def: LetterSectionDef;
 	isStreaming: boolean;
-	label: string;
-	primary: boolean;
 	showSkeleton: boolean;
-	skeletonLines: readonly string[];
 	/** Texto plano de la sección (lo que emite CASEY al streamear). Ausente = aún no llega. */
 	text?: string | undefined;
 }
@@ -89,16 +99,9 @@ interface CoverLetterSectionProps {
  * / streaming. El contenido cruza skeleton ↔ texto con un fade (no aparece de golpe); el `key`
  * estable evita re-animar en cada chunk del stream, así el llenado se siente fluido.
  */
-export function CoverLetterSection({
-	icon,
-	isStreaming,
-	label,
-	primary,
-	showSkeleton,
-	skeletonLines,
-	text,
-}: CoverLetterSectionProps) {
+export function CoverLetterSection({ def, isStreaming, showSkeleton, text }: CoverLetterSectionProps) {
 	const reduceMotion = useReducedMotion();
+	const skeletonLines = SECTION_SKELETON_LINES[def.key];
 
 	let panelContent: ReactNode = null;
 	if (text) {
@@ -132,7 +135,7 @@ export function CoverLetterSection({
 	}
 
 	return (
-		<LetterSectionShell icon={icon} isStreaming={isStreaming} label={label} primary={primary}>
+		<LetterSectionShell icon={def.icon} isStreaming={isStreaming} label={def.label} primary={def.primary}>
 			<AnimatePresence initial={false} mode="wait">
 				{panelContent}
 			</AnimatePresence>
