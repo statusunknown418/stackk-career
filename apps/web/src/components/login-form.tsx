@@ -106,7 +106,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 				</FramePanel>
 			</Frame>
 			<CardDescription className="px-6 text-center">
-				Al continuar, aceptás nuestros <Link to="/terms">Términos de Servicio</Link> y nuestra{" "}
+				Al continuar, aceptas nuestros <Link to="/terms">Términos de Servicio</Link> y nuestra{" "}
 				<Link to="/policy">Política de Privacidad</Link>.
 			</CardDescription>
 		</div>
