@@ -215,7 +215,12 @@ async function loadResumeAsPlaintext(
 	}
 
 	const rows = await db
-		.select()
+		.select({
+			id: resumeBlocks.id,
+			parentBlockId: resumeBlocks.parentBlockId,
+			blockType: resumeBlocks.blockType,
+			content: resumeBlocks.content,
+		})
 		.from(resumeBlocks)
 		.where(and(eq(resumeBlocks.resumeId, resumeId), isNull(resumeBlocks.deletedAt)))
 		.orderBy(asc(resumeBlocks.position));
