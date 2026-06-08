@@ -54,7 +54,12 @@ export const generations = sqliteTable(
 			.$onUpdateFn(() => new Date())
 			.notNull(),
 	}),
-	(t) => [index("generation_owner_id_idx").on(t.owner)]
+	(t) => [
+		// owner+type compuesto: las queries de letters siempre filtran por ambos; por
+		// leftmost-prefix cubre también las que filtran solo por owner (drizzle/SQLite).
+		index("generation_owner_type_idx").on(t.owner, t.type),
+		index("generation_resume_id_idx").on(t.resumeId),
+	]
 );
 
 export const generationsRelations = relations(generations, ({ one, many }) => ({
