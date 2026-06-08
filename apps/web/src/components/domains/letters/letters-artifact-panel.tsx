@@ -198,33 +198,80 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 ] as const;
 
 interface ArtifactToolbarProps {
-	canExport: boolean;
-	canRegenerate: boolean;
+	artifact: DeepPartial<CoverLetter> | undefined;
+	currentLanguage: CoverLetterLanguage;
 	generationCount: number;
-	handleCopy: () => void | Promise<void>;
-	handleDownload: () => void;
-	handleRegenerate: (preset: RegeneratePreset) => void | Promise<void>;
 	hasContent: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
 	maxVersions: number;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
-	popoverOpen: boolean;
-	setPopoverOpen: (open: boolean) => void;
-	visiblePresets: readonly RegeneratePreset[];
 }
 
 /** Botonera del header: Copiar / Descargar PDF / Regenerar. (La edición es inline, no hay botón.) */
-function ArtifactToolbar(props: ArtifactToolbarProps) {
-	if (!props.hasContent) {
+function ArtifactToolbar({
+	artifact,
+	currentLanguage,
+	generationCount,
+	hasContent,
+	isPending,
+	isStreaming,
+	maxVersions,
+	onTriggerAsync,
+}: ArtifactToolbarProps) {
+	const [popoverOpen, setPopoverOpen] = useState(false);
+
+	const formattedText = formatCoverLetterAsText(artifact);
+	const canExport = Boolean(formattedText) && !isPending;
+	const canRegenerate = hasContent && !isPending;
+
+	const visiblePresets = REGENERATE_PRESETS.filter(
+		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
+	);
+
+	const handleRegenerate = async (preset: RegeneratePreset) => {
+		setPopoverOpen(false);
+		try {
+			await onTriggerAsync({ extraPrompt: preset.extraPrompt, language: preset.language });
+		} catch {
+			// Toast emitido por la route.
+		}
+	};
+
+	const handleCopy = async () => {
+		if (!formattedText) {
+			return;
+		}
+		try {
+			await navigator.clipboard.writeText(formattedText);
+			toast.success("Carta copiada al portapapeles");
+		} catch {
+			toast.error("No pudimos copiar al portapapeles");
+		}
+	};
+
+	const handleDownload = () => {
+		const letter = toCompleteCoverLetter(artifact);
+		if (!letter) {
+			return;
+		}
+		try {
+			downloadCoverLetterPdf(letter);
+			toast.success("Carta descargada como PDF");
+		} catch {
+			toast.error("No se pudo generar el PDF");
+		}
+	};
+
+	if (!hasContent) {
 		return null;
 	}
 	return (
 		<div className="flex items-center gap-1.5">
 			<Button
 				aria-label="Copiar al portapapeles"
-				disabled={!props.canExport}
-				onClick={props.handleCopy}
+				disabled={!canExport}
+				onClick={handleCopy}
 				size="icon-sm"
 				type="button"
 				variant="outline"
@@ -233,37 +280,34 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 			</Button>
 			<Button
 				aria-label="Descargar como PDF"
-				disabled={!props.canExport}
-				onClick={props.handleDownload}
+				disabled={!canExport}
+				onClick={handleDownload}
 				size="icon-sm"
 				type="button"
 				variant="outline"
 			>
 				<DownloadSimpleIcon weight="bold" />
 			</Button>
-			<Popover onOpenChange={props.setPopoverOpen} open={props.popoverOpen}>
+			<Popover onOpenChange={setPopoverOpen} open={popoverOpen}>
 				<PopoverTrigger
 					render={
 						<Button
 							aria-label="Regenerar carta"
-							disabled={!props.canRegenerate}
+							disabled={!canRegenerate}
 							onClick={(e) => {
 								// En el límite no abrimos el popover: disparamos onTriggerAsync sin preset,
 								// que detecta el tope y muestra el diálogo de límite.
-								if (props.generationCount >= props.maxVersions) {
+								if (generationCount >= maxVersions) {
 									e.preventDefault();
 									e.stopPropagation();
-									props.onTriggerAsync({});
+									onTriggerAsync({});
 								}
 							}}
 							size="sm"
 							type="button"
 							variant="outline"
 						>
-							<ArrowsClockwiseIcon
-								className={cn((props.isPending || props.isStreaming) && "animate-spin")}
-								weight="bold"
-							/>
+							<ArrowsClockwiseIcon className={cn((isPending || isStreaming) && "animate-spin")} weight="bold" />
 							Regenerar
 						</Button>
 					}
@@ -271,14 +315,14 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 				<PopoverPopup align="end" className="w-72">
 					<div className="flex flex-col gap-1">
 						<p className="px-2 pt-1 pb-2 font-medium text-xs uppercase tracking-wide">Tono</p>
-						{props.visiblePresets.map((preset) => {
+						{visiblePresets.map((preset) => {
 							const PresetIcon = preset.icon;
 							return (
 								<button
 									className="flex items-start gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
-									disabled={!props.canRegenerate}
+									disabled={!canRegenerate}
 									key={preset.label}
-									onClick={() => props.handleRegenerate(preset)}
+									onClick={() => handleRegenerate(preset)}
 									type="button"
 								>
 									<PresetIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" weight="bold" />
@@ -378,10 +422,6 @@ export function LettersArtifactPanel({
 	// mostramos el mensaje cálido. En una regeneración con carta previa, `artifact` aún tiene la
 	// anterior, así que `preparing` es false y se ve la carta vieja hasta que arranca el stream.
 	const preparing = showLoaders && !hasStreamedContent;
-	const canRegenerate = hasContent && !isPending;
-	const formattedText = formatCoverLetterAsText(artifact);
-	const canExport = Boolean(formattedText) && !isPending;
-	const [popoverOpen, setPopoverOpen] = useState(false);
 
 	const reduceMotion = useReducedMotion();
 	const panelTransition = { duration: reduceMotion ? 0 : PANEL_FADE_DURATION, ease: PANEL_EASE };
@@ -392,44 +432,6 @@ export function LettersArtifactPanel({
 	// onSaveArtifact). El `!isPending` evita re-montar el editor en la ventana previa al stream.
 	const completeLetter = toCompleteCoverLetter(artifact);
 	const canEditInline = Boolean(completeLetter) && !isPending && Boolean(activeMessageId);
-
-	const visiblePresets = REGENERATE_PRESETS.filter(
-		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
-	);
-
-	const handleRegenerate = async (preset: RegeneratePreset) => {
-		setPopoverOpen(false);
-		try {
-			await onTriggerAsync({ extraPrompt: preset.extraPrompt, language: preset.language });
-		} catch {
-			// Toast emitido por la route.
-		}
-	};
-
-	const handleCopy = async () => {
-		if (!formattedText) {
-			return;
-		}
-		try {
-			await navigator.clipboard.writeText(formattedText);
-			toast.success("Carta copiada al portapapeles");
-		} catch {
-			toast.error("No pudimos copiar al portapapeles");
-		}
-	};
-
-	const handleDownload = () => {
-		const letter = toCompleteCoverLetter(artifact);
-		if (!letter) {
-			return;
-		}
-		try {
-			downloadCoverLetterPdf(letter);
-			toast.success("Carta descargada como PDF");
-		} catch {
-			toast.error("No se pudo generar el PDF");
-		}
-	};
 
 	// Cuerpo con cross-fade: al pasar de la carta editable a la vista de streaming (y viceversa)
 	// el contenido NO se reemplaza de golpe — la vista saliente se desvanece y la entrante aparece
@@ -484,20 +486,14 @@ export function LettersArtifactPanel({
 				</div>
 
 				<ArtifactToolbar
-					canExport={canExport}
-					canRegenerate={canRegenerate}
+					artifact={artifact}
+					currentLanguage={currentLanguage}
 					generationCount={generationCount}
-					handleCopy={handleCopy}
-					handleDownload={handleDownload}
-					handleRegenerate={handleRegenerate}
 					hasContent={hasContent}
 					isPending={isPending}
 					isStreaming={isStreaming}
 					maxVersions={maxVersions}
 					onTriggerAsync={onTriggerAsync}
-					popoverOpen={popoverOpen}
-					setPopoverOpen={setPopoverOpen}
-					visiblePresets={visiblePresets}
 				/>
 			</FrameHeader>
 
