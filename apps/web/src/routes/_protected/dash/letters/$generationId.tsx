@@ -203,24 +203,23 @@ function RouteComponent() {
 					const makeRow = (
 						order: number,
 						fields: { isAssistant: boolean; objectType: string | null; text: string | null }
-					) =>
-						({
-							id: `optimistic_${crypto.randomUUID()}`,
-							generationId,
-							parentMessageId: null,
-							analysisId: null,
-							content: null,
-							text: fields.text,
-							error: null,
-							model: null,
-							order,
-							toolMeta: null,
-							isTool: false,
-							isAssistant: fields.isAssistant,
-							objectType: fields.objectType,
-							object: null,
-							createdAt: new Date(),
-						}) as (typeof old.messages)[number];
+					): (typeof old.messages)[number] => ({
+						id: `optimistic_${crypto.randomUUID()}`,
+						generationId,
+						parentMessageId: null,
+						analysisId: null,
+						content: null,
+						text: fields.text,
+						error: null,
+						model: null,
+						order,
+						toolMeta: null,
+						isTool: false,
+						isAssistant: fields.isAssistant,
+						objectType: fields.objectType,
+						object: null,
+						createdAt: new Date(),
+					});
 					const trimmed = extraPrompt?.trim();
 					const artifactRow = makeRow(maxOrder + (trimmed ? 2 : 1), {
 						isAssistant: true,
