@@ -1,5 +1,4 @@
 import { ORPCError } from "@orpc/client";
-import { createId } from "@paralleldrive/cuid2";
 import { generations } from "@stackk-career/db/schema/generations";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumes } from "@stackk-career/db/schema/resumes";
@@ -7,13 +6,29 @@ import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-l
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import {
 	createCoverLetterGenerationInputSchema,
-	MAX_COVER_LETTER_VERSIONS,
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
+import { getEffectiveEntitlements, isUnlimited, type LimitValue } from "@stackk-career/schemas/subscriptions";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
+import { invalidateViewerLetters, viewerLettersTag } from "../lib/viewer-cache";
+import { getActiveSubscriptionForUser } from "../services/subscriptions";
+
+const PREVIEW_MAX_CHARS = 180;
+const WHITESPACE_RE = /\s+/g;
+
+/** Primeras ~180 chars del body en una sola línea, para la card del listado. */
+function toPreview(text: string): string {
+	const clean = text.replace(WHITESPACE_RE, " ").trim();
+	return clean.length > PREVIEW_MAX_CHARS ? `${clean.slice(0, PREVIEW_MAX_CHARS).trimEnd()}…` : clean;
+}
+
+/** El límite `cover_letter_versions` del plan como número (ningún plan lo deja "unlimited" hoy). */
+function resolveMaxVersions(limit: LimitValue): number {
+	return isUnlimited(limit) ? Number.MAX_SAFE_INTEGER : limit;
+}
 
 export const lettersRouter = {
 	list: protectedProcedure.handler(async ({ context }) => {
@@ -36,7 +51,7 @@ export const lettersRouter = {
 			.leftJoin(resumes, eq(resumes.id, generations.resumeId))
 			.where(and(eq(generations.owner, userId), eq(generations.type, "cover-letter")))
 			.orderBy(desc(generations.updatedAt))
-			.$withCache();
+			.$withCache({ tag: viewerLettersTag(userId) });
 
 		if (rows.length === 0) {
 			return rows.map((row) => ({ ...row, preview: null as string | null }));
@@ -59,17 +74,11 @@ export const lettersRouter = {
 			)
 			.orderBy(asc(messages.generationId), desc(messages.order));
 
-		const PREVIEW_MAX_CHARS = 180;
 		const previewByGeneration = new Map<string, string>();
-		for (const artifact of artifacts) {
-			if (!artifact.text || previewByGeneration.has(artifact.generationId)) {
-				continue;
+		for (const { generationId, text } of artifacts) {
+			if (text && !previewByGeneration.has(generationId)) {
+				previewByGeneration.set(generationId, toPreview(text));
 			}
-			const clean = artifact.text.replace(/\s+/g, " ").trim();
-			previewByGeneration.set(
-				artifact.generationId,
-				clean.length > PREVIEW_MAX_CHARS ? `${clean.slice(0, PREVIEW_MAX_CHARS).trimEnd()}…` : clean
-			);
 		}
 
 		return rows.map((row) => ({ ...row, preview: previewByGeneration.get(row.id) ?? null }));
@@ -115,6 +124,7 @@ export const lettersRouter = {
 				throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "No pudimos crear la carta" });
 			}
 
+			await invalidateViewerLetters(context.db, userId);
 			context.log?.set({ outcome: "created", generation: { id: created.id } });
 			return { generationId: created.id };
 		}),
@@ -129,7 +139,9 @@ export const lettersRouter = {
 				generation: { id: input.generationId },
 			});
 
-			const [generation] = await context.db
+			// Una sola query: la generación + (leftJoin) su CV vinculado. Antes el CV era una 2ª
+			// query (round-trip extra); el FE usa resume.title/displayName en /letters/:id.
+			const [row] = await context.db
 				.select({
 					id: generations.id,
 					title: generations.title,
@@ -138,8 +150,12 @@ export const lettersRouter = {
 					language: generations.language,
 					createdAt: generations.createdAt,
 					updatedAt: generations.updatedAt,
+					resumeTitle: resumes.title,
+					resumeDisplayName: resumes.displayName,
+					linkedResumeId: resumes.id,
 				})
 				.from(generations)
+				.leftJoin(resumes, and(eq(resumes.id, generations.resumeId), eq(resumes.userId, userId)))
 				.where(
 					and(
 						eq(generations.id, input.generationId),
@@ -148,26 +164,16 @@ export const lettersRouter = {
 					)
 				)
 				.limit(1)
-				.$withCache();
+				.$withCache({ tag: viewerLettersTag(userId) });
 
-			if (!generation) {
+			if (!row) {
 				context.log?.set({ outcome: "not_found" });
 				throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
 			}
 
-			const linkedResume = generation.resumeId
-				? ((
-						await context.db
-							.select({
-								id: resumes.id,
-								title: resumes.title,
-								displayName: resumes.displayName,
-							})
-							.from(resumes)
-							.where(and(eq(resumes.id, generation.resumeId), eq(resumes.userId, userId)))
-							.limit(1)
-							.$withCache()
-					).at(0) ?? null)
+			const { resumeTitle, resumeDisplayName, linkedResumeId, ...generation } = row;
+			const linkedResume = linkedResumeId
+				? { id: linkedResumeId, title: resumeTitle, displayName: resumeDisplayName }
 				: null;
 
 			const messageRows = await context.db
@@ -189,11 +195,15 @@ export const lettersRouter = {
 				? (coverLetterSchema.safeParse(latestArtifactMessage.object).data ?? null)
 				: null;
 
+			const subscription = await getActiveSubscriptionForUser(context.db, userId);
+			const maxVersions = resolveMaxVersions(getEffectiveEntitlements(subscription).cover_letter_versions);
+
 			return {
 				generation,
 				resume: linkedResume,
 				messages: messageRows,
 				latestArtifact,
+				maxVersions,
 			};
 		}),
 
@@ -260,18 +270,15 @@ export const lettersRouter = {
 			.from(messages)
 			.where(eq(messages.generationId, gen.id));
 
-		// Límite de versiones (la UI lo refleja, pero el tope se valida acá). Solo cuentan
-		// artifacts NO fallidos — un run que reventó no debe consumir cuota.
-		// NOTA: es un read-check, no atómico. Cubre el caso común (triggers secuenciales + el
-		// guard inFlightRef del cliente por pestaña). Dos triggers REALMENTE simultáneos
-		// (multi-pestaña/dispositivo) podrían pasar ambos y dejar 6 versiones — tope "suave" de
-		// UX, no de seguridad/billing. Un tope estrictamente atómico requeriría una constraint
-		// de DB o transacción interactiva (a verificar contra Turso antes de shippear).
+		// Tope de versiones por carta, derivado del PLAN del usuario (no hardcodeado). Solo
+		// cuentan artifacts no fallidos. Read-check no atómico: tope "suave" de UX, no de billing.
+		const subscription = await getActiveSubscriptionForUser(context.db, userId);
+		const maxVersions = resolveMaxVersions(getEffectiveEntitlements(subscription).cover_letter_versions);
 		const versionCount = existing.filter((m) => m.objectType === COVER_LETTER_OBJECT_TYPE && m.error === null).length;
-		if (versionCount >= MAX_COVER_LETTER_VERSIONS) {
+		if (versionCount >= maxVersions) {
 			context.log?.set({ outcome: "version_limit_reached" });
 			throw new ORPCError("BAD_REQUEST", {
-				message: `Alcanzaste el límite de ${MAX_COVER_LETTER_VERSIONS} versiones para esta carta.`,
+				message: `Alcanzaste el límite de ${maxVersions} versiones para esta carta.`,
 			});
 		}
 
@@ -295,14 +302,23 @@ export const lettersRouter = {
 			});
 		}
 
-		const messageId = `msg_${createId()}`;
-		await context.db.insert(messages).values({
-			generationId: gen.id,
-			id: messageId,
-			isAssistant: true,
-			objectType: COVER_LETTER_OBJECT_TYPE,
-			order: artifactOrder,
-		});
+		// El id lo genera la DB ($defaultFn en el schema de messages). Lo leemos con
+		// .returning() en vez de fabricarlo a mano.
+		const [artifactRow] = await context.db
+			.insert(messages)
+			.values({
+				generationId: gen.id,
+				isAssistant: true,
+				objectType: COVER_LETTER_OBJECT_TYPE,
+				order: artifactOrder,
+			})
+			.returning({ id: messages.id });
+
+		if (!artifactRow) {
+			context.log?.set({ outcome: "insert_failed" });
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "No pudimos iniciar la generación" });
+		}
+		const messageId = artifactRow.id;
 
 		try {
 			const idempotencyKey = await idempotencyKeys.create(`casey-letters-${messageId}`);
@@ -333,6 +349,7 @@ export const lettersRouter = {
 				}
 			);
 
+			await invalidateViewerLetters(context.db, userId);
 			context.log?.set({
 				message: { id: messageId },
 				outcome: "triggered",
@@ -407,6 +424,7 @@ export const lettersRouter = {
 					)
 				);
 
+			await invalidateViewerLetters(context.db, userId);
 			context.log?.set({ outcome: "updated" });
 			return { messageId: input.messageId, ok: true };
 		}),

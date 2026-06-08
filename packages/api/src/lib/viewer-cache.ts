@@ -15,6 +15,19 @@ export function viewerSubscriptionTag(userId: string): string {
 }
 
 /**
+ * Drizzle cache tag for a user's cover-letter reads (`letters.list` / `letters.get`).
+ * Invalidate it after any write that changes those reads (create / trigger / edit).
+ */
+export function viewerLettersTag(userId: string): string {
+	return `viewer:letters:${userId}`;
+}
+
+/** Bust the user's cover-letter read cache after a letters write. */
+export async function invalidateViewerLetters(dbClient: typeof db, userId: string): Promise<void> {
+	await dbClient.$cache.invalidate({ tags: [viewerLettersTag(userId)] });
+}
+
+/**
  * Invalidate one or more cached usage counters for a single user.
  *
  * @description Call this **after** any drizzle write that changes the row count a viewer counter is

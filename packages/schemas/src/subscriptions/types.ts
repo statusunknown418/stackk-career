@@ -18,6 +18,7 @@ export const limitKeyEnum = [
 	"resume_inline_ai_suggestions",
 	"messages_per_generation",
 	"coaching_sessions_per_cycle",
+	"cover_letter_versions",
 ] as const;
 export const limitKeySchema = z.enum(limitKeyEnum);
 export type LimitKey = (typeof limitKeyEnum)[number];
@@ -25,8 +26,8 @@ export type LimitKey = (typeof limitKeyEnum)[number];
 /**
  * Subset of {@link LimitKey} that maps to a cached per-user counter on `viewer.usage`.
  *
- * Excludes `messages_per_generation` because that is a per-generation cap (counted from a
- * specific generation's messages), not a per-cycle counter derived from a single table.
+ * Excludes `messages_per_generation` and `cover_letter_versions` because those are per-generation
+ * caps (counted live from a specific generation's messages), not per-cycle counters.
  *
  * Mapping to underlying tables:
  * - `resumes_total` → `resumes` (all-time count, not period-scoped)
@@ -36,9 +37,9 @@ export type LimitKey = (typeof limitKeyEnum)[number];
  * - `resume_inline_ai_suggestions` → `messages` WHERE `objectType = "resume-suggestion"` AND `isAssistant = false`, owned via `generations.owner` (per cycle)
  * - `coaching_sessions_per_cycle` → `coaching_sessions` (per cycle)
  */
-export type CachedUsageLimitKey = Exclude<LimitKey, "messages_per_generation">;
+export type CachedUsageLimitKey = Exclude<LimitKey, "messages_per_generation" | "cover_letter_versions">;
 export const cachedUsageLimitKeys: readonly CachedUsageLimitKey[] = limitKeyEnum.filter(
-	(key): key is CachedUsageLimitKey => key !== "messages_per_generation"
+	(key): key is CachedUsageLimitKey => key !== "messages_per_generation" && key !== "cover_letter_versions"
 );
 
 /**
@@ -63,6 +64,7 @@ export const entitlementMapSchema = z.object({
 	resume_inline_ai_suggestions: limitValueSchema,
 	messages_per_generation: limitValueSchema,
 	coaching_sessions_per_cycle: limitValueSchema,
+	cover_letter_versions: limitValueSchema,
 });
 export type EntitlementMap = z.infer<typeof entitlementMapSchema>;
 

@@ -5,9 +5,6 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Card, CardHeader, CardPanel } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const RICH_BODY_CLASS =
-	"text-sm leading-relaxed [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-0 [&_p+p]:mt-3 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5";
-
 // Ease-out exponencial: el contenido entra rápido y asienta suave (sin rebote). Solo animamos
 // opacity + transform (compositor-friendly), nunca propiedades de layout.
 const SECTION_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -81,10 +78,10 @@ interface CoverLetterSectionProps {
 	isStreaming: boolean;
 	label: string;
 	primary: boolean;
-	/** Contenido de la sección como HTML (de TipTap o de texto plano escapado). Ausente = aún no llega. */
-	richHtml?: string | undefined;
 	showSkeleton: boolean;
 	skeletonLines: readonly string[];
+	/** Texto plano de la sección (lo que emite CASEY al streamear). Ausente = aún no llega. */
+	text?: string | undefined;
 }
 
 /**
@@ -97,14 +94,14 @@ export function CoverLetterSection({
 	isStreaming,
 	label,
 	primary,
-	richHtml,
 	showSkeleton,
 	skeletonLines,
+	text,
 }: CoverLetterSectionProps) {
 	const reduceMotion = useReducedMotion();
 
 	let panelContent: ReactNode = null;
-	if (richHtml) {
+	if (text) {
 		panelContent = (
 			<motion.div
 				animate={{ opacity: 1, y: 0 }}
@@ -113,8 +110,8 @@ export function CoverLetterSection({
 				key="content"
 				transition={{ duration: reduceMotion ? 0 : 0.28, ease: SECTION_EASE }}
 			>
-				{/* biome-ignore lint/security/noDangerouslySetInnerHtml: HTML proviene de TipTap (StarterKit, sin scripts) o de texto plano escapado. */}
-				<div className={RICH_BODY_CLASS} dangerouslySetInnerHTML={{ __html: richHtml }} />
+				{/* Texto plano: React escapa el contenido (sin dangerouslySetInnerHTML); whitespace-pre-line respeta los saltos de línea de CASEY. */}
+				<div className="whitespace-pre-line text-sm leading-relaxed">{text}</div>
 			</motion.div>
 		);
 	} else if (showSkeleton) {

@@ -2,7 +2,6 @@ import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-l
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
-import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -43,19 +42,28 @@ function resolveValidVersionId(raw: string | null, versions: ReadonlyArray<{ id:
 	return null;
 }
 
-function limitDialogCopy(language: CoverLetterLanguage): { description: string; ok: string; title: string } {
-	if (language === "en") {
-		return {
-			title: "Generation limit reached",
-			description: `You've reached the maximum of ${MAX_COVER_LETTER_VERSIONS} versions for this cover letter. To make more changes, we suggest creating a new letter.`,
-			ok: "Got it",
-		};
-	}
+// Copy del diálogo SIEMPRE en español (es el idioma de la app; el idioma de la carta solo
+// afecta el contenido del artifact, no la UI). El tope sale del plan (lo devuelve `get`).
+function limitDialogCopy(maxVersions: number): { description: string; ok: string; title: string } {
 	return {
 		title: "Límite de generaciones alcanzado",
-		description: `Has alcanzado el límite máximo de ${MAX_COVER_LETTER_VERSIONS} versiones para esta carta de presentación. Si deseas realizar más cambios, te sugerimos crear una nueva carta.`,
+		description: `Has alcanzado el límite de ${maxVersions} versiones para esta carta de presentación. Si deseas realizar más cambios, te sugerimos crear una nueva carta.`,
 		ok: "Entendido",
 	};
+}
+
+// Qué carta mostrar: mientras genera, SOLO el stream (no la carta vieja durante el round-trip);
+// en idle, la versión seleccionada (?v) o la última persistida.
+function resolveDisplayedArtifact(input: {
+	cachedArtifact: DeepPartial<CoverLetter> | undefined;
+	isGenerating: boolean;
+	selectedArtifact: DeepPartial<CoverLetter> | undefined;
+	streamedArtifact: DeepPartial<CoverLetter> | undefined;
+}): DeepPartial<CoverLetter> | undefined {
+	if (input.isGenerating) {
+		return input.streamedArtifact;
+	}
+	return input.streamedArtifact ?? input.selectedArtifact ?? input.cachedArtifact;
 }
 
 // Forma del skeleton = forma real de una carta (saludo corto, cuerpo largo, cierre medio, firma
@@ -171,6 +179,8 @@ function RouteComponent() {
 		? data.messages.filter((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && !m.error)
 		: [];
 	const generationCount = coverLetterMessages.length;
+	// Tope de versiones del plan (lo devuelve el server en `get`). Sin data aún → sin tope.
+	const maxVersions = data?.maxVersions ?? Number.POSITIVE_INFINITY;
 
 	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
 
@@ -290,7 +300,7 @@ function RouteComponent() {
 			if (inFlightRef.current) {
 				return;
 			}
-			if (generationCount >= MAX_COVER_LETTER_VERSIONS) {
+			if (generationCount >= maxVersions) {
 				setShowLimitDialog(true);
 				return;
 			}
@@ -302,7 +312,7 @@ function RouteComponent() {
 				inFlightRef.current = false;
 			}
 		},
-		[generationId, triggerMutateAsync, generationCount, clearSelectedVersion]
+		[generationId, triggerMutateAsync, generationCount, maxVersions, clearSelectedVersion]
 	);
 
 	// `id: runHandle?.runId` da estado fresco del hook por run. Sin esto el hook keya su
@@ -387,7 +397,7 @@ function RouteComponent() {
 	// así no mostramos la carta vieja durante el round-trip a Trigger.dev (se sentía como una traba).
 	// `streamedArtifact` es undefined hasta el primer chunk → el panel muestra skeleton + "CASEY está
 	// leyendo tu CV…" de inmediato. En idle sí caemos a la versión seleccionada / la última persistida.
-	const artifact = isGenerating ? streamedArtifact : (streamedArtifact ?? selectedArtifact ?? cachedArtifact);
+	const artifact = resolveDisplayedArtifact({ cachedArtifact, isGenerating, selectedArtifact, streamedArtifact });
 
 	const error = realtime.error;
 
@@ -397,7 +407,7 @@ function RouteComponent() {
 
 	const activeMessageId = selectedMessageId || (coverLetterMessages.at(-1)?.id ?? null);
 	const activeVersion = coverLetterMessages.findIndex((m) => m.id === activeMessageId) + 1;
-	const dialogCopy = limitDialogCopy(data.generation.language);
+	const dialogCopy = limitDialogCopy(maxVersions);
 
 	return (
 		<>
@@ -405,6 +415,7 @@ function RouteComponent() {
 				<LettersChatPanel
 					isPending={isGenerating}
 					jobPosition={data.generation.title ?? "el puesto"}
+					maxVersions={maxVersions}
 					messages={data.messages}
 					onSelectVersion={selectVersion}
 					onTriggerAsync={onTriggerAsync}
@@ -422,6 +433,7 @@ function RouteComponent() {
 					hasContent={Boolean(artifact) || data.latestArtifact !== null}
 					isPending={isGenerating}
 					isStreaming={isStreaming}
+					maxVersions={maxVersions}
 					onSaveArtifact={onSaveArtifact}
 					onTriggerAsync={onTriggerAsync}
 				/>

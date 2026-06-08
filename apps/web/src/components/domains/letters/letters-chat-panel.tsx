@@ -10,7 +10,6 @@ import {
 	WrenchIcon,
 } from "@phosphor-icons/react";
 import { COVER_LETTER_OBJECT_TYPE } from "@stackk-career/schemas/ai/cover-letter";
-import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { ComponentType } from "react";
 import { useState } from "react";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
@@ -33,6 +32,7 @@ interface LettersChatPanelMessage {
 interface LettersChatPanelProps {
 	isPending: boolean;
 	jobPosition: string;
+	maxVersions: number;
 	messages: readonly LettersChatPanelMessage[];
 	onSelectVersion: (messageId: string) => void;
 	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
@@ -100,6 +100,7 @@ function isCoverLetterArtifact(m: LettersChatPanelMessage): boolean {
 export function LettersChatPanel({
 	isPending,
 	jobPosition,
+	maxVersions,
 	messages,
 	onSelectVersion,
 	onTriggerAsync,
@@ -189,7 +190,7 @@ export function LettersChatPanel({
 										>
 											<span className="flex items-center gap-2 font-semibold text-sm">
 												<FileTextIcon className="size-4 shrink-0" weight="duotone" />
-												{copy.version} {versionNumber}/{MAX_COVER_LETTER_VERSIONS}
+												{copy.version} {versionNumber}/{maxVersions}
 											</span>
 											<span className="flex items-center gap-1.5 font-normal text-muted-foreground text-xs">
 												<StatusIcon className="size-3.5 shrink-0" weight="bold" />

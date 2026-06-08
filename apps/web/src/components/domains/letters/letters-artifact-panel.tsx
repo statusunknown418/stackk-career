@@ -17,7 +17,6 @@ import {
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
-import { MAX_COVER_LETTER_VERSIONS } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { jsPDF } from "jspdf";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -45,6 +44,7 @@ interface LettersArtifactPanelProps {
 	hasContent: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
+	maxVersions: number;
 	/** Persiste ediciones manuales del usuario sobre la carta mostrada (no es una regeneración). */
 	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
@@ -353,6 +353,7 @@ interface ArtifactToolbarProps {
 	hasContent: boolean;
 	isPending: boolean;
 	isStreaming: boolean;
+	maxVersions: number;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
 	popoverOpen: boolean;
 	setPopoverOpen: (open: boolean) => void;
@@ -395,7 +396,7 @@ function ArtifactToolbar(props: ArtifactToolbarProps) {
 							onClick={(e) => {
 								// En el límite no abrimos el popover: disparamos onTriggerAsync sin preset,
 								// que detecta el tope y muestra el diálogo de límite.
-								if (props.generationCount >= MAX_COVER_LETTER_VERSIONS) {
+								if (props.generationCount >= props.maxVersions) {
 									e.preventDefault();
 									e.stopPropagation();
 									props.onTriggerAsync({});
@@ -472,9 +473,6 @@ function ReadOnlyLetter({
 				{SECTION_DEFS.map((def, i) => {
 					const value = artifact?.[def.key];
 					const text = typeof value === "string" ? value : undefined;
-					// Cualquier sección puede haber quedado como HTML tras una edición → la normalizamos
-					// para mostrarla con su formato.
-					const richHtml = text ? bodyToHtml(text) : undefined;
 					return (
 						<CoverLetterSection
 							icon={def.icon}
@@ -482,9 +480,9 @@ function ReadOnlyLetter({
 							key={def.key}
 							label={def.label}
 							primary={def.primary}
-							richHtml={richHtml}
 							showSkeleton={showLoaders && !text}
 							skeletonLines={SECTION_SKELETON_LINES[def.key]}
+							text={text}
 						/>
 					);
 				})}
@@ -517,6 +515,7 @@ export function LettersArtifactPanel({
 	hasContent,
 	isPending,
 	isStreaming,
+	maxVersions,
 	onSaveArtifact,
 	onTriggerAsync,
 }: LettersArtifactPanelProps) {
@@ -626,7 +625,7 @@ export function LettersArtifactPanel({
 						{error && <Badge variant="secondary">Error</Badge>}
 						{!(error || isPending) && hasContent && (
 							<Badge variant="secondary">
-								Versión {activeVersion}/{MAX_COVER_LETTER_VERSIONS}
+								Versión {activeVersion}/{maxVersions}
 							</Badge>
 						)}
 						{!(error || isPending || hasContent) && <Badge variant="secondary">Lista para empezar</Badge>}
@@ -643,6 +642,7 @@ export function LettersArtifactPanel({
 					hasContent={hasContent}
 					isPending={isPending}
 					isStreaming={isStreaming}
+					maxVersions={maxVersions}
 					onTriggerAsync={onTriggerAsync}
 					popoverOpen={popoverOpen}
 					setPopoverOpen={setPopoverOpen}

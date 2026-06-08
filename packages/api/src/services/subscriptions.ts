@@ -386,22 +386,29 @@ async function readCurrentUsage(
 	subscription: SubscriptionRow,
 	context: AssertQuotaContext
 ): Promise<number> {
-	if (limitKey !== "messages_per_generation") {
-		return readCachedUsageCounter(db, userId, limitKey, periodFromSubscription(subscription));
+	if (limitKey === "messages_per_generation") {
+		if (!context.generationId) {
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "messages_per_generation requires generationId",
+			});
+		}
+
+		const [rows] = await db
+			.select({ value: count() })
+			.from(messages)
+			.where(and(eq(messages.generationId, context.generationId), eq(messages.isAssistant, false)));
+
+		return rows?.value ?? 0;
 	}
 
-	if (!context.generationId) {
+	// `cover_letter_versions` es un cap por carta enforced en `letters.trigger`, no vía assertQuota.
+	if (limitKey === "cover_letter_versions") {
 		throw new ORPCError("INTERNAL_SERVER_ERROR", {
-			message: "messages_per_generation requires generationId",
+			message: "cover_letter_versions se valida en letters.trigger, no por assertQuota",
 		});
 	}
 
-	const [rows] = await db
-		.select({ value: count() })
-		.from(messages)
-		.where(and(eq(messages.generationId, context.generationId), eq(messages.isAssistant, false)));
-
-	return rows?.value ?? 0;
+	return readCachedUsageCounter(db, userId, limitKey, periodFromSubscription(subscription));
 }
 
 export interface ApplyProviderSubscriptionStateInput {
