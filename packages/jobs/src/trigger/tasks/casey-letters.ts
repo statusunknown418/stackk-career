@@ -2,7 +2,6 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { validateCoverLetter } from "@stackk-career/schemas/ai/cover-letter-validator";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
@@ -89,21 +88,6 @@ export const caseyLettersTask = schemaTask({
 		const finishReason = await result.finishReason;
 		await waitUntilComplete();
 
-		// Anti-clichés check. Solo informativo — loggeamos + flageamos en metadata.
-		// La decisión de reintentar con feedback queda para una iteración futura;
-		// hoy queremos visibilidad de la frecuencia con que el modelo igual emite
-		// frases baneadas a pesar del system prompt. El validator usa el banlist
-		// del idioma correcto para evitar falsos positivos.
-		const validation = validateCoverLetter(object, language);
-		if (!validation.ok) {
-			logger.warn("casey-letters = banned_phrases_detected", {
-				attempt: ctx.attempt.number,
-				foundPhrases: validation.foundPhrases,
-				generationId,
-				messageId,
-			});
-		}
-
 		metadata.set("ai", {
 			attempt: ctx.attempt.number,
 			feature: "casey-letters",
@@ -117,10 +101,6 @@ export const caseyLettersTask = schemaTask({
 				outputTokens: usage.outputTokens ?? null,
 				reasoningTokens: usage.reasoningTokens ?? null,
 				totalTokens: usage.totalTokens ?? null,
-			},
-			validation: {
-				foundPhrases: [...validation.foundPhrases],
-				ok: validation.ok,
 			},
 		});
 

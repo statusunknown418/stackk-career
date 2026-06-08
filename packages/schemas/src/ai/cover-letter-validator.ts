@@ -1,16 +1,14 @@
 import type { CoverLetterLanguage } from "../api/letters";
-import type { CoverLetter } from "./cover-letter";
 
 /**
  * Frases hueras / clichés que CASEY no debe usar al redactar una cover letter.
  *
- * Lista única de verdad: el system prompt referencia estas listas y el validator
- * en runtime usa la misma para detectar drift cuando el modelo igual las emite.
+ * El system prompt referencia estas listas (vía `getClichePhrases`) para que el
+ * modelo no las emita.
  *
  * Reglas:
  * - Solo frases verdaderamente vacías o tan trilladas que dañan la carta.
  * - Mínimo 2-3 palabras para evitar falsos positivos.
- * - Match case-insensitive; el validator se encarga de la normalización.
  * - Separadas por idioma: una carta en inglés no se evalúa contra clichés
  *   en español (y viceversa) — ahorra falsos positivos cuando el saludo o
  *   un nombre propio incluye una palabra que en el otro idioma es banneada.
@@ -110,39 +108,4 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 
 export function getClichePhrases(language: CoverLetterLanguage): readonly string[] {
 	return language === "en" ? COVER_LETTER_CLICHE_PHRASES_EN : COVER_LETTER_CLICHE_PHRASES_ES;
-}
-
-interface CoverLetterValidationResult {
-	foundPhrases: readonly string[];
-	ok: boolean;
-}
-
-/**
- * Escanea los 4 campos del artifact (greeting + body + closing + signature) buscando
- * frases clichés/refusal literales (case-insensitive). Antes solo miraba body+closing,
- * pero una negativa o un dump inyectado puede caer en el saludo o la firma. Las frases
- * del banlist son multi-palabra (clichés/refusals), no nombres sueltos, así que el riesgo
- * de falso positivo por un nombre propio en la firma es bajo.
- *
- * Devuelve `ok=true` si no encontró ninguna; `false` con la lista exacta
- * de qué encontró si sí. El caller decide qué hacer (loggear, reintentar,
- * flagear). No lanza — el validator es informativo, no bloquea.
- */
-export function validateCoverLetter(
-	letter: CoverLetter,
-	language: CoverLetterLanguage = "es"
-): CoverLetterValidationResult {
-	const haystack = `${letter.greeting} ${letter.body} ${letter.closing} ${letter.signature}`.toLowerCase();
-	const foundPhrases: string[] = [];
-
-	for (const phrase of getClichePhrases(language)) {
-		if (haystack.includes(phrase.toLowerCase())) {
-			foundPhrases.push(phrase);
-		}
-	}
-
-	return {
-		foundPhrases,
-		ok: foundPhrases.length === 0,
-	};
 }
