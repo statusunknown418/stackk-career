@@ -56,10 +56,10 @@ function ReasonsStrip() {
 							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
 							<span>El producto</span>
 						</div>
-						<h2 className="mt-3 max-w-215 font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-none tracking-tight">
+						<h2 className="mt-3 max-w-215 font-display text-5xl text-foreground leading-none tracking-tight">
 							<WordReveal>Una suscripción que reúne las herramientas que te aseguran tu próxima entrevista.</WordReveal>
 						</h2>
-						<p className="mt-5 max-w-155 text-base text-foreground/65 leading-relaxed">
+						<p className="mt-4 max-w-155 text-base text-foreground/65 leading-relaxed">
 							Un Agente especializado de IA y un coach senior, juntos para potenciarte.
 						</p>
 					</header>
@@ -218,7 +218,7 @@ function ReasonCardContent({
 				<span className="font-medium font-mono text-foreground text-xs uppercase">Razón {displayNumber}</span>
 			</header>
 
-			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-none tracking-tight">
+			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-6xl text-foreground leading-none tracking-tight">
 				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
 			</h3>
 
@@ -288,7 +288,7 @@ function PinnedPriceMoment({ reason }: PinnedPriceMomentProps) {
 	// makes motion throw "Target ref is defined but not hydrated".
 	if (reduced || !isDesktop) {
 		return (
-			<div className="px-6 py-8">
+			<div className="px-6 py-4">
 				<div className="mx-auto max-w-7xl">
 					<StaticPriceComposition reason={reason} />
 				</div>
@@ -345,8 +345,6 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 	const price2299Opacity = useRangeFade(progress, 0.26, 0.36);
 	const price2299Y = useTransform(progress, [0.26, 0.36], [16, 0]);
 
-	const ellosSubOpacity = useRangeFade(progress, 0.34, 0.44);
-
 	// Strike line — drawn across the price
 	const strikeScale = useTransform(progress, [0.42, 0.54], [0, 1]);
 
@@ -366,7 +364,6 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 	const numberOpacity = useRangeFade(progress, 0.66, 0.76);
 
 	const perMesOpacity = useRangeFade(progress, 0.78, 0.86);
-	const nosotrosSubOpacity = useRangeFade(progress, 0.82, 0.9);
 
 	// Bottom rail — the scrubbing progress indicator. Tracks raw scrollYProgress
 	// (not the spring) so it feels exactly tied to the wheel.
@@ -401,16 +398,16 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 				</motion.h3>
 
 				{/* The math — three columns: Ellos / vs / Nosotros */}
-				<div className="relative mt-10 grid grid-cols-1 items-start gap-x-10 gap-y-8 md:mt-14 md:grid-cols-[1fr_auto_1fr]">
+				<div className="relative grid grid-cols-1 items-start gap-x-10 gap-y-8 md:mt-14 md:grid-cols-[1fr_auto_1fr]">
 					{/* ELLOS — Wonsulting side */}
 					<div className="flex flex-col items-start text-left md:items-end md:text-right">
 						{/* Both prices with a single strike that sweeps across them */}
 						<div className="relative mt-3 flex w-fit flex-wrap items-baseline gap-x-4 gap-y-1">
 							<motion.span
-								className="flex items-baseline gap-1 font-display font-medium text-[clamp(2.5rem,5vw,4rem)] text-foreground/55 leading-none tracking-tighter"
+								className="flex items-baseline gap-1 font-display text-6xl text-foreground/45 leading-none tracking-tighter"
 								style={{ opacity: price2299Opacity, y: price2299Y }}
 							>
-								<span className="font-medium text-[0.55em] text-foreground/55">S/</span>
+								<span className="text-6xl text-foreground/55">S/</span>
 								250
 							</motion.span>
 
@@ -422,19 +419,12 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 								style={{ scaleX: strikeScale }}
 							/>
 						</div>
-
-						<motion.span
-							className="mt-3 font-mono text-foreground/55 text-xs uppercase"
-							style={{ opacity: ellosSubOpacity }}
-						>
-							Pagas más por menos
-						</motion.span>
 					</div>
 
 					{/* VS — italic punctuation, the pivot */}
 					<motion.span
 						aria-hidden="true"
-						className="origin-center self-center justify-self-center font-display-italic font-light text-[clamp(3rem,6vw,5.5rem)] text-foreground/30 leading-none"
+						className="self-center justify-self-center font-display-italic font-light text-4xl text-foreground/30 leading-none"
 						style={{ scale: vsScale, opacity: vsOpacity, rotate: vsRotate }}
 					>
 						vs
@@ -444,32 +434,22 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 					<div className="flex flex-col items-end text-right md:items-start md:text-left">
 						<div className="mt-3 flex items-baseline gap-2">
 							<motion.span
-								className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground leading-none tracking-tighter"
+								className="font-display text-6xl text-foreground leading-none tracking-tighter"
 								style={{ opacity: solesMarkOpacity, y: solesMarkY }}
 							>
 								S/
 							</motion.span>
 							<motion.span
 								aria-live="polite"
-								className="font-bold font-display text-[clamp(3rem,5.6vw,4.5rem)] text-foreground tabular-nums leading-none tracking-tighter"
+								className="font-display text-6xl text-foreground tabular-nums leading-none tracking-tighter"
 								style={{ opacity: numberOpacity }}
 							>
 								{counterText}
 							</motion.span>
-							<motion.span
-								className="font-mono text-foreground/60 text-xs tracking-tight"
-								style={{ opacity: perMesOpacity }}
-							>
-								/mes
+							<motion.span className="text-foreground/45 text-lg tracking-tight" style={{ opacity: perMesOpacity }}>
+								por mes
 							</motion.span>
 						</div>
-
-						<motion.span
-							className="mt-3 font-mono text-foreground/65 text-xs uppercase"
-							style={{ opacity: nosotrosSubOpacity }}
-						>
-							Pagas menos por mucho más
-						</motion.span>
 					</div>
 				</div>
 
@@ -550,10 +530,10 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-foreground text-xs uppercase">El precio</span>
+				<span className="font-medium text-foreground text-xs uppercase">El precio</span>
 			</header>
 
-			<h3 className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight">
+			<h3 className="relative mt-4 max-w-[24ch] font-display font-semibold text-4xl text-foreground leading-none tracking-tight">
 				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
 			</h3>
 
