@@ -40,13 +40,13 @@ export function HeroAuroraShader() {
 	const showShader = isDark && isDesktop && !reduced && inView;
 
 	return (
-		<div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" ref={ref}>
+		<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" ref={ref}>
 			{showShader ? (
-				<div className="mask-[radial-gradient(95%_70%_at_50%_14%,black_0%,transparent_75%)] absolute inset-0 opacity-100">
+				<div className="mask-[radial-gradient(90%_65%_at_55%_12%,black_0%,transparent_65%)] absolute inset-0 opacity-100">
 					<MeshGradient
 						colors={MESH_COLORS}
-						distortion={0.3}
-						speed={0.15}
+						distortion={0.7}
+						speed={0.8}
 						style={{ width: "100%", height: "100%" }}
 						swirl={0.3}
 					/>
@@ -54,7 +54,7 @@ export function HeroAuroraShader() {
 			) : (
 				<div
 					className={
-						isDark ? "hero-glow-dark absolute inset-0 opacity-80" : "hero-glow-light absolute inset-0 opacity-90"
+						isDark ? "hero-glow-dark absolute inset-0 opacity-0" : "hero-glow-light absolute inset-0 opacity-0"
 					}
 				/>
 			)}
