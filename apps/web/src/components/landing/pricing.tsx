@@ -72,7 +72,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			className={cn(
 				"group/price relative flex h-full flex-col overflow-hidden rounded-2xl border p-7 transition-all duration-300 ease-out sm:p-8",
 				featured
-					? "border-oxblood/55 bg-oxblood/[0.06] shadow-[0_24px_60px_-30px_oklch(from_var(--oxblood)_l_c_h/0.45)] hover:border-oxblood/80 lg:-translate-y-3"
+					? "border-oxblood/55 bg-oxblood/6 shadow-[0_24px_60px_-24px_oklch(from_var(--oxblood)_l_c_h/0.45)] hover:border-oxblood/80 lg:-translate-y-3"
 					: "border-border bg-card hover:-translate-y-1 hover:border-foreground/35"
 			)}
 			initial={reduced ? false : { opacity: 0, y: 24 }}
@@ -93,12 +93,13 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			<p className="mt-2 text-foreground/65 text-sm leading-normal">{plan.tagline}</p>
 
 			<div className="mt-7 flex items-baseline gap-1.5">
-				<span className="font-medium text-base text-foreground/70">S/</span>
-				<span className="font-bold font-display text-[3.4rem] text-foreground tabular-nums leading-none tracking-tighter">
+				<span className="text-foreground/70 text-xl">S/</span>
+				<span className="font-display text-6xl text-foreground tabular-nums leading-none tracking-tight">
 					<CountUp duration={1.0} once to={plan.priceSoles} />
 				</span>
-				<span className="ml-1 text-foreground/70 text-sm">{isFree ? "" : "/ mes"}</span>
+				<span className="ml-1 text-foreground/70 text-xl tracking-tight">{isFree ? "" : "/ mes"}</span>
 			</div>
+
 			<p className="mt-2 text-foreground/65 text-sm">{isFree ? plan.per : `≈ US$${plan.priceUsd} · ${plan.per}`}</p>
 
 			<div className={cn("my-7 h-px", featured ? "bg-oxblood/20" : "bg-border")} />
@@ -132,13 +133,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 
 			<Magnetic block className="mt-8" strength={0.22}>
 				<Link
-					className={cn(
-						buttonVariants({ size: "lg" }),
-						"w-full",
-						featured
-							? "bg-oxblood text-neutral-950 hover:bg-oxblood/90"
-							: "border-foreground bg-foreground text-background hover:bg-foreground/90"
-					)}
+					className={cn(buttonVariants({ size: "lg", variant: featured ? "default" : "outline" }), "w-full")}
 					to="/waitlist"
 				>
 					{plan.cta}
@@ -177,7 +172,7 @@ function SingleSessionStrip() {
 	return (
 		<div className="px-6 pb-16 sm:pb-24">
 			<aside
-				className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
+				className="mx-auto max-w-7xl overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:border-foreground/35"
 				id="sesion-unica"
 			>
 				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
@@ -190,25 +185,19 @@ function SingleSessionStrip() {
 					</div>
 
 					<div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:col-span-4 md:col-start-9 md:flex-col md:items-end md:text-right">
-						<div>
-							<p className="flex items-baseline gap-1.5">
-								<span className="font-medium text-base text-foreground/70">S/</span>
-								<span className="font-bold font-display text-[2.8rem] text-foreground tabular-nums leading-none tracking-tighter">
+						<div className="text-right">
+							<p className="flex items-baseline justify-end gap-1.5 text-right">
+								<span className="font-medium text-foreground/70 text-xl">S/</span>
+								<span className="font-display text-6xl text-foreground tabular-nums leading-none tracking-tighter">
 									<CountUp duration={1.0} once to={SINGLE_SESSION.priceSoles} />
 								</span>
 							</p>
-							<p className="mt-1 text-foreground/70 text-xs">
+							<p className="mt-1 text-foreground/70">
 								≈ US${SINGLE_SESSION.priceUsd} · {SINGLE_SESSION.duration}
 							</p>
 						</div>
 						<Magnetic className="w-full shrink-0 sm:w-auto" strength={0.25}>
-							<Link
-								className={cn(
-									buttonVariants({ size: "default" }),
-									"w-full justify-center border-foreground bg-foreground text-background hover:bg-foreground/90 sm:w-auto"
-								)}
-								to="/waitlist"
-							>
+							<Link className={cn(buttonVariants({ size: "default", variant: "outline" }))} to="/waitlist">
 								{SINGLE_SESSION.cta}
 								<ArrowRightIcon weight="bold" />
 							</Link>

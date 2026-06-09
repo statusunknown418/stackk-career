@@ -19,7 +19,7 @@ export function Hero() {
 	return (
 		<>
 			<section
-				className="relative isolate flex min-h-[95vh] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-24 pb-20 sm:pb-24 md:pt-32"
+				className="relative isolate flex min-h-[95vh] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-24 pb-20 sm:pb-24"
 				id="top"
 			>
 				<HeroAuroraShader />
@@ -27,7 +27,7 @@ export function Hero() {
 				<div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
 					{/* Headline */}
 					<motion.h1
-						className="text-balance font-display text-5xl tracking-tighter md:text-6xl"
+						className="text-balance font-display text-5xl leading-none tracking-tighter md:text-7xl"
 						initial={fadeUp}
 						transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.1 }}
 						viewport={viewport}

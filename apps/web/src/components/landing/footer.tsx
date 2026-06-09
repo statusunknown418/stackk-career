@@ -21,7 +21,7 @@ export function LandingFooter() {
 	const reduced = useReducedMotion();
 
 	return (
-		<footer className="relative mt-16 overflow-hidden border-border border-t bg-foreground/1.5">
+		<footer className="relative mt-16 overflow-hidden">
 			{/* Hairline accent above the signature, like a printer's mark */}
 			<div aria-hidden="true" className="absolute top-0 left-1/2 h-px w-24 -translate-x-1/2 bg-oxblood/60" />
 
@@ -31,13 +31,13 @@ export function LandingFooter() {
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
-					className="mt-10 max-w-160 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-tight tracking-tight md:mt-14"
+					className="mt-4 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-muted-foreground leading-tight tracking-tight"
 					initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
 					transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.15 }}
 					viewport={{ once: true, margin: "-10% 0px" }}
 					whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
 				>
-					<span className="block text-foreground">De dónde estás, a dónde quieres llegar.</span>
+					<span className="block text-center text-foreground">De donde estás, a donde quieres llegar.</span>
 				</motion.p>
 
 				{/* COLUMNS */}
@@ -119,7 +119,7 @@ function SignatureMark() {
 			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"
-					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-none tracking-tighter"
+					className="block w-full bg-linear-to-t from-primary bg-clip-text text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground text-transparent leading-none tracking-tighter"
 				>
 					ASSENDIA
 				</span>
