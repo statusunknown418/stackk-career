@@ -62,7 +62,7 @@ function FeaturedTestimonial() {
 			onMouseLeave={() => setPaused(false)}
 		>
 			<motion.span
-				className="inline-block font-mono text-foreground/55 text-xs uppercase tracking-widest"
+				className="inline-block font-mono text-foreground/55 text-xs uppercase"
 				initial={reduced ? false : { opacity: 0, y: 8 }}
 				transition={reduced ? { duration: 0 } : { duration: 0.5, ease: EASE_OUT_QUINT }}
 				viewport={{ margin: "-15% 0px", once: true }}
@@ -95,7 +95,7 @@ function FeaturedTestimonial() {
 			<AnimatePresence initial={false} mode="wait">
 				<motion.p
 					animate={{ opacity: 1, y: 0 }}
-					className="mt-6 font-mono text-foreground/65 text-xs uppercase tracking-widest"
+					className="mt-6 font-mono text-foreground/65 text-xs uppercase"
 					exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
 					initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
 					key={`${active.id}-meta`}
@@ -164,10 +164,6 @@ export function TestimonialsCarousel() {
 						))}
 					</div>
 				</div>
-
-				<p className="mt-8 text-center font-mono text-foreground/55 text-xs uppercase tracking-widest">
-					Una muestra de las 90 reseñas · pasa el cursor para pausar
-				</p>
 			</div>
 		</section>
 	);
@@ -219,15 +215,8 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 
 			<blockquote className="text-foreground/80 text-sm leading-relaxed">“{testimonial.quote}”</blockquote>
 
-			<footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-border border-t pt-3">
-				{testimonial.chip && (
-					<span className="rounded-full border border-border bg-foreground/[0.06] px-2 py-0.5 font-medium font-mono text-foreground text-xs uppercase tracking-widest">
-						{testimonial.chip}
-					</span>
-				)}
-				<span className="ml-auto font-mono text-foreground/55 text-xs uppercase tracking-widest">
-					{testimonial.location}
-				</span>
+			<footer className="flex flex-wrap items-center gap-x-2 gap-y-1">
+				<span className="ml-auto font-bold text-foreground/55 text-xs uppercase">{testimonial.location}</span>
 			</footer>
 		</article>
 	);

@@ -52,7 +52,7 @@ function ReasonsStrip() {
 			<div className="px-6 pt-16 pb-4 md:pt-24 md:pb-6">
 				<Reveal>
 					<header className="mx-auto max-w-7xl">
-						<div className="flex items-center gap-2 font-mono text-foreground text-xs uppercase tracking-widest">
+						<div className="flex items-center gap-2 font-mono text-foreground text-xs uppercase">
 							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
 							<span>El producto</span>
 						</div>
@@ -215,9 +215,7 @@ function ReasonCardContent({
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">
-					Razón {displayNumber}
-				</span>
+				<span className="font-medium font-mono text-foreground text-xs uppercase">Razón {displayNumber}</span>
 			</header>
 
 			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-[clamp(1.75rem,3.2vw,2.75rem)] text-foreground leading-none tracking-tight">
@@ -229,7 +227,7 @@ function ReasonCardContent({
 			</p>
 
 			<footer className="relative mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-6">
-				<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">{reason.receipt.label}</span>
+				<span className="font-mono text-foreground/55 text-xs uppercase">{reason.receipt.label}</span>
 				<span className="font-display font-semibold text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
 					{leading ? (
 						<>
@@ -391,7 +389,7 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 				{/* Header chrome — Razón 02 meta */}
 				<motion.header className="relative flex items-center gap-2" style={{ opacity: headerOpacity, y: headerY }}>
 					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-					<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
+					<span className="font-medium font-mono text-foreground text-xs uppercase">El precio</span>
 				</motion.header>
 
 				{/* Title */}
@@ -426,7 +424,7 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 						</div>
 
 						<motion.span
-							className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest"
+							className="mt-3 font-mono text-foreground/55 text-xs uppercase"
 							style={{ opacity: ellosSubOpacity }}
 						>
 							Pagas más por menos
@@ -467,7 +465,7 @@ function PriceScrubStage({ containerRef, reason }: PriceScrubStageProps) {
 						</div>
 
 						<motion.span
-							className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest"
+							className="mt-3 font-mono text-foreground/65 text-xs uppercase"
 							style={{ opacity: nosotrosSubOpacity }}
 						>
 							Pagas menos por mucho más
@@ -511,7 +509,7 @@ function ScrollProgressRail({ progress, railScale }: ScrollProgressRailProps) {
 
 	return (
 		<div className="relative mt-10 flex items-center gap-4 border-border border-t pt-5">
-			<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">El argumento</span>
+			<span className="font-mono text-foreground/55 text-xs uppercase">El argumento</span>
 
 			{/* Thin scrubbing bar */}
 			<div className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-border">
@@ -552,7 +550,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-foreground text-xs uppercase tracking-widest">El precio</span>
+				<span className="font-medium font-mono text-foreground text-xs uppercase">El precio</span>
 			</header>
 
 			<h3 className="relative mt-5 max-w-[24ch] font-display font-semibold text-[clamp(1.75rem,3vw,2.5rem)] text-foreground leading-none tracking-tight">
@@ -568,9 +566,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 						</span>
 						<span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-[2.5px] bg-foreground/70" />
 					</div>
-					<span className="mt-3 font-mono text-foreground/55 text-xs uppercase tracking-widest">
-						Pagas más por menos
-					</span>
+					<span className="mt-3 font-mono text-foreground/55 text-xs uppercase">Pagas más por menos</span>
 				</div>
 
 				<span
@@ -588,9 +584,7 @@ function StaticPriceComposition({ reason }: { reason: (typeof WHY_REASONS)[numbe
 						</span>
 						<span className="font-mono text-foreground/60 text-xs tracking-tight">/mes</span>
 					</div>
-					<span className="mt-3 font-mono text-foreground/65 text-xs uppercase tracking-widest">
-						Pagas menos por mucho más
-					</span>
+					<span className="mt-3 font-mono text-foreground/65 text-xs uppercase">Pagas menos por mucho más</span>
 				</div>
 			</div>
 		</article>

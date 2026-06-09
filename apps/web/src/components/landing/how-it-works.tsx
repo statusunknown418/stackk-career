@@ -189,7 +189,7 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 	return (
 		<header className="relative z-20 mx-auto flex w-full max-w-[1400px] items-end justify-between px-6 pt-10 pb-6 md:px-12 md:pt-14">
 			<div className="flex flex-col gap-3">
-				<div className="flex items-center gap-3 font-mono text-foreground/55 text-xs uppercase tracking-widest">
+				<div className="flex items-center gap-3 font-mono text-foreground/55 text-xs uppercase">
 					<span aria-hidden="true" className="h-px w-8 bg-foreground/30" />
 					<span>El camino</span>
 				</div>
@@ -200,14 +200,14 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">0</span>
 					<span className="font-display-italic font-light text-[clamp(2rem,4vw,3.4rem)] text-foreground/50">→</span>
 					<span className="text-[clamp(2.5rem,5vw,4.25rem)]">42</span>
-					<span className="mb-2 self-end font-mono text-[clamp(0.7rem,0.9vw,0.95rem)] text-foreground/50 uppercase tracking-widest">
+					<span className="mb-2 self-end font-mono text-[clamp(0.7rem,0.9vw,0.95rem)] text-foreground/50 uppercase">
 						días
 					</span>
 				</h2>
 			</div>
 
 			<div className="hidden flex-col items-end gap-2 md:flex">
-				<div className="flex items-center gap-2 font-mono text-foreground/55 text-xs uppercase tracking-widest">
+				<div className="flex items-center gap-2 font-mono text-foreground/55 text-xs uppercase">
 					<span className="font-display-italic font-light text-base text-foreground/65 leading-none">
 						{activePhase.roman}
 					</span>
@@ -215,7 +215,7 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 					<span className="text-oxblood">{activePhase.label}</span>
 				</div>
 				<div className="flex items-baseline gap-1.5 leading-none">
-					<span className="font-mono text-foreground/55 text-xs uppercase leading-none tracking-widest">Día</span>
+					<span className="font-mono text-foreground/55 text-xs uppercase leading-none">Día</span>
 					<motion.span
 						aria-live="polite"
 						className="font-bold font-display text-[clamp(1.75rem,3vw,2.75rem)] text-oxblood tabular-nums leading-none tracking-tighter"
@@ -223,7 +223,7 @@ function ScrubHeader({ activeIdx, dayText, progress }: ScrubHeaderProps) {
 					>
 						{dayText}
 					</motion.span>
-					<span className="font-mono text-foreground/35 text-xs uppercase tracking-widest">de {TOTAL_DAYS}</span>
+					<span className="font-mono text-foreground/35 text-xs uppercase">de {TOTAL_DAYS}</span>
 				</div>
 			</div>
 		</header>
@@ -281,7 +281,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 					{/* Left: index + day */}
 					<div className="col-span-12 flex flex-col gap-6 md:col-span-5">
 						<motion.div
-							className="inline-flex w-fit items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 font-mono text-foreground/65 text-xs uppercase tracking-widest"
+							className="inline-flex w-fit items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 font-mono text-foreground/65 text-xs uppercase"
 							style={{ opacity: pillOpacity, scale: pillScale }}
 						>
 							<span aria-hidden="true" className="size-1 rounded-full bg-oxblood" />
@@ -291,7 +291,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 						</motion.div>
 
 						<motion.div className="flex items-baseline gap-1" style={{ opacity: tagOpacity, y: tagY }}>
-							<span className="font-mono text-foreground/50 text-xs uppercase tracking-widest">Día</span>
+							<span className="font-mono text-foreground/50 text-xs uppercase">Día</span>
 							<span className="font-bold font-display text-[clamp(6rem,14vw,12rem)] text-foreground tabular-nums leading-[0.82] tracking-[-0.065em]">
 								{step.day}
 							</span>
@@ -302,7 +302,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 					<div className="col-span-12 flex max-w-[44ch] flex-col md:col-span-7 md:col-start-7">
 						{step.tag && (
 							<motion.div
-								className="mb-5 inline-flex w-fit items-center gap-2 font-mono text-foreground/60 text-xs uppercase tracking-widest"
+								className="mb-5 inline-flex w-fit items-center gap-2 font-mono text-foreground/60 text-xs uppercase"
 								style={{ opacity: tagOpacity, y: tagY }}
 							>
 								<span aria-hidden="true" className="h-px w-6 bg-oxblood" />
@@ -333,7 +333,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 
 						{isLast && (
 							<motion.div
-								className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3.5 py-1.5 font-mono text-neutral-950 text-xs uppercase tracking-widest"
+								className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3.5 py-1.5 font-mono text-neutral-950 text-xs uppercase"
 								style={{ opacity: bodyOpacity, y: bodyY }}
 							>
 								<span aria-hidden="true" className="size-1.5 rounded-full bg-background" />
@@ -611,7 +611,7 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 
 	return (
 		<div className="relative z-20 mx-auto w-full max-w-[1400px] px-6 pb-10 md:px-12 md:pb-14">
-			<div className="mb-3 flex items-center justify-between font-mono text-foreground/55 text-xs uppercase tracking-widest">
+			<div className="mb-3 flex items-center justify-between font-mono text-foreground/55 text-xs uppercase">
 				<span>Promedio plan Premium</span>
 				<span className="hidden tabular-nums md:inline">
 					Días · {STEP_INDICES[activeIdx]} de 0{PANEL_COUNT}
@@ -656,7 +656,7 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 									}}
 								/>
 								<span
-									className={`font-mono text-xs uppercase tabular-nums tracking-widest transition-colors duration-300 ${
+									className={`font-mono text-xs uppercase tabular-nums transition-colors duration-300 ${
 										active ? "text-foreground" : "text-foreground/35"
 									}`}
 								>
@@ -664,7 +664,7 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 								</span>
 								<span
 									aria-hidden="true"
-									className={`mt-1 font-mono text-xs uppercase tracking-widest transition-colors duration-300 ${
+									className={`mt-1 font-mono text-xs uppercase transition-colors duration-300 ${
 										active ? "text-oxblood" : "text-foreground/25"
 									}`}
 								>
@@ -688,7 +688,7 @@ function HowItWorksStatic() {
 		<section aria-labelledby="how-heading-static" className="relative bg-background px-6 py-20 md:py-28" id="camino">
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-7xl">
-					<div className="mb-6 flex items-center gap-3 font-mono text-foreground/55 text-xs uppercase tracking-widest">
+					<div className="mb-6 flex items-center gap-3 font-mono text-foreground/55 text-xs uppercase">
 						<span aria-hidden="true" className="h-px w-8 bg-foreground/30" />
 						<span>El camino</span>
 					</div>
@@ -699,7 +699,7 @@ function HowItWorksStatic() {
 						<span className="tabular-nums">0</span>
 						<span className="font-display-italic font-light text-[0.85em] text-foreground/50 leading-none">→</span>
 						<span className="tabular-nums">42</span>
-						<span className="self-end pb-2 font-mono text-[clamp(0.7rem,1.4vw,1rem)] text-foreground/50 uppercase tracking-widest">
+						<span className="self-end pb-2 font-mono text-[clamp(0.7rem,1.4vw,1rem)] text-foreground/50 uppercase">
 							días
 						</span>
 					</h2>
@@ -717,7 +717,7 @@ function HowItWorksStatic() {
 					return (
 						<li className="relative border-foreground/10 border-t py-10 first:border-t-0 first:pt-0" key={step.index}>
 							{isFirstOfPhase && (
-								<div className="mb-4 flex items-center gap-2 font-mono text-oxblood text-xs uppercase tracking-widest">
+								<div className="mb-4 flex items-center gap-2 font-mono text-oxblood text-xs uppercase">
 									<span className="font-display-italic font-light text-base text-foreground/65 leading-none">
 										{step.phase.roman}
 									</span>
@@ -728,11 +728,9 @@ function HowItWorksStatic() {
 							<div className="flex flex-col gap-2 md:flex-row md:items-baseline md:gap-8">
 								<div className="flex items-center justify-between gap-3 md:w-[180px] md:shrink-0 md:items-baseline md:justify-start">
 									<div className="flex items-baseline gap-2">
-										<span className="font-mono text-foreground/40 text-xs uppercase tabular-nums tracking-widest">
-											{step.index}
-										</span>
+										<span className="font-mono text-foreground/40 text-xs uppercase tabular-nums">{step.index}</span>
 										<span className="flex items-baseline gap-1.5">
-											<span className="font-mono text-foreground/40 text-xs uppercase tracking-widest">Día</span>
+											<span className="font-mono text-foreground/40 text-xs uppercase">Día</span>
 											<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-tighter">
 												{step.day}
 											</span>
@@ -743,11 +741,7 @@ function HowItWorksStatic() {
 									</div>
 								</div>
 								<div className="flex max-w-[52ch] flex-1 flex-col">
-									{step.tag && (
-										<span className="mb-2 font-mono text-foreground/55 text-xs uppercase tracking-widest">
-											{step.tag}
-										</span>
-									)}
+									{step.tag && <span className="mb-2 font-mono text-foreground/55 text-xs uppercase">{step.tag}</span>}
 									<h3 className="font-bold font-display text-[clamp(1.4rem,3vw,2rem)] text-foreground leading-[1.1] tracking-tight">
 										{titleParts ? (
 											<>
@@ -760,7 +754,7 @@ function HowItWorksStatic() {
 									</h3>
 									<p className="mt-3 text-base text-foreground/70 leading-relaxed">{step.body}</p>
 									{isLast && (
-										<div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3 py-1 font-mono text-neutral-950 text-xs uppercase tracking-widest">
+										<div className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-oxblood px-3 py-1 font-mono text-neutral-950 text-xs uppercase">
 											<span aria-hidden="true" className="size-1.5 rounded-full bg-background" />
 											Meta
 										</div>
@@ -777,7 +771,7 @@ function HowItWorksStatic() {
 				})}
 			</ol>
 
-			<div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-foreground/8 border-t pt-6 font-mono text-foreground/55 text-xs uppercase tracking-widest sm:flex-row sm:items-center sm:justify-between">
+			<div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-foreground/8 border-t pt-6 font-mono text-foreground/55 text-xs uppercase sm:flex-row sm:items-center sm:justify-between">
 				<span>Sobre 240+ procesos reales</span>
 				<span className="flex items-center gap-2 text-foreground/70">
 					<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />

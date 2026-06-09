@@ -35,7 +35,7 @@ function ResumesIndexPending() {
 			</section>
 
 			<section className="px-4 py-2">
-				<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+				<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{Array.from({ length: 6 }).map((_, i) => (
 						<ResumeCardSkeleton key={i.toString()} />
 					))}

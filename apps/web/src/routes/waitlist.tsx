@@ -44,7 +44,7 @@ function ComingSoonPage() {
 			</Link>
 
 			{/* Alive but tasteful: a periodic sheen, no harsh "live" ping or status dot. */}
-			<span className="relative mt-12 inline-flex items-center overflow-hidden rounded-full border border-oxblood/30 bg-card px-3 py-1 font-medium font-mono text-foreground/75 text-xs uppercase tracking-widest shadow-[0_0_0_1px_oklch(0.72_0.19_150_/_0.04),0_8px_24px_-12px_oklch(0.72_0.19_150_/_0.25)]">
+			<span className="relative mt-12 inline-flex items-center overflow-hidden rounded-full border border-oxblood/30 bg-card px-3 py-1 font-medium font-mono text-foreground/75 text-xs uppercase shadow-[0_0_0_1px_oklch(0.72_0.19_150_/_0.04),0_8px_24px_-12px_oklch(0.72_0.19_150_/_0.25)]">
 				Muy pronto
 				{!motionDisabled && (
 					<motion.span

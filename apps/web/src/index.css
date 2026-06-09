@@ -707,10 +707,10 @@
 	   Used when the WebGL MeshGradient is skipped (light mode, mobile, reduced motion, or out of view). */
 	.hero-glow-dark {
 		background: radial-gradient(
-			125% 110% at 28% 22%,
-			oklch(0.5 0.15 150 / 0.55),
-			oklch(0.3 0.09 152 / 0.32) 40%,
-			transparent 74%
+			95% 70% at 50% 14%,
+			oklch(0.4 0.12 146 / 0.5),
+			oklch(0.22 0.07 150 / 0.3) 42%,
+			transparent 75%
 		);
 	}
 

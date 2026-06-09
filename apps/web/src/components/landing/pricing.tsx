@@ -31,9 +31,7 @@ function PricingHeader() {
 		<div className="px-6 pt-20 pb-12 sm:pt-28 sm:pb-16">
 			<div className="mx-auto max-w-7xl">
 				<Reveal>
-					<span className="block font-mono text-foreground/60 text-xs uppercase tracking-widest">
-						Planes · precios en soles
-					</span>
+					<span className="block font-mono text-foreground/60 text-xs uppercase">Planes · precios en soles</span>
 				</Reveal>
 				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-none tracking-tighter">
 					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
@@ -184,7 +182,7 @@ function SingleSessionStrip() {
 			>
 				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
 					<div className="md:col-span-7">
-						<span className="font-mono text-foreground/60 text-xs uppercase tracking-widest">Sin suscripción</span>
+						<span className="font-mono text-foreground/60 text-xs uppercase">Sin suscripción</span>
 						<h3 className="mt-2 font-display font-semibold text-2xl text-foreground leading-tight tracking-tight">
 							Sesión única: {SINGLE_SESSION.tagline}
 						</h3>
