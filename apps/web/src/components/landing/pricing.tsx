@@ -33,11 +33,11 @@ function PricingHeader() {
 				<Reveal>
 					<span className="block font-mono text-foreground/60 text-xs uppercase">Planes · precios en soles</span>
 				</Reveal>
-				<h2 className="mt-3 max-w-[18ch] font-bold font-display text-[clamp(2.4rem,6vw,5rem)] text-foreground leading-none tracking-tighter">
+				<h2 className="mt-3 max-w-[18ch] font-display text-5xl text-foreground leading-none tracking-tighter">
 					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 				</h2>
 				<Reveal delay={0.2}>
-					<p className="mt-7 max-w-[60ch] text-base text-foreground/65 leading-relaxed">
+					<p className="mt-4 text-balance text-base text-foreground/65 leading-relaxed">
 						Empieza gratis con tu Score CV. Pasa a Pro para usar todas las herramientas de IA sin límite. Premium suma
 						tu coach y el camino completo con garantía de entrevista en 90 días.
 					</p>

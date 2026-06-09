@@ -155,7 +155,7 @@ function ScrubStage({ sectionRef }: { sectionRef: { current: HTMLElement | null 
 
 			<div className="relative flex-1 overflow-hidden">
 				<motion.ol
-					aria-label="Pasos del camino ASSENDIA"
+					aria-label="Como funciona ASSENDIA"
 					className="flex h-full will-change-transform"
 					style={{ x: stripX, width: `${PANEL_COUNT * 100}vw` }}
 				>
@@ -264,11 +264,7 @@ function Panel({ idx, progress, step }: PanelProps) {
 	const bodyY = useTransform(local, [0.25, 0.9], [22, 0]);
 
 	// Gauge parallaxes opposite the scroll direction so it feels weighted.
-	const ghostX = useTransform(local, [0, 1], [80, -40]);
-
-	// Index pill — barely scales in, never bounces.
-	const pillScale = useTransform(local, [0, 0.6], [0.96, 1]);
-	const pillOpacity = useTransform(local, [0, 0.4], [0, 1]);
+	const ghostX = useTransform(local, [0, 1], [80, -20]);
 
 	return (
 		<li aria-label={`Día ${step.day}: ${step.title}`} className="relative flex h-full w-screen shrink-0 items-center">
@@ -276,58 +272,46 @@ function Panel({ idx, progress, step }: PanelProps) {
 			    the old repeated ghost number). */}
 			<StepVisual ghostX={ghostX} idx={idx} local={local} />
 
-			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] items-center gap-12 px-6 md:px-12">
-				<div className="grid w-full grid-cols-12 items-end gap-8">
+			<div className="relative mx-auto flex w-full max-w-7xl items-center gap-12 px-6 md:px-12">
+				<div className="grid w-full grid-cols-12 items-center gap-4">
 					{/* Left: index + day */}
-					<div className="col-span-12 flex flex-col gap-6 md:col-span-5">
-						<motion.div
-							className="inline-flex w-fit items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 font-mono text-foreground/65 text-xs uppercase"
-							style={{ opacity: pillOpacity, scale: pillScale }}
-						>
-							<span aria-hidden="true" className="size-1 rounded-full bg-oxblood" />
-							<span className="text-foreground/55">Paso</span>
-							<span className="text-foreground tabular-nums">{step.index}</span>
-							<span className="text-foreground/30">/ 0{PANEL_COUNT}</span>
-						</motion.div>
 
-						<motion.div className="flex items-baseline gap-1" style={{ opacity: tagOpacity, y: tagY }}>
-							<span className="font-mono text-foreground/50 text-xs uppercase">Día</span>
-							<span className="font-bold font-display text-[clamp(6rem,14vw,12rem)] text-foreground tabular-nums leading-[0.82] tracking-[-0.065em]">
-								{step.day}
-							</span>
+					<div className="flex justify-center md:col-span-6">
+						<motion.div
+							className="flex items-baseline gap-4 font-light text-7xl tracking-tightest"
+							style={{ opacity: tagOpacity, y: tagY }}
+						>
+							<p className="text-foreground/50">Día</p>
+							<p className="font-display text-foreground tabular-nums">#{step.day}</p>
 						</motion.div>
 					</div>
 
 					{/* Right: tag + title + body */}
-					<div className="col-span-12 flex max-w-[44ch] flex-col md:col-span-7 md:col-start-7">
+					<div className="col-span-12 flex flex-col self-center md:col-span-6 md:col-start-7">
 						{step.tag && (
 							<motion.div
-								className="mb-5 inline-flex w-fit items-center gap-2 font-mono text-foreground/60 text-xs uppercase"
+								className="mb-4 inline-flex w-fit items-center gap-2 text-muted-foreground text-xs uppercase"
 								style={{ opacity: tagOpacity, y: tagY }}
 							>
-								<span aria-hidden="true" className="h-px w-6 bg-oxblood" />
+								<span aria-hidden="true" className="h-1 w-3 bg-oxblood" />
 								<span>{step.tag}</span>
 							</motion.div>
 						)}
 
 						<motion.h3
-							className="font-bold font-display text-[clamp(2rem,3.6vw,3.25rem)] text-foreground leading-none tracking-tight"
+							className="font-display text-5xl text-foreground leading-none tracking-tight"
 							style={{ opacity: titleOpacity, y: titleY }}
 						>
 							{titleParts ? (
 								<>
-									{titleParts.head}{" "}
-									<span className="font-display-italic font-light text-foreground/70">{titleParts.tail}</span>
+									{titleParts.head} <span className="font-display-italic font-light">{titleParts.tail}</span>
 								</>
 							) : (
 								step.title
 							)}
 						</motion.h3>
 
-						<motion.p
-							className="mt-5 text-[clamp(1rem,1.15vw,1.125rem)] text-foreground/70 leading-relaxed"
-							style={{ opacity: bodyOpacity, y: bodyY }}
-						>
+						<motion.p className="mt-4 text-lg text-muted-foreground" style={{ opacity: bodyOpacity, y: bodyY }}>
 							{step.body}
 						</motion.p>
 
@@ -703,7 +687,7 @@ function HowItWorksStatic() {
 							días
 						</span>
 					</h2>
-					<p className="mt-5 max-w-[520px] text-foreground/65 leading-relaxed">
+					<p className="mt-5 max-w-100 text-foreground/65 leading-relaxed">
 						El camino, día por día. Tiempos medidos sobre los procesos reales de nuestros primeros usuarios.
 					</p>
 				</header>

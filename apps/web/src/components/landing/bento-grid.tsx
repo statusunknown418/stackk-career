@@ -92,8 +92,8 @@ function ReasonsStrip() {
 
 // Per-card sticky offset: card i sticks `STACK_TOP_BASE + i * STACK_TOP_STEP`
 // below the viewport top. The step is what reveals the sliver beneath.
-const STACK_TOP_BASE_REM = 7;
-const STACK_TOP_STEP_REM = 1.75;
+const STACK_TOP_BASE_REM = 10;
+const STACK_TOP_STEP_REM = 5;
 
 function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) {
 	const reduced = useReducedMotion() ?? false;
@@ -133,11 +133,6 @@ function formatStackNumber(index: number): string {
 	return String(index + 1).padStart(2, "0");
 }
 
-// Shared card chrome for the stack — large, premium, opaque (so a stacked
-// card fully hides the one it covers except the peeking sliver at the top).
-const STACK_CARD_CLASS =
-	"relative flex min-h-[60vh] flex-col overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-[0_24px_60px_-28px_oklch(0.13_0_0/0.22)] md:p-12";
-
 // One sticky card. Owns its own useScroll/useTransform so hooks stay top-level
 // (mapping hooks in the parent would violate rules-of-hooks). As the next card
 // scrolls over this one, this card scales down slightly and dims.
@@ -159,14 +154,14 @@ function StackReasonCard({
 		offset: ["start start", "end start"],
 	});
 
-	const scale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
+	const scale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 	const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.6]);
 
 	const leading = splitLeadingNumber(reason.receipt.value);
 
 	return (
 		<motion.article
-			className={`${STACK_CARD_CLASS} mb-[6vh]`}
+			className={"relative mb-[5vh] flex min-h-[35vh] flex-col overflow-hidden rounded-xl border bg-card p-8 shadow-xl"}
 			ref={cardRef}
 			style={{
 				position: "sticky",
@@ -176,59 +171,28 @@ function StackReasonCard({
 				transformOrigin: "center top",
 			}}
 		>
-			<ReasonCardContent displayNumber={displayNumber} leading={leading} reason={reason} />
-		</motion.article>
-	);
-}
-
-// Non-sticky variant used in the reduced-motion / mobile fallback.
-function StaticReasonCard({ reason, displayNumber }: { reason: (typeof WHY_REASONS)[number]; displayNumber: string }) {
-	const leading = splitLeadingNumber(reason.receipt.value);
-	return (
-		<article className={STACK_CARD_CLASS}>
-			<ReasonCardContent displayNumber={displayNumber} leading={leading} reason={reason} />
-		</article>
-	);
-}
-
-// The shared inner composition — big ghost number, eyebrow, title + italic
-// emphasis, body, and the receipt footer. Reused by both card variants so the
-// sticky and static paths can never drift apart.
-function ReasonCardContent({
-	reason,
-	displayNumber,
-	leading,
-}: {
-	reason: (typeof WHY_REASONS)[number];
-	displayNumber: string;
-	leading: { number: number; rest: string } | null;
-}) {
-	return (
-		<>
 			{/* Big ghost number — the editorial anchor for each reason */}
 			<span
 				aria-hidden="true"
-				className="pointer-events-none absolute -top-10 -right-4 select-none font-bold font-display text-[clamp(11rem,22vw,18rem)] text-foreground/[0.05] leading-none tracking-tighter"
+				className="pointer-events-none absolute -top-4 right-2 select-none font-bold font-display text-[clamp(11rem,22vw,15rem)] text-muted-foreground/10 tabular-nums leading-none tracking-tighter"
 			>
 				{displayNumber}
 			</span>
 
 			<header className="relative flex items-center gap-2">
 				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
-				<span className="font-medium font-mono text-foreground text-xs uppercase">Razón {displayNumber}</span>
+				<span className="font-medium font-mono text-oxblood text-xs uppercase">Razón {displayNumber}</span>
 			</header>
 
-			<h3 className="relative mt-6 max-w-[18ch] font-display font-semibold text-6xl text-foreground leading-none tracking-tight">
-				{reason.title} <span className="font-display-italic font-light">{reason.emphasis}</span>
+			<h3 className="relative mt-6 max-w-[18ch] font-display font-medium text-3xl text-foreground leading-none tracking-tight">
+				{reason.title} <span className="font-display-italic font-extralight">{reason.emphasis}</span>
 			</h3>
 
-			<p className="relative mt-5 max-w-[52ch] text-[clamp(1rem,1.4vw,1.125rem)] text-foreground/65 leading-relaxed">
-				{reason.body}
-			</p>
+			<p className="relative mt-5 max-w-[52ch] text-muted-foreground text-xl leading-tight">{reason.body}</p>
 
 			<footer className="relative mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-6">
 				<span className="font-mono text-foreground/55 text-xs uppercase">{reason.receipt.label}</span>
-				<span className="font-display font-semibold text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
+				<span className="font-display text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
 					{leading ? (
 						<>
 							<CountUp duration={0.8} once to={leading.number} />
@@ -239,7 +203,48 @@ function ReasonCardContent({
 					)}
 				</span>
 			</footer>
-		</>
+		</motion.article>
+	);
+}
+
+// Non-sticky variant used in the reduced-motion / mobile fallback.
+function StaticReasonCard({ reason, displayNumber }: { reason: (typeof WHY_REASONS)[number]; displayNumber: string }) {
+	const leading = splitLeadingNumber(reason.receipt.value);
+	return (
+		<article>
+			{/* Big ghost number — the editorial anchor for each reason */}
+			<span
+				aria-hidden="true"
+				className="pointer-events-none absolute -top-4 right-2 select-none font-bold font-display text-[clamp(11rem,22vw,15rem)] text-muted-foreground/10 tabular-nums leading-none tracking-tighter"
+			>
+				{displayNumber}
+			</span>
+
+			<header className="relative flex items-center gap-2">
+				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
+				<span className="font-medium font-mono text-oxblood text-xs uppercase">Razón {displayNumber}</span>
+			</header>
+
+			<h3 className="relative mt-6 max-w-[18ch] font-display font-medium text-3xl text-foreground leading-none tracking-tight">
+				{reason.title} <span className="font-display-italic font-extralight">{reason.emphasis}</span>
+			</h3>
+
+			<p className="relative mt-5 max-w-[52ch] text-muted-foreground text-xl leading-tight">{reason.body}</p>
+
+			<footer className="relative mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-6">
+				<span className="font-mono text-foreground/55 text-xs uppercase">{reason.receipt.label}</span>
+				<span className="font-display text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
+					{leading ? (
+						<>
+							<CountUp duration={0.8} once to={leading.number} />
+							{leading.rest}
+						</>
+					) : (
+						reason.receipt.value
+					)}
+				</span>
+			</footer>
+		</article>
 	);
 }
 

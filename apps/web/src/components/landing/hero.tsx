@@ -1,4 +1,4 @@
-import { ArrowRightIcon, ShieldCheckIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
@@ -20,7 +20,7 @@ export function Hero() {
 	return (
 		<>
 			<section
-				className="relative isolate flex min-h-[95vh] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-20 pb-20 sm:pb-24 md:pt-32"
+				className="relative isolate flex min-h-[95vh] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-24 pb-20 sm:pb-24 md:pt-32"
 				id="top"
 			>
 				<HeroAuroraShader />
@@ -28,7 +28,7 @@ export function Hero() {
 				<div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
 					{/* Headline */}
 					<motion.h1
-						className="text-balance font-display text-6xl tracking-tighter"
+						className="text-balance font-display text-5xl tracking-tighter md:text-6xl"
 						initial={fadeUp}
 						transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.1 }}
 						viewport={viewport}
@@ -40,7 +40,7 @@ export function Hero() {
 
 					{/* Subheadline */}
 					<motion.p
-						className="mt-5 max-w-2xl text-balance text-lg text-muted-foreground"
+						className="mt-6 max-w-2xl text-balance text-lg text-muted-foreground leading-tight"
 						initial={fadeUp}
 						transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.2 }}
 						viewport={viewport}
@@ -52,7 +52,7 @@ export function Hero() {
 
 					{/* CTAs */}
 					<motion.div
-						className="mt-5 flex flex-col items-center gap-4 sm:flex-row"
+						className="mt-6 flex flex-col items-center gap-4 sm:flex-row"
 						initial={fadeUp}
 						transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.3 }}
 						viewport={viewport}
@@ -68,27 +68,12 @@ export function Hero() {
 						</Button>
 
 						<a
-							className="group inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 font-medium text-foreground/70 transition-colors hover:text-foreground"
+							className="group inline-flex h-10 items-center justify-center gap-2 rounded-full px-6 font-medium text-muted-foreground transition-colors hover:text-foreground"
 							href="#planes"
 						>
 							Ver planes
 							<ArrowRightIcon className="transition-transform duration-300 group-hover:translate-x-1" weight="bold" />
 						</a>
-					</motion.div>
-
-					{/* Micro Trust Pills */}
-					<motion.div
-						className="mt-6 flex items-center justify-center gap-4 font-medium font-mono text-foreground/50 text-xs uppercase"
-						initial={fadeUp}
-						transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.4 }}
-						viewport={viewport}
-						whileInView={fadeIn}
-					>
-						<span className="flex items-center gap-1.5">
-							<ShieldCheckIcon className="text-oxblood" size={14} weight="fill" /> Garantía 90 días
-						</span>
-						<span aria-hidden="true" className="size-1 rounded-full bg-foreground/20" />
-						<span>Cancelas cuando quieras</span>
 					</motion.div>
 
 					{/* The Core Proof */}
@@ -102,26 +87,21 @@ export function Hero() {
 						<OutcomeCard className="sm:col-span-2 lg:col-span-6 lg:row-span-2" reducedMotion={motionDisabled}>
 							<div className="flex items-start justify-between gap-4">
 								<div>
-									<p className="font-medium font-mono text-foreground/55 text-xs uppercase">
+									<p className="font-medium text-foreground/60 text-xs uppercase">
 										Puntaje CV <span className="text-foreground/30">/ 100</span>
 									</p>
-									<p className="mt-3 max-w-[18ch] font-display text-foreground text-xl leading-none tracking-tight">
+									<p className="mt-3 max-w-[18ch] font-display text-foreground text-xl leading-tight tracking-tight">
 										De borrador genérico a CV listo para reclutador.
 									</p>
 								</div>
-								<span className="shrink-0 rounded-full border border-oxblood/25 bg-oxblood/10 px-3 py-1 font-mono text-oxblood text-xs uppercase">
-									+48 pts
-								</span>
 							</div>
 
 							<div className="mt-10 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
 								<div>
-									<div className="flex items-baseline justify-center gap-1">
-										<span className="font-display font-medium text-4xl text-foreground/25 tabular-nums leading-none tracking-tight">
-											46
-										</span>
+									<div className="flex items-baseline justify-center gap-1 text-5xl">
+										<span className="font-display font-medium text-foreground/25 tabular-nums leading-none">46</span>
 										<ArrowRightIcon className="text-foreground/35" size={20} weight="bold" />
-										<span className="font-display text-4xl text-foreground tabular-nums tracking-tight">95</span>
+										<span className="font-display text-foreground tabular-nums">95</span>
 									</div>
 
 									<div className="mt-2 h-1 overflow-hidden rounded-full bg-foreground/20">
@@ -136,13 +116,13 @@ export function Hero() {
 
 									<div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
 										<div className="rounded-2xl border border-border/70 bg-background/45 p-3">
-											<p className="font-mono text-foreground/40 text-xs uppercase">Antes</p>
+											<p className="text-foreground/40 text-xs uppercase">Antes</p>
 											<p className="mt-2 text-foreground/55 leading-snug">
 												Responsabilidades sueltas, sin impacto ni palabras clave.
 											</p>
 										</div>
 										<div className="rounded-2xl border border-oxblood/25 bg-oxblood/10 p-3">
-											<p className="font-mono text-oxblood text-xs uppercase">Después</p>
+											<p className="text-oxblood text-xs uppercase">Después</p>
 											<p className="mt-2 text-foreground/70 leading-snug">
 												Logros medibles, tono propio y lectura rápida para ATS.
 											</p>

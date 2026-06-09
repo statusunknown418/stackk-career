@@ -55,7 +55,7 @@ export function Faq() {
 						</motion.div>
 
 						<motion.h2
-							className="mt-5 font-bold font-display text-[clamp(2.1rem,4.6vw,3.4rem)] text-foreground leading-none tracking-tight"
+							className="mt-4 font-display text-5xl text-foreground leading-none tracking-tight"
 							style={reduced ? undefined : { y: titleY, transformOrigin: "left top" }}
 						>
 							Preguntas <br className="hidden sm:block" />

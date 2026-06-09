@@ -29,8 +29,8 @@ export function LandingNav() {
 	});
 
 	return (
-		<header className="sticky top-4 z-50 mx-auto mt-4 w-full max-w-7xl px-4">
-			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/95 py-2 pr-2 pl-3 shadow-[var(--shadow-nav)]">
+		<header className="sticky top-2 z-50 mx-auto w-full max-w-7xl px-4">
+			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/60 py-1.5 pr-1 pl-2 shadow-(--shadow-nav) backdrop-blur-md">
 				<a className="flex shrink-0 items-center gap-2 pr-3 text-foreground tracking-tight" href="#top">
 					<img
 						alt="ASSENDIA"
@@ -39,7 +39,7 @@ export function LandingNav() {
 						src="/assendia-logo.png"
 						width={32}
 					/>
-					<span className="font-bold font-display text-base leading-none tracking-tight">ASSENDIA</span>
+					<span className="font-display text-base leading-none tracking-tight">ASSENDIA</span>
 				</a>
 
 				<span aria-hidden="true" className="hidden h-5 w-px bg-muted md:block" />
@@ -74,6 +74,7 @@ export function LandingNav() {
 					>
 						Iniciar sesión
 					</Link>
+
 					<AnimatePresence initial={false}>
 						{showCta && (
 							<motion.span
@@ -90,6 +91,7 @@ export function LandingNav() {
 							</motion.span>
 						)}
 					</AnimatePresence>
+
 					<MobileMenu />
 				</div>
 			</nav>
@@ -102,12 +104,13 @@ function MobileMenu() {
 		<Sheet>
 			<SheetTrigger
 				aria-label="Abrir menú"
-				className="grid size-11 place-items-center rounded-full border border-border text-foreground/75 transition-colors hover:bg-muted hover:text-foreground md:hidden"
+				className="grid size-10 place-items-center rounded-full border border-border text-foreground/75 transition-colors hover:bg-muted hover:text-foreground md:hidden"
 			>
 				<ListIcon size={18} weight="bold" />
 			</SheetTrigger>
+
 			<SheetPopup className="w-[min(86vw,320px)]" side="right">
-				<div className="flex items-center gap-2 px-6 pt-6">
+				<div className="flex items-center gap-2 px-5 pt-6">
 					<img
 						alt="ASSENDIA"
 						className="size-8 rounded-lg object-cover"
@@ -115,8 +118,9 @@ function MobileMenu() {
 						src="/assendia-logo.png"
 						width={32}
 					/>
-					<span className="font-bold font-display text-base text-foreground leading-none tracking-tight">ASSENDIA</span>
+					<span className="font-display text-foreground leading-none tracking-tight">ASSENDIA</span>
 				</div>
+
 				<SheetPanel>
 					<ul className="mt-2 flex flex-col gap-1">
 						{NAV_LINKS.map((link) => (
