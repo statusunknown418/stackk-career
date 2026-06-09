@@ -2,7 +2,6 @@ import { ArrowRightIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { CountUp } from "@/components/ui/count-up";
 import { LogoMarqueeRows } from "@/components/ui/logo-marquee-rows";
 import { Button } from "../ui/button";
 import { HeroAuroraShader } from "./hero-aurora-shader";
@@ -137,7 +136,7 @@ export function Hero() {
 								<div>
 									<p className="font-medium font-mono text-foreground/55 text-xs uppercase">Coach 1:1 + Casey AI</p>
 									<p className="mt-3 max-w-[16ch] font-display text-foreground text-xl leading-none tracking-tight">
-										Feedback humano
+										Feedback humano personalizado
 									</p>
 								</div>
 								<div aria-hidden="true" className="flex -space-x-2 pt-1">
@@ -211,43 +210,10 @@ export function Hero() {
 			</section>
 
 			{/* Unhidden & Polished Stats Section */}
-			<section className="relative border-border/50 border-t bg-muted/20 px-6 py-12 sm:py-16">
-				<div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10">
-					<motion.dl
-						className="flex w-full flex-wrap items-baseline justify-center gap-x-12 gap-y-8 text-center sm:justify-around"
-						initial="hidden"
-						transition={{ staggerChildren: 0.12 }}
-						viewport={{ once: true, margin: "-15% 0px" }}
-						whileInView="visible"
-					>
-						<HeroStat
-							countTo={240}
-							label="entrevistas conseguidas"
-							reducedMotion={motionDisabled}
-							suffix="+"
-							value="240+"
-						/>
-						<HeroStat
-							countTo={4.9}
-							decimals={1}
-							label="en 90 reseñas verificadas"
-							reducedMotion={motionDisabled}
-							suffix="★"
-							value="4.9★"
-						/>
-						<HeroStat countTo={18} label="días a tu primera entrevista" reducedMotion={motionDisabled} value="18" />
-					</motion.dl>
-
-					<div className="flex w-full flex-col items-center gap-6">
-						<p className="font-medium font-mono text-foreground/50 text-xs uppercase">
-							Nuestros talentos ya trabajan en
-						</p>
-						<LogoMarqueeRows />
-						<p className="mt-2 flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 text-balance text-center font-medium font-mono text-foreground/40 text-xs uppercase">
-							<span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-foreground/20" />
-							<span>Empresas verificadas a través del LinkedIn de cada talento</span>
-						</p>
-					</div>
+			<section className="relative bg-linear-to-t from-muted/20 px-6 pb-12 sm:pb-16">
+				<div className="flex w-full flex-col items-center gap-6">
+					<p className="text-foreground/50 text-xs uppercase">Nuestros talentos ya trabajan en</p>
+					<LogoMarqueeRows />
 				</div>
 			</section>
 		</>
@@ -280,39 +246,5 @@ function OutcomeCard({
 			/>
 			<div className="relative z-10 flex flex-col">{children}</div>
 		</motion.article>
-	);
-}
-
-const heroStatVariants = {
-	hidden: { opacity: 0, y: 16 },
-	visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE_OUT_QUINT } },
-};
-
-function HeroStat({
-	label,
-	value,
-	countTo,
-	decimals = 0,
-	suffix = "",
-	reducedMotion,
-}: {
-	label: string;
-	value: string;
-	countTo?: number;
-	decimals?: number;
-	suffix?: string;
-	reducedMotion: boolean;
-}) {
-	return (
-		<motion.div className="flex flex-col items-center gap-3" variants={reducedMotion ? undefined : heroStatVariants}>
-			<dt className="font-display text-[clamp(2.5rem,4vw,3.5rem)] text-foreground tabular-nums leading-none tracking-tighter">
-				{countTo === undefined ? (
-					value
-				) : (
-					<CountUp decimals={decimals} duration={1.5} once suffix={suffix} to={countTo} />
-				)}
-			</dt>
-			<dd className="max-w-[18ch] text-balance font-medium font-mono text-foreground/50 text-xs uppercase">{label}</dd>
-		</motion.div>
 	);
 }
