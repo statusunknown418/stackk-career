@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
 interface LetterStreams {
@@ -78,7 +79,7 @@ const PENDING_LETTER_SECTIONS = [
 
 function PendingLetterSection({ bars, label, primary }: { bars: readonly string[]; label: string; primary: boolean }) {
 	return (
-		<div className={`rounded-2xl border bg-card px-4 pt-3.5 pb-4${primary ? "min-h-44 flex-1" : ""}`}>
+		<div className={cn("rounded-2xl border bg-card px-4 pt-3.5 pb-4", primary && "min-h-44 flex-1")}>
 			<Skeleton className={`mb-3 h-3 rounded-full ${label}`} />
 			<div className="flex flex-col gap-2">
 				{bars.map((w) => (
@@ -376,11 +377,14 @@ function RouteComponent() {
 	// de completion nunca corre: el run pudo terminar bien en el server pero la versión nueva
 	// no aparecería hasta recargar, con el handle muerto colgado. Refrescamos la data
 	// persistida y soltamos el handle — el espejo del cierre normal, para el camino de error.
+	// El toast es la única señal que perdura: al soltar el handle, el hook se re-keyea y el
+	// Badge/Alert de error del panel desaparecen en el siguiente render.
 	const realtimeError = realtime.error;
 	useEffect(() => {
 		if (!(runHandle && realtimeError)) {
 			return;
 		}
+		toast.error("Se perdió la conexión con la generación; recargamos el estado de la carta.");
 		queryClient.invalidateQueries({
 			queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
 		});

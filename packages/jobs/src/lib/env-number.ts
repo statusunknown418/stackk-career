@@ -5,7 +5,9 @@
  * numérico cae al default en vez de tumbar el task por una env mal seteada.
  */
 export function envNumber(raw: string | undefined, fallback: number): number {
-	if (raw === undefined) {
+	// `raw === ""` también cae al default: Number("") es 0 (finito) y una env declarada
+	// pero vacía (`FOO=` en un .env) produciría concurrencia 0 o timeout 0 en silencio.
+	if (raw === undefined || raw.trim() === "") {
 		return fallback;
 	}
 	const parsed = Number(raw);
