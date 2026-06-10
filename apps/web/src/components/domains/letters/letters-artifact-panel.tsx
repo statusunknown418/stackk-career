@@ -178,9 +178,9 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 	// Switch idioma. Solo muestra el del idioma opuesto al actual; el preset persiste
 	// el switch en generations.language Y dispara el run, así el modelo arranca con el
 	// system prompt del nuevo idioma (extraPrompt solo no alcanza — el system prompt
-	// gana sobre instrucciones del user message en Claude).
+	// tiene prioridad sobre instrucciones del user message).
 	{
-		description: "Cambia el idioma del thread a inglés.",
+		description: "Traduce esta carta y genera las próximas versiones en inglés.",
 		extraPrompt: "Reescribe la carta completa en inglés (American English) manteniendo el mismo contenido.",
 		icon: TranslateIcon,
 		label: "En inglés",
@@ -188,7 +188,7 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 		onlyIfCurrentLanguage: "es",
 	},
 	{
-		description: "Cambia el idioma del thread a español.",
+		description: "Traduce esta carta y genera las próximas versiones en español.",
 		extraPrompt: "Reescribe la carta completa en español (peruano neutro profesional) manteniendo el mismo contenido.",
 		icon: TranslateIcon,
 		label: "En español",

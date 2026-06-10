@@ -35,7 +35,15 @@ export function bodyToHtml(value: string): string {
 		.join("");
 }
 
-/** HTML del editor → texto plano (para PDF / copiar / validar vacío). Si ya es plano, lo deja igual. */
+const ENTITY_RE = /&(amp|lt|gt|nbsp|quot|#39);/g;
+const ENTITY_MAP: Record<string, string> = { "#39": "'", amp: "&", gt: ">", lt: "<", nbsp: " ", quot: '"' };
+
+/**
+ * HTML del editor → texto plano (para PDF / copiar / validar vacío). Si ya es plano, lo
+ * deja igual. Sin DOMParser a propósito: esto también corre en SSR (formatCoverLetterAsText
+ * se evalúa en render) y el input es el set cerrado de tags/entities que emite TipTap,
+ * no HTML arbitrario. Breaks de bloque → saltos de línea, tags fuera, entities decodificadas.
+ */
 function htmlToText(value: string): string {
 	if (!isHtmlBody(value)) {
 		return value;
@@ -44,10 +52,7 @@ function htmlToText(value: string): string {
 		.replace(BR_RE, "\n")
 		.replace(BLOCK_CLOSE_RE, "\n\n")
 		.replace(ANY_TAG_RE, "")
-		.replaceAll("&nbsp;", " ")
-		.replaceAll("&lt;", "<")
-		.replaceAll("&gt;", ">")
-		.replaceAll("&amp;", "&")
+		.replace(ENTITY_RE, (_, entity: string) => ENTITY_MAP[entity] ?? "")
 		.replace(MULTI_NEWLINE_RE, "\n\n")
 		.trim();
 }
@@ -121,36 +126,23 @@ export function downloadCoverLetterPdf(letter: CoverLetter) {
 	doc.save("carta-de-presentacion.pdf");
 }
 
-export const allSectionsFilled = (letter: CoverLetter): boolean =>
-	Boolean(
-		htmlToText(letter.greeting).trim() &&
-			htmlToText(letter.body).trim() &&
-			htmlToText(letter.closing).trim() &&
-			htmlToText(letter.signature).trim()
-	);
-
 /**
  * Serialize the (possibly partial) cover letter to plain text for the clipboard Copy
- * button. Returns null si alguna sección falta o todavía es un chunk incompleto — el
- * caller usa eso para deshabilitar Copy/Download mientras streamea. (El Download genera
- * un PDF con jsPDF a partir del mismo artifact, no un .txt.)
+ * button. Returns null si alguna sección falta, es un chunk incompleto del stream, o
+ * queda vacía tras quitar el markup — el caller usa eso para deshabilitar Copy/Download.
+ * (El Download genera un PDF con jsPDF a partir del mismo artifact, no un .txt.)
  */
 export function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined): string | null {
-	if (!artifact) {
+	const letter = toCompleteCoverLetter(artifact);
+	if (!letter) {
 		return null;
 	}
-	const { greeting, body, closing, signature } = artifact;
-	if (typeof greeting !== "string" || !greeting) {
+	const sections = [letter.greeting, letter.body, letter.closing, letter.signature].map(htmlToText);
+	if (sections.some((section) => !section.trim())) {
 		return null;
 	}
-	if (typeof body !== "string" || !body) {
-		return null;
-	}
-	if (typeof closing !== "string" || !closing) {
-		return null;
-	}
-	if (typeof signature !== "string" || !signature) {
-		return null;
-	}
-	return `${htmlToText(greeting)}\n\n${htmlToText(body)}\n\n${htmlToText(closing)}\n\n${htmlToText(signature)}\n`;
+	return `${sections.join("\n\n")}\n`;
 }
+
+/** Una carta es guardable si las 4 secciones tienen contenido real (mismo criterio que Copy). */
+export const allSectionsFilled = (letter: CoverLetter): boolean => formatCoverLetterAsText(letter) !== null;
