@@ -329,6 +329,7 @@ function RouteComponent() {
 	// de runId), así que toda regeneración después de la primera dejaría el chat/historial
 	// congelado y filtraría runHandle. Acá refrescamos + limpiamos en CADA run que termina.
 	const currentRunFinishedAt = realtime.run?.finishedAt;
+	const currentRunStatus = realtime.run?.status;
 	useEffect(() => {
 		if (!(runHandle && currentRunFinishedAt)) {
 			return;
@@ -338,19 +339,33 @@ function RouteComponent() {
 		// el refetch sigue en vuelo → la carta desaparecería ("Esperando datos") por 1-2s. Esperar
 		// al refetch hace el handoff (stream → data persistida) sin parpadeo.
 		let cancelled = false;
-		queryClient
-			.invalidateQueries({
+		let failedRunRetry: ReturnType<typeof setTimeout> | undefined;
+		const invalidate = () =>
+			queryClient.invalidateQueries({
 				queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
-			})
-			.finally(() => {
-				if (!cancelled) {
-					setRunHandle(null);
-				}
 			});
+		invalidate().finally(() => {
+			if (cancelled) {
+				return;
+			}
+			setRunHandle(null);
+			// Run fallido: el `onFailure` del task estampa `error` en la fila EN PARALELO a este
+			// refetch. Si el refetch ganó la race, la fila pendiente llegó con error:null y
+			// object:null → contaría como "Versión N" vacía (fantasma). Un segundo refetch corto
+			// después recoge la marca de error y la saca de la numeración.
+			if (currentRunStatus !== "COMPLETED") {
+				failedRunRetry = setTimeout(() => {
+					invalidate();
+				}, 1500);
+			}
+		});
 		return () => {
 			cancelled = true;
+			if (failedRunRetry) {
+				clearTimeout(failedRunRetry);
+			}
 		};
-	}, [runHandle, currentRunFinishedAt, queryClient, generationId]);
+	}, [runHandle, currentRunFinishedAt, currentRunStatus, queryClient, generationId]);
 
 	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
 	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` se setea ANTES

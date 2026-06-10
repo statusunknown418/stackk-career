@@ -187,9 +187,14 @@ export const lettersRouter = {
 				.orderBy(asc(messages.order), asc(messages.createdAt), sql`rowid`);
 
 			// Latest assistant message tagged as a cover-letter artifact = current letter.
+			// `error === null`: mismo criterio que el FE para "versión válida" — una fila con
+			// object Y error a la vez (run reintentado a medias) no debe mostrarse como carta.
 			const latestArtifactMessage = [...messageRows]
 				.reverse()
-				.find((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && m.object !== null);
+				.find(
+					(m) =>
+						m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && m.object !== null && m.error === null
+				);
 
 			const latestArtifact = latestArtifactMessage?.object
 				? (coverLetterSchema.safeParse(latestArtifactMessage.object).data ?? null)
@@ -412,17 +417,25 @@ export const lettersRouter = {
 			}
 
 			// Scope the update to this generation's artifact message; the objectType guard makes
-			// sure a non-artifact row (user/tool message) can never be overwritten.
-			await context.db
+			// sure a non-artifact row (user/tool message) can never be overwritten, y el guard de
+			// `error` impide "revivir" una versión fallida por edición (quedaría con object+error).
+			const updated = await context.db
 				.update(messages)
 				.set({ object: input.artifact, text: input.artifact.body })
 				.where(
 					and(
 						eq(messages.id, input.messageId),
 						eq(messages.generationId, gen.id),
-						eq(messages.objectType, COVER_LETTER_OBJECT_TYPE)
+						eq(messages.objectType, COVER_LETTER_OBJECT_TYPE),
+						isNull(messages.error)
 					)
-				);
+				)
+				.returning({ id: messages.id });
+
+			if (updated.length === 0) {
+				context.log?.set({ outcome: "artifact_not_found" });
+				throw new ORPCError("NOT_FOUND", { message: "Versión no encontrada" });
+			}
 
 			await invalidateViewerLetters(context.db, userId);
 			context.log?.set({ outcome: "updated" });

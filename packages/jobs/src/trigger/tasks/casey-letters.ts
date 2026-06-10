@@ -149,6 +149,10 @@ export const caseyLettersTask = schemaTask({
 		await db
 			.update(messages)
 			.set({
+				// error: null — la fila pudo quedar marcada (p.ej. "trigger_failed" si el router
+				// vio fallar el dispatch pero el run igual se encoló, o el error de un attempt
+				// previo). Un éxito SIEMPRE limpia la marca: object y error son excluyentes.
+				error: null,
 				model: modelForAttempt,
 				object,
 				text: object.body,
