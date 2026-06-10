@@ -330,6 +330,12 @@ function RouteComponent() {
 	// congelado y filtraría runHandle. Acá refrescamos + limpiamos en CADA run que termina.
 	const currentRunFinishedAt = realtime.run?.finishedAt;
 	const currentRunStatus = realtime.run?.status;
+	// El retry del run fallido vive en un ref y se limpia SOLO al desmontar: el propio effect
+	// de completion llama setRunHandle(null), que re-dispara el effect (runHandle es dep) y un
+	// clearTimeout en su cleanup normal mataría el timer recién creado — el segundo refetch
+	// jamás llegaría a correr.
+	const failedRunRetryRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+	useEffect(() => () => clearTimeout(failedRunRetryRef.current), []);
 	useEffect(() => {
 		if (!(runHandle && currentRunFinishedAt)) {
 			return;
@@ -339,7 +345,6 @@ function RouteComponent() {
 		// el refetch sigue en vuelo → la carta desaparecería ("Esperando datos") por 1-2s. Esperar
 		// al refetch hace el handoff (stream → data persistida) sin parpadeo.
 		let cancelled = false;
-		let failedRunRetry: ReturnType<typeof setTimeout> | undefined;
 		const invalidate = () =>
 			queryClient.invalidateQueries({
 				queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
@@ -354,16 +359,13 @@ function RouteComponent() {
 			// object:null → contaría como "Versión N" vacía (fantasma). Un segundo refetch corto
 			// después recoge la marca de error y la saca de la numeración.
 			if (currentRunStatus !== "COMPLETED") {
-				failedRunRetry = setTimeout(() => {
+				failedRunRetryRef.current = setTimeout(() => {
 					invalidate();
 				}, 1500);
 			}
 		});
 		return () => {
 			cancelled = true;
-			if (failedRunRetry) {
-				clearTimeout(failedRunRetry);
-			}
 		};
 	}, [runHandle, currentRunFinishedAt, currentRunStatus, queryClient, generationId]);
 

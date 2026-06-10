@@ -192,6 +192,31 @@ export const caseyLettersTask = schemaTask({
 	},
 });
 
+// Las secciones de la versión previa pueden venir como HTML: updateArtifact persiste lo
+// que emite el editor TipTap (getHTML()). Espejo mínimo del htmlToText del FE
+// (letters-artifact-utils.ts): breaks de bloque → saltos de línea, tags fuera, entities
+// básicas decodificadas. Sin esto, <PREVIOUS_LETTER> llevaría <p>/<br> al prompt.
+const HTML_TAG_RE = /<\/?(?:p|br|strong|em|ul|ol|li)(?:>|\s|\/)/i;
+const BR_RE = /<br\s*\/?>/gi;
+const BLOCK_CLOSE_RE = /<\/(?:p|div|li)>/gi;
+const ANY_TAG_RE = /<[^>]+>/g;
+const ENTITY_RE = /&(amp|lt|gt|nbsp|quot|#39);/g;
+const ENTITY_MAP: Record<string, string> = { "#39": "'", amp: "&", gt: ">", lt: "<", nbsp: " ", quot: '"' };
+const MULTI_NEWLINE_RE = /\n{3,}/g;
+
+function htmlSectionToText(value: string): string {
+	if (!HTML_TAG_RE.test(value)) {
+		return value;
+	}
+	return value
+		.replace(BR_RE, "\n")
+		.replace(BLOCK_CLOSE_RE, "\n\n")
+		.replace(ANY_TAG_RE, "")
+		.replace(ENTITY_RE, (_, entity: string) => ENTITY_MAP[entity] ?? "")
+		.replace(MULTI_NEWLINE_RE, "\n\n")
+		.trim();
+}
+
 /**
  * Última versión válida de la carta (objeto completo, sin error), excluyendo la fila
  * pendiente de ESTE run. Como `updateArtifact` sobreescribe el mismo row, esto incluye
@@ -223,7 +248,7 @@ async function loadPreviousLetterPlaintext(
 		return;
 	}
 	const { greeting, body, closing, signature } = parsed.data;
-	return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}`;
+	return [greeting, body, closing, signature].map(htmlSectionToText).join("\n\n");
 }
 
 /**
