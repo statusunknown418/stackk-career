@@ -462,18 +462,18 @@ function RouteComponent() {
 				/>
 
 				<LettersArtifactPanel
-					activeMessageId={activeMessageId}
-					activeVersion={activeVersion > 0 ? activeVersion : 1}
-					artifact={artifact}
-					currentLanguage={data.generation.language}
-					error={error}
-					generationCount={generationCount}
-					hasContent={Boolean(artifact) || data.latestArtifact !== null}
-					isPending={isGenerating}
-					isStreaming={isStreaming}
-					maxVersions={maxVersions}
+					letter={{
+						activeMessageId,
+						activeVersion: activeVersion > 0 ? activeVersion : 1,
+						artifact,
+						currentLanguage: data.generation.language,
+						generationCount,
+						hasContent: Boolean(artifact) || data.latestArtifact !== null,
+						maxVersions,
+					}}
 					onSaveArtifact={onSaveArtifact}
 					onTriggerAsync={onTriggerAsync}
+					run={{ error, isPending: isGenerating, isStreaming }}
 				/>
 			</section>
 

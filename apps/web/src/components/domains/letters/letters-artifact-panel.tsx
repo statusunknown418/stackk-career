@@ -39,22 +39,32 @@ import {
 	toCompleteCoverLetter,
 } from "./letters-artifact-utils";
 
-interface LettersArtifactPanelProps {
+/** Snapshot de la carta que el panel muestra: contenido, versión activa y cuota. La arma la route. */
+export interface LetterView {
 	/** Id del artifact-message actualmente mostrado (al que se guardan las ediciones). */
 	activeMessageId: string | null;
 	activeVersion: number;
 	artifact: DeepPartial<CoverLetter> | undefined;
-	className?: string;
 	currentLanguage: CoverLetterLanguage;
-	error?: Error;
 	generationCount: number;
 	hasContent: boolean;
+	maxVersions: number;
+}
+
+/** Estado del run de CASEY en curso (o su error), compartido por header, toolbar y cuerpo. */
+export interface LetterRunState {
+	error?: Error;
 	isPending: boolean;
 	isStreaming: boolean;
-	maxVersions: number;
+}
+
+interface LettersArtifactPanelProps {
+	className?: string;
+	letter: LetterView;
 	/** Persiste ediciones manuales del usuario sobre la carta mostrada (no es una regeneración). */
 	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
+	run: LetterRunState;
 }
 
 // Ease-out exponencial para el cross-fade del cuerpo (carta editable ↔ vista de streaming):
@@ -198,32 +208,19 @@ const REGENERATE_PRESETS: readonly RegeneratePreset[] = [
 ] as const;
 
 interface ArtifactToolbarProps {
-	artifact: DeepPartial<CoverLetter> | undefined;
-	currentLanguage: CoverLetterLanguage;
-	generationCount: number;
-	hasContent: boolean;
-	isPending: boolean;
-	isStreaming: boolean;
-	maxVersions: number;
+	letter: LetterView;
 	onTriggerAsync: (input: { extraPrompt?: string; language?: CoverLetterLanguage }) => Promise<unknown>;
+	run: LetterRunState;
 }
 
 /** Botonera del header: Copiar / Descargar PDF / Regenerar. (La edición es inline, no hay botón.) */
-function ArtifactToolbar({
-	artifact,
-	currentLanguage,
-	generationCount,
-	hasContent,
-	isPending,
-	isStreaming,
-	maxVersions,
-	onTriggerAsync,
-}: ArtifactToolbarProps) {
+function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) {
+	const { artifact, currentLanguage, generationCount, hasContent, maxVersions } = letter;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
 	const formattedText = formatCoverLetterAsText(artifact);
-	const canExport = Boolean(formattedText) && !isPending;
-	const canRegenerate = hasContent && !isPending;
+	const canExport = Boolean(formattedText) && !run.isPending;
+	const canRegenerate = hasContent && !run.isPending;
 
 	const visiblePresets = REGENERATE_PRESETS.filter(
 		(p) => !p.onlyIfCurrentLanguage || p.onlyIfCurrentLanguage === currentLanguage
@@ -307,7 +304,7 @@ function ArtifactToolbar({
 							type="button"
 							variant="outline"
 						>
-							<ArrowsClockwiseIcon className={cn((isPending || isStreaming) && "animate-spin")} weight="bold" />
+							<ArrowsClockwiseIcon className={cn((run.isPending || run.isStreaming) && "animate-spin")} weight="bold" />
 							Regenerar
 						</Button>
 					}
@@ -400,20 +397,14 @@ function ReadOnlyLetter({
  *   - "Regenerar" — popover con presets de tono que firen un nuevo run.
  */
 export function LettersArtifactPanel({
-	activeMessageId,
-	activeVersion,
-	artifact,
 	className,
-	currentLanguage,
-	error,
-	generationCount,
-	hasContent,
-	isPending,
-	isStreaming,
-	maxVersions,
+	letter,
 	onSaveArtifact,
 	onTriggerAsync,
+	run,
 }: LettersArtifactPanelProps) {
+	const { activeMessageId, activeVersion, artifact, hasContent, maxVersions } = letter;
+	const { error, isPending, isStreaming } = run;
 	// Skeletons durante TODO el generado (incluida la ventana previa al stream, mientras CASEY lee
 	// el CV), no solo en streaming — así no hay un hueco frío entre "disparé" y "primer chunk".
 	const showLoaders = !error && isPending;
@@ -485,16 +476,7 @@ export function LettersArtifactPanel({
 					</FrameDescription>
 				</div>
 
-				<ArtifactToolbar
-					artifact={artifact}
-					currentLanguage={currentLanguage}
-					generationCount={generationCount}
-					hasContent={hasContent}
-					isPending={isPending}
-					isStreaming={isStreaming}
-					maxVersions={maxVersions}
-					onTriggerAsync={onTriggerAsync}
-				/>
+				<ArtifactToolbar letter={letter} onTriggerAsync={onTriggerAsync} run={run} />
 			</FrameHeader>
 
 			<AnimatePresence initial={false} mode="popLayout">
