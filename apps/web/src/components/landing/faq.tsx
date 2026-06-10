@@ -51,13 +51,11 @@ export function Faq() {
 								<span className="absolute inset-0 animate-[live-pulse_2.4s_ease-in-out_infinite] rounded-full bg-oxblood" />
 								<span className="relative size-2 rounded-full bg-oxblood" />
 							</span>
-							<span className="font-mono text-foreground/70 text-xs uppercase tracking-widest">
-								FAQ · Respuestas humanas
-							</span>
+							<span className="font-mono text-foreground/70 text-xs uppercase">FAQ · Respuestas humanas</span>
 						</motion.div>
 
 						<motion.h2
-							className="mt-5 font-bold font-display text-[clamp(2.1rem,4.6vw,3.4rem)] text-foreground leading-none tracking-tight"
+							className="mt-4 font-display text-5xl text-foreground leading-none tracking-tight"
 							style={reduced ? undefined : { y: titleY, transformOrigin: "left top" }}
 						>
 							Preguntas <br className="hidden sm:block" />
@@ -169,7 +167,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 				onClick={onToggle}
 				type="button"
 			>
-				<span className="mt-1 font-mono text-foreground/55 text-xs tabular-nums tracking-widest">
+				<span className="mt-1 font-mono text-foreground/55 text-xs tabular-nums">
 					{(idx + 1).toString().padStart(2, "0")}
 				</span>
 				<span className="flex-1 font-display font-medium text-foreground text-lg leading-snug tracking-tight transition-colors duration-200 group-hover/row:text-foreground">

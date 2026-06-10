@@ -82,16 +82,16 @@ const TOOLS: readonly Tool[] = [
 
 export function Tools() {
 	return (
-		<section className="relative border-border border-y bg-foreground/[0.025] px-6 py-20 md:py-28" id="herramientas">
-			<div className="mx-auto max-w-7xl">
+		<section className="relative border-border border-y px-6 py-20 md:py-28" id="herramientas">
+			<div className="mx-auto max-w-6xl">
 				<Reveal>
 					<header className="mb-12 grid gap-6 md:grid-cols-12 md:items-end md:gap-10">
 						<div className="md:col-span-8">
-							<div className="flex items-center gap-3 font-mono text-foreground/60 text-xs uppercase tracking-widest">
+							<div className="flex items-center gap-3 font-mono text-foreground/60 text-xs uppercase">
 								<span aria-hidden="true" className="h-px w-7 bg-oxblood" />
 								<span>Todo lo que necesitas</span>
 							</div>
-							<h2 className="mt-4 max-w-[16ch] font-bold font-display text-[clamp(2rem,4.4vw,3.5rem)] text-foreground leading-none tracking-tight">
+							<h2 className="mt-4 max-w-[16ch] font-display text-5xl text-foreground leading-none tracking-tight">
 								<WordReveal>Herramientas con IA. Un coach de verdad.</WordReveal>
 							</h2>
 						</div>
@@ -130,19 +130,19 @@ function ToolRow({ idx, tool }: { idx: number; tool: Tool }) {
 	let tagLabel = "IA";
 	let tagWeight: "bold" | "fill" = "fill";
 	let tagClass =
-		"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full border border-border px-2.5 py-1 font-mono text-xs text-foreground/55 uppercase tracking-widest md:col-span-1 md:justify-self-end md:self-center";
+		"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full border border-border px-2.5 py-1 font-mono text-xs text-foreground/55 uppercase md:col-span-1 md:justify-self-end md:self-center";
 	if (isHuman) {
 		TagIcon = UserIcon;
 		tagLabel = "Humano";
 		tagWeight = "bold";
 		tagClass =
-			"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full bg-oxblood px-2.5 py-1 font-medium font-mono text-xs text-neutral-950 uppercase tracking-widest md:col-span-1 md:justify-self-end md:self-center";
+			"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full bg-oxblood px-2.5 py-1 font-mono text-xs text-neutral-950 uppercase md:col-span-1 md:justify-self-end md:self-center";
 	} else if (isSoon) {
 		TagIcon = ClockIcon;
 		tagLabel = "Muy pronto";
 		tagWeight = "bold";
 		tagClass =
-			"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full border border-foreground/30 border-dashed px-2.5 py-1 font-mono text-xs text-foreground/60 uppercase tracking-widest md:col-span-1 md:justify-self-end md:self-center";
+			"col-span-2 inline-flex w-fit items-center gap-1.5 self-start rounded-full border border-foreground/30 border-dashed px-2.5 py-1 font-mono text-xs text-foreground/60 uppercase md:col-span-1 md:justify-self-end md:self-center";
 	}
 
 	return (
@@ -164,17 +164,15 @@ function ToolRow({ idx, tool }: { idx: number; tool: Tool }) {
 
 			{/* Title + index */}
 			<div className="flex flex-col">
-				<span className="font-mono text-foreground/35 text-xs uppercase tabular-nums tracking-widest">
-					{tool.index} / 06
-				</span>
+				<span className="font-mono text-foreground/35 text-xs uppercase tabular-nums">{tool.index} / 06</span>
 				<h3
-					className={`mt-1 font-display font-semibold leading-tight tracking-tight ${
+					className={`mt-1 font-display font-light leading-tight tracking-tight ${
 						isHuman ? "text-[1.35rem] text-foreground md:text-[1.5rem]" : "text-foreground text-xl"
 					}`}
 				>
 					{tool.name}
 				</h3>
-				<span className="mt-1.5 font-mono text-foreground/45 text-xs uppercase tracking-widest transition-colors duration-300 group-hover:text-oxblood">
+				<span className="mt-1.5 font-mono text-foreground/45 text-xs uppercase transition-colors duration-300 group-hover:text-oxblood">
 					{tool.plan}
 				</span>
 			</div>

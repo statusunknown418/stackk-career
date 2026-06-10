@@ -24,7 +24,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
  * the matching CSS gradients (the static fallback) live in `index.css` as `.hero-glow-*`
  * so the values are colocated with the rest of the brand color tokens.
  */
-const MESH_COLORS = ["#0d120e", "#13301d", "#1f5130", "#37a559", "#0b0f0c"];
+const MESH_COLORS = ["#000201", "#001b04", "#003c0f", "#1c6a21", "#000501"];
 
 export function HeroAuroraShader() {
 	const { theme } = useTheme();
@@ -40,21 +40,21 @@ export function HeroAuroraShader() {
 	const showShader = isDark && isDesktop && !reduced && inView;
 
 	return (
-		<div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" ref={ref}>
+		<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" ref={ref}>
 			{showShader ? (
-				<div className="absolute inset-0 opacity-[0.68] [mask-image:radial-gradient(125%_110%_at_28%_22%,black_38%,transparent_82%)]">
+				<div className="mask-[radial-gradient(90%_65%_at_55%_12%,black_0%,transparent_65%)] absolute inset-0 opacity-100">
 					<MeshGradient
 						colors={MESH_COLORS}
-						distortion={1}
-						speed={0.6}
+						distortion={0.7}
+						speed={0.8}
 						style={{ width: "100%", height: "100%" }}
-						swirl={0.85}
+						swirl={0.3}
 					/>
 				</div>
 			) : (
 				<div
 					className={
-						isDark ? "hero-glow-dark absolute inset-0 opacity-80" : "hero-glow-light absolute inset-0 opacity-90"
+						isDark ? "hero-glow-dark absolute inset-0 opacity-0" : "hero-glow-light absolute inset-0 opacity-0"
 					}
 				/>
 			)}

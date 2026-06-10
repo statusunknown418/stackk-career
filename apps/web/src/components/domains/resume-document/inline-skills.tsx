@@ -10,10 +10,11 @@ import {
 } from "@stackk-career/schemas/db/resume-blocks";
 import { sortLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { type ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { getBlockKey } from "@/components/domains/resume-document/block-key-registry";
 import { useCreateBlock, useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
@@ -26,36 +27,6 @@ const LANGUAGE_PROFICIENCIES: readonly SkillProficiency[] = ["basic", "conversat
 
 const skillProficiencyOptions = buildLabeledOptions(SKILL_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
 const languageProficiencyOptions = buildLabeledOptions(LANGUAGE_PROFICIENCIES, SKILL_PROFICIENCY_LABELS);
-
-interface SkillChipProps {
-	blockId: number;
-	deleteLabel: string;
-	onDelete: () => void;
-	proficiencyControl: ReactNode;
-	valueEditor: ReactNode;
-}
-
-const SkillChip = ({ blockId, deleteLabel, onDelete, proficiencyControl, valueEditor }: SkillChipProps) => (
-	<li
-		className="group/chip relative grid min-w-0 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2 transition-colors focus-within:border-border hover:border-border sm:grid-cols-[minmax(0,1fr)_7rem] sm:items-center"
-		data-block-id={blockId}
-	>
-		<div className="min-w-0">{valueEditor}</div>
-		<div className="min-w-0 transition-transform duration-200 ease-out sm:justify-self-end sm:group-focus-within/chip:-translate-x-8 [@media(hover:hover)]:sm:group-hover/chip:-translate-x-8">
-			{proficiencyControl}
-		</div>
-		<Button
-			aria-label={deleteLabel}
-			className="pointer-events-none absolute top-2 right-2 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/chip:pointer-events-auto group-focus-within/chip:translate-x-0 group-focus-within/chip:opacity-100 sm:top-1/2 sm:-translate-y-1/2 sm:group-focus-within/chip:-translate-y-1/2 [@media(hover:hover)]:group-hover/chip:pointer-events-auto [@media(hover:hover)]:group-hover/chip:translate-x-0 [@media(hover:hover)]:group-hover/chip:opacity-100 [@media(hover:hover)]:sm:group-hover/chip:-translate-y-1/2"
-			onClick={onDelete}
-			size="icon-sm"
-			type="button"
-			variant="destructive-ghost"
-		>
-			<TrashIcon />
-		</Button>
-	</li>
-);
 
 export const InlineSkills = withForm({
 	defaultValues: resumeFormDefaults,
@@ -122,82 +93,142 @@ export const InlineSkills = withForm({
 					.catch(() => undefined);
 			};
 
+			const lineIndex = blockIndexById.get(primaryLine.id);
+
 			return (
-				<div className="space-y-2" data-block-id={primaryLine.id}>
-					<ul className="grid gap-2 lg:grid-cols-2">
-						{items.map((item) => {
-							if (item.blockType !== "skill_item") {
-								return null;
-							}
-							const itemIndex = blockIndexById.get(item.id);
-							if (itemIndex === undefined) {
-								return null;
-							}
-							return (
-								<SkillChip
-									blockId={item.id}
-									deleteLabel="Eliminar idioma"
-									key={getBlockKey(item.id)}
-									onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-									proficiencyControl={
-										<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
-											{(field) => (
-												<Select
-													items={proficiencyOptions}
-													onValueChange={(next) =>
-														field.handleChange(next === "" || next === null ? undefined : (next as SkillProficiency))
-													}
-													value={(field.state.value ?? "") as string}
-												>
-													<SelectTrigger
-														aria-label="Nivel"
-														className="h-8 min-h-0 w-full min-w-0 gap-1 rounded-md border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50 sm:w-28"
-														onBlur={field.handleBlur}
-														size="sm"
-													>
-														<SelectValue placeholder="Nivel" />
-													</SelectTrigger>
+				<div className="space-y-2 py-1" data-block-id={primaryLine.id}>
+					<div className="group/line grid grid-cols-[max-content_1fr] items-baseline gap-x-2.5 font-serif text-sm">
+						<div className="flex select-none items-baseline pr-1 text-left font-bold text-foreground">
+							{lineIndex === undefined ? (
+								<span className="select-none">Idiomas:</span>
+							) : (
+								<>
+									<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
+										{(field) => (
+											<InlineTextEditor
+												className="w-full rounded-sm font-bold font-serif text-sm hover:bg-accent/40"
+												onBlur={() => field.handleBlur()}
+												onChange={(value) => field.handleChange(value)}
+												placeholder="Categoría"
+												value={(field.state.value ?? "") as string}
+												variant="plain"
+											/>
+										)}
+									</form.AppField>
+									<span className="mr-1 select-none font-bold">:</span>
+								</>
+							)}
+						</div>
+						<div className="flex flex-1 flex-wrap items-center gap-x-1 gap-y-1">
+							{items.map((item, itemIdx) => {
+								if (item.blockType !== "skill_item") {
+									return null;
+								}
+								const itemIndex = blockIndexById.get(item.id);
+								if (itemIndex === undefined) {
+									return null;
+								}
+								const isLast = itemIdx === items.length - 1;
 
-													<SelectPopup>
-														{proficiencyOptions.map((option) => (
-															<SelectItem key={option.value} value={option.value}>
-																{option.label}
-															</SelectItem>
-														))}
-													</SelectPopup>
-												</Select>
-											)}
-										</form.AppField>
-									}
-									valueEditor={
-										<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
-											{(field) => (
-												<InlineTextEditor
-													className="w-full min-w-0 break-words px-1 hover:bg-transparent focus:bg-transparent"
-													onBlur={() => field.handleBlur()}
-													onChange={(value) => field.handleChange(value)}
-													placeholder={itemPlaceholder}
-													value={(field.state.value ?? "") as string}
-													variant="plain"
-												/>
-											)}
-										</form.AppField>
-									}
-								/>
-							);
-						})}
-					</ul>
+								return (
+									<div className="flex items-center" key={item.id}>
+										<Popover>
+											<PopoverTrigger className="cursor-pointer rounded px-1 py-0.5 font-medium font-sans text-foreground text-sm transition-all duration-150 hover:bg-accent/80">
+												{item.content.value || "[Nuevo idioma]"}
+												{item.content.proficiency && (
+													<span className="ml-1 font-normal text-muted-foreground text-xs">
+														({SKILL_PROFICIENCY_LABELS[item.content.proficiency]})
+													</span>
+												)}
+											</PopoverTrigger>
+											<PopoverContent className="w-80 p-4">
+												<div className="flex flex-col gap-3">
+													<div className="flex items-center justify-between">
+														<span className="font-bold text-foreground text-sm">Editar idioma</span>
+														<Button
+															aria-label="Eliminar idioma"
+															onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
+															size="icon-sm"
+															type="button"
+															variant="destructive-ghost"
+														>
+															<TrashIcon className="size-4" />
+														</Button>
+													</div>
+													<div className="flex flex-col gap-3">
+														<div className="flex flex-col gap-1">
+															<span className="font-semibold text-[11px] text-muted-foreground">Idioma</span>
+															<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
+																{(field) => (
+																	<input
+																		className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+																		onBlur={() => field.handleBlur()}
+																		onChange={(e) => field.handleChange(e.target.value)}
+																		placeholder={itemPlaceholder}
+																		type="text"
+																		value={(field.state.value ?? "") as string}
+																	/>
+																)}
+															</form.AppField>
+														</div>
+														<div className="flex flex-col gap-1">
+															<span className="font-semibold text-[11px] text-muted-foreground">Nivel (Opcional)</span>
+															<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
+																{(field) => (
+																	<Select
+																		items={proficiencyOptions}
+																		onValueChange={(next) =>
+																			field.handleChange(
+																				next === "" || next === null ? undefined : (next as SkillProficiency)
+																			)
+																		}
+																		value={(field.state.value ?? "") as string}
+																	>
+																		<SelectTrigger aria-label="Nivel" className="w-full" size="sm">
+																			<SelectValue placeholder="Ninguno / Sin especificar" />
+																		</SelectTrigger>
+																		<SelectPopup>
+																			<SelectItem value="">Ninguno / Sin especificar</SelectItem>
+																			{proficiencyOptions.map((option) => (
+																				<SelectItem key={option.value} value={option.value}>
+																					{option.label}
+																				</SelectItem>
+																			))}
+																		</SelectPopup>
+																	</Select>
+																)}
+															</form.AppField>
+														</div>
+													</div>
+												</div>
+											</PopoverContent>
+										</Popover>
+										{!isLast && (
+											<span className="pointer-events-none mr-1.5 select-none text-muted-foreground/60">,</span>
+										)}
+									</div>
+								);
+							})}
 
-					<Button disabled={createBlock.isPending} onClick={handleAddItem} size="sm" type="button" variant="ghost">
-						<PlusIcon />
-						{addItemLabel}
-					</Button>
+							<Button
+								className="h-6 w-6 rounded-full opacity-0 transition-opacity duration-200 group-hover/line:opacity-100"
+								disabled={createBlock.isPending}
+								onClick={handleAddItem}
+								size="icon-xs"
+								title={addItemLabel}
+								type="button"
+								variant="ghost"
+							>
+								<PlusIcon className="size-3.5" />
+							</Button>
+						</div>
+					</div>
 				</div>
 			);
 		}
 
 		return (
-			<div className="space-y-4">
+			<div className="space-y-3 py-1">
 				{lines.map((line) => {
 					if (line.blockType !== "skill_line") {
 						return null;
@@ -225,42 +256,47 @@ export const InlineSkills = withForm({
 					};
 
 					return (
-						<div className="group/line flex flex-col gap-2" data-block-id={line.id} key={getBlockKey(line.id)}>
-							<div className="relative min-w-0">
-								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
-									{(field) => (
-										<div className="min-w-0">
-											<InlineTextEditor
-												className="w-full min-w-0"
-												onBlur={() => field.handleBlur()}
-												onChange={(value) => field.handleChange(value)}
-												placeholder="Categoría"
-												value={(field.state.value ?? "") as string}
-												variant="subtitle"
-											/>
-										</div>
-									)}
-								</form.AppField>
+						<div
+							className="group/line grid grid-cols-[max-content_1fr] items-baseline gap-x-2.5 font-serif text-sm"
+							data-block-id={line.id}
+							key={getBlockKey(line.id)}
+						>
+							<div className="group/label relative flex select-none items-baseline pr-1 text-left font-bold text-foreground">
 								<Button
 									aria-label="Eliminar categoría"
-									className="pointer-events-none absolute top-0 right-0 translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/line:pointer-events-auto group-focus-within/line:translate-x-0 group-focus-within/line:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/line:pointer-events-auto [@media(hover:hover)]:group-hover/line:translate-x-0 [@media(hover:hover)]:group-hover/line:opacity-100"
+									className="pointer-events-none absolute top-0.5 left-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/label:pointer-events-auto group-focus-within/label:translate-x-0 group-focus-within/label:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/label:pointer-events-auto [@media(hover:hover)]:group-hover/label:translate-x-0 [@media(hover:hover)]:group-hover/label:opacity-100"
 									data-pending={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									disabled={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
-									size="icon-sm"
+									size="icon-xs"
 									type="button"
 									variant="destructive-ghost"
 								>
 									{deleteBlock.isPending && deleteBlock.variables?.id === line.id ? (
-										<Spinner className="size-4" />
+										<Spinner className="size-3" />
 									) : (
-										<TrashIcon />
+										<TrashIcon className="size-3.5" />
 									)}
 								</Button>
+								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
+									{(field) => (
+										<div className="min-w-0 pl-6">
+											<InlineTextEditor
+												className="w-full rounded-sm font-bold font-serif text-sm hover:bg-accent/40"
+												onBlur={() => field.handleBlur()}
+												onChange={(value) => field.handleChange(value)}
+												placeholder="Categoría"
+												value={(field.state.value ?? "") as string}
+												variant="plain"
+											/>
+										</div>
+									)}
+								</form.AppField>
+								<span className="mr-1 select-none font-bold">:</span>
 							</div>
 
-							<ul className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
-								{items.map((item) => {
+							<div className="flex flex-1 flex-wrap items-center gap-x-1 gap-y-1">
+								{items.map((item, itemIdx) => {
 									if (item.blockType !== "skill_item") {
 										return null;
 									}
@@ -268,72 +304,100 @@ export const InlineSkills = withForm({
 									if (itemIndex === undefined) {
 										return null;
 									}
+									const isLast = itemIdx === items.length - 1;
+
 									return (
-										<SkillChip
-											blockId={item.id}
-											deleteLabel="Eliminar habilidad"
-											key={getBlockKey(item.id)}
-											onDelete={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
-											proficiencyControl={
-												<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
-													{(field) => (
-														<Select
-															items={proficiencyOptions}
-															onValueChange={(next) =>
-																field.handleChange(
-																	next === "" || next === null ? undefined : (next as SkillProficiency)
-																)
-															}
-															value={(field.state.value ?? "") as string}
-														>
-															<SelectTrigger
-																aria-label="Nivel"
-																className="h-8 min-h-0 w-full min-w-0 gap-1 rounded-md border-0 bg-transparent px-1.5 text-muted-foreground text-xs shadow-none before:hidden hover:bg-accent/50 sm:w-28"
-																onBlur={field.handleBlur}
-																size="sm"
+										<div className="flex items-center" key={item.id}>
+											<Popover>
+												<PopoverTrigger className="cursor-pointer rounded px-1 py-0.5 font-medium font-sans text-foreground text-sm transition-all duration-150 hover:bg-accent/80">
+													{item.content.value || "[Nueva habilidad]"}
+													{item.content.proficiency && (
+														<span className="ml-1 font-normal text-muted-foreground text-xs">
+															({SKILL_PROFICIENCY_LABELS[item.content.proficiency]})
+														</span>
+													)}
+												</PopoverTrigger>
+												<PopoverContent className="w-80 p-4">
+													<div className="flex flex-col gap-3">
+														<div className="flex items-center justify-between">
+															<span className="font-bold text-foreground text-sm">Editar habilidad</span>
+															<Button
+																aria-label="Eliminar habilidad"
+																onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
+																size="icon-sm"
+																type="button"
+																variant="destructive-ghost"
 															>
-																<SelectValue placeholder="Nivel" />
-															</SelectTrigger>
-															<SelectPopup>
-																{proficiencyOptions.map((option) => (
-																	<SelectItem key={option.value} value={option.value}>
-																		{option.label}
-																	</SelectItem>
-																))}
-															</SelectPopup>
-														</Select>
-													)}
-												</form.AppField>
-											}
-											valueEditor={
-												<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
-													{(field) => (
-														<InlineTextEditor
-															className="w-full min-w-0 break-words px-1 hover:bg-transparent focus:bg-transparent"
-															onBlur={() => field.handleBlur()}
-															onChange={(value) => field.handleChange(value)}
-															placeholder={itemPlaceholder}
-															value={(field.state.value ?? "") as string}
-															variant="plain"
-														/>
-													)}
-												</form.AppField>
-											}
-										/>
+																<TrashIcon className="size-4" />
+															</Button>
+														</div>
+														<div className="flex flex-col gap-3">
+															<div className="flex flex-col gap-1">
+																<span className="font-semibold text-[11px] text-muted-foreground">Habilidad</span>
+																<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
+																	{(field) => (
+																		<input
+																			className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+																			onBlur={() => field.handleBlur()}
+																			onChange={(e) => field.handleChange(e.target.value)}
+																			placeholder={itemPlaceholder}
+																			type="text"
+																			value={(field.state.value ?? "") as string}
+																		/>
+																	)}
+																</form.AppField>
+															</div>
+															<div className="flex flex-col gap-1">
+																<span className="font-semibold text-[11px] text-muted-foreground">
+																	Nivel (Opcional)
+																</span>
+																<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
+																	{(field) => (
+																		<Select
+																			items={proficiencyOptions}
+																			onValueChange={(next) =>
+																				field.handleChange(
+																					next === "" || next === null ? undefined : (next as SkillProficiency)
+																				)
+																			}
+																			value={(field.state.value ?? "") as string}
+																		>
+																			<SelectTrigger aria-label="Nivel" className="w-full" size="sm">
+																				<SelectValue placeholder="Ninguno / Sin especificar" />
+																			</SelectTrigger>
+																			<SelectPopup>
+																				<SelectItem value="">Ninguno / Sin especificar</SelectItem>
+																				{proficiencyOptions.map((option) => (
+																					<SelectItem key={option.value} value={option.value}>
+																						{option.label}
+																					</SelectItem>
+																				))}
+																			</SelectPopup>
+																		</Select>
+																	)}
+																</form.AppField>
+															</div>
+														</div>
+													</div>
+												</PopoverContent>
+											</Popover>
+											{!isLast && (
+												<span className="pointer-events-none mr-1.5 select-none text-muted-foreground/60">,</span>
+											)}
+										</div>
 									);
 								})}
-							</ul>
 
-							<div className="transition-opacity group-focus-within/line:opacity-100 [@media(hover:hover)]:group-hover/line:opacity-100">
 								<Button
+									className="h-6 w-6 rounded-full opacity-0 transition-opacity duration-200 group-hover/line:opacity-100"
 									disabled={createBlock.isPending}
 									onClick={handleAddItem}
-									size="sm"
+									size="icon-xs"
+									title={addItemLabel}
 									type="button"
 									variant="ghost"
 								>
-									<PlusIcon />
-									{addItemLabel}
+									<PlusIcon className="size-3.5" />
 								</Button>
 							</div>
 						</div>
@@ -341,13 +405,13 @@ export const InlineSkills = withForm({
 				})}
 
 				<Button
-					className="w-max"
+					className="flex h-7 w-max items-center gap-1.5 rounded-full border border-border/80 border-dashed px-3 py-1 font-semibold text-muted-foreground text-xs opacity-0 transition-opacity duration-200 focus-within:opacity-100 hover:border-primary/50 hover:text-foreground hover:opacity-100 group-hover/section:opacity-100"
 					disabled={createBlock.isPending}
 					onClick={handleAddCategory}
 					type="button"
 					variant="ghost"
 				>
-					<PlusIcon />
+					<PlusIcon className="size-3.5" />
 					Agregar categoría
 				</Button>
 			</div>

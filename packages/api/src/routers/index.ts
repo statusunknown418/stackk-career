@@ -14,6 +14,7 @@ import { resumeAnalysesRouter } from "./resume-analyses";
 import { resumesRouter } from "./resumes";
 import { suggestionsRouter } from "./suggestions";
 import { viewerRouter } from "./viewer";
+import { waitlistRouter } from "./waitlist";
 
 export const appRouter = {
 	healthCheck: publicProcedure.handler(({ context }) => {
@@ -36,6 +37,7 @@ export const appRouter = {
 	resumeAnalyses: resumeAnalysesRouter,
 	blocks: blocksRouter,
 	suggestions: suggestionsRouter,
+	waitlist: waitlistRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

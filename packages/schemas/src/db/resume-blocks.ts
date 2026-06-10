@@ -32,6 +32,7 @@ export const entryContentSchema = z.object({
 	subtitle: z.string().optional(),
 	location: z.string().optional(),
 	isRemote: z.boolean().default(false),
+	workSetting: z.enum(["remote", "hybrid", "onsite"]).optional().default("onsite"),
 	startDate: z.string().optional(),
 	endDate: z.string().nullable().optional(),
 	isCurrent: z.boolean().default(false),

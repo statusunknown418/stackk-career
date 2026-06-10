@@ -1,23 +1,16 @@
 "use client";
 
-import {
-	ArrowUpRightIcon,
-	InstagramLogoIcon,
-	LinkedinLogoIcon,
-	ShieldCheckIcon,
-	XLogoIcon,
-} from "@phosphor-icons/react";
+import { ArrowUpRightIcon, InstagramLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { FOOTER_COLUMNS } from "./data";
 
-const SOCIAL_LINKS = [
+export const SOCIAL_LINKS = [
 	{ href: "https://linkedin.com/company/assendia", Icon: LinkedinLogoIcon, label: "LinkedIn" },
-	{ href: "https://instagram.com/assendia", Icon: InstagramLogoIcon, label: "Instagram" },
-	{ href: "https://x.com/assendia", Icon: XLogoIcon, label: "X" },
+	{ href: "https://www.instagram.com/statusunknown418/", Icon: InstagramLogoIcon, label: "Instagram" },
 ];
 
 const LEGAL_LINKS = [
-	{ href: "/privacy", label: "Privacidad" },
+	{ href: "/policy", label: "Privacidad" },
 	{ href: "/terms", label: "Términos" },
 	{ href: "/data", label: "Tus datos" },
 ];
@@ -28,7 +21,7 @@ export function LandingFooter() {
 	const reduced = useReducedMotion();
 
 	return (
-		<footer className="relative mt-16 overflow-hidden border-border border-t bg-foreground/[0.015]">
+		<footer className="relative mt-16 overflow-hidden">
 			{/* Hairline accent above the signature, like a printer's mark */}
 			<div aria-hidden="true" className="absolute top-0 left-1/2 h-px w-24 -translate-x-1/2 bg-oxblood/60" />
 
@@ -38,14 +31,13 @@ export function LandingFooter() {
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
-					className="mt-10 max-w-160 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-foreground/80 leading-tight tracking-tight md:mt-14"
+					className="mt-4 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-muted-foreground leading-tight tracking-tight"
 					initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
 					transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.15 }}
 					viewport={{ once: true, margin: "-10% 0px" }}
 					whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
 				>
-					Hecho en Lima para toda LATAM.
-					<span className="mt-1 block text-foreground">De dónde estás, a dónde quieres llegar.</span>
+					<span className="block text-center text-foreground">De donde estás, a donde quieres llegar.</span>
 				</motion.p>
 
 				{/* COLUMNS */}
@@ -80,13 +72,13 @@ export function LandingFooter() {
 				{/* LEGAL ROW */}
 				<div className="mt-14 flex flex-col-reverse items-start justify-between gap-7 border-border border-t pt-7 md:flex-row md:items-center">
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-						<p className="font-mono text-foreground/65 text-xs uppercase tracking-widest">© 2026 ASSENDIA SAC</p>
+						<p className="font-mono text-foreground/65 text-xs uppercase">© 2026 ASSENDIA SAC</p>
 						<LegalDot />
 						<ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
 							{LEGAL_LINKS.map((link, idx) => (
 								<li className="flex items-center gap-3" key={link.href}>
 									<a
-										className="group/legal relative font-mono text-foreground/65 text-xs uppercase tracking-widest transition-colors duration-200 hover:text-foreground"
+										className="group/legal relative font-mono text-foreground/65 text-xs uppercase transition-colors duration-200 hover:text-foreground"
 										href={link.href}
 									>
 										{link.label}
@@ -103,8 +95,6 @@ export function LandingFooter() {
 								</li>
 							))}
 						</ul>
-						<LegalDot />
-						<DataProtectionPill />
 					</div>
 
 					<ul className="flex items-center gap-1.5">
@@ -122,16 +112,14 @@ function SignatureMark() {
 	return (
 		<div className="relative">
 			<div className="flex items-center justify-between gap-4">
-				<span className="font-mono text-foreground/55 text-xs uppercase tracking-widest">Tu carrera, en serio.</span>
-				<span className="font-mono text-foreground/55 text-xs uppercase tabular-nums tracking-widest">
-					Est. 2026 · Perú
-				</span>
+				<span className="font-mono text-foreground/55 text-xs uppercase">Tu carrera, en serio.</span>
+				<span className="font-mono text-foreground/55 text-xs uppercase tabular-nums">Est. 2026 · Perú</span>
 			</div>
 
 			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"
-					className="block w-full text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground leading-none tracking-tighter"
+					className="block w-full bg-linear-to-t from-primary bg-clip-text text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground text-transparent leading-none tracking-tighter"
 				>
 					ASSENDIA
 				</span>
@@ -154,7 +142,7 @@ function FooterColumn({ col, colIdx }: FooterColumnProps) {
 			viewport={{ once: true, margin: "-5% 0px" }}
 			whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
 		>
-			<h2 className="mb-5 font-mono text-foreground/75 text-xs uppercase tracking-widest">{col.heading}</h2>
+			<h2 className="mb-5 font-mono text-foreground/75 text-xs uppercase">{col.heading}</h2>
 			<ul className="flex flex-col gap-2.5">
 				{col.links.map((link) => (
 					<li key={link.label}>
@@ -183,15 +171,6 @@ function FooterColumn({ col, colIdx }: FooterColumnProps) {
 
 function LegalDot() {
 	return <span aria-hidden="true" className="size-[3px] rounded-full bg-foreground/25" />;
-}
-
-function DataProtectionPill() {
-	return (
-		<span className="inline-flex items-center gap-1.5 rounded-full border border-oxblood/35 bg-oxblood/10 px-2.5 py-1 font-mono text-foreground/85 text-xs uppercase tracking-widest">
-			<ShieldCheckIcon className="text-oxblood" size={11} weight="fill" />
-			Datos protegidos · Ley 29733 PE
-		</span>
-	);
 }
 
 interface SocialIconProps {

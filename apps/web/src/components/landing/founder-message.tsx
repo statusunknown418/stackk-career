@@ -201,7 +201,7 @@ export function FounderMessage() {
 			>
 				{/* Eyebrow — small editorial marker */}
 				<motion.div
-					className="col-span-12 col-start-1 flex items-center gap-3 font-mono text-neutral-950/70 text-xs uppercase tracking-widest md:col-span-10 md:col-start-2"
+					className="col-span-12 col-start-1 flex items-center gap-3 font-mono text-neutral-950/70 text-xs uppercase md:col-span-10 md:col-start-2"
 					initial={reduced ? false : { opacity: 0, y: 8 }}
 					transition={{ duration: 0.6, ease: EASE_OUT_QUINT }}
 					viewport={{ margin: "-15% 0px", once: true }}
@@ -253,7 +253,7 @@ export function FounderMessage() {
 						<span className="font-display-italic font-light text-base text-neutral-950 leading-tight md:text-xl">
 							Equipo ASSENDIA
 						</span>
-						<span className="font-mono text-neutral-950/65 text-xs uppercase tracking-widest">Lima, Perú</span>
+						<span className="font-mono text-neutral-950/65 text-xs uppercase">Lima, Perú</span>
 					</div>
 					<div aria-hidden="true" className="ml-auto hidden h-px flex-1 bg-foreground/25 md:block" />
 				</motion.footer>

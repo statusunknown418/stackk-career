@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3228f7ad-48b9-4a2c-8318-91e7758b48c4",
-  "prevId": "dee2a58c-c5d9-4130-b098-e9c597bba183",
+  "id": "8bff6d38-434a-4643-ae47-732ab61a6396",
+  "prevId": "286a71e9-43bb-40cd-9bd1-ef04fdbee412",
   "tables": {
     "account": {
       "name": "account",
@@ -609,6 +609,21 @@
           "notNull": false,
           "autoincrement": false
         },
+        "resumeId": {
+          "name": "resumeId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'es'"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "integer",
@@ -625,9 +640,14 @@
         }
       },
       "indexes": {
-        "generation_owner_id_idx": {
-          "name": "generation_owner_id_idx",
-          "columns": ["owner"],
+        "generation_owner_type_idx": {
+          "name": "generation_owner_type_idx",
+          "columns": ["owner", "type"],
+          "isUnique": false
+        },
+        "generation_resume_id_idx": {
+          "name": "generation_resume_id_idx",
+          "columns": ["resumeId"],
           "isUnique": false
         }
       },
@@ -1544,6 +1564,64 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "waitlist": {
+      "name": "waitlist",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "waitlist_email": {
+          "name": "waitlist_email",
+          "columns": ["email"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
