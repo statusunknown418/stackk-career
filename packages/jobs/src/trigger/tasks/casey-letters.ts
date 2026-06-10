@@ -2,10 +2,11 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
+import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, ne } from "drizzle-orm";
 import {
 	CASEY_LETTERS_FALLBACK_MODEL,
 	CASEY_LETTERS_MODEL,
@@ -65,6 +66,12 @@ export const caseyLettersTask = schemaTask({
 		metadata.set("step", "loading_resume");
 		const resumePlaintext = await loadResumeAsPlaintext(db, resumeId, userId);
 
+		// Las instrucciones del usuario (presets "más formal", "en inglés manteniendo el
+		// contenido", o texto libre) son REVISIONES sobre la carta actual: sin pasársela,
+		// el modelo regenera de cero y se pierden las ediciones manuales. Un re-run sin
+		// extraPrompt sí es una regeneración desde cero a propósito.
+		const previousLetter = extraPrompt ? await loadPreviousLetterPlaintext(db, generationId, messageId) : undefined;
+
 		metadata.set("step", "generating");
 		const result = await runCaseyLettersAgent({
 			extraPrompt,
@@ -72,6 +79,7 @@ export const caseyLettersTask = schemaTask({
 			jobDescription,
 			language,
 			model: modelForAttempt,
+			previousLetter,
 			resumePlaintext,
 			signal,
 			userId,
@@ -165,6 +173,40 @@ export const caseyLettersTask = schemaTask({
 		await db.update(messages).set({ error: message }).where(eq(messages.id, payload.messageId));
 	},
 });
+
+/**
+ * Última versión válida de la carta (objeto completo, sin error), excluyendo la fila
+ * pendiente de ESTE run. Como `updateArtifact` sobreescribe el mismo row, esto incluye
+ * las ediciones manuales del usuario. Devuelve undefined si todavía no hay versión
+ * (primera generación con instrucciones) — el agente escribe desde cero en ese caso.
+ */
+async function loadPreviousLetterPlaintext(
+	db: ReturnType<typeof getTriggerDb>,
+	generationId: string,
+	pendingMessageId: string
+): Promise<string | undefined> {
+	const [prev] = await db
+		.select({ object: messages.object })
+		.from(messages)
+		.where(
+			and(
+				eq(messages.generationId, generationId),
+				eq(messages.objectType, COVER_LETTER_OBJECT_TYPE),
+				isNull(messages.error),
+				isNotNull(messages.object),
+				ne(messages.id, pendingMessageId)
+			)
+		)
+		.orderBy(desc(messages.order), desc(messages.createdAt))
+		.limit(1);
+
+	const parsed = coverLetterSchema.safeParse(prev?.object);
+	if (!parsed.success) {
+		return;
+	}
+	const { greeting, body, closing, signature } = parsed.data;
+	return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}`;
+}
 
 /**
  * Serialize the candidate's resume to a structured plain-text representation
