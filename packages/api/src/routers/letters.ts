@@ -260,15 +260,7 @@ export const lettersRouter = {
 			throw new ORPCError("BAD_REQUEST", { message: "La carta no tiene un puesto definido" });
 		}
 
-		// Language override: si el caller pidió cambiar idioma para este turno (preset
-		// "En inglés" / "En español"), persistimos el switch en el generation row antes
-		// de disparar el task. Así re-triggers posteriores arrancan directamente en el
-		// idioma nuevo sin volver a pasar el override.
 		const effectiveLanguage = input.language ?? gen.language;
-		if (input.language && input.language !== gen.language) {
-			await context.db.update(generations).set({ language: input.language }).where(eq(generations.id, gen.id));
-			context.log?.set({ languageChange: { from: gen.language, to: input.language } });
-		}
 
 		const existing = await context.db
 			.select({ order: messages.order, error: messages.error, objectType: messages.objectType })
@@ -285,6 +277,18 @@ export const lettersRouter = {
 			throw new ORPCError("BAD_REQUEST", {
 				message: `Alcanzaste el límite de ${maxVersions} versiones para esta carta.`,
 			});
+		}
+
+		// Language override: si el caller pidió cambiar idioma para este turno (preset
+		// "En inglés" / "En español"), persistimos el switch para que re-triggers
+		// posteriores arranquen en el idioma nuevo. Va DESPUÉS del check de límite (un
+		// user al tope no debe quedar con el idioma cambiado sin carta que lo refleje)
+		// y se invalida el cache al toque — aunque el dispatch de abajo falle, lo que
+		// sirvan list/get debe coincidir con la DB.
+		if (input.language && input.language !== gen.language) {
+			await context.db.update(generations).set({ language: input.language }).where(eq(generations.id, gen.id));
+			await invalidateViewerLetters(context.db, userId);
+			context.log?.set({ languageChange: { from: gen.language, to: input.language } });
 		}
 
 		// `order` monotónico = max(order) + 1. NO usar el count de filas: es racy con
