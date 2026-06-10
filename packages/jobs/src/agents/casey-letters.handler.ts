@@ -3,6 +3,7 @@ import { getClichePhrases } from "@stackk-career/schemas/ai/cover-letter-validat
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { type LanguageModel, Output, stepCountIs, streamText, tool } from "ai";
 import { z } from "zod";
+import { envNumber } from "../lib/env-number";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
 // Modelo de CASEY vía el AI gateway = Gemini 3.1 Flash Lite (mismo slug que usa
@@ -10,8 +11,8 @@ import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 export const CASEY_LETTERS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const CASEY_LETTERS_FALLBACK_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 
-const CASEY_TIMEOUT_MS = Number(process.env.CASEY_LETTERS_TIMEOUT_MS ?? 4 * 60 * 1000); // 4 min
-const CASEY_MAX_STEPS = Number(process.env.CASEY_LETTERS_MAX_STEPS ?? 6); // 3 tools + buffer
+const CASEY_TIMEOUT_MS = envNumber(process.env.CASEY_LETTERS_TIMEOUT_MS, 4 * 60 * 1000); // 4 min
+const CASEY_MAX_STEPS = envNumber(process.env.CASEY_LETTERS_MAX_STEPS, 6); // 3 tools + buffer
 
 export interface RunCaseyLettersInput {
 	extraPrompt?: string | undefined;
@@ -61,7 +62,7 @@ Example C — CV SPARSE / estudiante postulando a primera práctica. The CV only
 \`\`\`json
 {
   "greeting": "Estimada/o equipo de Yape:",
-  "body": "Postulo al rol de Practicante de Data Science. Soy estudiante de pregrado en la Pontificia Universidad Católica del Perú; las cursos de la carrera me están dando las bases de estadística, programación y análisis de datos que necesito para empezar a trabajar.\\n\\nMe interesa Yape porque es uno de los pocos productos peruanos que opera a escala masiva, y quiero entrar al mundo de data science aplicado a un problema real de pagos en vez de a un dataset académico. Busco una pasantía donde aportar lo que vengo aprendiendo y crecer con un equipo que ya está resolviendo cosas difíciles.",
+  "body": "Postulo al rol de Practicante de Data Science. Soy estudiante de pregrado en la Pontificia Universidad Católica del Perú; los cursos de la carrera me están dando las bases de estadística, programación y análisis de datos que necesito para empezar a trabajar.\\n\\nMe interesa Yape porque es uno de los pocos productos peruanos que opera a escala masiva, y quiero entrar al mundo de data science aplicado a un problema real de pagos en vez de a un dataset académico. Busco una pasantía donde aportar lo que vengo aprendiendo y crecer con un equipo que ya está resolviendo cosas difíciles.",
   "closing": "Quedo atento a coordinar una conversación cuando puedan.",
   "signature": "Atentamente,\\nValeria Cáceres\\na20214567@pucp.edu.pe"
 }

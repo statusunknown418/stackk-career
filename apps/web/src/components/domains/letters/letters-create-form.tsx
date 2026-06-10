@@ -1,6 +1,7 @@
 "use client";
 
-import { createCoverLetterGenerationInputSchema } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import { coverLetterLanguageSchema, createCoverLetterGenerationInputSchema } from "@stackk-career/schemas/api/letters";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -35,7 +36,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 		value: resume.id,
 	}));
 
-	const languageOptions = [
+	const languageOptions: ReadonlyArray<{ label: string; value: CoverLetterLanguage }> = [
 		{ label: "Español (LATAM)", value: "es" },
 		{ label: "English (US)", value: "en" },
 	];
@@ -51,13 +52,22 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 		})
 	);
 
+	// Tipar el objeto (en vez de castear `language`) deja que useForm infiera el union
+	// correcto sin type assertions.
+	const defaultValues: {
+		jobPosition: string;
+		jobDescription: string;
+		language: CoverLetterLanguage;
+		resumeId: string;
+	} = {
+		jobPosition: "",
+		jobDescription: "",
+		language: "es",
+		resumeId: resumes[0]?.id ?? "",
+	};
+
 	const form = useForm({
-		defaultValues: {
-			jobPosition: "",
-			jobDescription: "",
-			language: "es" as "es" | "en",
-			resumeId: resumes[0]?.id ?? "",
-		},
+		defaultValues,
 		onSubmit: ({ value }) => {
 			const parsed = createCoverLetterGenerationInputSchema.safeParse(value);
 			if (!parsed.success) {
@@ -152,7 +162,11 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 						<FieldLabel htmlFor="letters-language">Idioma de la carta</FieldLabel>
 						<Select
 							items={languageOptions}
-							onValueChange={(value) => field.handleChange((value ?? "es") as "es" | "en")}
+							onValueChange={(value) => {
+								// Narrowing real con el schema en vez de castear lo que devuelva el Select.
+								const parsed = coverLetterLanguageSchema.safeParse(value);
+								field.handleChange(parsed.success ? parsed.data : "es");
+							}}
 							value={field.state.value}
 						>
 							<SelectTrigger id="letters-language">

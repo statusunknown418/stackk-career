@@ -220,8 +220,12 @@ export function LettersChatPanel({
 					}
 					const trimmed = extraPrompt.trim();
 					try {
-						await onTriggerAsync({ extraPrompt: trimmed || undefined });
-						setExtraPrompt("");
+						const result = await onTriggerAsync({ extraPrompt: trimmed || undefined });
+						// `undefined` = la route NO disparó (límite alcanzado / run en vuelo): el
+						// usuario ve el diálogo de límite y conserva lo que escribió.
+						if (result !== undefined) {
+							setExtraPrompt("");
+						}
 					} catch {
 						// Toast ya emitido por la route; mantenemos el texto para reintento.
 					}

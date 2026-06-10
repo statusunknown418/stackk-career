@@ -12,6 +12,7 @@ import {
 	CASEY_LETTERS_MODEL,
 	runCaseyLettersAgent,
 } from "../../agents/casey-letters.handler";
+import { envNumber } from "../../lib/env-number";
 import { letterQueue } from "../queues";
 import { coverLetterArtifactStream } from "../streams";
 
@@ -28,7 +29,7 @@ const MAX_RESUME_PLAINTEXT_CHARS = 8000;
  * google/gemini-3.1-flash-lite; hoy primary y fallback apuntan al MISMO slug (no-op), así que esto
  * es solo un hook para poder degradar a otra variante en el último intento a futuro sin tocar el task.
  */
-const FALLBACK_ON_ATTEMPT = Number(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT ?? 3);
+const FALLBACK_ON_ATTEMPT = envNumber(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT, 3);
 
 export const caseyLettersTask = schemaTask({
 	id: "casey-letters",

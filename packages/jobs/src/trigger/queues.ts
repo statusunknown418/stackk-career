@@ -1,4 +1,5 @@
 import { queue } from "@trigger.dev/sdk";
+import { envNumber } from "../lib/env-number";
 
 /**
  * Resume parser fans out 4 LLM calls per run (validation + header + entries bundle + skills bundle).
@@ -32,5 +33,5 @@ export const k02DetailedQueue = queue({
  */
 export const letterQueue = queue({
 	name: "casey-letters",
-	concurrencyLimit: Number(process.env.LETTER_QUEUE_CONCURRENCY ?? 10),
+	concurrencyLimit: envNumber(process.env.LETTER_QUEUE_CONCURRENCY, 10),
 });

@@ -304,9 +304,12 @@ function RouteComponent() {
 				return;
 			}
 			inFlightRef.current = true;
-			clearSelectedVersion();
 			try {
-				return await triggerMutateAsync({ generationId, ...input });
+				const result = await triggerMutateAsync({ generationId, ...input });
+				// Soltar el ?v recién cuando el trigger confirmó: si falla (toast de error),
+				// el usuario no pierde la versión que estaba viendo.
+				clearSelectedVersion();
+				return result;
 			} finally {
 				inFlightRef.current = false;
 			}
@@ -368,6 +371,21 @@ function RouteComponent() {
 			cancelled = true;
 		};
 	}, [runHandle, currentRunFinishedAt, currentRunStatus, queryClient, generationId]);
+
+	// Si la suscripción realtime muere SIN finishedAt (token expirado, SSE caído), el effect
+	// de completion nunca corre: el run pudo terminar bien en el server pero la versión nueva
+	// no aparecería hasta recargar, con el handle muerto colgado. Refrescamos la data
+	// persistida y soltamos el handle — el espejo del cierre normal, para el camino de error.
+	const realtimeError = realtime.error;
+	useEffect(() => {
+		if (!(runHandle && realtimeError)) {
+			return;
+		}
+		queryClient.invalidateQueries({
+			queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
+		});
+		setRunHandle(null);
+	}, [runHandle, realtimeError, queryClient, generationId]);
 
 	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
 	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` se setea ANTES
