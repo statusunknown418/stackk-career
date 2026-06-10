@@ -124,15 +124,28 @@ export const caseyLettersTask = schemaTask({
 				.from(messages)
 				.where(eq(messages.id, messageId))
 				.limit(1);
-			const toolOrder = (artifactRow?.order ?? 1) - 1;
+			if (!artifactRow) {
+				// La fila pendiente la inserta el router ANTES de disparar el task; si no está,
+				// el estado es inválido y un default silencioso escondería el problema.
+				throw new Error(`Artifact message ${messageId} not found for generation ${generationId}`);
+			}
+			const toolOrder = (artifactRow.order ?? 1) - 1;
 
 			// Idempotente ante retries: run() corre de cero en cada reintento (maxAttempts 3),
 			// así que sin esto un intento que insertó tools y luego falló duplicaría los chips
-			// ("CASEY leyó tu CV" ×2). Borramos los tool-rows previos de ESTE turno (mismo
-			// `order` reservado, único por turno con el esquema max+1) antes de re-insertar.
+			// ("CASEY leyó tu CV" ×2). Los tool-rows de ESTE turno se identifican por su vínculo
+			// al artifact (parentMessageId), NO por `order`: con dos triggers concurrentes
+			// (dos pestañas) el esquema max+1 puede colisionar, y borrar por order se llevaría
+			// los chips del turno ajeno.
 			await db
 				.delete(messages)
-				.where(and(eq(messages.generationId, generationId), eq(messages.isTool, true), eq(messages.order, toolOrder)));
+				.where(
+					and(
+						eq(messages.generationId, generationId),
+						eq(messages.isTool, true),
+						eq(messages.parentMessageId, messageId)
+					)
+				);
 
 			await db.insert(messages).values(
 				toolCalls.map((call) => ({
@@ -140,6 +153,7 @@ export const caseyLettersTask = schemaTask({
 					isAssistant: true,
 					isTool: true,
 					order: toolOrder,
+					parentMessageId: messageId,
 					toolMeta: { toolId: call.toolCallId, toolName: call.toolName },
 				}))
 			);
