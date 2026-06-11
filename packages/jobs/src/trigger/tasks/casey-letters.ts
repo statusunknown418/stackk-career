@@ -18,16 +18,16 @@ import { coverLetterArtifactStream } from "../streams";
 
 /**
  * Soft cap on the resume plaintext we inject as tool output. ~8k chars ≈ 2k tokens —
- * cubre con margen un CV típico de LATAM de 2-3 páginas. Si excede, truncamos al
- * último newline antes del cap y dejamos una marca explícita para que el modelo
- * entienda que faltan datos en vez de inventarlos.
+ * comfortably covers a typical 2-3 page LATAM CV. On overflow we truncate at the last
+ * newline before the cap and leave an explicit marker so the model knows data is
+ * missing instead of inventing it.
  */
 const MAX_RESUME_PLAINTEXT_CHARS = 8000;
 
 /**
- * Attempt en el que se cambia a `CASEY_LETTERS_FALLBACK_MODEL`. Modelo de CASEY =
- * google/gemini-3.1-flash-lite; hoy primary y fallback apuntan al MISMO slug (no-op), así que esto
- * es solo un hook para poder degradar a otra variante en el último intento a futuro sin tocar el task.
+ * Attempt at which we switch to `CASEY_LETTERS_FALLBACK_MODEL`. Today primary and fallback
+ * point to the SAME slug (no-op); this is just a hook to degrade to another variant on the
+ * last attempt later without touching the task.
  */
 const FALLBACK_ON_ATTEMPT = envNumber(process.env.CASEY_LETTERS_FALLBACK_ON_ATTEMPT, 3);
 
@@ -48,7 +48,7 @@ export const caseyLettersTask = schemaTask({
 	) => {
 		const db = getTriggerDb();
 
-		// Gemini primary; fallback (mismo slug hoy) en el último intento si los anteriores fallaron.
+		// Gemini primary; fallback (same slug today) on the last attempt if earlier ones failed.
 		const modelForAttempt =
 			ctx.attempt.number >= FALLBACK_ON_ATTEMPT ? CASEY_LETTERS_FALLBACK_MODEL : CASEY_LETTERS_MODEL;
 		const modelSlug = String(modelForAttempt);
@@ -67,10 +67,9 @@ export const caseyLettersTask = schemaTask({
 		metadata.set("step", "loading_resume");
 		const resumePlaintext = await loadResumeAsPlaintext(db, resumeId, userId);
 
-		// Las instrucciones del usuario (presets "más formal", "en inglés manteniendo el
-		// contenido", o texto libre) son REVISIONES sobre la carta actual: sin pasársela,
-		// el modelo regenera de cero y se pierden las ediciones manuales. Un re-run sin
-		// extraPrompt sí es una regeneración desde cero a propósito.
+		// User instructions (tone presets or free text) are REVISIONS of the current letter:
+		// without passing it, the model regenerates from scratch and manual edits are lost.
+		// A re-run without extraPrompt is an intentional from-scratch regeneration.
 		const previousLetter = extraPrompt ? await loadPreviousLetterPlaintext(db, generationId, messageId) : undefined;
 
 		metadata.set("step", "generating");
@@ -87,8 +86,8 @@ export const caseyLettersTask = schemaTask({
 		});
 
 		// Stream partial CoverLetter chunks to the UI as the model emits structured output
-		// (calca el patrón de k02-fast-analysis). El pipe drena el stream — los tools se
-		// ejecutan y el `output` schema-enforced queda completo antes de leerlo.
+		// (mirrors the k02-fast-analysis pattern). The pipe drains the stream — tools run and
+		// the schema-enforced `output` is complete before we read it.
 		const { waitUntilComplete } = coverLetterArtifactStream.pipe(result.partialOutputStream);
 
 		const object = await result.output;
@@ -113,11 +112,10 @@ export const caseyLettersTask = schemaTask({
 			},
 		});
 
-		// Persist each tool call as a chat row so el panel izquierdo los renderiza inline
-		// (fidelidad al diagrama: getUserMetadata → message, getSelectedResume → message).
-		// La API reserva `artifactOrder - 1` para los tools: la query del get ordena por
-		// (order asc, createdAt asc), así que insertarlos un escalón antes del artifact los
-		// renderiza ANTES de su tarjeta de versión (que el chat filtra), no después.
+		// Persist each tool call as a chat row so the left panel renders them inline. The API
+		// reserves `artifactOrder - 1` for tools: the get query orders by (order asc, createdAt
+		// asc), so inserting them one step before the artifact renders them BEFORE its version
+		// card, not after.
 		if (toolCalls.length > 0) {
 			metadata.set("step", "persisting_tool_calls");
 			const [artifactRow] = await db
@@ -126,18 +124,17 @@ export const caseyLettersTask = schemaTask({
 				.where(eq(messages.id, messageId))
 				.limit(1);
 			if (!artifactRow) {
-				// La fila pendiente la inserta el router ANTES de disparar el task; si no está,
-				// el estado es inválido y un default silencioso escondería el problema.
+				// The router inserts the pending row BEFORE triggering the task; if it's missing,
+				// the state is invalid and a silent default would hide the problem.
 				throw new Error(`Artifact message ${messageId} not found for generation ${generationId}`);
 			}
 			const toolOrder = (artifactRow.order ?? 1) - 1;
 
-			// Idempotente ante retries: run() corre de cero en cada reintento (maxAttempts 3),
-			// así que sin esto un intento que insertó tools y luego falló duplicaría los chips
-			// ("CASEY leyó tu CV" ×2). Los tool-rows de ESTE turno se identifican por su vínculo
-			// al artifact (parentMessageId), NO por `order`: con dos triggers concurrentes
-			// (dos pestañas) el esquema max+1 puede colisionar, y borrar por order se llevaría
-			// los chips del turno ajeno.
+			// Idempotent across retries: run() restarts from scratch on each attempt, so without
+			// this an attempt that inserted tools and then failed would duplicate the chips.
+			// THIS turn's tool rows are identified by their artifact link (parentMessageId), NOT
+			// by `order`: with two concurrent triggers the max+1 scheme can collide, and deleting
+			// by order would wipe the other turn's chips.
 			await db
 				.delete(messages)
 				.where(
@@ -164,9 +161,8 @@ export const caseyLettersTask = schemaTask({
 		await db
 			.update(messages)
 			.set({
-				// error: null — la fila pudo quedar marcada (p.ej. "trigger_failed" si el router
-				// vio fallar el dispatch pero el run igual se encoló, o el error de un attempt
-				// previo). Un éxito SIEMPRE limpia la marca: object y error son excluyentes.
+				// error: null — the row may carry a stale mark (e.g. "trigger_failed", or a prior
+				// attempt's error). Success ALWAYS clears it: object and error are exclusive.
 				error: null,
 				model: modelForAttempt,
 				object,
@@ -193,10 +189,10 @@ export const caseyLettersTask = schemaTask({
 	},
 });
 
-// Las secciones de la versión previa pueden venir como HTML: updateArtifact persiste lo
-// que emite el editor TipTap (getHTML()). Espejo mínimo del htmlToText del FE
-// (letters-artifact-utils.ts): breaks de bloque → saltos de línea, tags fuera, entities
-// básicas decodificadas. Sin esto, <PREVIOUS_LETTER> llevaría <p>/<br> al prompt.
+// Previous-version sections may arrive as HTML: updateArtifact persists what the TipTap
+// editor emits (getHTML()). Minimal mirror of the FE's htmlToText (letters-artifact-utils.ts):
+// block breaks → newlines, tags stripped, basic entities decoded. Without it,
+// <PREVIOUS_LETTER> would carry <p>/<br> into the prompt.
 const HTML_TAG_RE = /<\/?(?:p|br|strong|em|ul|ol|li)(?:>|\s|\/)/i;
 const BR_RE = /<br\s*\/?>/gi;
 const BLOCK_CLOSE_RE = /<\/(?:p|div|li)>/gi;
@@ -219,10 +215,9 @@ function htmlSectionToText(value: string): string {
 }
 
 /**
- * Última versión válida de la carta (objeto completo, sin error), excluyendo la fila
- * pendiente de ESTE run. Como `updateArtifact` sobreescribe el mismo row, esto incluye
- * las ediciones manuales del usuario. Devuelve undefined si todavía no hay versión
- * (primera generación con instrucciones) — el agente escribe desde cero en ese caso.
+ * Latest valid letter version (complete object, no error), excluding THIS run's pending
+ * row. Since `updateArtifact` overwrites the same row, this includes manual user edits.
+ * Returns undefined when no version exists yet — the agent writes from scratch then.
  */
 async function loadPreviousLetterPlaintext(
 	db: ReturnType<typeof getTriggerDb>,
@@ -362,9 +357,8 @@ async function loadResumeAsPlaintext(
 		return full;
 	}
 
-	// Truncar al último newline antes del cap mantiene blocks completos (no partimos
-	// un block a la mitad) y la marca explícita evita que el modelo invente lo que
-	// le falta.
+	// Truncating at the last newline before the cap keeps blocks whole, and the explicit
+	// marker keeps the model from inventing what's missing.
 	const head = full.slice(0, MAX_RESUME_PLAINTEXT_CHARS);
 	const lastNewline = head.lastIndexOf("\n");
 	const safeCut = lastNewline > 0 ? head.slice(0, lastNewline) : head;

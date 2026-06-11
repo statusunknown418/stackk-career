@@ -39,9 +39,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 										authClient.signIn.social({
 											provider: "google",
 											newUserCallbackURL: "/setup",
-											// Para users existentes: si vinieron desde un protected route,
-											// usar ese URL; si vinieron directo a /login, mandar a /dash
-											// (NO al landing — Better-Auth defaultea a / si no se pasa).
+											// Existing users: honor the protected-route redirect URL, else
+											// go to /dash (NOT the landing — Better-Auth defaults to / if unset).
 											callbackURL: search.redirect ?? "/dash",
 											fetchOptions: {
 												onRequest: () => {

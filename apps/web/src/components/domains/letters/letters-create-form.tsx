@@ -21,7 +21,7 @@ interface LettersCreateFormProps {
 /**
  * /letters dialog body. Two fields, one mutation.
  *
- * Pattern calca de resume-create-form: bare TanStack `useForm` + a `useMutation`,
+ * Pattern mirrors resume-create-form: bare TanStack `useForm` + a `useMutation`,
  * cache-invalidation on success, navigate to the detail route. The CV selector
  * is populated from `orpc.resumes.list` via Suspense (the parent dialog already
  * waits on the realtime token query so this Suspense boundary is harmless).
@@ -52,8 +52,8 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 		})
 	);
 
-	// Tipar el objeto (en vez de castear `language`) deja que useForm infiera el union
-	// correcto sin type assertions.
+	// Typing the object (instead of casting `language`) lets useForm infer the union
+	// without type assertions.
 	const defaultValues: {
 		jobPosition: string;
 		jobDescription: string;
@@ -163,7 +163,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 						<Select
 							items={languageOptions}
 							onValueChange={(value) => {
-								// Narrowing real con el schema en vez de castear lo que devuelva el Select.
+								// Real narrowing via the schema instead of casting the Select value.
 								const parsed = coverLetterLanguageSchema.safeParse(value);
 								field.handleChange(parsed.success ? parsed.data : "es");
 							}}

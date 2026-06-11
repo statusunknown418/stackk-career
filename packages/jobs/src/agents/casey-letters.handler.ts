@@ -6,8 +6,8 @@ import { z } from "zod";
 import { envNumber } from "../lib/env-number";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
 
-// Modelo de CASEY vía el AI gateway = Gemini 3.1 Flash Lite (mismo slug que usa
-// k02-fast-analysis en el repo). NO Anthropic.
+// CASEY's model via the AI gateway = Gemini 3.1 Flash Lite (same slug k02-fast-analysis
+// uses). NOT Anthropic.
 export const CASEY_LETTERS_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 export const CASEY_LETTERS_FALLBACK_MODEL: LanguageModel = "google/gemini-3.1-flash-lite";
 
@@ -22,9 +22,8 @@ export interface RunCaseyLettersInput {
 	/** Override per attempt — used by the task to fall back on the last retry. */
 	model?: LanguageModel | undefined;
 	/**
-	 * Versión actual de la carta (texto plano) cuando el run es una revisión con
-	 * instrucciones. El mensaje la inyecta en <PREVIOUS_LETTER> para que el modelo
-	 * itere sobre ella en vez de regenerar de cero.
+	 * Current letter version (plain text) when the run is a revision with instructions.
+	 * Injected into <PREVIOUS_LETTER> so the model iterates on it instead of regenerating.
 	 */
 	previousLetter?: string | undefined;
 	resumePlaintext: string;
@@ -325,7 +324,7 @@ ${blocks.examplesBlock}
  *   - Accepts a `model` override so the task can swap to a fallback model
  *     on the last retry attempt as a graceful fallback if the primary keeps failing.
  *
- * Convention calca `k02-detailed-analysis.handler.ts`: typed model, OBJECT_TYPE
+ * Convention mirrors `k02-detailed-analysis.handler.ts`: typed model, OBJECT_TYPE
  * constant, `process.env`-driven timeout, `withTimeout` for the abortable cap,
  * `providerOptions.gateway` for telemetry. `stepCountIs(N)` bounds tool round-trips.
  */
@@ -341,11 +340,11 @@ export function runCaseyLettersAgent({
 	userId,
 }: RunCaseyLettersInput) {
 	const isEnglish = language === "en";
-	// `jobDescription` y `extraPrompt` son texto DEL USUARIO → posible prompt-injection.
-	// Van fenceados y rotulados como data no confiable; el modelo los trata como referencia/
-	// tono, nunca como instrucciones que puedan saltarse las Hard Rules, cambiar idioma,
-	// revelar el prompt, omitir un tool o forzar una negativa. (Amenaza self-scoped: el user
-	// solo degradaría su propia carta — aun así no la dejamos pasar.)
+	// `jobDescription` and `extraPrompt` are USER text → possible prompt injection. They go
+	// fenced and labeled as untrusted data; the model treats them as reference/tone, never as
+	// instructions that can override the Hard Rules, switch language, reveal the prompt, skip
+	// a tool, or force a refusal. (Self-scoped threat — the user would only degrade their own
+	// letter — but still blocked.)
 	const jobDescriptionBlock = jobDescription?.trim() ?? "";
 	const extraPromptBlock = extraPrompt?.trim() ?? "";
 	const blocks = languageBlocks(language);

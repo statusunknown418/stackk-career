@@ -34,8 +34,8 @@ interface RunHandle {
 	runId: string;
 }
 
-// El ?v de la URL solo vale si apunta a una versión válida actual; un id stale/foráneo se ignora
-// (cae a la última versión) para que la vista y el destino de guardado nunca diverjan.
+// The ?v param only counts when it points to a currently valid version; a stale/foreign id is
+// ignored (falls back to the latest) so the view and the save target never diverge.
 function resolveValidVersionId(raw: string | null, versions: ReadonlyArray<{ id: string }>): string | null {
 	if (raw && versions.some((m) => m.id === raw)) {
 		return raw;
@@ -43,8 +43,8 @@ function resolveValidVersionId(raw: string | null, versions: ReadonlyArray<{ id:
 	return null;
 }
 
-// Copy del diálogo SIEMPRE en español (es el idioma de la app; el idioma de la carta solo
-// afecta el contenido del artifact, no la UI). El tope sale del plan (lo devuelve `get`).
+// Dialog copy is ALWAYS Spanish (app UI language; letter language only affects the artifact).
+// The cap comes from the plan (returned by `get`).
 function limitDialogCopy(maxVersions: number): { description: string; ok: string; title: string } {
 	return {
 		title: "Límite de generaciones alcanzado",
@@ -53,8 +53,8 @@ function limitDialogCopy(maxVersions: number): { description: string; ok: string
 	};
 }
 
-// Qué carta mostrar: mientras genera, SOLO el stream (no la carta vieja durante el round-trip);
-// en idle, la versión seleccionada (?v) o la última persistida.
+// Which letter to show: while generating, ONLY the stream (not the old letter during the
+// round-trip); when idle, the selected version (?v) or the latest persisted one.
 function resolveDisplayedArtifact(input: {
 	cachedArtifact: DeepPartial<CoverLetter> | undefined;
 	isGenerating: boolean;
@@ -67,9 +67,8 @@ function resolveDisplayedArtifact(input: {
 	return input.streamedArtifact ?? input.selectedArtifact ?? input.cachedArtifact;
 }
 
-// Forma del skeleton = forma real de una carta (saludo corto, cuerpo largo, cierre medio, firma
-// corta). El cuerpo (`primary`) va en una tarjeta prominente; el resto, filas planas — espeja el
-// layout final para que la transición skeleton → carta no salte.
+// Skeleton shape mirrors a real letter (short greeting, long body, medium closing, short
+// signature) and the final layout, so the skeleton → letter transition doesn't jump.
 const PENDING_LETTER_SECTIONS = [
 	{ bars: ["w-2/5"], key: "greeting", label: "w-16", primary: false },
 	{ bars: ["w-full", "w-11/12", "w-5/6", "w-4/5", "w-3/4", "w-2/3"], key: "body", label: "w-20", primary: true },
@@ -90,7 +89,7 @@ function PendingLetterSection({ bars, label, primary }: { bars: readonly string[
 	);
 }
 
-/** Esqueleto de las 2 columnas mientras el loader trae la carta — evita el blanco + spinner. */
+/** Two-column skeleton while the loader fetches the letter — avoids blank page + spinner. */
 function LetterPagePending() {
 	return (
 		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr] md:grid-rows-1">
@@ -130,8 +129,8 @@ function LetterPagePending() {
 export const Route = createFileRoute("/_protected/dash/letters/$generationId")({
 	component: RouteComponent,
 	pendingComponent: LetterPagePending,
-	// `v` = id del mensaje-artifact de la versión que se está viendo. Vive en la URL para que
-	// sobreviva al refresh y sea compartible; ausente = se muestra la última versión.
+	// `v` = artifact-message id of the viewed version. Lives in the URL so it survives refresh
+	// and is shareable; absent = show the latest version.
 	validateSearch: (search: Record<string, unknown>): { v?: string } => ({
 		v: typeof search.v === "string" && search.v.length > 0 ? search.v : undefined,
 	}),
@@ -153,8 +152,7 @@ function RouteComponent() {
 	const [runHandle, setRunHandle] = useState<RunHandle | null>(null);
 	const [showLimitDialog, setShowLimitDialog] = useState(false);
 
-	// La versión seleccionada vive en la URL (?v=<messageId>): sobrevive al refresh y es
-	// compartible. Sin `v` = se muestra la última versión.
+	// Selected version lives in the URL (?v=<messageId>). No `v` = latest version.
 	const navigate = Route.useNavigate();
 	const rawSelectedVersionId = Route.useSearch().v ?? null;
 	const selectVersion = useCallback(
@@ -166,21 +164,21 @@ function RouteComponent() {
 	const clearSelectedVersion = useCallback(() => {
 		navigate({ replace: true, search: (prev) => ({ ...prev, v: undefined }) });
 	}, [navigate]);
-	// Feedback inmediato al disparar un run: true desde el click hasta que la mutation settlea
-	// (ahí el realtime/isStreaming toma el relevo). Atado al ciclo de la mutation, así que no se cuelga.
+	// Immediate feedback when firing a run: true from click until the mutation settles (then
+	// realtime/isStreaming takes over). Tied to the mutation lifecycle, so it can't hang.
 	const [triggering, setTriggering] = useState(false);
 	const autoTriggeredRef = useRef(false);
-	// Evita disparar dos runs en paralelo (doble-click, auto-trigger + manual). El realtime
-	// solo trackea un runHandle, así que dos triggers simultáneos perderían uno.
+	// Prevents two parallel runs (double-click, auto-trigger + manual). Realtime tracks a
+	// single runHandle, so simultaneous triggers would lose one.
 	const inFlightRef = useRef(false);
 
-	// Versiones válidas = artifacts NO fallidos. Numeración, cuota y cards derivan todas
-	// de esta lista para que coincidan (un run que reventó no es una versión navegable).
+	// Valid versions = non-failed artifacts. Numbering, quota and cards all derive from this
+	// list so they match (a crashed run is not a navigable version).
 	const coverLetterMessages = data
 		? data.messages.filter((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && !m.error)
 		: [];
 	const generationCount = coverLetterMessages.length;
-	// Tope de versiones del plan (lo devuelve el server en `get`). Sin data aún → sin tope.
+	// Plan's version cap (returned by `get`). No data yet → no cap.
 	const maxVersions = data?.maxVersions ?? Number.POSITIVE_INFINITY;
 
 	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
@@ -251,9 +249,8 @@ function RouteComponent() {
 		})
 	);
 
-	// Ediciones manuales del usuario sobre la carta mostrada (no regenera, no consume versión).
-	// Optimista: reflejamos la edición en el caché al instante (con rollback si falla), así
-	// guardar se siente inmediato y no hay parpadeo de refetch al cambiar de versión.
+	// Manual user edits to the shown letter (no regeneration, no version consumed). Optimistic:
+	// reflect the edit in the cache immediately (rollback on failure) so saving feels instant.
 	const updateArtifactMutation = useMutation(
 		orpc.letters.updateArtifact.mutationOptions({
 			onMutate: async ({ artifact, messageId }) => {
@@ -264,8 +261,8 @@ function RouteComponent() {
 						return old;
 					}
 					const messages = old.messages.map((m) => (m.id === messageId ? { ...m, object: artifact } : m));
-					// Si editamos el artifact más reciente, reflejarlo también en `latestArtifact`
-					// (lo que muestra la vista por defecto cuando no hay versión seleccionada).
+					// If the most recent artifact was edited, mirror it in `latestArtifact`
+					// (the default view when no version is selected).
 					const lastArtifact = [...messages]
 						.reverse()
 						.find((m) => m.isAssistant === true && m.objectType === COVER_LETTER_OBJECT_TYPE && m.object !== null);
@@ -308,8 +305,8 @@ function RouteComponent() {
 			inFlightRef.current = true;
 			try {
 				const result = await triggerMutateAsync({ generationId, ...input });
-				// Soltar el ?v recién cuando el trigger confirmó: si falla (toast de error),
-				// el usuario no pierde la versión que estaba viendo.
+				// Drop ?v only after the trigger confirmed: on failure the user keeps the
+				// version they were viewing.
 				clearSelectedVersion();
 				return result;
 			} finally {
@@ -319,10 +316,9 @@ function RouteComponent() {
 		[generationId, triggerMutateAsync, generationCount, maxVersions, clearSelectedVersion]
 	);
 
-	// `id: runHandle?.runId` da estado fresco del hook por run. Sin esto el hook keya su
-	// SWR (run/streams/error) por un useId() estable de por vida del mount, arrastrando el
-	// run COMPLETED y los chunks del run anterior al siguiente (carta stale con Copy/Download
-	// habilitados, sin spinner). Con id por run, cada generación arranca limpia.
+	// `id: runHandle?.runId` gives fresh hook state per run. Without it the hook keys its SWR
+	// by a mount-stable useId(), dragging the previous COMPLETED run and its chunks into the
+	// next one (stale letter with Copy/Download enabled, no spinner).
 	const realtime = useRealtimeRunWithStreams<typeof caseyLettersTask, LetterStreams>(runHandle?.runId, {
 		accessToken: runHandle?.accessToken,
 		enabled: Boolean(runHandle),
@@ -402,22 +398,20 @@ function RouteComponent() {
 		? (coverLetterSchema.safeParse(selectedMessage.object).data ?? undefined)
 		: undefined;
 	const cachedArtifact = data?.latestArtifact ?? undefined;
-	// Streaming mientras haya run activo y aún no haya terminado. Si el hook todavía no
-	// recibió el primer SSE del run nuevo (realtime.run undefined) también contamos como
-	// streaming, para no mostrar la carta vieja con Copy/Download habilitados.
-	// `!realtime.error` evita que un error de suscripción (token expirado, SSE caído) sin `finishedAt`
-	// deje `isStreaming` en true para siempre y trabe Regenerar/Copiar/Descargar hasta recargar.
+	// Streaming while a run is active and unfinished. Before the first SSE of a new run
+	// (realtime.run undefined) we still count as streaming, so the old letter isn't shown with
+	// Copy/Download enabled. `!realtime.error` keeps a dead subscription (expired token, dropped
+	// SSE) without `finishedAt` from leaving isStreaming true forever.
 	const isStreaming = Boolean(runHandle) && !realtime.run?.finishedAt && !realtime.error;
 
-	// "Generando" = hay un run activo (isStreaming) o un trigger recién disparado (triggering).
-	// `triggering` da feedback inmediato al clickear Generar y se limpia al settlear la mutation;
-	// `isStreaming` se limpia con `finishedAt`. Ninguno depende de un flag que pueda quedar colgado.
+	// "Generating" = active run (isStreaming) or a just-fired trigger (triggering). Both clear
+	// on their own lifecycle (mutation settle / finishedAt) — neither can hang.
 	const isGenerating = isStreaming || triggering;
 
-	// Mientras se genera (desde el click, AUNQUE el run aún no arranque) preferimos SOLO el stream:
-	// así no mostramos la carta vieja durante el round-trip a Trigger.dev (se sentía como una traba).
-	// `streamedArtifact` es undefined hasta el primer chunk → el panel muestra skeleton + "CASEY está
-	// leyendo tu CV…" de inmediato. En idle sí caemos a la versión seleccionada / la última persistida.
+	// While generating (from the click, even before the run starts) prefer ONLY the stream so
+	// the old letter isn't shown during the Trigger.dev round-trip. `streamedArtifact` is
+	// undefined until the first chunk → the panel shows the skeleton immediately. When idle,
+	// fall back to the selected / latest persisted version.
 	const artifact = resolveDisplayedArtifact({ cachedArtifact, isGenerating, selectedArtifact, streamedArtifact });
 
 	const error = realtime.error;

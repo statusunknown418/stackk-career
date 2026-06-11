@@ -5,18 +5,16 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Card, CardHeader, CardPanel } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Ease-out exponencial: el contenido entra rápido y asienta suave (sin rebote). Solo animamos
-// opacity + transform (compositor-friendly), nunca propiedades de layout.
+// Exponential ease-out, no bounce. Only animate opacity + transform (compositor-friendly),
+// never layout properties.
 const SECTION_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// Etiqueta de sección: uppercase pequeña y muted. Compartida por la carta editable y la de solo
-// lectura para que ambas vistas tengan la misma jerarquía.
+// Section label, shared by the editable and read-only views so both have the same hierarchy.
 const SECTION_LABEL_CLASS = "flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wide";
 
 /**
- * Anchos (clases tailwind) de las barras del skeleton por sección — reflejan la FORMA real de una
- * carta (saludo corto, cuerpo largo y variado, cierre medio, firma corta) en vez de barras
- * genéricas iguales. Anchos únicos por sección para poder keyear por el ancho (sin index key).
+ * Skeleton bar widths per section — mirror the real shape of a letter (short greeting, long body,
+ * medium closing, short signature). Widths are unique within a section so they can be used as keys.
  */
 export const SECTION_SKELETON_LINES: Record<"greeting" | "body" | "closing" | "signature", readonly string[]> = {
 	greeting: ["w-2/5"],
@@ -26,9 +24,8 @@ export const SECTION_SKELETON_LINES: Record<"greeting" | "body" | "closing" | "s
 };
 
 /**
- * Identidad estática de una sección de la carta (icono, key, etiqueta, si es la sección primaria).
- * Se pasa como un solo objeto `def` para no inflar la firma de `CoverLetterSection` con props que
- * siempre viajan juntos. `key` indexa los anchos del skeleton en SECTION_SKELETON_LINES.
+ * Static identity of a letter section (icon, key, label, primary flag), passed as one `def` object
+ * since these props always travel together. `key` indexes SECTION_SKELETON_LINES.
  */
 export interface LetterSectionDef {
 	icon: Icon;
@@ -43,17 +40,15 @@ interface LetterSectionShellProps {
 	isStreaming: boolean;
 	label: string;
 	/**
-	 * El cuerpo es la sección dominante: va dentro de una Card prominente. El resto (saludo, cierre,
-	 * firma) son filas planas y livianas — así la carta tiene jerarquía y no es un grid de tarjetas
-	 * idénticas.
+	 * The body is the dominant section and gets a prominent Card; the rest stay light so the
+	 * letter has hierarchy instead of a grid of identical cards.
 	 */
 	primary: boolean;
 }
 
 /**
- * Contenedor + etiqueta de una sección de la carta. `primary` (el cuerpo) se envuelve en una Card
- * prominente; las demás secciones son filas planas compactas. Lo usan tanto la vista editable como
- * la de solo lectura para que la jerarquía sea idéntica en ambos modos.
+ * Container + label for a letter section. Used by both the editable and read-only views so the
+ * hierarchy is identical in both modes.
  */
 export function LetterSectionShell({
 	children,
@@ -74,9 +69,8 @@ export function LetterSectionShell({
 		</div>
 	);
 
-	// Todas las secciones tienen su Card. El cuerpo (`primary`) además crece para llenar el alto
-	// disponible del panel (es la sección principal), con un piso de altura — así el panel no queda
-	// con un hueco vacío abajo y la jerarquía se da por tamaño, no por quitarle el box a las demás.
+	// The body (`primary`) grows to fill the panel height (with a min height) so the panel has no
+	// empty gap below and hierarchy comes from size.
 	return (
 		<Card className={primary ? "min-h-44 flex-1" : undefined}>
 			<CardHeader className="px-4 pt-3.5 pb-2">{header}</CardHeader>
@@ -86,18 +80,18 @@ export function LetterSectionShell({
 }
 
 interface CoverLetterSectionProps {
-	/** Identidad estática de la sección (icono, key, etiqueta, primaria). */
+	/** Static section identity (icon, key, label, primary flag). */
 	def: LetterSectionDef;
 	isStreaming: boolean;
 	showSkeleton: boolean;
-	/** Texto plano de la sección (lo que emite CASEY al streamear). Ausente = aún no llega. */
+	/** Plain text streamed by CASEY. Absent = not arrived yet. */
 	text?: string | undefined;
 }
 
 /**
- * One block of the cover-letter artifact (greeting, body, closing, signature) en modo solo lectura
- * / streaming. El contenido cruza skeleton ↔ texto con un fade (no aparece de golpe); el `key`
- * estable evita re-animar en cada chunk del stream, así el llenado se siente fluido.
+ * One block of the cover-letter artifact (greeting, body, closing, signature) in read-only /
+ * streaming mode. Skeleton ↔ text cross-fades; the stable `key` avoids re-animating on every
+ * stream chunk.
  */
 export function CoverLetterSection({ def, isStreaming, showSkeleton, text }: CoverLetterSectionProps) {
 	const reduceMotion = useReducedMotion();
@@ -113,7 +107,7 @@ export function CoverLetterSection({ def, isStreaming, showSkeleton, text }: Cov
 				key="content"
 				transition={{ duration: reduceMotion ? 0 : 0.28, ease: SECTION_EASE }}
 			>
-				{/* Texto plano: React escapa el contenido (sin dangerouslySetInnerHTML); whitespace-pre-line respeta los saltos de línea de CASEY. */}
+				{/* Plain text (React-escaped); whitespace-pre-line preserves CASEY's line breaks. */}
 				<div className="whitespace-pre-line text-sm leading-relaxed">{text}</div>
 			</motion.div>
 		);

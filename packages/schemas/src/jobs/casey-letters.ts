@@ -9,8 +9,8 @@ import { coverLetterLanguageSchema } from "../api/letters";
  * (getUserMetadata, getSelectedResume) and emits the CoverLetter via
  * `Output.object`, streaming partial chunks to the frontend.
  *
- * `language` viene del `generations.language` columna (es/en); el agent
- * arma el system prompt + few-shot block según ese flag.
+ * `language` comes from the `generations.language` column (es/en); the agent
+ * builds the system prompt + few-shot block from that flag.
  */
 export const caseyLettersInputSchema = z.object({
 	messageId: z.string(),

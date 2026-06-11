@@ -14,10 +14,10 @@ export const generationTypes = ["conversation", "resume-creation", "resume-manua
 export type GenerationTypes = (typeof generationTypes)[number];
 
 /**
- * Idiomas soportados para artifacts generados (hoy: cover-letter).
- * `es` cubre LATAM neutro / es-PE — default. `en` agrega flujo en inglés americano
- * para postulaciones a roles internacionales. Para sumar pt o fr: agregar a esta
- * lista + escribir few-shot examples + bloque de "Language" en el system prompt.
+ * Supported languages for generated artifacts (today: cover-letter). `es` covers neutral
+ * LATAM / es-PE — default; `en` is American English for international applications.
+ * To add pt or fr: extend this list + write few-shot examples + a "Language" block in
+ * the system prompt.
  */
 export const generationLanguages = ["es", "en"] as const;
 export type GenerationLanguage = (typeof generationLanguages)[number];
@@ -55,8 +55,8 @@ export const generations = sqliteTable(
 			.notNull(),
 	}),
 	(t) => [
-		// Índices simples por columna (decisión del review: sin compuestos). `owner` conserva
-		// su nombre original — ya existe en la DB remota, así db:push no necesita droppearlo.
+		// Simple per-column indexes (review decision: no composites). `owner` keeps its
+		// original name — it already exists in the remote DB, so db:push won't drop it.
 		index("generation_owner_id_idx").on(t.owner),
 		index("generation_type_idx").on(t.type),
 		index("generation_resume_id_idx").on(t.resumeId),

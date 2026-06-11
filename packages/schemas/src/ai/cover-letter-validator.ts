@@ -1,20 +1,18 @@
 import type { CoverLetterLanguage } from "../api/letters";
 
 /**
- * Frases hueras / clichés que CASEY no debe usar al redactar una cover letter.
+ * Hollow phrases / clichés CASEY must not use in a cover letter. Referenced by the
+ * system prompt (via `getClichePhrases`).
  *
- * El system prompt referencia estas listas (vía `getClichePhrases`) para que el
- * modelo no las emita.
- *
- * Reglas:
- * - Solo frases verdaderamente vacías o tan trilladas que dañan la carta.
- * - Mínimo 2-3 palabras para evitar falsos positivos.
- * - Separadas por idioma: una carta en inglés no se evalúa contra clichés
- *   en español (y viceversa) — ahorra falsos positivos cuando el saludo o
- *   un nombre propio incluye una palabra que en el otro idioma es banneada.
+ * Rules:
+ * - Only truly empty or worn-out phrases that hurt the letter.
+ * - Minimum 2-3 words to avoid false positives.
+ * - Split by language: an English letter isn't checked against Spanish clichés (and
+ *   vice versa) — avoids false positives when a greeting or proper noun contains a
+ *   word banned in the other language.
  */
 export const COVER_LETTER_CLICHE_PHRASES_ES = [
-	// Adjetivos vacíos
+	// Empty adjectives
 	"apasionado",
 	"apasionada",
 	"altamente motivado",
@@ -26,7 +24,7 @@ export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"trabajadora en equipo",
 	"habilidades interpersonales",
 
-	// Filler genérico ("yo me considero…", "tengo la capacidad de…")
+	// Generic filler ("me considero…", "tengo la capacidad de…")
 	"me considero",
 	"tengo la capacidad de",
 	"amplia experiencia",
@@ -34,8 +32,8 @@ export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"siempre dispuesta a aprender",
 	"buscar nuevos retos",
 
-	// Filler vacío que el modelo cae a meter cuando el CV es pobre — observados
-	// en runs reales. Detectan cartas que no citan nada concreto del CV.
+	// Empty filler the model falls back to with sparse CVs — observed in real runs.
+	// These catch letters that cite nothing concrete from the CV.
 	"cuento con conocimientos",
 	"descritas en mi perfil",
 	"descritos en mi perfil",
@@ -48,13 +46,9 @@ export const COVER_LETTER_CLICHE_PHRASES_ES = [
 	"estoy emocionado",
 	"me emociona",
 
-	// REFUSAL / META-COMMENT PATTERNS — el modelo escribe una negativa o
-	// pedido de actualizar el CV en vez de una carta. EJEMPLO REAL observado:
-	// "Mi CV no cuenta con experiencia laboral documentada... Para redactar
-	// una carta honesta y útil necesito que el CV esté completo... Una vez
-	// que actualices tu CV con la información completa, con gusto redacto la
-	// carta de inmediato." Eso NO es una cover letter, es un mensaje al user
-	// disfrazado de artifact. Flageado = prompt drift crítico.
+	// REFUSAL / META-COMMENT PATTERNS — the model writes a refusal or a "please update
+	// your CV" message instead of a letter (observed in real runs). That is a message to
+	// the user disguised as an artifact; flagged = critical prompt drift.
 	"no cuenta con experiencia",
 	"no cuento con experiencia",
 	"necesito que el cv",
@@ -85,7 +79,7 @@ export const COVER_LETTER_CLICHE_PHRASES_EN = [
 	"detail-oriented",
 	"self-starter",
 
-	// Filler genérico que aparece cuando el CV es delgado
+	// Generic filler that shows up with thin CVs
 	"i consider myself",
 	"i have always been",
 	"i'm thrilled to",

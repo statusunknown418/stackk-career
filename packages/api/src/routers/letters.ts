@@ -19,13 +19,13 @@ import { getActiveSubscriptionForUser } from "../services/subscriptions";
 const PREVIEW_MAX_CHARS = 180;
 const WHITESPACE_RE = /\s+/g;
 
-/** Primeras ~180 chars del body en una sola línea, para la card del listado. */
+/** First ~180 chars of the body on one line, for the list card. */
 function toPreview(text: string): string {
 	const clean = text.replace(WHITESPACE_RE, " ").trim();
 	return clean.length > PREVIEW_MAX_CHARS ? `${clean.slice(0, PREVIEW_MAX_CHARS).trimEnd()}…` : clean;
 }
 
-/** El límite `cover_letter_versions` del plan como número (ningún plan lo deja "unlimited" hoy). */
+/** The plan's `cover_letter_versions` limit as a number (no plan leaves it "unlimited" today). */
 function resolveMaxVersions(limit: LimitValue): number {
 	return isUnlimited(limit) ? Number.MAX_SAFE_INTEGER : limit;
 }
@@ -40,8 +40,8 @@ export const lettersRouter = {
 				id: generations.id,
 				title: generations.title,
 				resumeId: generations.resumeId,
-				// CV base de la carta — sirve de diferenciador en el listado (varias cartas
-				// pueden compartir puesto pero usar CVs distintos). leftJoin: el CV puede no existir.
+				// Base CV of the letter — differentiates list entries (several letters can share a
+				// role but use different CVs). leftJoin: the CV may not exist.
 				resumeTitle: resumes.title,
 				language: generations.language,
 				createdAt: generations.createdAt,
@@ -57,8 +57,8 @@ export const lettersRouter = {
 			return rows.map((row) => ({ ...row, preview: null as string | null }));
 		}
 
-		// Preview = body de la última versión de cada carta (messages.text = body del artifact).
-		// Una sola query con `inArray` evita N+1; en JS nos quedamos con el de mayor `order` por carta.
+		// Preview = body of each letter's latest version (messages.text = artifact body).
+		// One `inArray` query avoids N+1; in JS keep the highest `order` per letter.
 		const generationIds = rows.map((row) => row.id);
 		const artifacts = await context.db
 			.select({ generationId: messages.generationId, text: messages.text, order: messages.order })
@@ -139,8 +139,8 @@ export const lettersRouter = {
 				generation: { id: input.generationId },
 			});
 
-			// Una sola query: la generación + (leftJoin) su CV vinculado. Antes el CV era una 2ª
-			// query (round-trip extra); el FE usa resume.title/displayName en /letters/:id.
+			// Single query: the generation + (leftJoin) its linked CV. The FE uses
+			// resume.title/displayName on /letters/:id.
 			const [row] = await context.db
 				.select({
 					id: generations.id,
@@ -180,15 +180,14 @@ export const lettersRouter = {
 				.select()
 				.from(messages)
 				.where(eq(messages.generationId, generation.id))
-				// `rowid` (orden de inserción) como tiebreak final: order + createdAt (segundos)
-				// pueden empatar — los 2 tool-rows comparten order, y dos triggers concurrentes
-				// pueden colisionar en order. El rowid garantiza un render estable y determinista
-				// (tools en orden de llamada; versiones en orden de creación) pase lo que pase.
+				// `rowid` (insertion order) as final tiebreak: order + createdAt (seconds) can tie —
+				// the 2 tool rows share order, and concurrent triggers can collide on order. rowid
+				// guarantees a stable, deterministic render.
 				.orderBy(asc(messages.order), asc(messages.createdAt), sql`rowid`);
 
 			// Latest assistant message tagged as a cover-letter artifact = current letter.
-			// `error === null`: mismo criterio que el FE para "versión válida" — una fila con
-			// object Y error a la vez (run reintentado a medias) no debe mostrarse como carta.
+			// `error === null`: same "valid version" criterion as the FE — a row with both object
+			// AND error (half-retried run) must not show as a letter.
 			const latestArtifactMessage = [...messageRows]
 				.reverse()
 				.find(
@@ -219,7 +218,7 @@ export const lettersRouter = {
 	 * immediately; the task fills `object` + `text` on completion, or `onFailure`
 	 * stamps an `error` on the same row.
 	 *
-	 * Pattern calca `agents.triggerK02FastAnalysis`: concurrencyKey scoped to the
+	 * Pattern mirrors `agents.triggerK02FastAnalysis`: concurrencyKey scoped to the
 	 * generation (so re-triggers on the same letter serialize), idempotencyKey to
 	 * dedupe retries, tags for realtime token scoping on the frontend.
 	 */
@@ -267,8 +266,8 @@ export const lettersRouter = {
 			.from(messages)
 			.where(eq(messages.generationId, gen.id));
 
-		// Tope de versiones por carta, derivado del PLAN del usuario (no hardcodeado). Solo
-		// cuentan artifacts no fallidos. Read-check no atómico: tope "suave" de UX, no de billing.
+		// Per-letter version cap derived from the user's PLAN. Only non-failed artifacts count.
+		// Non-atomic read-check: a soft UX cap, not billing enforcement.
 		const subscription = await getActiveSubscriptionForUser(context.db, userId);
 		const maxVersions = resolveMaxVersions(getEffectiveEntitlements(subscription).cover_letter_versions);
 		const versionCount = existing.filter((m) => m.objectType === COVER_LETTER_OBJECT_TYPE && m.error === null).length;
@@ -279,26 +278,24 @@ export const lettersRouter = {
 			});
 		}
 
-		// Language override: si el caller pidió cambiar idioma para este turno (preset
-		// "En inglés" / "En español"), persistimos el switch para que re-triggers
-		// posteriores arranquen en el idioma nuevo. Va DESPUÉS del check de límite (un
-		// user al tope no debe quedar con el idioma cambiado sin carta que lo refleje)
-		// y se invalida el cache al toque — aunque el dispatch de abajo falle, lo que
-		// sirvan list/get debe coincidir con la DB.
+		// Language override: persist the switch so later re-triggers start in the new language.
+		// Must run AFTER the limit check (a capped user must not end up with a switched language
+		// and no letter reflecting it), and the cache is invalidated immediately so list/get
+		// match the DB even if the dispatch below fails.
 		if (input.language && input.language !== gen.language) {
 			await context.db.update(generations).set({ language: input.language }).where(eq(generations.id, gen.id));
 			await invalidateViewerLetters(context.db, userId);
 			context.log?.set({ languageChange: { from: gen.language, to: input.language } });
 		}
 
-		// `order` monotónico = max(order) + 1. NO usar el count de filas: es racy con
-		// triggers concurrentes y se infla con los tool-messages que el task inserta luego.
+		// Monotonic `order` = max(order) + 1. Do NOT use the row count: racy with concurrent
+		// triggers and inflated by the tool messages the task inserts later.
 		const maxOrder = existing.reduce((acc, m) => Math.max(acc, m.order ?? -1), -1);
 		const baseOrder = maxOrder + 1;
 
-		// Layout del turno para que en el chat los tool-calls salgan ANTES de su versión:
-		//   [extraPrompt del user] → [tool-calls del task @ toolOrder] → [artifact @ artifactOrder]
-		// El task inserta los tools en `artifactOrder - 1` (= toolOrder), justo antes.
+		// Turn layout so tool calls render BEFORE their version in the chat:
+		//   [user extraPrompt] → [task tool-calls @ toolOrder] → [artifact @ artifactOrder]
+		// The task inserts tools at `artifactOrder - 1` (= toolOrder).
 		const toolOrder = input.extraPrompt ? baseOrder + 1 : baseOrder;
 		const artifactOrder = toolOrder + 1;
 
@@ -311,8 +308,7 @@ export const lettersRouter = {
 			});
 		}
 
-		// El id lo genera la DB ($defaultFn en el schema de messages). Lo leemos con
-		// .returning() en vez de fabricarlo a mano.
+		// The id comes from the DB ($defaultFn in the messages schema), read via .returning().
 		const [artifactRow] = await context.db
 			.insert(messages)
 			.values({
@@ -420,9 +416,9 @@ export const lettersRouter = {
 				throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
 			}
 
-			// Scope the update to this generation's artifact message; the objectType guard makes
-			// sure a non-artifact row (user/tool message) can never be overwritten, y el guard de
-			// `error` impide "revivir" una versión fallida por edición (quedaría con object+error).
+			// Scope the update to this generation's artifact message; the objectType guard keeps
+			// non-artifact rows (user/tool messages) from being overwritten, and the `error` guard
+			// keeps an edit from "reviving" a failed version (it would end up with object+error).
 			const updated = await context.db
 				.update(messages)
 				.set({ object: input.artifact, text: input.artifact.body })

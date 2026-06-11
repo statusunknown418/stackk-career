@@ -1,10 +1,9 @@
 import { z } from "zod";
 
 /**
- * Idiomas soportados para el output del cover letter. Refleja
- * `generationLanguages` en el schema de DB — manteneos sincronizado.
- * Lo dejo acá replicado (no importado desde @stackk-career/db) para
- * que el schemas package no dependa del db package.
+ * Supported cover-letter output languages. Mirrors `generationLanguages` in the DB
+ * schema — keep in sync. Replicated here (not imported from @stackk-career/db) so the
+ * schemas package doesn't depend on the db package.
  */
 export const coverLetterLanguageSchema = z.enum(["es", "en"]);
 export type CoverLetterLanguage = z.infer<typeof coverLetterLanguageSchema>;
@@ -13,7 +12,7 @@ export type CoverLetterLanguage = z.infer<typeof coverLetterLanguageSchema>;
  * Input for the dialog at /letters: pick the target job position, which CV to link,
  * and the output language. The API creates a `generation` of type "cover-letter"
  * with the linked resumeId + language and returns its id, which becomes
- * /letters/:generationId. `language` defaults a `es` para LATAM.
+ * /letters/:generationId. `language` defaults to `es` for LATAM.
  */
 export const createCoverLetterGenerationInputSchema = z.object({
 	jobPosition: z.string().trim().min(1).max(500),
@@ -25,13 +24,13 @@ export type CreateCoverLetterGenerationInput = z.infer<typeof createCoverLetterG
 
 /**
  * Input for triggering the CASEY-Letters task from the chat at /letters/:generationId.
- * The task reads jobPosition + resumeId + language from the generation itself; el
- * user's free-form extra prompt se forwardea per turn.
+ * The task reads jobPosition + resumeId + language from the generation itself; the
+ * user's free-form extra prompt is forwarded per turn.
  *
- * `language` opcional: si se pasa, override el valor del generation row Y persiste
- * el cambio en DB (así re-triggers posteriores arrancan en el nuevo idioma sin
- * volver a pasar el override). Usado por el preset "En inglés" / "En español" del
- * artifact panel para cambiar idioma a mitad de hilo sin re-crear la carta.
+ * Optional `language`: when passed, overrides the generation row's value AND persists
+ * the change in DB (so later re-triggers start in the new language without re-passing
+ * the override). Used by the artifact panel's language presets to switch mid-thread
+ * without recreating the letter.
  */
 export const triggerCoverLetterInputSchema = z.object({
 	generationId: z.string().nonempty(),

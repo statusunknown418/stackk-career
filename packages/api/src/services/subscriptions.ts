@@ -401,7 +401,7 @@ async function readCurrentUsage(
 		return rows?.value ?? 0;
 	}
 
-	// `cover_letter_versions` es un cap por carta enforced en `letters.trigger`, no vía assertQuota.
+	// `cover_letter_versions` is a per-letter cap enforced in `letters.trigger`, not via assertQuota.
 	if (limitKey === "cover_letter_versions") {
 		throw new ORPCError("INTERNAL_SERVER_ERROR", {
 			message: "cover_letter_versions se valida en letters.trigger, no por assertQuota",

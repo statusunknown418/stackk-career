@@ -46,9 +46,8 @@ interface ToolPresentation {
 }
 
 /**
- * Chrome del chat panel — SIEMPRE en español (es el idioma de la app: sidebar, panel derecho,
- * etc. también lo están). El idioma de la carta (es/en) afecta SOLO el contenido del artifact,
- * no la UI. No localizar este chrome al idioma de la carta o queda inconsistente con la app.
+ * Chat panel chrome — ALWAYS in Spanish (the app's UI language). The letter language (es/en)
+ * affects ONLY the artifact content; localizing this chrome would be inconsistent with the app.
  */
 const CHAT_COPY = {
 	introPrefix: "Voy a redactar tu carta para",
@@ -110,14 +109,13 @@ export function LettersChatPanel({
 	const [extraPrompt, setExtraPrompt] = useState("");
 	const copy = CHAT_COPY;
 
-	// Versiones navegables = artifacts NO fallidos. La numeración deriva de esta lista
-	// (computada una vez, no por mensaje) para que coincida con el panel derecho y la cuota.
+	// Navigable versions = non-failed artifacts. Numbering derives from this list (computed
+	// once) so it matches the right panel and the quota.
 	const validVersions = messages.filter((m) => isCoverLetterArtifact(m) && !m.error);
 	const latestValidId = validVersions.at(-1)?.id ?? null;
 
-	// Una vez que existe una versión EXITOSA (o en curso), el submit exige texto: regenerar
-	// "sin cambios" vive en el popover del panel derecho. Si solo hubo fallidas, se permite
-	// submit vacío para reintentar.
+	// Once a successful (or in-flight) version exists, submit requires text — "regenerate as-is"
+	// lives in the right panel's popover. If only failures exist, empty submit retries.
 	const hasArtifact = validVersions.length > 0;
 	const canSubmit = !isPending && (extraPrompt.trim().length > 0 || !hasArtifact);
 
@@ -156,7 +154,7 @@ export function LettersChatPanel({
 						}
 
 						if (isCoverLetterArtifact(m)) {
-							// Versión fallida: fila distinta, NO clickeable, fuera de la numeración.
+							// Failed version: distinct row, not clickable, excluded from numbering.
 							if (m.error) {
 								return (
 									<Message from="assistant" key={m.id}>
@@ -221,13 +219,13 @@ export function LettersChatPanel({
 					const trimmed = extraPrompt.trim();
 					try {
 						const result = await onTriggerAsync({ extraPrompt: trimmed || undefined });
-						// `undefined` = la route NO disparó (límite alcanzado / run en vuelo): el
-						// usuario ve el diálogo de límite y conserva lo que escribió.
+						// `undefined` = the route didn't fire (limit reached / run in flight): the
+						// user sees the limit dialog and keeps their text.
 						if (result !== undefined) {
 							setExtraPrompt("");
 						}
 					} catch {
-						// Toast ya emitido por la route; mantenemos el texto para reintento.
+						// Toast already emitted by the route; keep the text for retry.
 					}
 				}}
 			>

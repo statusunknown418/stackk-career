@@ -11,8 +11,8 @@ import { z } from "zod";
  *   messages.objectType = COVER_LETTER_OBJECT_TYPE
  *   messages.object     = CoverLetter
  */
-// `.max()` generoso por campo: una carta real queda muy por debajo, pero corta dumps /
-// echos del prompt inyectados (Output.object rechaza el output si excede → reintento).
+// Generous per-field `.max()`: real letters stay far below, but it cuts injected prompt
+// dumps/echoes (Output.object rejects oversized output → retry).
 export const coverLetterSchema = z.object({
 	greeting: z
 		.string()

@@ -14,9 +14,8 @@ export const Route = createFileRoute("/_protected/dash/letters/")({
 	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.letters.list.queryOptions()),
 });
 
-// Module-level: el Intl.DateTimeFormat es caro de construir y no depende de props/state.
-// `timeStyle: "short"` agrega HH:mm — para distinguir cartas actualizadas el mismo día
-// (request del user al ver 3 cartas con la misma fecha sin hora).
+// Module-level: Intl.DateTimeFormat is expensive to build and depends on no props/state.
+// `timeStyle: "short"` adds HH:mm to distinguish letters updated the same day.
 const dateTimeFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
 
 function RouteComponent() {
@@ -56,7 +55,7 @@ function RouteComponent() {
 									to="/dash/letters/$generationId"
 								>
 									<article className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl border bg-card p-4 transition-all duration-200 group-hover/card:-translate-y-0.5 group-hover/card:border-primary/40 group-hover/card:shadow-lg group-focus-visible/card:border-primary/50 group-focus-visible/card:ring-2 group-focus-visible/card:ring-ring/40">
-										{/* Línea de acento que crece en hover — da profundidad sin recargar */}
+										{/* Accent line that grows on hover */}
 										<span
 											aria-hidden="true"
 											className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover/card:scale-x-100"
