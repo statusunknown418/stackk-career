@@ -185,11 +185,9 @@ function RouteComponent() {
 
 	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
 
-	// Optimista: al disparar, reflejamos en el chat AL INSTANTE la instrucción del user (burbuja)
-	// + el placeholder de la nueva versión, sin esperar el round-trip + refetch. Antes la
-	// instrucción solo aparecía tras el invalidate de onSuccess, por eso "se demoraba" en el
-	// historial. El refetch posterior reemplaza estas filas optimistas por las reales del server;
-	// onError hace rollback. La forma calca un row de `messages` para no romper el tipo del caché.
+	// Optimistic: reflect the user's instruction bubble + the pending version placeholder in
+	// the chat immediately, without waiting for the round-trip. The refetch replaces these
+	// rows with the real ones; onError rolls back.
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
 			onMutate: async ({ extraPrompt }) => {
@@ -201,35 +199,38 @@ function RouteComponent() {
 						return old;
 					}
 					const maxOrder = old.messages.reduce((acc, m) => Math.max(acc, m.order ?? -1), -1);
-					const makeRow = (
-						order: number,
-						fields: { isAssistant: boolean; objectType: string | null; text: string | null }
-					): (typeof old.messages)[number] => ({
-						id: `optimistic_${crypto.randomUUID()}`,
-						generationId,
-						parentMessageId: null,
+					const base = {
 						analysisId: null,
 						content: null,
-						text: fields.text,
-						error: null,
-						model: null,
-						order,
-						toolMeta: null,
-						isTool: false,
-						isAssistant: fields.isAssistant,
-						objectType: fields.objectType,
-						object: null,
 						createdAt: new Date(),
-					});
+						error: null,
+						generationId,
+						isTool: false,
+						model: null,
+						object: null,
+						parentMessageId: null,
+						toolMeta: null,
+					};
 					const trimmed = extraPrompt?.trim();
-					const artifactRow = makeRow(maxOrder + (trimmed ? 2 : 1), {
+					const rows: typeof old.messages = [];
+					if (trimmed) {
+						rows.push({
+							...base,
+							id: `optimistic_${crypto.randomUUID()}`,
+							isAssistant: false,
+							objectType: null,
+							order: maxOrder + 1,
+							text: trimmed,
+						});
+					}
+					rows.push({
+						...base,
+						id: `optimistic_${crypto.randomUUID()}`,
 						isAssistant: true,
 						objectType: COVER_LETTER_OBJECT_TYPE,
+						order: maxOrder + rows.length + 1,
 						text: null,
 					});
-					const rows = trimmed
-						? [makeRow(maxOrder + 1, { isAssistant: false, objectType: null, text: trimmed }), artifactRow]
-						: [artifactRow];
 					return { ...old, messages: [...old.messages, ...rows] };
 				});
 				return { previous };
@@ -328,26 +329,29 @@ function RouteComponent() {
 		id: runHandle?.runId,
 	});
 
-	// Completion manejada por NUESTRO effect, no por el onComplete del hook: ese callback
-	// dispara UNA sola vez por mount (su hasCalledOnCompleteRef nunca se resetea al cambiar
-	// de runId), así que toda regeneración después de la primera dejaría el chat/historial
-	// congelado y filtraría runHandle. Acá refrescamos + limpiamos en CADA run que termina.
+	// Run lifecycle, handled by ONE effect instead of the hook's onComplete (that callback
+	// fires once per mount and never resets across runIds, so every regeneration after the
+	// first would leave the chat frozen). A run "ends" when finishedAt arrives OR when the
+	// subscription dies mid-flight (error): both paths refetch the persisted data first and
+	// only then release the handle — releasing earlier empties `streamedArtifact` while the
+	// refetch is in flight and the letter would blink out for a second.
 	const currentRunFinishedAt = realtime.run?.finishedAt;
 	const currentRunStatus = realtime.run?.status;
-	// El retry del run fallido vive en un ref y se limpia SOLO al desmontar: el propio effect
-	// de completion llama setRunHandle(null), que re-dispara el effect (runHandle es dep) y un
-	// clearTimeout en su cleanup normal mataría el timer recién creado — el segundo refetch
-	// jamás llegaría a correr.
+	const realtimeError = realtime.error;
+	// The failed-run retry lives in a ref cleared only on unmount: this effect calls
+	// setRunHandle(null), which re-runs it (runHandle is a dep), and a clearTimeout in the
+	// regular cleanup would kill the timer right after creating it.
 	const failedRunRetryRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 	useEffect(() => () => clearTimeout(failedRunRetryRef.current), []);
 	useEffect(() => {
-		if (!(runHandle && currentRunFinishedAt)) {
+		if (!(runHandle && (currentRunFinishedAt || realtimeError))) {
 			return;
 		}
-		// Refrescamos la data persistida y SOLO soltamos el runHandle cuando el refetch terminó.
-		// Si lo soltáramos antes, el realtime se deshabilita y `streamedArtifact` se vacía mientras
-		// el refetch sigue en vuelo → la carta desaparecería ("Esperando datos") por 1-2s. Esperar
-		// al refetch hace el handoff (stream → data persistida) sin parpadeo.
+		if (realtimeError && !currentRunFinishedAt) {
+			// The toast is the only durable signal: once the handle is released the hook
+			// re-keys and the error badge/alert disappear on the next render.
+			toast.error("Se perdió la conexión con la generación; recargamos el estado de la carta.");
+		}
 		let cancelled = false;
 		const invalidate = () =>
 			queryClient.invalidateQueries({
@@ -358,10 +362,10 @@ function RouteComponent() {
 				return;
 			}
 			setRunHandle(null);
-			// Run fallido: el `onFailure` del task estampa `error` en la fila EN PARALELO a este
-			// refetch. Si el refetch ganó la race, la fila pendiente llegó con error:null y
-			// object:null → contaría como "Versión N" vacía (fantasma). Un segundo refetch corto
-			// después recoge la marca de error y la saca de la numeración.
+			// Non-completed run: the task's onFailure stamps `error` on the row in parallel
+			// with this refetch. If the refetch won the race, the pending row came back with
+			// no error and no object — it would count as an empty clickable "Version N". A
+			// short follow-up refetch picks up the error mark and drops it from the numbering.
 			if (currentRunStatus !== "COMPLETED") {
 				failedRunRetryRef.current = setTimeout(() => {
 					invalidate();
@@ -371,32 +375,11 @@ function RouteComponent() {
 		return () => {
 			cancelled = true;
 		};
-	}, [runHandle, currentRunFinishedAt, currentRunStatus, queryClient, generationId]);
+	}, [runHandle, currentRunFinishedAt, currentRunStatus, realtimeError, queryClient, generationId]);
 
-	// Si la suscripción realtime muere SIN finishedAt (token expirado, SSE caído), el effect
-	// de completion nunca corre: el run pudo terminar bien en el server pero la versión nueva
-	// no aparecería hasta recargar, con el handle muerto colgado. Refrescamos la data
-	// persistida y soltamos el handle — el espejo del cierre normal, para el camino de error.
-	// El toast es la única señal que perdura: al soltar el handle, el hook se re-keyea y el
-	// Badge/Alert de error del panel desaparecen en el siguiente render.
-	const realtimeError = realtime.error;
-	useEffect(() => {
-		if (!(runHandle && realtimeError)) {
-			return;
-		}
-		toast.error("Se perdió la conexión con la generación; recargamos el estado de la carta.");
-		queryClient.invalidateQueries({
-			queryKey: orpc.letters.get.queryKey({ input: { generationId } }),
-		});
-		setRunHandle(null);
-	}, [runHandle, realtimeError, queryClient, generationId]);
-
-	// Auto-dispara el primer draft cuando el user llega a una carta recién creada
-	// (sin mensajes y sin artifact persistido). `autoTriggeredRef` se setea ANTES
-	// del mutate y NO se resetea en el catch — si el primer disparo falla, el user
-	// re-intenta manual desde el form. Resetearlo causaba loop de retries cuando
-	// isPending transicionaba true→false y el effect re-corría con isEmpty todavía
-	// true.
+	// Auto-fire the first draft when the user lands on a freshly created letter (no messages,
+	// no persisted artifact). The ref is set BEFORE the mutate and never reset on failure —
+	// resetting it caused a retry loop while isEmpty was still true; the user retries manually.
 	const isEmpty = data ? data.messages.length === 0 && data.latestArtifact === null : false;
 	const isPending = triggerMutation.isPending;
 	useEffect(() => {
@@ -406,7 +389,7 @@ function RouteComponent() {
 		if (isEmpty && !runHandle && !isPending) {
 			autoTriggeredRef.current = true;
 			onTriggerAsync({}).catch(() => {
-				// Toast emitido por onError. El user re-intenta manualmente vía el form.
+				// Toast already emitted by onError.
 			});
 		}
 	}, [isEmpty, runHandle, isPending, onTriggerAsync]);

@@ -213,13 +213,14 @@ interface ArtifactToolbarProps {
 	run: LetterRunState;
 }
 
-/** Botonera del header: Copiar / Descargar PDF / Regenerar. (La edición es inline, no hay botón.) */
+/** Header buttons: copy / download PDF / regenerate. (Editing is inline, no button.) */
 function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) {
 	const { artifact, currentLanguage, generationCount, hasContent, maxVersions } = letter;
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
-	const formattedText = formatCoverLetterAsText(artifact);
-	const canExport = Boolean(formattedText) && !run.isPending;
+	// Presence check only — the actual text conversion happens inside the click handlers
+	// (it touches the DOM, which is unavailable during SSR).
+	const canExport = toCompleteCoverLetter(artifact) !== null && !run.isPending;
 	const canRegenerate = hasContent && !run.isPending;
 
 	const visiblePresets = REGENERATE_PRESETS.filter(
@@ -231,11 +232,12 @@ function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) 
 		try {
 			await onTriggerAsync({ extraPrompt: preset.extraPrompt, language: preset.language });
 		} catch {
-			// Toast emitido por la route.
+			// Toast already emitted by the route.
 		}
 	};
 
 	const handleCopy = async () => {
+		const formattedText = formatCoverLetterAsText(artifact);
 		if (!formattedText) {
 			return;
 		}

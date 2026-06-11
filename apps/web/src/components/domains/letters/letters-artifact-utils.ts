@@ -4,60 +4,50 @@ import { jsPDF } from "jspdf";
 
 export const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
 
-// El cuerpo de la carta puede venir como texto plano (lo que escribe CASEY) o como
-// HTML (cuando el usuario lo editó con el editor enriquecido TipTap). Estos helpers
-// normalizan en ambos sentidos — el schema sigue siendo un único `string`.
-// Detecta SOLO los tags que el editor TipTap (StarterKit prose) emite — no cualquier `<token>`.
-// Así un texto plano como `Promise<T>`, `<empresa>` o `<a@b.com>` NO se confunde con HTML: se
-// escapa bien y no se pierde al renderizar / copiar / exportar a PDF.
-const HTML_TAG_RE = /<\/?(?:p|br|strong|em|ul|ol|li)(?:>|\s|\/)/i;
-const BR_RE = /<br\s*\/?>/gi;
-const BLOCK_CLOSE_RE = /<\/(?:p|div|li)>/gi;
-const ANY_TAG_RE = /<[^>]+>/g;
-const MULTI_NEWLINE_RE = /\n{3,}/g;
-const PARAGRAPH_SPLIT_RE = /\n{2,}/;
-
-const isHtmlBody = (value: string): boolean => HTML_TAG_RE.test(value);
+// A letter section is either plain text (what CASEY writes) or TipTap HTML (after a manual
+// edit — the editor persists getHTML()). TipTap always emits block-wrapped markup, so the
+// first character tells them apart without parsing.
+const isTipTapHtml = (value: string): boolean =>
+	value.startsWith("<p") || value.startsWith("<ul") || value.startsWith("<ol");
 
 const escapeHtml = (value: string): string =>
 	value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-/** Texto plano (párrafos separados por `\n\n`) → HTML `<p>…</p>`. Si ya es HTML, lo deja igual. */
+/** Plain text (paragraphs split by blank lines) → `<p>…</p>` HTML for the editor. */
 export function bodyToHtml(value: string): string {
-	if (isHtmlBody(value)) {
+	if (isTipTapHtml(value)) {
 		return value;
 	}
 	return value
-		.split(PARAGRAPH_SPLIT_RE)
+		.split("\n\n")
 		.map((paragraph) => paragraph.trim())
 		.filter(Boolean)
 		.map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
 		.join("");
 }
 
-const ENTITY_RE = /&(amp|lt|gt|nbsp|quot|#39);/g;
-const ENTITY_MAP: Record<string, string> = { "#39": "'", amp: "&", gt: ">", lt: "<", nbsp: " ", quot: '"' };
-
 /**
- * HTML del editor → texto plano (para PDF / copiar / validar vacío). Si ya es plano, lo
- * deja igual. Sin DOMParser a propósito: esto también corre en SSR (formatCoverLetterAsText
- * se evalúa en render) y el input es el set cerrado de tags/entities que emite TipTap,
- * no HTML arbitrario. Breaks de bloque → saltos de línea, tags fuera, entities decodificadas.
+ * Editor HTML → plain text. DOM-based (DOMParser), so it must only run inside event
+ * handlers (copy / download / save) — never during render, which also runs on the server.
  */
 function htmlToText(value: string): string {
-	if (!isHtmlBody(value)) {
+	if (!isTipTapHtml(value)) {
 		return value;
 	}
-	return value
-		.replace(BR_RE, "\n")
-		.replace(BLOCK_CLOSE_RE, "\n\n")
-		.replace(ANY_TAG_RE, "")
-		.replace(ENTITY_RE, (_, entity: string) => ENTITY_MAP[entity] ?? "")
-		.replace(MULTI_NEWLINE_RE, "\n\n")
-		.trim();
+	const doc = new DOMParser().parseFromString(value, "text/html");
+	for (const br of doc.body.querySelectorAll("br")) {
+		br.replaceWith("\n");
+	}
+	const blocks = doc.body.querySelectorAll("p, li");
+	if (blocks.length === 0) {
+		return (doc.body.textContent ?? "").trim();
+	}
+	return Array.from(blocks, (block) => (block.textContent ?? "").trim())
+		.filter(Boolean)
+		.join("\n\n");
 }
 
-/** Extrae el artifact completo (4 secciones string) para editar, o null si está incompleto. */
+/** Narrows a (possibly streaming) artifact to a complete 4-section letter, or null. */
 export function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undefined): CoverLetter | null {
 	if (!artifact) {
 		return null;
@@ -75,9 +65,8 @@ export function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undef
 }
 
 /**
- * Genera y descarga el PDF de la carta, paginando LÍNEA por línea (jsPDF no pagina dentro de
- * un solo text(), así que escribir el párrafo entero recortaba párrafos más altos que la página).
- * A nivel de módulo para mantener baja la complejidad cognitiva del componente.
+ * Build and download the letter PDF, paginating line by line (jsPDF doesn't paginate
+ * inside a single text() call, so paragraphs taller than a page would get clipped).
  */
 export function downloadCoverLetterPdf(letter: CoverLetter) {
 	const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -127,10 +116,8 @@ export function downloadCoverLetterPdf(letter: CoverLetter) {
 }
 
 /**
- * Serialize the (possibly partial) cover letter to plain text for the clipboard Copy
- * button. Returns null si alguna sección falta, es un chunk incompleto del stream, o
- * queda vacía tras quitar el markup — el caller usa eso para deshabilitar Copy/Download.
- * (El Download genera un PDF con jsPDF a partir del mismo artifact, no un .txt.)
+ * Serialize the letter to plain text for the clipboard. Returns null when a section is
+ * missing or empty after stripping markup. Handler-only (uses the DOM, see htmlToText).
  */
 export function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined): string | null {
 	const letter = toCompleteCoverLetter(artifact);
@@ -144,5 +131,5 @@ export function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | und
 	return `${sections.join("\n\n")}\n`;
 }
 
-/** Una carta es guardable si las 4 secciones tienen contenido real (mismo criterio que Copy). */
+/** A letter is saveable when all four sections have real content (same bar as Copy). */
 export const allSectionsFilled = (letter: CoverLetter): boolean => formatCoverLetterAsText(letter) !== null;
