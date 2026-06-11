@@ -34,6 +34,7 @@
 		sans-serif;
 	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
+	--color-landing-color: var(--landing-color);
 	--color-aurora-1: var(--aurora-1);
 	--color-aurora-2: var(--aurora-2);
 	--color-aurora-3: var(--aurora-3);
@@ -455,6 +456,11 @@
 }
 
 :root {
+	--landing-color: color-mix(
+		in srgb,
+		var(--color-neutral-950) 98.6%,
+		var(--color-white)
+	);
 	--destructive-foreground: var(--color-red-700);
 	--info: var(--color-blue-500);
 	--info-foreground: var(--color-blue-700);
@@ -525,7 +531,6 @@
 	--shadow-pillar: 0 1px 0 var(--rule);
 	--shadow-glow-emerald: 0 0 0 0 transparent;
 	--shadow-featured: 0 1px 0 var(--rule);
-	--shadow-nav: 0 1px 0 var(--rule);
 	--shadow-logo: 0 0 0 0 transparent;
 	--shadow-floating: 0 1px 0 var(--rule);
 }
@@ -559,6 +564,11 @@
 }
 
 .dark {
+	--landing-color: color-mix(
+		in srgb,
+		var(--color-neutral-950) 99%,
+		var(--color-white)
+	);
 	--destructive-foreground: var(--color-red-400);
 	--info: var(--color-blue-500);
 	--info-foreground: var(--color-blue-400);
