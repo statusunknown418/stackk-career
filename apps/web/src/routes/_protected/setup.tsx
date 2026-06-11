@@ -132,11 +132,11 @@ function RouteComponent() {
 								v.0.1 Assendia
 							</div>
 
-							<h1 className="mb-6 bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text font-extrabold text-4xl text-transparent tracking-tight sm:text-5xl md:text-6xl md:leading-tight">
+							<h1 className="mb-6 bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-4xl text-transparent leading-tight tracking-tight sm:text-5xl md:text-6xl">
 								Diseña tu futuro profesional con Assendia
 							</h1>
 
-							<div className="mb-10 space-y-4 font-medium text-base text-muted-foreground leading-relaxed sm:text-lg">
+							<div className="mb-10 space-y-4 text-base text-muted-foreground leading-relaxed sm:text-lg">
 								<p>Estamos listos para ayudarte a destacar y conseguir el empleo que realmente deseas.</p>
 								<p>
 									A través de este breve cuestionario interactivo, personalizaremos tu perfil, analizaremos tus
