@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8bff6d38-434a-4643-ae47-732ab61a6396",
+  "id": "26367f24-5984-4313-9504-e4f9ebe3a089",
   "prevId": "286a71e9-43bb-40cd-9bd1-ef04fdbee412",
   "tables": {
     "account": {
@@ -640,9 +640,14 @@
         }
       },
       "indexes": {
-        "generation_owner_type_idx": {
-          "name": "generation_owner_type_idx",
-          "columns": ["owner", "type"],
+        "generation_owner_id_idx": {
+          "name": "generation_owner_id_idx",
+          "columns": ["owner"],
+          "isUnique": false
+        },
+        "generation_type_idx": {
+          "name": "generation_type_idx",
+          "columns": ["type"],
           "isUnique": false
         },
         "generation_resume_id_idx": {

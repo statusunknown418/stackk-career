@@ -55,9 +55,10 @@ export const generations = sqliteTable(
 			.notNull(),
 	}),
 	(t) => [
-		// owner+type compuesto: las queries de letters siempre filtran por ambos; por
-		// leftmost-prefix cubre también las que filtran solo por owner (drizzle/SQLite).
-		index("generation_owner_type_idx").on(t.owner, t.type),
+		// Índices simples por columna (decisión del review: sin compuestos). `owner` conserva
+		// su nombre original — ya existe en la DB remota, así db:push no necesita droppearlo.
+		index("generation_owner_id_idx").on(t.owner),
+		index("generation_type_idx").on(t.type),
 		index("generation_resume_id_idx").on(t.resumeId),
 	]
 );
