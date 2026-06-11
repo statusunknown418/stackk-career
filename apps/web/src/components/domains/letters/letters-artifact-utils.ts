@@ -4,48 +4,8 @@ import { jsPDF } from "jspdf";
 
 export const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
 
-// A letter section is either plain text (what CASEY writes) or TipTap HTML (after a manual
-// edit — the editor persists getHTML()). TipTap always emits block-wrapped markup, so the
-// first character tells them apart without parsing.
-const isTipTapHtml = (value: string): boolean =>
-	value.startsWith("<p") || value.startsWith("<ul") || value.startsWith("<ol");
-
-const escapeHtml = (value: string): string =>
-	value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-
-/** Plain text (paragraphs split by blank lines) → `<p>…</p>` HTML for the editor. */
-export function bodyToHtml(value: string): string {
-	if (isTipTapHtml(value)) {
-		return value;
-	}
-	return value
-		.split("\n\n")
-		.map((paragraph) => paragraph.trim())
-		.filter(Boolean)
-		.map((paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`)
-		.join("");
-}
-
-/**
- * Editor HTML → plain text. DOM-based (DOMParser), so it must only run inside event
- * handlers (copy / download / save) — never during render, which also runs on the server.
- */
-function htmlToText(value: string): string {
-	if (!isTipTapHtml(value)) {
-		return value;
-	}
-	const doc = new DOMParser().parseFromString(value, "text/html");
-	for (const br of doc.body.querySelectorAll("br")) {
-		br.replaceWith("\n");
-	}
-	const blocks = doc.body.querySelectorAll("p, li");
-	if (blocks.length === 0) {
-		return (doc.body.textContent ?? "").trim();
-	}
-	return Array.from(blocks, (block) => (block.textContent ?? "").trim())
-		.filter(Boolean)
-		.join("\n\n");
-}
+// Letter sections are plain text end to end: CASEY emits plain text and the inline editor
+// saves plain text, so there is a single canonical format — no HTML, no conversions.
 
 /** Narrows a (possibly streaming) artifact to a complete 4-section letter, or null. */
 export function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undefined): CoverLetter | null {
@@ -96,10 +56,10 @@ export function downloadCoverLetterPdf(letter: CoverLetter) {
 	};
 
 	doc.setFont("helvetica", "bold");
-	writeBlock(htmlToText(letter.greeting), 8);
+	writeBlock(letter.greeting, 8);
 
 	doc.setFont("helvetica", "normal");
-	for (const p of htmlToText(letter.body).split("\n\n")) {
+	for (const p of letter.body.split("\n\n")) {
 		const trimmed = p.trim();
 		if (trimmed) {
 			writeBlock(trimmed, 6);
@@ -107,24 +67,24 @@ export function downloadCoverLetterPdf(letter: CoverLetter) {
 	}
 
 	cursorY += 4;
-	writeBlock(htmlToText(letter.closing), 8);
+	writeBlock(letter.closing, 8);
 
 	doc.setFont("helvetica", "bold");
-	writeBlock(htmlToText(letter.signature), 0);
+	writeBlock(letter.signature, 0);
 
 	doc.save("carta-de-presentacion.pdf");
 }
 
 /**
  * Serialize the letter to plain text for the clipboard. Returns null when a section is
- * missing or empty after stripping markup. Handler-only (uses the DOM, see htmlToText).
+ * missing (still streaming) or empty.
  */
 export function formatCoverLetterAsText(artifact: DeepPartial<CoverLetter> | undefined): string | null {
 	const letter = toCompleteCoverLetter(artifact);
 	if (!letter) {
 		return null;
 	}
-	const sections = [letter.greeting, letter.body, letter.closing, letter.signature].map(htmlToText);
+	const sections = [letter.greeting, letter.body, letter.closing, letter.signature];
 	if (sections.some((section) => !section.trim())) {
 		return null;
 	}

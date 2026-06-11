@@ -22,17 +22,16 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CoverLetterSection, type LetterSectionDef, LetterSectionShell } from "./cover-letter-section";
 import {
 	allSectionsFilled,
-	bodyToHtml,
 	downloadCoverLetterPdf,
 	EMPTY_SECTION_MESSAGE,
 	formatCoverLetterAsText,
@@ -138,12 +137,15 @@ function EditableLetter({
 				</p>
 				{SECTION_DEFS.map((def) => (
 					<LetterSectionShell icon={def.icon} isStreaming={false} key={def.key} label={def.label} primary={def.primary}>
-						<InlineTextEditor
+						<Textarea
+							aria-label={def.label}
+							className="field-sizing-content w-full resize-none whitespace-pre-line text-sm leading-relaxed outline-none"
 							onBlur={commit}
-							onChange={(value) => setField(def.key, value)}
+							onChange={(e) => setField(def.key, e.target.value)}
 							placeholder={`${def.label}…`}
-							value={bodyToHtml(draft[def.key])}
-							variant="prose"
+							rows={def.primary ? 6 : 1}
+							unstyled
+							value={draft[def.key]}
 						/>
 					</LetterSectionShell>
 				))}

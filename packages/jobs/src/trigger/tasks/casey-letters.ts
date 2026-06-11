@@ -189,35 +189,11 @@ export const caseyLettersTask = schemaTask({
 	},
 });
 
-// Previous-version sections may arrive as HTML: updateArtifact persists what the TipTap
-// editor emits (getHTML()). Minimal mirror of the FE's htmlToText (letters-artifact-utils.ts):
-// block breaks → newlines, tags stripped, basic entities decoded. Without it,
-// <PREVIOUS_LETTER> would carry <p>/<br> into the prompt.
-const HTML_TAG_RE = /<\/?(?:p|br|strong|em|ul|ol|li)(?:>|\s|\/)/i;
-const BR_RE = /<br\s*\/?>/gi;
-const BLOCK_CLOSE_RE = /<\/(?:p|div|li)>/gi;
-const ANY_TAG_RE = /<[^>]+>/g;
-const ENTITY_RE = /&(amp|lt|gt|nbsp|quot|#39);/g;
-const ENTITY_MAP: Record<string, string> = { "#39": "'", amp: "&", gt: ">", lt: "<", nbsp: " ", quot: '"' };
-const MULTI_NEWLINE_RE = /\n{3,}/g;
-
-function htmlSectionToText(value: string): string {
-	if (!HTML_TAG_RE.test(value)) {
-		return value;
-	}
-	return value
-		.replace(BR_RE, "\n")
-		.replace(BLOCK_CLOSE_RE, "\n\n")
-		.replace(ANY_TAG_RE, "")
-		.replace(ENTITY_RE, (_, entity: string) => ENTITY_MAP[entity] ?? "")
-		.replace(MULTI_NEWLINE_RE, "\n\n")
-		.trim();
-}
-
 /**
  * Latest valid letter version (complete object, no error), excluding THIS run's pending
- * row. Since `updateArtifact` overwrites the same row, this includes manual user edits.
- * Returns undefined when no version exists yet — the agent writes from scratch then.
+ * row. Sections are plain text end to end (CASEY emits plain text, the editor saves plain
+ * text), so they go straight into the prompt. Since `updateArtifact` overwrites the same
+ * row, this includes manual user edits. Undefined = no version yet, write from scratch.
  */
 async function loadPreviousLetterPlaintext(
 	db: ReturnType<typeof getTriggerDb>,
@@ -244,7 +220,7 @@ async function loadPreviousLetterPlaintext(
 		return;
 	}
 	const { greeting, body, closing, signature } = parsed.data;
-	return [greeting, body, closing, signature].map(htmlSectionToText).join("\n\n");
+	return [greeting, body, closing, signature].join("\n\n");
 }
 
 /**
