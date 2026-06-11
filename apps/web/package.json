@@ -63,6 +63,7 @@
     "embla-carousel-auto-scroll": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "evlog": "catalog:",
+    "jspdf": "^4.2.1",
     "libsql": "catalog:",
     "lucide-react": "catalog:",
     "media-chrome": "^4.19.0",

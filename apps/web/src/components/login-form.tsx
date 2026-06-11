@@ -39,6 +39,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 										authClient.signIn.social({
 											provider: "google",
 											newUserCallbackURL: "/setup",
+											// Existing users: honor the protected-route redirect URL, else
+											// go to /dash (NOT the landing — Better-Auth defaults to / if unset).
 											callbackURL: search.redirect ?? "/dash",
 											fetchOptions: {
 												onRequest: () => {
@@ -75,11 +77,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 			<CardDescription className="px-6 text-center">
 				Al continuar con el registro, aceptas nuestros{" "}
 				<Button render={<Link to="/terms" />} size="sm" variant="link">
-					Terminos de servicio
+					Términos de servicio
 				</Button>{" "}
 				y{" "}
 				<Button render={<Link to="/policy" />} size="sm" variant="link">
-					Politicas de privacidad.
+					Políticas de privacidad.
 				</Button>
 			</CardDescription>
 		</div>

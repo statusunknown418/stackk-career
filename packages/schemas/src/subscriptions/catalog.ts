@@ -47,6 +47,10 @@ export interface PlanCatalogEntry {
  *
  * - **`coaching_sessions_per_cycle`** — Coaching bookings per billing cycle, counted from `coaching_sessions`
  *   excluding `bookingStatus = "cancelled"`. Enforced at `coaching-bookings.captureBooking`.
+ *
+ * - **`cover_letter_versions`** — Cover-letter versions (regenerations) allowed within a SINGLE letter.
+ *   Per-letter, NOT per-cycle: counted live from non-failed cover-letter artifacts on that generation.
+ *   Enforced at `letters.trigger`.
  */
 export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 	free: {
@@ -61,6 +65,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_inline_ai_suggestions: 3,
 			messages_per_generation: 10,
 			coaching_sessions_per_cycle: 0,
+			cover_letter_versions: 5,
 		},
 	},
 	pro: {
@@ -75,6 +80,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_inline_ai_suggestions: 150,
 			messages_per_generation: 50,
 			coaching_sessions_per_cycle: 1,
+			cover_letter_versions: 20,
 		},
 	},
 	max: {
@@ -89,6 +95,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_inline_ai_suggestions: 500,
 			messages_per_generation: 500,
 			coaching_sessions_per_cycle: 3,
+			cover_letter_versions: 50,
 		},
 	},
 };

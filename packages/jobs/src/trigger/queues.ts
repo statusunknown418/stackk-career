@@ -1,4 +1,5 @@
 import { queue } from "@trigger.dev/sdk";
+import { envNumber } from "../lib/env-number";
 
 /**
  * Resume parser fans out 4 LLM calls per run (validation + header + entries bundle + skills bundle).
@@ -24,4 +25,13 @@ export const k02Queue = queue({
 export const k02DetailedQueue = queue({
 	name: "k02-detailed-analysis",
 	concurrencyLimit: Number(process.env.K02_DETAILED_QUEUE_CONCURRENCY ?? 5),
+});
+
+/**
+ * casey-letters generates a single CoverLetter via streamText. 1 LLM call per run,
+ * cheap per slot — can run wider, similar to k02Queue.
+ */
+export const letterQueue = queue({
+	name: "casey-letters",
+	concurrencyLimit: envNumber(process.env.LETTER_QUEUE_CONCURRENCY, 10),
 });

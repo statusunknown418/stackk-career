@@ -1,8 +1,15 @@
 packages:
   - apps/*
   - packages/*
+overrides:
+  # better-auth and trigger.dev's @opentelemetry stack resolve @opentelemetry/api to
+  # different versions; without pinning, the package gets duplicated and typecheck breaks
+  # (~36 incompatible-type errors across the copies). Pinned to 1.9.1 to dedupe.
+  # Do NOT remove without confirming via clean reinstall + typecheck that no duplication occurs.
+  "@opentelemetry/api": "1.9.1"
 allowBuilds:
   "@depot/cli": true
+  core-js: false
   esbuild: true
   msgpackr-extract: true
   protobufjs: true

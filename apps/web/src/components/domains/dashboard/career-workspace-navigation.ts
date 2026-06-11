@@ -24,14 +24,12 @@ export const careerWorkspaceNavigation = [
 		to: "/dash",
 	},
 	{
-		disabled: true,
 		icon: FilesIcon,
 		id: "curriculums",
 		label: "Curriculums",
 		to: "/dash/resumes",
 	},
 	{
-		disabled: true,
 		icon: ChatCircleTextIcon,
 		id: "cover-letter",
 		label: "Cartas de presentación",
