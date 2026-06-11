@@ -8,7 +8,6 @@ import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
-import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 import { Tools } from "@/components/landing/tools";
 
 const SITE_URL = "https://assendia.com";
@@ -132,7 +131,7 @@ function LandingPage() {
 				<Tools />
 				<BentoGrid />
 				<HowItWorks />
-				<TestimonialsCarousel />
+				{/*<TestimonialsCarousel />*/}
 				<FounderMessage />
 				<Pricing />
 				<Faq />
