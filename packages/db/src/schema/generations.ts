@@ -45,6 +45,10 @@ export const generations = sqliteTable(
 		// Propagated end-to-end (create → trigger → task → agent system prompt + few-shot block).
 		language: t.text({ enum: generationLanguages }).default("es").notNull(),
 
+		// For type="cover-letter": user-selected visual template/style.
+		// Centered, classic, minty, blue, or null/blank.
+		template: t.text({ enum: ["centered", "classic", "minty", "blue"] }),
+
 		createdAt: t
 			.integer({ mode: "timestamp" })
 			.$defaultFn(() => new Date())

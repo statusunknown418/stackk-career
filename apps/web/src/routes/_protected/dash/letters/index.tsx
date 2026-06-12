@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { LettersCreateDialog } from "@/components/domains/letters/letters-create-dialog";
+import { TemplateCard } from "@/components/domains/letters/template-card";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
@@ -18,9 +19,180 @@ export const Route = createFileRoute("/_protected/dash/letters/")({
 // `timeStyle: "short"` adds HH:mm to distinguish letters updated the same day.
 const dateTimeFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
 
+const TEMPLATE_LABELS: Record<string, string> = {
+	centered: "Centrado",
+	classic: "Clásico",
+	minty: "Minty",
+	blue: "Azul",
+};
+
 function RouteComponent() {
 	const { data } = useSuspenseQuery(orpc.letters.list.queryOptions());
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const [selectedTemplate, setSelectedTemplate] = useState<
+		"centered" | "classic" | "minty" | "blue" | null | undefined
+	>(undefined);
+	const [step, setStep] = useState(1);
+
+	if (data.length === 0) {
+		return (
+			<section className="space-y-4">
+				<section className="flex items-start justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
+					<article className="grid gap-1">
+						<h1 className="font-light text-2xl">Cartas de presentación</h1>
+						<FrameDescription>
+							<Shimmer>CASEY</Shimmer> redacta cartas a partir de tu CV y del puesto al que postulas.
+						</FrameDescription>
+					</article>
+				</section>
+
+				<section className="mx-auto w-full max-w-7xl px-4 py-2">
+					{step === 1 ? (
+						<div className="relative overflow-hidden rounded-2xl border bg-card/50 p-8 shadow-xl backdrop-blur-md transition-all duration-300">
+							{/* Background ambient glow inside the card */}
+							<div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-primary/10 blur-[60px]" />
+							<div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-[60px]" />
+
+							<div className="relative flex flex-col items-center gap-6 py-8 text-center">
+								<div className="inline-flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner ring-1 ring-primary/20">
+									<ChatCircleTextIcon size={36} weight="duotone" />
+								</div>
+
+								<div className="space-y-2">
+									<h2 className="font-semibold text-2xl text-foreground tracking-tight">
+										Hola, soy <Shimmer>CASEY</Shimmer>
+									</h2>
+									<p className="mx-auto max-w-xl text-base text-muted-foreground leading-relaxed">
+										Te ayudaré a redactar cartas de presentación a partir de tu CV y del puesto al que quieres postular.
+									</p>
+								</div>
+
+								<Button
+									className="mt-4 px-8 py-5 text-base"
+									onClick={() => {
+										setSelectedTemplate(null);
+										setStep(2);
+									}}
+								>
+									Siguiente
+									<PlusCircleIcon size={20} />
+								</Button>
+							</div>
+						</div>
+					) : (
+						<div className="fade-in slide-in-from-bottom-4 animate-in space-y-8 duration-300">
+							<div className="flex items-center justify-between border-b pb-4">
+								<div className="space-y-1">
+									<h2 className="font-semibold text-xl tracking-tight">Elige un estilo para tu carta</h2>
+									<p className="text-muted-foreground text-sm">
+										Selecciona una plantilla o empieza desde cero para abrir el asistente de creación.
+									</p>
+								</div>
+								<Button onClick={() => setStep(1)} size="sm" variant="ghost-muted">
+									Atrás
+								</Button>
+							</div>
+
+							<div className="grid gap-6 md:grid-cols-2">
+								{/* Formal Group */}
+								<div className="flex flex-col gap-4 rounded-xl border bg-card/30 p-5 backdrop-blur-xs transition-all duration-300 hover:border-indigo-500/20 hover:bg-card/45 hover:shadow-indigo-500/[0.02] hover:shadow-xl">
+									<div className="space-y-1.5">
+										<h3 className="font-semibold text-base text-foreground">Formales</h3>
+										<p className="text-muted-foreground text-xs leading-relaxed">
+											Estructuras clásicas, limpias y profesionales que priorizan la sobriedad y van directo al grano.
+											Ideal para sectores corporativos y tradicionales.
+										</p>
+									</div>
+									<div className="grid grid-cols-2 gap-4">
+										<TemplateCard
+											author="Brian T. Wayne"
+											onClick={() => {
+												setSelectedTemplate("centered");
+												setIsCreateOpen(true);
+											}}
+											subtitle="COVER LETTER CENTERED"
+											title="CLASSIC"
+											type="centered"
+										/>
+										<TemplateCard
+											author="Andrew O'Sullivan"
+											onClick={() => {
+												setSelectedTemplate("classic");
+												setIsCreateOpen(true);
+											}}
+											subtitle="COVER LETTER TEMPLATE"
+											title="CLASSIC"
+											type="classic"
+										/>
+									</div>
+								</div>
+
+								{/* Creative Group */}
+								<div className="flex flex-col gap-4 rounded-xl border bg-card/30 p-5 backdrop-blur-xs transition-all duration-300 hover:border-emerald-500/20 hover:bg-card/45 hover:shadow-emerald-500/[0.02] hover:shadow-xl">
+									<div className="space-y-1.5">
+										<h3 className="font-semibold text-base text-foreground">Creativos</h3>
+										<p className="text-muted-foreground text-xs leading-relaxed">
+											Diseños dinámicos, modernos y visuales creados para destacar y demostrar tu originalidad.
+											Recomendado para puestos de diseño, marketing y tecnología.
+										</p>
+									</div>
+									<div className="grid grid-cols-2 gap-4">
+										<TemplateCard
+											author="Anna Field"
+											onClick={() => {
+												setSelectedTemplate("minty");
+												setIsCreateOpen(true);
+											}}
+											subtitle="MINIMALISTIC COVER LETTER"
+											title="MINTY"
+											type="minty"
+										/>
+										<TemplateCard
+											author="Andrew O'Sullivan"
+											onClick={() => {
+												setSelectedTemplate("blue");
+												setIsCreateOpen(true);
+											}}
+											subtitle="MODERN COVER LETTER WITH BLUE..."
+											title="BLUE CLASSIC"
+											type="blue"
+										/>
+									</div>
+								</div>
+							</div>
+
+							{/* Blank Template option */}
+							<div className="flex flex-col gap-3 rounded-xl border bg-card/10 p-5 transition-all duration-300 hover:border-primary/20 hover:bg-card/20 hover:shadow-lg">
+								<div className="space-y-1">
+									<h3 className="font-semibold text-base text-foreground">En blanco</h3>
+									<p className="text-muted-foreground text-xs leading-relaxed">
+										Comienza con un lienzo despejado y dale forma de manera libre y personalizada.
+									</p>
+								</div>
+								<div className="max-w-xs">
+									<button
+										className="group flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-muted-foreground/25 border-dashed p-6 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+										onClick={() => {
+											setSelectedTemplate(null);
+											setIsCreateOpen(true);
+										}}
+										type="button"
+									>
+										<div className="rounded-full bg-muted p-2.5 transition-colors group-hover:bg-primary/10">
+											<PlusCircleIcon className="transition-transform group-hover:scale-110" size={24} />
+										</div>
+										<span className="font-medium text-sm">Crear en blanco</span>
+									</button>
+								</div>
+							</div>
+						</div>
+					)}
+				</section>
+
+				<LettersCreateDialog onOpenChange={setIsCreateOpen} open={isCreateOpen} template={selectedTemplate} />
+			</section>
+		);
+	}
 
 	return (
 		<section className="space-y-4">
@@ -31,7 +203,13 @@ function RouteComponent() {
 						<Shimmer>CASEY</Shimmer> redacta cartas a partir de tu CV y del puesto al que postulas.
 					</FrameDescription>
 
-					<Button className="mt-4 max-w-max" onClick={() => setIsCreateOpen(true)}>
+					<Button
+						className="mt-4 max-w-max"
+						onClick={() => {
+							setSelectedTemplate(undefined);
+							setIsCreateOpen(true);
+						}}
+					>
 						<PlusCircleIcon />
 						Nueva carta
 					</Button>
@@ -64,7 +242,17 @@ function RouteComponent() {
 											<span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15 transition-colors duration-200 group-hover/card:bg-primary/15">
 												<ChatCircleTextIcon size={20} weight="duotone" />
 											</span>
-											<div className="flex items-center gap-2">
+											<div className="flex items-center gap-1.5">
+												{letter.template && (
+													<span className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-1.5 py-0.5 font-medium text-[0.6rem] text-indigo-650 uppercase tracking-wide dark:text-indigo-400">
+														{TEMPLATE_LABELS[letter.template] || letter.template}
+													</span>
+												)}
+												{!letter.template && (
+													<span className="rounded-md border px-1.5 py-0.5 font-medium text-[0.6rem] text-muted-foreground uppercase tracking-wide">
+														En blanco
+													</span>
+												)}
 												<span className="rounded-md border px-1.5 py-0.5 font-mono text-[0.6rem] text-muted-foreground uppercase tracking-wide">
 													{letter.language === "en" ? "EN" : "ES"}
 												</span>
@@ -122,7 +310,7 @@ function RouteComponent() {
 				)}
 			</section>
 
-			<LettersCreateDialog onOpenChange={setIsCreateOpen} open={isCreateOpen} />
+			<LettersCreateDialog onOpenChange={setIsCreateOpen} open={isCreateOpen} template={selectedTemplate} />
 		</section>
 	);
 }

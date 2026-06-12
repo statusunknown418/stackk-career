@@ -447,6 +447,7 @@ function RouteComponent() {
 						generationCount,
 						hasContent: Boolean(artifact) || data.latestArtifact !== null,
 						maxVersions,
+						template: data.generation.template as "centered" | "classic" | "minty" | "blue" | null | undefined,
 					}}
 					onSaveArtifact={onSaveArtifact}
 					onTriggerAsync={onTriggerAsync}

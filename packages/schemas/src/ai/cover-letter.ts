@@ -36,6 +36,22 @@ export const coverLetterSchema = z.object({
 		.min(1)
 		.max(500)
 		.describe("Firma con nombre del usuario. Ej: 'Atentamente, María González' o 'Saludos, Joseph'."),
+
+	// Custom editable candidate contact info
+	contactName: z.string().optional().nullable().describe("Nombre completo del candidato"),
+	contactTitle: z.string().optional().nullable().describe("Título profesional del candidato"),
+	contactEmail: z.string().optional().nullable().describe("Correo electrónico del candidato"),
+	contactPhone: z.string().optional().nullable().describe("Teléfono del candidato"),
+	contactAddress: z.string().optional().nullable().describe("Dirección o ciudad del candidato"),
+	contactLinkedin: z.string().optional().nullable().describe("Enlace al perfil de LinkedIn del candidato"),
+	contactWebsite: z.string().optional().nullable().describe("Sitio web o portafolio personal del candidato"),
+
+	// Custom editable recipient/company info
+	recipientName: z.string().optional().nullable().describe("Nombre del reclutador o destinatario"),
+	recipientCompany: z.string().optional().nullable().describe("Nombre de la empresa receptora"),
+	recipientAddress: z.string().optional().nullable().describe("Dirección de la empresa receptora"),
+
+	dateStr: z.string().optional().nullable().describe("Fecha de emisión de la carta"),
 });
 
 export type CoverLetter = z.infer<typeof coverLetterSchema>;

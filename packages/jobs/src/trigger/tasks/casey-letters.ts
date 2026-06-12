@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: task contains durable background task orchestrating flow
 import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
@@ -71,6 +72,7 @@ export const caseyLettersTask = schemaTask({
 		// without passing it, the model regenerates from scratch and manual edits are lost.
 		// A re-run without extraPrompt is an intentional from-scratch regeneration.
 		const previousLetter = extraPrompt ? await loadPreviousLetterPlaintext(db, generationId, messageId) : undefined;
+		const previousObject = await loadPreviousLetterObject(db, generationId, messageId);
 
 		metadata.set("step", "generating");
 		const result = await runCaseyLettersAgent({
@@ -157,6 +159,22 @@ export const caseyLettersTask = schemaTask({
 			);
 		}
 
+		// Merge generated letter details with any custom contact/recipient overrides
+		const mergedObject = {
+			...object,
+			contactName: previousObject?.contactName ?? object.contactName ?? null,
+			contactTitle: previousObject?.contactTitle ?? object.contactTitle ?? null,
+			contactEmail: previousObject?.contactEmail ?? object.contactEmail ?? null,
+			contactPhone: previousObject?.contactPhone ?? object.contactPhone ?? null,
+			contactAddress: previousObject?.contactAddress ?? object.contactAddress ?? null,
+			contactLinkedin: previousObject?.contactLinkedin ?? object.contactLinkedin ?? null,
+			contactWebsite: previousObject?.contactWebsite ?? object.contactWebsite ?? null,
+			recipientName: previousObject?.recipientName ?? object.recipientName ?? null,
+			recipientCompany: previousObject?.recipientCompany ?? object.recipientCompany ?? null,
+			recipientAddress: previousObject?.recipientAddress ?? object.recipientAddress ?? null,
+			dateStr: previousObject?.dateStr ?? object.dateStr ?? null,
+		};
+
 		metadata.set("step", "persisting");
 		await db
 			.update(messages)
@@ -165,13 +183,20 @@ export const caseyLettersTask = schemaTask({
 				// attempt's error). Success ALWAYS clears it: object and error are exclusive.
 				error: null,
 				model: modelForAttempt,
-				object,
-				text: object.body,
+				object: mergedObject,
+				text: mergedObject.body,
 			})
 			.where(and(eq(messages.id, messageId), eq(messages.generationId, generationId)));
 
 		metadata.set("step", "complete");
-		return { generationId, messageId, model: modelSlug, object, toolCalls: toolCalls.map((c) => c.toolName), userId };
+		return {
+			generationId,
+			messageId,
+			model: modelSlug,
+			object: mergedObject,
+			toolCalls: toolCalls.map((c) => c.toolName),
+			userId,
+		};
 	},
 
 	onFailure: async ({ payload, error, ctx }) => {
@@ -245,6 +270,32 @@ async function loadPreviousLetterPlaintext(
 	}
 	const { greeting, body, closing, signature } = parsed.data;
 	return [greeting, body, closing, signature].map(htmlSectionToText).join("\n\n");
+}
+
+/**
+ * Load the previous letter object if it exists.
+ */
+async function loadPreviousLetterObject(
+	db: ReturnType<typeof getTriggerDb>,
+	generationId: string,
+	pendingMessageId: string
+): Promise<unknown> {
+	const [prev] = await db
+		.select({ object: messages.object })
+		.from(messages)
+		.where(
+			and(
+				eq(messages.generationId, generationId),
+				eq(messages.objectType, COVER_LETTER_OBJECT_TYPE),
+				isNull(messages.error),
+				isNotNull(messages.object),
+				ne(messages.id, pendingMessageId)
+			)
+		)
+		.orderBy(desc(messages.order), desc(messages.createdAt))
+		.limit(1);
+
+	return prev?.object;
 }
 
 /**
