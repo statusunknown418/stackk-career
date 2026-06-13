@@ -1,11 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected/dash/")({
-	component: RouteComponent,
-});
+	beforeLoad: () => {
+		redirect({ to: "/dash/resumes" });
 
-function RouteComponent() {
-	return redirect({
-		to: "/dash/resumes",
-	});
-}
+		return;
+	},
+});
