@@ -17,21 +17,26 @@ const STATUS_ACCENT: Record<ResumeStatus, string> = {
 	archived: "bg-muted-foreground/30",
 };
 
-/** CV-sheet preview rendering the holder's name and target so the card reads like a real document. */
-function ResumeSheetPreview({ name, subtitle, status }: { name: string; subtitle: string; status: ResumeStatus }) {
+/** CV-sheet preview rendering the holder's identity so the card reads like a real document. */
+function ResumeSheetPreview({
+	name,
+	subtitle,
+	detail,
+	status,
+}: {
+	name: string;
+	subtitle: string;
+	detail: string | null;
+	status: ResumeStatus;
+}) {
 	return (
-		<div
-			aria-hidden="true"
-			className="relative aspect-video overflow-hidden rounded-xl border bg-linear-to-br from-muted"
-		>
+		<div aria-hidden="true" className="relative h-26 overflow-hidden rounded-xl border bg-linear-to-br from-muted">
 			<div className="absolute inset-x-5 top-4 flex flex-col gap-1.5 rounded-t-lg bg-background p-4 shadow-sm">
 				<p className="truncate text-foreground text-sm leading-none">{name}</p>
 
-				{subtitle ? (
-					<p className="truncate text-muted-foreground text-xs leading-none">{subtitle}</p>
-				) : (
-					<div className="h-1.5 w-3/5 rounded-full bg-foreground/10" />
-				)}
+				{subtitle && <p className="truncate text-muted-foreground text-xs leading-none">{subtitle}</p>}
+
+				{detail && <p className="truncate text-muted-foreground/70 text-xs leading-none">{detail}</p>}
 
 				<div className={cn("mt-2 h-1 w-8 rounded-full", STATUS_ACCENT[status])} />
 
@@ -57,6 +62,7 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 		.map((part) => part?.trim())
 		.filter(Boolean)
 		.join(" · ");
+	const contactDetail = resume.contact?.detail ?? null;
 
 	return (
 		<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
@@ -64,7 +70,7 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 				aria-labelledby={`resume-${resume.id}-title`}
 				className="group h-full gap-3 p-3 transition-colors hover:bg-muted"
 			>
-				<ResumeSheetPreview name={candidateName} status={resume.status} subtitle={subtitle} />
+				<ResumeSheetPreview detail={contactDetail} name={candidateName} status={resume.status} subtitle={subtitle} />
 
 				<div className="flex items-center justify-between gap-2">
 					<ul aria-label="Etiquetas del CV" className="flex list-none items-center gap-1">
