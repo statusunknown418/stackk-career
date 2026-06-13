@@ -1,97 +1,110 @@
-import { ArrowUpRightIcon, BuildingsIcon, SparkleIcon, StarIcon, UserIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, SparkleIcon, StarIcon } from "@phosphor-icons/react";
 import type { ResumeListItem } from "@stackk-career/schemas/api/resumes";
 import type { ResumeStatus } from "@stackk-career/schemas/db/resumes";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { Frame, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
+import { buttonVariants } from "@/components/ui/button";
+import { Frame, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
-const STATUS_LABEL: Record<ResumeStatus, string> = {
-	draft: "Borrador",
-	ready: "Listo",
-	archived: "Archivado",
+/** Accent bar colour for the faux CV sheet, mirroring the status badge tone. */
+const STATUS_ACCENT: Record<ResumeStatus, string> = {
+	draft: "bg-warning/60",
+	ready: "bg-success/60",
+	archived: "bg-muted-foreground/30",
 };
 
-const STATUS_VARIANT: Record<ResumeStatus, "warning" | "success" | "outline"> = {
-	draft: "warning",
-	ready: "success",
-	archived: "outline",
-};
+/** CV-sheet preview rendering the holder's name and target so the card reads like a real document. */
+function ResumeSheetPreview({ name, subtitle, status }: { name: string; subtitle: string; status: ResumeStatus }) {
+	return (
+		<div
+			aria-hidden="true"
+			className="relative aspect-video overflow-hidden rounded-xl border bg-linear-to-br from-muted"
+		>
+			<div className="absolute inset-x-5 top-4 flex flex-col gap-1.5 rounded-t-lg bg-background p-4 shadow-sm">
+				<p className="truncate text-foreground text-sm leading-none">{name}</p>
 
-const EMPTY = "—";
+				{subtitle ? (
+					<p className="truncate text-muted-foreground text-xs leading-none">{subtitle}</p>
+				) : (
+					<div className="h-1.5 w-3/5 rounded-full bg-foreground/10" />
+				)}
+
+				<div className={cn("mt-2 h-1 w-8 rounded-full", STATUS_ACCENT[status])} />
+
+				<div className="mt-1 flex flex-col gap-1.5">
+					<div className="h-1.5 w-full rounded-full bg-foreground/8" />
+					<div className="h-1.5 w-11/12 rounded-full bg-foreground/8" />
+					<div className="h-1.5 w-4/5 rounded-full bg-foreground/8" />
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export function ResumeCard({ resume }: { resume: ResumeListItem }) {
-	const ownerName = resume.contact ? `${resume.contact.firstName} ${resume.contact.lastName}`.trim() : null;
 	const updatedLabel = formatDistanceToNow(resume.updatedAt, { addSuffix: true, locale: es });
 	const agentCreated = resume.aiMetadata?.agentCreated ?? false;
+	const candidateName =
+		[resume.contact?.firstName, resume.contact?.lastName]
+			.map((part) => part?.trim())
+			.filter(Boolean)
+			.join(" ") || resume.title;
+	const subtitle = [resume.targetRole, resume.targetedCompanyIdentifier]
+		.map((part) => part?.trim())
+		.filter(Boolean)
+		.join(" · ");
 
 	return (
-		<Link params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
-			<Frame aria-labelledby={`resume-${resume.id}-title`} className="group">
-				<FrameHeader>
-					<ul aria-label="Estado del CV" className="flex list-none items-center gap-2">
-						<Badge size="sm" variant={STATUS_VARIANT[resume.status]}>
-							{STATUS_LABEL[resume.status]}
-						</Badge>
+		<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
+			<Frame
+				aria-labelledby={`resume-${resume.id}-title`}
+				className="group h-full gap-3 p-3 transition-colors hover:bg-muted"
+			>
+				<ResumeSheetPreview name={candidateName} status={resume.status} subtitle={subtitle} />
 
+				<div className="flex items-center justify-between gap-2">
+					<ul aria-label="Etiquetas del CV" className="flex list-none items-center gap-1">
 						{resume.isPrimary && (
-							<Badge size="sm" variant="info">
-								<StarIcon weight="fill" />
-								Principal
-							</Badge>
+							<li>
+								<Badge size="sm" variant="info">
+									<StarIcon weight="fill" />
+									Principal
+								</Badge>
+							</li>
 						)}
 
 						{agentCreated && (
-							<Badge size="sm" variant="secondary">
-								<SparkleIcon weight="fill" />
-								IA
-							</Badge>
+							<li>
+								<Badge size="sm" variant="secondary">
+									<SparkleIcon weight="fill" />
+									IA
+								</Badge>
+							</li>
 						)}
 					</ul>
+				</div>
 
-					<section className="flex items-center gap-2 underline-offset-4 group-hover:underline">
-						<FrameTitle id={`resume-${resume.id}-title`}>{resume.title}</FrameTitle>
+				<FrameTitle
+					className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
+					id={`resume-${resume.id}-title`}
+				>
+					{resume.title}
+				</FrameTitle>
 
-						<ArrowUpRightIcon
-							aria-hidden="true"
-							className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
-							weight="bold"
-						/>
-					</section>
-				</FrameHeader>
+				<div className="flex flex-col gap-2">
+					<time className="text-muted-foreground text-xs" dateTime={formatISO(resume.updatedAt)}>
+						Actualizado {updatedLabel}
+					</time>
 
-				<FramePanel className="grid grid-cols-2 gap-3 text-sm">
-					<div className="flex min-w-0 flex-col gap-1">
-						<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
-							<UserIcon aria-hidden="true" className="size-3.5" />
-							Nombre
-						</dt>
-
-						<dd className="truncate">
-							{ownerName ? (
-								<p className="not-italic">{ownerName}</p>
-							) : (
-								<span className="text-muted-foreground">{EMPTY}</span>
-							)}
-						</dd>
-					</div>
-
-					<div className="flex min-w-0 flex-col gap-1">
-						<dt className="flex items-center gap-1.5 text-muted-foreground text-xs uppercase tracking-wide">
-							<BuildingsIcon aria-hidden="true" className="size-3.5" />
-							Empresa
-						</dt>
-						<dd className="truncate">
-							{resume.targetedCompanyIdentifier ?? <span className="text-muted-foreground">{EMPTY}</span>}
-						</dd>
-					</div>
-				</FramePanel>
-
-				<FrameFooter className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
-					<time dateTime={formatISO(resume.updatedAt)}>Actualizado {updatedLabel}</time>
-				</FrameFooter>
+					<span aria-hidden="true" className={cn(buttonVariants({ variant: "secondary" }), "w-full justify-between")}>
+						Editar CV
+						<ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" weight="bold" />
+					</span>
+				</div>
 			</Frame>
 		</Link>
 	);
@@ -99,37 +112,23 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 
 export function ResumeCardSkeleton() {
 	return (
-		<Frame aria-hidden="true">
-			<FrameHeader>
-				<div className="flex items-center gap-2">
-					<Skeleton className="h-5 w-20 rounded-full" />
-					<Skeleton className="h-5 w-14 rounded-full" />
-				</div>
+		<Frame aria-hidden="true" className="h-full gap-3 p-3">
+			<Skeleton className="aspect-[4/3] w-full rounded-xl" />
 
-				<div className="flex items-start justify-between gap-3">
-					<Skeleton className="h-6 w-40 rounded-md" />
-					<Skeleton className="size-4 rounded-sm" />
-				</div>
+			<div className="flex items-center justify-between gap-2">
+				<Skeleton className="h-5 w-20 rounded-sm" />
+				<Skeleton className="h-5 w-14 rounded-sm" />
+			</div>
 
-				<Skeleton className="h-4 w-3/4 rounded-md" />
-			</FrameHeader>
-
-			<FramePanel className="grid grid-cols-2 gap-3 text-sm">
-				<div className="flex min-w-0 flex-col gap-1">
-					<Skeleton className="h-3 w-16 rounded-md" />
-					<Skeleton className="h-4 w-24 rounded-md" />
-				</div>
-
-				<div className="flex min-w-0 flex-col gap-1">
-					<Skeleton className="h-3 w-16 rounded-md" />
-					<Skeleton className="h-4 w-28 rounded-md" />
-				</div>
-			</FramePanel>
-
-			<FrameFooter className="flex items-center justify-between gap-2">
+			<div className="flex flex-1 flex-col gap-1.5">
+				<Skeleton className="h-5 w-40 rounded-md" />
 				<Skeleton className="h-4 w-28 rounded-md" />
-				<Skeleton className="h-6 w-14 rounded-full" />
-			</FrameFooter>
+			</div>
+
+			<div className="flex flex-col gap-2">
+				<Skeleton className="h-4 w-24 rounded-md" />
+				<Skeleton className="h-8 w-full rounded-lg" />
+			</div>
 		</Frame>
 	);
 }

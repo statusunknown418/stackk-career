@@ -1,10 +1,8 @@
 "use client";
 
 import { MeshGradient } from "@paper-design/shaders-react";
-import { useInView, useReducedMotion } from "motion/react";
+import { useInView } from "motion/react";
 import { useRef } from "react";
-import { useTheme } from "@/components/theme-provider";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 /**
  * Green ambient glow behind the hero headline.
@@ -27,21 +25,14 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 const MESH_COLORS = ["#000201", "#001b04", "#003c0f", "#1c6a21", "#000501"];
 
 export function HeroAuroraShader() {
-	const { theme } = useTheme();
-	const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
-	const isDark = theme === "dark" || (theme === "system" && systemDark);
-
-	const reduced = useReducedMotion();
-	const isDesktop = useMediaQuery("md");
-
 	const ref = useRef<HTMLDivElement>(null);
 	const inView = useInView(ref, { margin: "300px 0px" });
 
-	const showShader = isDark && isDesktop && !reduced && inView;
+	const showShader = inView;
 
 	return (
 		<div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" ref={ref}>
-			{showShader ? (
+			{showShader && (
 				<div className="mask-[radial-gradient(90%_65%_at_55%_12%,black_0%,transparent_65%)] absolute inset-0 opacity-100">
 					<MeshGradient
 						colors={MESH_COLORS}
@@ -51,12 +42,6 @@ export function HeroAuroraShader() {
 						swirl={0.3}
 					/>
 				</div>
-			) : (
-				<div
-					className={
-						isDark ? "hero-glow-dark absolute inset-0 opacity-0" : "hero-glow-light absolute inset-0 opacity-0"
-					}
-				/>
 			)}
 		</div>
 	);
