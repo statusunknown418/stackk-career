@@ -169,21 +169,20 @@ function RouteComponent() {
 										Comienza con un lienzo despejado y dale forma de manera libre y personalizada.
 									</p>
 								</div>
-								<div className="max-w-xs">
-									<button
-										className="group flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-muted-foreground/25 border-dashed p-6 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
-										onClick={() => {
-											setSelectedTemplate(null);
-											setIsCreateOpen(true);
-										}}
-										type="button"
-									>
-										<div className="rounded-full bg-muted p-2.5 transition-colors group-hover:bg-primary/10">
-											<PlusCircleIcon className="transition-transform group-hover:scale-110" size={24} />
-										</div>
-										<span className="font-medium text-sm">Crear en blanco</span>
-									</button>
-								</div>
+
+								<button
+									className="group flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-muted-foreground/25 border-dashed p-6 text-muted-foreground transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+									onClick={() => {
+										setSelectedTemplate(null);
+										setIsCreateOpen(true);
+									}}
+									type="button"
+								>
+									<div className="rounded-full bg-muted p-2.5 transition-colors group-hover:bg-primary/10">
+										<PlusCircleIcon className="transition-transform group-hover:scale-110" size={24} />
+									</div>
+									<span className="font-medium text-sm">Crear en blanco</span>
+								</button>
 							</div>
 						</div>
 					)}
