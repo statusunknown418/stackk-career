@@ -82,7 +82,7 @@ const TOOLS: readonly Tool[] = [
 
 export function Tools() {
 	return (
-		<section className="relative border-border border-y px-6 py-20 md:py-28" id="herramientas">
+		<section className="relative px-6 py-20 md:py-28" id="herramientas">
 			<div className="mx-auto max-w-6xl">
 				<Reveal>
 					<header className="mb-12 grid gap-6 md:grid-cols-12 md:items-end md:gap-10">

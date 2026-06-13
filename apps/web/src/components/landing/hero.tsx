@@ -210,7 +210,7 @@ export function Hero() {
 			</section>
 
 			{/* Unhidden & Polished Stats Section */}
-			<section className="relative bg-linear-to-t from-muted/20 px-6 pb-12 sm:pb-16">
+			<section className="px-6 py-12 sm:pb-16">
 				<div className="flex w-full flex-col items-center gap-6">
 					<p className="text-foreground/50 text-xs uppercase">Nuestros talentos ya trabajan en</p>
 					<LogoMarqueeRows />

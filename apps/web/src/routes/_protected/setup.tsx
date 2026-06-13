@@ -102,7 +102,7 @@ function RouteComponent() {
 			</header>
 
 			{/* Welcome & Questionnaire Content */}
-			<main className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-6 py-12">
+			<main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 py-12">
 				<AnimatePresence mode="wait">
 					{showChat ? (
 						<motion.div
@@ -132,15 +132,15 @@ function RouteComponent() {
 								v.0.1 Assendia
 							</div>
 
-							<h1 className="mb-6 bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-4xl text-transparent leading-tight tracking-tight sm:text-5xl md:text-6xl">
+							<h1 className="mb-6 text-balance bg-linear-to-b from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-4xl text-transparent leading-tighter tracking-tight sm:text-5xl">
 								Diseña tu futuro profesional con Assendia
 							</h1>
 
-							<div className="mb-10 space-y-4 text-base text-muted-foreground leading-relaxed sm:text-lg">
-								<p>Estamos listos para ayudarte a destacar y conseguir el empleo que realmente deseas.</p>
+							<div className="mb-10 space-y-4 text-balance text-base text-muted-foreground leading-relaxed sm:text-lg">
 								<p>
-									A través de este breve cuestionario interactivo, personalizaremos tu perfil, analizaremos tus
-									preferencias y optimizaremos tu búsqueda de trabajo.
+									Estamos listos para ayudarte a destacar y conseguir el empleo que realmente deseas. A través de este
+									breve cuestionario interactivo, personalizaremos tu perfil, analizaremos tus preferencias y
+									optimizaremos tu búsqueda de trabajo.
 								</p>
 								<p className="mt-6 text-foreground/60 text-sm italic">— El equipo de Assendia</p>
 							</div>
@@ -160,11 +160,6 @@ function RouteComponent() {
 					)}
 				</AnimatePresence>
 			</main>
-
-			{/* Footer */}
-			<footer className="relative z-10 mx-auto w-full max-w-5xl px-6 py-6 text-center text-muted-foreground/60 text-xs">
-				© {new Date().getFullYear()} Assendia. Todos los derechos reservados.
-			</footer>
 		</div>
 	);
 }

@@ -1,10 +1,7 @@
 @import "tailwindcss";
-/* Self-hosted fonts (no external Google Fonts request — better LCP/FCP on slow links). */
 @import "@fontsource-variable/geist";
-@import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 @import "@fontsource/instrument-serif";
-@import "@fontsource/instrument-serif/400-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -22,16 +19,12 @@
 	--ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
 	--ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
 
-	--font-heading:
-		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
-	--font-display:
-		"Geist Variable", "Geist", "Inter Variable", -apple-system, sans-serif;
+	--font-heading: "Geist Variable", "Geist", -apple-system, sans-serif;
+	--font-display: "Geist Variable", "Geist", -apple-system, sans-serif;
 	--font-mono:
 		"JetBrains Mono Variable", "JetBrains Mono", "Geist Mono Variable",
 		ui-monospace, monospace;
-	--font-sans:
-		"Geist Variable", "Geist", "Inter Variable", "Inter", -apple-system,
-		sans-serif;
+	--font-sans: "Geist Variable", "Geist", -apple-system, sans-serif;
 	--font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
 	--color-landing-color: var(--landing-color);
@@ -664,15 +657,10 @@
 		/* Non-static so motion's useScroll({ target }) can measure window-scroll
 		   offsets against a positioned container (silences a dev-only warning). */
 		position: relative;
-	}
-
-	.grain-overlay {
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-		background-size: 160px 160px;
+		scroll-behavior: smooth;
 	}
 
 	body {
-		font-feature-settings: "ss01", "ss02", "cv11";
 		@apply bg-background text-foreground;
 	}
 
@@ -694,21 +682,9 @@
 		font-family: var(--font-mono);
 	}
 
-	html {
-		@apply font-sans overscroll-y-none;
-		scroll-behavior: smooth;
-		scroll-padding-top: 100px;
-	}
-
 	::selection {
 		color: oklch(0.99 0 0);
 		background: var(--oxblood);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		html {
-			scroll-behavior: auto;
-		}
 	}
 }
 

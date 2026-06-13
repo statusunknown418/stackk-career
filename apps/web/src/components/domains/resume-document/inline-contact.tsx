@@ -78,7 +78,7 @@ export const InlineContact = withForm({
 												<PopoverTrigger className="cursor-pointer select-none break-all rounded-sm px-1.5 py-0.5 font-medium font-sans text-sm transition-all duration-200 hover:bg-accent/80 hover:text-foreground">
 													{item.value || `[Añadir ${CONTACT_ITEM_LABELS[item.kind]}]`}
 												</PopoverTrigger>
-												<PopoverContent className="w-80 p-4">
+												<PopoverContent className="w-80">
 													<div className="flex flex-col gap-3">
 														<div className="flex items-center justify-between">
 															<span className="font-bold text-foreground text-sm">Editar contacto</span>

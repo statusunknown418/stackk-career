@@ -98,7 +98,7 @@ export const InlineSkills = withForm({
 			return (
 				<div className="space-y-2 py-1" data-block-id={primaryLine.id}>
 					<div className="group/line grid grid-cols-[max-content_1fr] items-baseline gap-x-2.5 font-serif text-sm">
-						<div className="flex select-none items-baseline pr-1 text-left font-bold text-foreground">
+						<div className="flex select-none items-baseline pr-1 text-left text-foreground">
 							{lineIndex === undefined ? (
 								<span className="select-none">Idiomas:</span>
 							) : (
@@ -142,7 +142,7 @@ export const InlineSkills = withForm({
 												)}
 											</PopoverTrigger>
 											<PopoverContent className="w-80 p-4">
-												<div className="flex flex-col gap-3">
+												<div className="flex flex-col gap-4">
 													<div className="flex items-center justify-between">
 														<span className="font-bold text-foreground text-sm">Editar idioma</span>
 														<Button
@@ -157,7 +157,7 @@ export const InlineSkills = withForm({
 													</div>
 													<div className="flex flex-col gap-3">
 														<div className="flex flex-col gap-1">
-															<span className="font-semibold text-[11px] text-muted-foreground">Idioma</span>
+															<span className="font-semibold text-muted-foreground text-sm">Idioma</span>
 															<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 																{(field) => (
 																	<input
@@ -172,7 +172,7 @@ export const InlineSkills = withForm({
 															</form.AppField>
 														</div>
 														<div className="flex flex-col gap-1">
-															<span className="font-semibold text-[11px] text-muted-foreground">Nivel (Opcional)</span>
+															<span className="font-semibold text-muted-foreground text-sm">Nivel (Opcional)</span>
 															<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
 																{(field) => (
 																	<Select
@@ -203,23 +203,21 @@ export const InlineSkills = withForm({
 												</div>
 											</PopoverContent>
 										</Popover>
-										{!isLast && (
-											<span className="pointer-events-none mr-1.5 select-none text-muted-foreground/60">,</span>
-										)}
+										{!isLast && <span className="pointer-events-none mr-1.5 select-none text-muted-foreground">,</span>}
 									</div>
 								);
 							})}
 
 							<Button
-								className="h-6 w-6 rounded-full opacity-0 transition-opacity duration-200 group-hover/line:opacity-100"
+								className="rounded-full opacity-0 transition-opacity duration-200 group-hover/line:opacity-100"
 								disabled={createBlock.isPending}
 								onClick={handleAddItem}
-								size="icon-xs"
+								size="icon"
 								title={addItemLabel}
 								type="button"
 								variant="ghost"
 							>
-								<PlusIcon className="size-3.5" />
+								<PlusIcon />
 							</Button>
 						</div>
 					</div>
@@ -228,7 +226,7 @@ export const InlineSkills = withForm({
 		}
 
 		return (
-			<div className="space-y-3 py-1">
+			<div className="space-y-4 py-1">
 				{lines.map((line) => {
 					if (line.blockType !== "skill_line") {
 						return null;
@@ -264,25 +262,21 @@ export const InlineSkills = withForm({
 							<div className="group/label relative flex select-none items-baseline pr-1 text-left font-bold text-foreground">
 								<Button
 									aria-label="Eliminar categoría"
-									className="pointer-events-none absolute top-0.5 left-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/label:pointer-events-auto group-focus-within/label:translate-x-0 group-focus-within/label:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/label:pointer-events-auto [@media(hover:hover)]:group-hover/label:translate-x-0 [@media(hover:hover)]:group-hover/label:opacity-100"
+									className="pointer-events-none absolute top-1/2 -left-6 -translate-y-1/2 opacity-0 transition-[opacity,transform] duration-200 ease-out group-focus-within/line:pointer-events-auto group-focus-within/line:translate-x-0 group-focus-within/line:opacity-100 data-[pending=true]:pointer-events-auto data-[pending=true]:translate-x-0 data-[pending=true]:opacity-100 [@media(hover:hover)]:group-hover/line:pointer-events-auto [@media(hover:hover)]:group-hover/line:translate-x-0 [@media(hover:hover)]:group-hover/line:opacity-100"
 									data-pending={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									disabled={deleteBlock.isPending && deleteBlock.variables?.id === line.id}
 									onClick={() => deleteBlock.mutate({ id: line.id, resumeId: params.resumeId })}
-									size="icon-xs"
+									size="icon-sm"
 									type="button"
 									variant="destructive-ghost"
 								>
-									{deleteBlock.isPending && deleteBlock.variables?.id === line.id ? (
-										<Spinner className="size-3" />
-									) : (
-										<TrashIcon className="size-3.5" />
-									)}
+									{deleteBlock.isPending && deleteBlock.variables?.id === line.id ? <Spinner /> : <TrashIcon />}
 								</Button>
 								<form.AppField name={`blocks[${lineIndex}].content.label` as const}>
 									{(field) => (
-										<div className="min-w-0 pl-6">
+										<div className="min-w-0">
 											<InlineTextEditor
-												className="w-full rounded-sm font-bold font-serif text-sm hover:bg-accent/40"
+												className="w-full rounded-sm font-normal! font-serif text-base text-muted-foreground tracking-wide hover:bg-accent/40"
 												onBlur={() => field.handleBlur()}
 												onChange={(value) => field.handleChange(value)}
 												placeholder="Categoría"
@@ -295,7 +289,7 @@ export const InlineSkills = withForm({
 								<span className="mr-1 select-none font-bold">:</span>
 							</div>
 
-							<div className="flex flex-1 flex-wrap items-center gap-x-1 gap-y-1">
+							<div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
 								{items.map((item, itemIdx) => {
 									if (item.blockType !== "skill_item") {
 										return null;
@@ -311,16 +305,17 @@ export const InlineSkills = withForm({
 											<Popover>
 												<PopoverTrigger className="cursor-pointer rounded px-1 py-0.5 font-medium font-sans text-foreground text-sm transition-all duration-150 hover:bg-accent/80">
 													{item.content.value || "[Nueva habilidad]"}
+
 													{item.content.proficiency && (
-														<span className="ml-1 font-normal text-muted-foreground text-xs">
+														<span className="ml-1 font-normal text-muted-foreground text-sm">
 															({SKILL_PROFICIENCY_LABELS[item.content.proficiency]})
 														</span>
 													)}
 												</PopoverTrigger>
-												<PopoverContent className="w-80 p-4">
+												<PopoverContent className="w-80">
 													<div className="flex flex-col gap-3">
 														<div className="flex items-center justify-between">
-															<span className="font-bold text-foreground text-sm">Editar habilidad</span>
+															<span className="text-foreground">Editar habilidad</span>
 															<Button
 																aria-label="Eliminar habilidad"
 																onClick={() => deleteBlock.mutate({ id: item.id, resumeId: params.resumeId })}
@@ -333,7 +328,7 @@ export const InlineSkills = withForm({
 														</div>
 														<div className="flex flex-col gap-3">
 															<div className="flex flex-col gap-1">
-																<span className="font-semibold text-[11px] text-muted-foreground">Habilidad</span>
+																<span className="text-muted-foreground text-sm">Habilidad</span>
 																<form.AppField name={`blocks[${itemIndex}].content.value` as const}>
 																	{(field) => (
 																		<input
@@ -348,9 +343,7 @@ export const InlineSkills = withForm({
 																</form.AppField>
 															</div>
 															<div className="flex flex-col gap-1">
-																<span className="font-semibold text-[11px] text-muted-foreground">
-																	Nivel (Opcional)
-																</span>
+																<span className="text-muted-foreground text-sm">Nivel (Opcional)</span>
 																<form.AppField name={`blocks[${itemIndex}].content.proficiency` as const}>
 																	{(field) => (
 																		<Select
@@ -397,7 +390,7 @@ export const InlineSkills = withForm({
 									type="button"
 									variant="ghost"
 								>
-									<PlusIcon className="size-3.5" />
+									<PlusIcon />
 								</Button>
 							</div>
 						</div>
@@ -405,13 +398,14 @@ export const InlineSkills = withForm({
 				})}
 
 				<Button
-					className="flex h-7 w-max items-center gap-1.5 rounded-full border border-border/80 border-dashed px-3 py-1 font-semibold text-muted-foreground text-xs opacity-0 transition-opacity duration-200 focus-within:opacity-100 hover:border-primary/50 hover:text-foreground hover:opacity-100 group-hover/section:opacity-100"
+					className="rounded-full opacity-0 transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100 group-hover/section:opacity-100"
 					disabled={createBlock.isPending}
 					onClick={handleAddCategory}
+					size="lg"
 					type="button"
-					variant="ghost"
+					variant="outline"
 				>
-					<PlusIcon className="size-3.5" />
+					<PlusIcon />
 					Agregar categoría
 				</Button>
 			</div>

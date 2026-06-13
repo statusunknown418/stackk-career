@@ -143,7 +143,14 @@ export const InlineSection = withForm({
 							return <InlineEntry block={entry} blockIndex={idx} form={form} key={getBlockKey(entry.id)} />;
 						})}
 
-						<Button disabled={createBlock.isPending} onClick={handleAddEntry} size="sm" type="button" variant="ghost">
+						<Button
+							className="rounded-full"
+							disabled={createBlock.isPending}
+							onClick={handleAddEntry}
+							size="lg"
+							type="button"
+							variant="outline"
+						>
 							<PlusIcon />
 							{labels.addCta}
 						</Button>

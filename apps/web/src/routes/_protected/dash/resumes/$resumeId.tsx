@@ -248,6 +248,13 @@ function RouteComponent() {
 	);
 	const contactBlockId = rootBlocks.find((block) => block.blockType === "contact")?.id ?? null;
 
+	const hasJobExperience = rootBlocks.some(
+		(block) =>
+			block.blockType === "section" &&
+			getSectionKind(block.content) === "experience" &&
+			block.children.some((child) => child.blockType === "entry")
+	);
+
 	useEffect(() => {
 		if (focusedSectionId === null) {
 			return;
@@ -437,6 +444,7 @@ function RouteComponent() {
 					</Collapsible>
 
 					<ResumeAnalysisSection
+						hasJobExperience={hasJobExperience}
 						onApplyEdit={handleApplyEdit}
 						onViewSection={handleViewSection}
 						resumeId={params.resumeId}

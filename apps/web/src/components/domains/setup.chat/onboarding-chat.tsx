@@ -1,4 +1,13 @@
-import { ArrowBendUpRightIcon, CaretLeftIcon, CheckCircleIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import {
+	ArrowBendUpRightIcon,
+	CaretDoubleUpIcon,
+	CaretLeftIcon,
+	CaretRightIcon,
+	CaretUpIcon,
+	CheckCircleIcon,
+	CircleDashedIcon,
+	PencilSimpleIcon,
+} from "@phosphor-icons/react";
 import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -453,9 +462,9 @@ function OnboardingQuestionView({
 	const isLanguages = activeQuestion?.id === "languages";
 
 	return (
-		<div className="flex min-h-[500px] w-full flex-1 flex-col justify-between p-2 sm:p-4">
+		<div className="flex min-h-125 w-full flex-1 flex-col justify-between p-2">
 			{/* Progress Indicator */}
-			<div className="mx-auto w-full max-w-xl">
+			<div className="mx-auto w-full">
 				<div className="mb-2 flex items-center justify-between text-muted-foreground text-xs">
 					<span className="font-semibold uppercase tracking-wider">
 						{editingIndex === null ? `Pregunta ${activeIndex + 1} de ${QUESTIONS.length}` : "🔧 Editando respuesta"}
@@ -481,7 +490,7 @@ function OnboardingQuestionView({
 						key={editingIndex === null ? `question-${turnIndex}` : `edit-${editingIndex}`}
 						transition={{ duration: 0.25, ease: "easeOut" }}
 					>
-						<h2 className="mb-10 max-w-2xl bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text font-extrabold text-3xl text-foreground text-transparent tracking-tight sm:text-4xl md:text-5xl md:leading-tight">
+						<h2 className="mb-10 max-w-2xl bg-linear-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-3xl text-transparent tracking-tight sm:text-4xl md:text-5xl md:leading-tight">
 							{activeQuestion?.prompt}
 						</h2>
 
@@ -499,7 +508,7 @@ function OnboardingQuestionView({
 											const emoji = OPTION_EMOJIS[option] || "✨";
 											return (
 												<button
-													className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-border bg-card/40 px-6 py-5 text-left font-medium text-card-foreground backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-primary/50 hover:bg-card/90 hover:shadow-[0_0_20px_rgba(var(--primary),0.05)] active:scale-[0.98]"
+													className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-border bg-card/40 px-6 py-5 text-left font-medium text-card-foreground backdrop-blur-md transition-all hover:bg-card/90 hover:shadow-[0_0_20px_rgba(var(--primary),0.05)] active:scale-[0.98]"
 													key={option}
 													onClick={() => handlePick(option)}
 													type="button"
@@ -507,7 +516,7 @@ function OnboardingQuestionView({
 													<span className="text-3xl transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
 														{emoji}
 													</span>
-													<span className="font-bold text-base text-foreground/90 tracking-tight group-hover:text-foreground">
+													<span className="font-medium text-base text-muted-foreground group-hover:text-foreground">
 														{option}
 													</span>
 												</button>
@@ -530,7 +539,7 @@ function OnboardingQuestionView({
 			</div>
 
 			{/* Navigation Bar */}
-			<div className="mx-auto flex w-full max-w-xl items-center justify-between border-border/40 border-t pt-4">
+			<div className="mx-auto flex w-full max-w-5xl items-center justify-between pt-4">
 				<OnboardingQuestionNavigation
 					editingIndex={editingIndex}
 					handleCancel={handleCancel}
@@ -592,74 +601,72 @@ interface OnboardingSummaryViewProps {
 
 function OnboardingSummaryView({ answers, generationId, setEditingIndex, navigate }: OnboardingSummaryViewProps) {
 	return (
-		<div className="flex min-h-[500px] w-full flex-1 flex-col overflow-y-auto p-2 sm:p-4">
-			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-between">
-				<div>
-					{/* Header */}
-					<div className="mb-8 text-center">
-						<div className="mb-4 inline-flex rounded-full bg-success/10 p-3 text-success">
-							<CheckCircleIcon className="size-8" />
-						</div>
-						<h2 className="bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text font-extrabold text-3xl text-foreground text-transparent tracking-tight sm:text-4xl">
-							Resumen de tu perfil
-						</h2>
-						<p className="mt-2 text-muted-foreground text-sm sm:text-base">
-							Revisa tus respuestas. Puedes editar cualquiera de ellas si es necesario.
-						</p>
-					</div>
+		<div className="flex min-h-125 w-full flex-1 flex-col overflow-y-auto p-2 sm:p-4">
+			{/* Header */}
+			<article className="mb-8 text-center">
+				<div className="mb-4 inline-flex rounded-full bg-success/10 p-3 text-success">
+					<CheckCircleIcon className="size-8" />
+				</div>
+				<h2 className="bg-linear-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-3xl text-transparent tracking-tight sm:text-4xl">
+					Resumen de tu perfil
+				</h2>
+				<p className="mt-2 text-muted-foreground text-sm sm:text-base">
+					Revisa tus respuestas. Puedes editar cualquiera de ellas si es necesario.
+				</p>
+			</article>
 
-					{/* Summary Grid */}
-					<div className="mb-8 grid gap-3">
-						{QUESTIONS.map((question, idx) => {
-							const answer = answers[question.id];
-							const isSkipped = answer === SKIPPED_ANSWER || !answer;
-							const displayAnswer = isSkipped ? SKIPPED_REPLY_LABEL : answer;
-							let emoji = isSkipped ? "🤫" : OPTION_EMOJIS[answer] || "✨";
+			<div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
+				{/* Summary Grid */}
+				<div className="grid min-w-0 gap-4">
+					{QUESTIONS.map((question, idx) => {
+						const answer = answers[question.id];
+						const isSkipped = answer === SKIPPED_ANSWER || !answer;
+						const displayAnswer = isSkipped ? SKIPPED_REPLY_LABEL : answer;
+						let emoji = isSkipped ? "🤫" : OPTION_EMOJIS[answer] || "✨";
 
-							if (question.id === "languages" && !isSkipped && answer !== "Solo español") {
-								emoji = "🌐";
-							}
+						if (question.id === "languages" && !isSkipped && answer !== "Solo español") {
+							emoji = "🌐";
+						}
 
-							return (
-								<div
-									className="group flex items-center justify-between rounded-2xl border border-border/50 bg-card/30 p-5 backdrop-blur-md transition-all duration-200 hover:bg-card/60"
-									key={question.id}
-								>
-									<div className="min-w-0 flex-1 pr-4">
-										<p className="mb-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-											{question.prompt}
+						return (
+							<div
+								className="group flex min-w-0 items-center justify-between rounded-lg border p-5 backdrop-blur-md transition-all duration-200 hover:bg-card/60"
+								key={question.id}
+							>
+								<div className="min-w-0 flex-1 pr-4">
+									<p className="mb-1 text-muted-foreground text-xs uppercase">{question.prompt}</p>
+									<div className="flex min-w-0 items-center gap-2">
+										<span className="text-lg">{emoji}</span>
+										<p
+											className={cn(
+												"truncate font-medium text-foreground text-sm",
+												isSkipped && "font-normal text-muted-foreground italic"
+											)}
+										>
+											{displayAnswer}
 										</p>
-										<div className="flex items-center gap-2">
-											<span className="text-lg">{emoji}</span>
-											<p
-												className={cn(
-													"truncate font-bold text-foreground text-sm",
-													isSkipped && "font-normal text-muted-foreground italic"
-												)}
-											>
-												{displayAnswer}
-											</p>
-										</div>
 									</div>
-									<button
-										className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-border bg-background/50 px-3 py-1.5 font-bold text-muted-foreground text-xs shadow-xs transition-all hover:bg-secondary/80 hover:text-foreground"
-										onClick={() => setEditingIndex(idx)}
-										type="button"
-									>
-										<PencilSimpleIcon className="size-3.5" />
-										Editar
-									</button>
 								</div>
-							);
-						})}
-					</div>
+								<Button
+									className="shrink-0"
+									onClick={() => setEditingIndex(idx)}
+									size="xs"
+									type="button"
+									variant="outline"
+								>
+									<PencilSimpleIcon className="size-3.5" />
+									Editar
+								</Button>
+							</div>
+						);
+					})}
 				</div>
 
 				{/* Call to Action: Dropzone & Continue */}
-				<div className="mt-6 border-border/40 border-t pt-8">
+				<div className="min-w-0 px-1 lg:pl-2">
 					<div className="space-y-4">
 						<div className="text-center sm:text-left">
-							<h3 className="font-bold text-base text-foreground">Subir tu curriculum vitae (Opcional)</h3>
+							<h3> Sube tu curriculum (CV) para analizarlo!</h3>
 							<p className="mt-0.5 text-muted-foreground text-xs">
 								Formatos aceptados: PDF. Nuestro asistente analizará tu perfil automáticamente.
 							</p>
@@ -732,6 +739,21 @@ const LANGUAGES_LIST = [
 	{ name: "Otro", emoji: "🌍" },
 ];
 
+const LEVELS = [
+	{
+		label: "Básico",
+		icon: <CircleDashedIcon />,
+	},
+	{
+		label: "Intermedio",
+		icon: <CaretUpIcon />,
+	},
+	{
+		label: "Avanzado",
+		icon: <CaretDoubleUpIcon />,
+	},
+] as const;
+
 function OnboardingLanguagesSelector({ initialValue, onSave, onSkip }: OnboardingLanguagesSelectorProps) {
 	const parsed = parseLanguagesString(initialValue);
 	const [selections, setSelections] = useState<Record<string, "Básico" | "Intermedio" | "Avanzado" | null>>(() => {
@@ -784,37 +806,35 @@ function OnboardingLanguagesSelector({ initialValue, onSave, onSkip }: Onboardin
 	}
 
 	return (
-		<div className="mx-auto flex w-full max-w-xl flex-col gap-5">
+		<div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
 			<div className="flex flex-col gap-3">
 				{LANGUAGES_LIST.map((lang) => {
 					const currentLevel = selections[lang.name];
 					return (
 						<div
-							className="flex flex-col gap-3 rounded-2xl border border-border/30 bg-card/25 p-4 backdrop-blur-md transition-all hover:bg-card/35 sm:flex-row sm:items-center sm:justify-between"
+							className="flex flex-col gap-3 border-border border-b p-4 backdrop-blur-md transition-all hover:bg-card/35 sm:flex-row sm:items-center sm:justify-between"
 							key={lang.name}
 						>
 							<div className="flex items-center gap-3">
 								<span className="text-2xl">{lang.emoji}</span>
-								<span className="font-bold text-foreground/90 text-sm tracking-tight sm:text-base">{lang.name}</span>
+								<span className="text-foreground/90 text-sm sm:text-base">{lang.name}</span>
 							</div>
 
 							<div className="flex items-center gap-1.5 self-end sm:self-auto">
-								{(["Básico", "Intermedio", "Avanzado"] as const).map((level) => {
-									const isActive = currentLevel === level;
+								{LEVELS.map((level) => {
+									const isActive = currentLevel === level.label;
 									return (
-										<button
-											className={cn(
-												"cursor-pointer select-none rounded-full px-4 py-1.5 font-semibold text-xs transition-all duration-200",
-												isActive
-													? "border border-primary bg-primary font-bold text-primary-foreground shadow-[0_0_12px_rgba(var(--primary),0.25)]"
-													: "border border-border/50 bg-background/50 text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-											)}
-											key={level}
-											onClick={() => toggleLevel(lang.name, level)}
+										<Button
+											key={level.label}
+											onClick={() => toggleLevel(lang.name, level.label)}
+											size="sm"
 											type="button"
+											variant={isActive ? "outline" : "ghost-muted"}
 										>
-											{level}
-										</button>
+											{level.icon}
+
+											{level.label}
+										</Button>
 									);
 								})}
 							</div>
@@ -824,18 +844,9 @@ function OnboardingLanguagesSelector({ initialValue, onSave, onSkip }: Onboardin
 			</div>
 
 			<div className="mt-2 flex flex-col items-center justify-between gap-4 border-border/30 border-t pt-4 sm:flex-row">
-				<button
-					className={cn(
-						"flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 font-semibold text-xs transition-all duration-200",
-						onlySpanish
-							? "border-primary/40 bg-primary/10 text-primary"
-							: "border-border bg-card/30 text-muted-foreground hover:bg-card/60 hover:text-foreground"
-					)}
-					onClick={handleOnlySpanish}
-					type="button"
-				>
+				<Button onClick={handleOnlySpanish} type="button" variant={onlySpanish ? "outline" : "ghost-muted"}>
 					🇪🇸 Solo hablo español
-				</button>
+				</Button>
 
 				<div className="flex w-full items-center justify-end gap-3 sm:w-auto">
 					<button
@@ -846,12 +857,8 @@ function OnboardingLanguagesSelector({ initialValue, onSave, onSkip }: Onboardin
 						Prefiero no responder
 					</button>
 
-					<Button
-						className="w-full rounded-xl bg-primary px-6 py-2 font-bold text-primary-foreground text-sm transition-all hover:bg-primary/90 sm:w-auto"
-						onClick={handleContinue}
-						type="button"
-					>
-						Continuar
+					<Button onClick={handleContinue} size="sm" type="button">
+						Continuar <CaretRightIcon />
 					</Button>
 				</div>
 			</div>
