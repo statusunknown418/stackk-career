@@ -1,4 +1,4 @@
-import { BriefcaseIcon, SparkleIcon } from "@phosphor-icons/react";
+import { GpsSlashIcon, SparkleIcon } from "@phosphor-icons/react";
 import type { k02DetailedAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-detailed-analysis";
 import type { ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -204,9 +204,9 @@ export function ResumeAnalysisSection({
 						Analizar
 					</Button>
 				) : (
-					<div className="flex items-start gap-2 rounded-md bg-muted/60 p-3 text-muted-foreground text-xs">
-						<BriefcaseIcon className="mt-0.5 size-4 shrink-0" />
-						<p>Agregá al menos una experiencia laboral para analizar tu CV con IA.</p>
+					<div className="flex items-start gap-2 rounded-md bg-muted p-3 text-muted-foreground text-sm">
+						<GpsSlashIcon className="mt-0.5 size-4 shrink-0" />
+						<p>Agrega al menos una experiencia laboral para que Casey pueda analizar tu CV.</p>
 					</div>
 				)}
 			</section>

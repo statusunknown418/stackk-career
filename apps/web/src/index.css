@@ -582,7 +582,7 @@
 	--card-foreground: var(--color-neutral-100);
 	--destructive: color-mix(
 		in srgb,
-		var(--color-red-500) 90%,
+		var(--color-red-500) 97%,
 		var(--color-white)
 	);
 	--foreground: var(--color-neutral-100);

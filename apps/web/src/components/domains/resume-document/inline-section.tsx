@@ -144,7 +144,7 @@ export const InlineSection = withForm({
 						})}
 
 						<Button
-							className="rounded-full"
+							className="rounded-full opacity-0 transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100 group-hover/section:opacity-100"
 							disabled={createBlock.isPending}
 							onClick={handleAddEntry}
 							size="lg"

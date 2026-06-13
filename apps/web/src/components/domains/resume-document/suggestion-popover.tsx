@@ -42,9 +42,12 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 	});
 
 	const handleOpenChange = (next: boolean) => {
+		if (next && !hasQuota) {
+			return;
+		}
 		setOpen(next);
 		onOpenChange?.(next);
-		if (next && hasQuota) {
+		if (next) {
 			submit(input);
 		} else {
 			stop();
@@ -60,21 +63,33 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 
 	return (
 		<Popover onOpenChange={handleOpenChange} open={open}>
-			<PopoverTrigger
-				render={
-					<Tooltip>
+			<Tooltip>
+				<PopoverTrigger
+					render={
 						<TooltipTrigger
 							render={
-								<Button aria-label="Mejorar con IA" disabled={!hasQuota} size="sm" type="button" variant="ghost">
+								<Button
+									aria-disabled={!hasQuota || undefined}
+									aria-label="Mejorar con IA"
+									className="aria-disabled:cursor-not-allowed aria-disabled:opacity-64"
+									size="sm"
+									type="button"
+									variant="ghost"
+								>
 									<SparkleIcon /> Mejorar
 								</Button>
 							}
 						/>
+					}
+				/>
 
-						{!hasQuotaRemaining && <TooltipContent>Has alcanzado tu limite de generaciones</TooltipContent>}
-					</Tooltip>
-				}
-			/>
+				{!hasQuota && (
+					<TooltipContent>
+						Oops, Parece que has llegado al limite de sugerencias con Casey. Puedes acceder a un plan mayor para mejores
+						limites!
+					</TooltipContent>
+				)}
+			</Tooltip>
 
 			<PopoverPopup align="end" className="w-2xl">
 				<header className="flex items-center justify-between px-2 pt-1 pb-2">

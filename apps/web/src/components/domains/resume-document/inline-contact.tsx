@@ -9,6 +9,7 @@ import {
 	type ContactItemKind,
 } from "@stackk-career/schemas/db/resume-blocks";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { propType, resumeFormDefaults, withForm } from "@/lib/forms/resume-form";
@@ -81,7 +82,7 @@ export const InlineContact = withForm({
 												<PopoverContent className="w-80">
 													<div className="flex flex-col gap-3">
 														<div className="flex items-center justify-between">
-															<span className="font-bold text-foreground text-sm">Editar contacto</span>
+															<span className="text-foreground">Editar contacto</span>
 															<Button
 																aria-label="Eliminar contacto"
 																onClick={() => itemsField.removeValue(itemIndex)}
@@ -92,47 +93,41 @@ export const InlineContact = withForm({
 																<TrashIcon className="size-4" />
 															</Button>
 														</div>
-														<div className="flex flex-col gap-3">
-															<div className="flex flex-col gap-1">
-																<span className="font-semibold text-[11px] text-muted-foreground">
-																	Tipo de contacto
-																</span>
-																<form.AppField name={`${itemsName}[${itemIndex}].kind` as const}>
-																	{(field) => (
-																		<Select
-																			items={contactKindOptions}
-																			onValueChange={(next) => field.handleChange(next as ContactItemKind)}
-																			value={field.state.value as string}
-																		>
-																			<SelectTrigger aria-label="Tipo de contacto" className="w-full" size="sm">
-																				<SelectValue />
-																			</SelectTrigger>
-																			<SelectPopup>
-																				{contactKindOptions.map((option) => (
-																					<SelectItem key={option.value} value={option.value}>
-																						{option.label}
-																					</SelectItem>
-																				))}
-																			</SelectPopup>
-																		</Select>
-																	)}
-																</form.AppField>
-															</div>
-															<div className="flex flex-col gap-1">
-																<span className="font-semibold text-[11px] text-muted-foreground">Valor</span>
-																<form.AppField name={`${itemsName}[${itemIndex}].value` as const}>
-																	{(field) => (
-																		<input
-																			className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-																			onBlur={() => field.handleBlur()}
-																			onChange={(e) => field.handleChange(e.target.value)}
-																			placeholder={CONTACT_ITEM_LABELS[item.kind]}
-																			type="text"
-																			value={(field.state.value ?? "") as string}
-																		/>
-																	)}
-																</form.AppField>
-															</div>
+
+														<div className="flex flex-col gap-2">
+															<form.AppField name={`${itemsName}[${itemIndex}].kind` as const}>
+																{(field) => (
+																	<Select
+																		items={contactKindOptions}
+																		onValueChange={(next) => field.handleChange(next as ContactItemKind)}
+																		value={field.state.value as string}
+																	>
+																		<SelectTrigger aria-label="Tipo de contacto" className="w-full" size="sm">
+																			<SelectValue />
+																		</SelectTrigger>
+																		<SelectPopup>
+																			{contactKindOptions.map((option) => (
+																				<SelectItem key={option.value} value={option.value}>
+																					{option.label}
+																				</SelectItem>
+																			))}
+																		</SelectPopup>
+																	</Select>
+																)}
+															</form.AppField>
+
+															<form.AppField name={`${itemsName}[${itemIndex}].value` as const}>
+																{(field) => (
+																	<Input
+																		onBlur={() => field.handleBlur()}
+																		onChange={(e) => field.handleChange(e.target.value)}
+																		placeholder={CONTACT_ITEM_LABELS[item.kind]}
+																		type="text"
+																		value={(field.state.value ?? "") as string}
+																		variant="outline"
+																	/>
+																)}
+															</form.AppField>
 														</div>
 													</div>
 												</PopoverContent>

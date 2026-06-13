@@ -97,10 +97,6 @@ function formatPeriodDate(date: Date): string {
 	return format(date, "d 'de' MMMM, yyyy", { locale: es });
 }
 
-function formatResetDate(date: Date): string {
-	return format(date, "d MMM", { locale: es });
-}
-
 export function BillingSheet(): React.ReactElement {
 	const open = useBillingSheet((state) => state.open);
 	const view = useBillingSheet((state) => state.view);
@@ -239,7 +235,7 @@ function PlanOverview({ snapshot }: { snapshot: BillingSnapshot }): React.ReactE
 					{!isInactivePaidPlan && <ArrowsClockwiseIcon className="size-4 shrink-0" />}
 					{isInactivePaidPlan && <LockSimpleIcon className="size-4 shrink-0" />}
 					{isFree && <span>Sin cobros. Mejora cuando lo necesites.</span>}
-					{!isFree && hasAccess && <span>Se renueva el {formatPeriodDate(periodEnd)}</span>}
+					{!isFree && hasAccess && <span>Las cuotas se renuevan el {formatPeriodDate(periodEnd)}</span>}
 					{isInactivePaidPlan && <span>Tu acceso volvió a {snapshot.effectivePlan.displayName}.</span>}
 				</div>
 			</div>
@@ -255,10 +251,8 @@ function PlanOverview({ snapshot }: { snapshot: BillingSnapshot }): React.ReactE
 			)}
 
 			<div className="flex flex-col gap-4">
-				<div className="flex items-baseline justify-between gap-2">
-					<span className="font-medium text-foreground text-sm">Uso del ciclo</span>
-					<span className="text-muted-foreground text-xs tabular-nums">Reinicia {formatResetDate(periodEnd)}</span>
-				</div>
+				<span className="font-medium text-muted-foreground text-sm">Uso en este ciclo</span>
+
 				<div className="flex flex-col gap-3.5">
 					{USAGE_METRICS.map(({ key, label }) => (
 						<UsageRow key={key} label={label} limit={snapshot.entitlements[key]} used={snapshot.usage[key]} />
