@@ -78,8 +78,8 @@ function resolveTriangleOpacity(row: number, col: number, isActive: boolean, fra
 }
 
 export function DotmTriangle1({
-	size = 30,
-	dotSize = 6.5,
+	size = 22,
+	dotSize = 4,
 	color = "currentColor",
 	colorPreset,
 	ariaLabel = "Loading",

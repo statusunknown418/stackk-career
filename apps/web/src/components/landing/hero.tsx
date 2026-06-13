@@ -27,7 +27,7 @@ export function Hero() {
 				<div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
 					{/* Headline */}
 					<motion.h1
-						className="text-balance font-display text-5xl leading-none tracking-tighter md:text-7xl"
+						className="text-balance bg-linear-to-b from-foreground to-neutral-300 bg-clip-text font-display text-5xl text-transparent leading-none tracking-tighter md:text-7xl"
 						initial={fadeUp}
 						transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.1 }}
 						viewport={viewport}
@@ -210,7 +210,7 @@ export function Hero() {
 			</section>
 
 			{/* Unhidden & Polished Stats Section */}
-			<section className="relative bg-linear-to-t from-muted/20 px-6 pb-12 sm:pb-16">
+			<section className="px-6 py-12 sm:pb-16">
 				<div className="flex w-full flex-col items-center gap-6">
 					<p className="text-foreground/50 text-xs uppercase">Nuestros talentos ya trabajan en</p>
 					<LogoMarqueeRows />

@@ -248,6 +248,17 @@ function RouteComponent() {
 	);
 	const contactBlockId = rootBlocks.find((block) => block.blockType === "contact")?.id ?? null;
 
+	const hasJobExperience = rootBlocks.some(
+		(block) =>
+			block.blockType === "section" &&
+			getSectionKind(block.content) === "experience" &&
+			block.children.some(
+				(child) =>
+					child.blockType === "entry" &&
+					(child.content.title.trim() !== "" || (child.content.subtitle?.trim() ?? "") !== "")
+			)
+	);
+
 	useEffect(() => {
 		if (focusedSectionId === null) {
 			return;
@@ -437,6 +448,7 @@ function RouteComponent() {
 					</Collapsible>
 
 					<ResumeAnalysisSection
+						hasJobExperience={hasJobExperience}
 						onApplyEdit={handleApplyEdit}
 						onViewSection={handleViewSection}
 						resumeId={params.resumeId}
@@ -458,7 +470,7 @@ function RouteComponent() {
 			<AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
 				<AlertDialogPopup>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Borrar este CV</AlertDialogTitle>
+						<AlertDialogTitle>Estás seguro que quieres borrar este CV?</AlertDialogTitle>
 						<AlertDialogDescription>
 							Esta acción no se puede deshacer. Se eliminará el CV junto con todas sus secciones.
 						</AlertDialogDescription>

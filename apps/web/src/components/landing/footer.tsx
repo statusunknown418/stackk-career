@@ -1,7 +1,9 @@
 "use client";
 
 import { ArrowUpRightIcon, InstagramLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
+import { Button } from "../ui/button";
 import { FOOTER_COLUMNS } from "./data";
 
 export const SOCIAL_LINKS = [
@@ -72,7 +74,12 @@ export function LandingFooter() {
 				{/* LEGAL ROW */}
 				<div className="mt-14 flex flex-col-reverse items-start justify-between gap-7 border-border border-t pt-7 md:flex-row md:items-center">
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-						<p className="font-mono text-foreground/65 text-xs uppercase">© 2026 ASSENDIA SAC</p>
+						<p className="font-mono text-foreground/65 text-xs">
+							Assendia.com, un producto de ©{" "}
+							<Button render={<Link to={"https://stackkstudios.com"} />} size="sm" variant="link">
+								Stackk Studios
+							</Button>
+						</p>
 						<LegalDot />
 						<ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
 							{LEGAL_LINKS.map((link, idx) => (

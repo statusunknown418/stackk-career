@@ -10,6 +10,7 @@ import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack
 import { BillingSheet } from "@/components/domains/billing/billing-sheet";
 import { useBillingSheet } from "@/components/domains/billing/use-billing-sheet";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -145,10 +146,13 @@ function DashLayout() {
 							className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}
 							weight="fill"
 						/>
+
 						<span className={cn(planMeta === "pro" && "text-indigo-600", planMeta === "max" && "text-pink-600")}>
 							{planLabel}
 						</span>
 					</Button>
+
+					<AnimatedThemeToggler />
 				</nav>
 
 				<div className="min-h-0 overflow-y-auto">

@@ -56,14 +56,18 @@ function ComingSoonPage() {
 				)}
 			</span>
 
-			<h1 className="mt-7 max-w-[16ch] font-display font-semibold text-[clamp(2.25rem,6vw,4rem)] text-foreground leading-[1.02] tracking-tighter">
+			<h1 className="mt-7 max-w-[16ch] text-balance font-display text-5xl text-foreground leading-tighter tracking-tighter">
 				Estamos afinando los últimos detalles
 			</h1>
 
-			<p className="mt-6 max-w-[52ch] text-[clamp(1rem,1.2vw,1.15rem)] text-foreground/70 leading-normal">
+			<p className="mt-6 max-w-[52ch] text-balance text-foreground/70 leading-normal">
 				Muy pronto, un Agente especializado de IA analizará y potenciará tu CV, y un coach 1:1 que ya pasó por lo mismo
 				te acompañará hasta tu próxima entrevista.
 			</p>
+
+			<p className="mt-12 font-medium text-foreground text-sm">Déjanos tus datos y te escribimos apenas lancemos.</p>
+
+			<WaitlistForm />
 
 			<p className="mt-10 font-medium text-foreground text-sm">Síguenos en nuestras redes:</p>
 
@@ -81,10 +85,6 @@ function ComingSoonPage() {
 					</a>
 				))}
 			</div>
-
-			<p className="mt-12 font-medium text-foreground text-sm">Déjanos tus datos y te escribimos apenas lancemos.</p>
-
-			<WaitlistForm />
 
 			<Link
 				className="group mt-14 inline-flex items-center gap-2 font-medium text-foreground/55 text-sm transition-colors hover:text-foreground"

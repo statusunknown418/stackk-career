@@ -1,12 +1,12 @@
 "use client";
 
-import { CheckCircleIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon, EnvelopeSimpleIcon, UserIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { orpc } from "@/utils/orpc";
 
 /** Captura de waitlist en /waitlist: nombre + teléfono (WhatsApp) + email para avisar al lanzar. */
@@ -48,48 +48,63 @@ export function WaitlistForm() {
 		>
 			<form.Field name="name">
 				{(field) => (
-					<Input
-						aria-label="Tu nombre"
-						autoComplete="name"
-						disabled={join.isPending}
-						onBlur={field.handleBlur}
-						onChange={(event) => field.handleChange(event.target.value)}
-						placeholder="Tu nombre"
-						required
-						value={field.state.value}
-					/>
+					<InputGroup>
+						<InputGroupInput
+							aria-label="Tu nombre"
+							autoComplete="name"
+							disabled={join.isPending}
+							onBlur={field.handleBlur}
+							onChange={(event) => field.handleChange(event.target.value)}
+							placeholder="Tu nombre"
+							required
+							value={field.state.value}
+						/>
+						<InputGroupAddon>
+							<UserIcon aria-hidden="true" />
+						</InputGroupAddon>
+					</InputGroup>
 				)}
 			</form.Field>
 
 			<form.Field name="phone">
 				{(field) => (
-					<Input
-						aria-label="Tu celular (WhatsApp)"
-						autoComplete="tel"
-						disabled={join.isPending}
-						inputMode="tel"
-						onBlur={field.handleBlur}
-						onChange={(event) => field.handleChange(event.target.value)}
-						placeholder="Tu celular (WhatsApp)"
-						required
-						type="tel"
-						value={field.state.value}
-					/>
+					<InputGroup>
+						<InputGroupInput
+							aria-label="Tu celular (WhatsApp)"
+							autoComplete="tel"
+							disabled={join.isPending}
+							inputMode="tel"
+							onBlur={field.handleBlur}
+							onChange={(event) => field.handleChange(event.target.value)}
+							placeholder="Tu celular (WhatsApp)"
+							required
+							type="tel"
+							value={field.state.value}
+						/>
+						<InputGroupAddon>
+							<WhatsappLogoIcon aria-hidden="true" />
+						</InputGroupAddon>
+					</InputGroup>
 				)}
 			</form.Field>
 
 			<form.Field name="email">
 				{(field) => (
-					<Input
-						aria-label="Tu correo (opcional)"
-						autoComplete="email"
-						disabled={join.isPending}
-						onBlur={field.handleBlur}
-						onChange={(event) => field.handleChange(event.target.value)}
-						placeholder="Tu correo (opcional)"
-						type="email"
-						value={field.state.value}
-					/>
+					<InputGroup>
+						<InputGroupInput
+							aria-label="Tu correo (opcional)"
+							autoComplete="email"
+							disabled={join.isPending}
+							onBlur={field.handleBlur}
+							onChange={(event) => field.handleChange(event.target.value)}
+							placeholder="Tu correo (opcional)"
+							type="email"
+							value={field.state.value}
+						/>
+						<InputGroupAddon>
+							<EnvelopeSimpleIcon aria-hidden="true" />
+						</InputGroupAddon>
+					</InputGroup>
 				)}
 			</form.Field>
 

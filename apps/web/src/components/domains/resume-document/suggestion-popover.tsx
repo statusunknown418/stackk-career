@@ -8,9 +8,10 @@ import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { Classic } from "@/components/loading-ui/classic";
 import { Button } from "@/components/ui/button";
+import { DotmTriangle1 } from "@/components/ui/dotm-triangle-1";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { orpc } from "@/utils/orpc";
 import { InlineTextEditor } from "./inline-text-editor";
@@ -41,9 +42,12 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 	});
 
 	const handleOpenChange = (next: boolean) => {
+		if (next && !hasQuota) {
+			return;
+		}
 		setOpen(next);
 		onOpenChange?.(next);
-		if (next && hasQuota) {
+		if (next) {
 			submit(input);
 		} else {
 			stop();
@@ -59,20 +63,34 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 
 	return (
 		<Popover onOpenChange={handleOpenChange} open={open}>
-			<PopoverTrigger
-				render={
-					<Button
-						aria-label="Mejorar con IA"
-						disabled={!hasQuota}
-						size="sm"
-						title={hasQuota ? undefined : "Alcanzaste el límite de sugerencias con IA de tu plan"}
-						type="button"
-						variant="ghost"
-					>
-						<SparkleIcon /> Generar
-					</Button>
-				}
-			/>
+			<Tooltip>
+				<PopoverTrigger
+					render={
+						<TooltipTrigger
+							render={
+								<Button
+									aria-disabled={!hasQuota || undefined}
+									aria-label="Mejorar con IA"
+									className="aria-disabled:cursor-not-allowed aria-disabled:opacity-64"
+									size="sm"
+									type="button"
+									variant="ghost"
+								>
+									<SparkleIcon /> Mejorar
+								</Button>
+							}
+						/>
+					}
+				/>
+
+				{!hasQuota && (
+					<TooltipContent>
+						Oops, Parece que has llegado al limite de sugerencias con Casey. Puedes acceder a un plan mayor para mejores
+						limites!
+					</TooltipContent>
+				)}
+			</Tooltip>
+
 			<PopoverPopup align="end" className="w-2xl">
 				<header className="flex items-center justify-between px-2 pt-1 pb-2">
 					<div className="flex items-center gap-1.5 font-medium text-sm">
@@ -111,7 +129,7 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 											Generando opción
 										</Shimmer>
 										<div className="flex items-center justify-center py-3">
-											<Classic className="size-4 text-muted-foreground" />
+											<DotmTriangle1 />
 										</div>
 									</div>
 								);
@@ -148,7 +166,7 @@ export function SuggestionPopover({ input, onApply, onOpenChange }: Props) {
 										/>
 									) : (
 										<div className="flex items-center justify-center py-3">
-											<Classic className="size-4 text-muted-foreground" />
+											<DotmTriangle1 />
 										</div>
 									)}
 								</button>

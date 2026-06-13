@@ -1,4 +1,4 @@
-import { SparkleIcon } from "@phosphor-icons/react";
+import { GpsSlashIcon, SparkleIcon } from "@phosphor-icons/react";
 import type { k02DetailedAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-detailed-analysis";
 import type { ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,10 +23,12 @@ type CachedAnalysis = {
 
 export function ResumeAnalysisSection({
 	resumeId,
+	hasJobExperience,
 	onApplyEdit,
 	onViewSection,
 }: {
 	resumeId: string;
+	hasJobExperience: boolean;
 	onApplyEdit?: (edit: ResumeEdit) => boolean;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
@@ -196,10 +198,17 @@ export function ResumeAnalysisSection({
 					<h3 className="font-medium text-sm">Análisis de tu CV</h3>
 					<p className="text-muted-foreground text-xs">Puntajes y sugerencias sobre tu CV actual.</p>
 				</hgroup>
-				<Button className="w-full" disabled={initiateAnalysis.isPending} onClick={handleAnalyze}>
-					<SparkleIcon />
-					Analizar
-				</Button>
+				{hasJobExperience ? (
+					<Button className="w-full" disabled={initiateAnalysis.isPending} onClick={handleAnalyze}>
+						<SparkleIcon />
+						Analizar
+					</Button>
+				) : (
+					<div className="flex items-start gap-2 rounded-md bg-muted p-3 text-muted-foreground text-sm">
+						<GpsSlashIcon className="mt-0.5 size-4 shrink-0" />
+						<p>Agrega al menos una experiencia laboral para que Casey pueda analizar tu CV.</p>
+					</div>
+				)}
 			</section>
 		);
 	}

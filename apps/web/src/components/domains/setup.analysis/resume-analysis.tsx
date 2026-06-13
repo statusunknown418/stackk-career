@@ -131,7 +131,7 @@ export function ResumeAnalysisPanel({
 								return (
 									<Card key={slot}>
 										<CardHeader>
-											<CardTitle>{edit?.title}</CardTitle>
+											<CardTitle className="text-base leading-tight">{edit?.title}</CardTitle>
 											<CardDescription>{edit?.description}</CardDescription>
 										</CardHeader>
 
