@@ -193,7 +193,7 @@ export function ResumeAnalysisSection({
 
 	if (!hasAnything) {
 		return (
-			<section className="flex flex-col gap-3 rounded-lg bg-background p-3">
+			<section className="flex flex-col gap-3 rounded-lg bg-card p-3">
 				<hgroup className="space-y-0.5">
 					<h3 className="font-medium text-sm">Análisis de tu CV</h3>
 					<p className="text-muted-foreground text-xs">Puntajes y sugerencias sobre tu CV actual.</p>

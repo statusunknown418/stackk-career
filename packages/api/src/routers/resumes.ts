@@ -20,6 +20,8 @@ import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume
 import { invalidateViewerUsage } from "../lib/viewer-cache";
 import { assertSingleQuota } from "../services/subscriptions";
 
+const CONTACT_DETAIL_PRIORITY = ["email", "address", "website", "phone", "linkedin", "other"] as const;
+
 export const resumesRouter = {
 	list: protectedProcedure.input(listResumesInputSchema).handler(async ({ context, input }) => {
 		const userId = context.session.user.id;
@@ -71,9 +73,19 @@ export const resumesRouter = {
 					return [raw.resumeId, null];
 				}
 
+				let detail: string | null = null;
+				for (const kind of CONTACT_DETAIL_PRIORITY) {
+					const value = block.content.items.find((item) => item.kind === kind)?.value.trim();
+					if (value) {
+						detail = value;
+						break;
+					}
+				}
+
 				return [
 					raw.resumeId,
 					{
+						detail,
 						firstName: block.content.firstName,
 						lastName: block.content.lastName,
 					},

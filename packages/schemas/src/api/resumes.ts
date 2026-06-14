@@ -12,10 +12,9 @@ export const listResumesInputSchema = z
 
 export type ListResumesInput = z.infer<typeof listResumesInputSchema>;
 
-export const resumeListContactSchema = contactContentSchema.pick({
-	firstName: true,
-	lastName: true,
-});
+export const resumeListContactSchema = contactContentSchema
+	.pick({ firstName: true, lastName: true })
+	.extend({ detail: z.string().nullable() });
 
 export const resumeListItemSchema = selectResumeSchema.extend({
 	contact: resumeListContactSchema.nullable().optional(),

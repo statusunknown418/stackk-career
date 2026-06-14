@@ -83,7 +83,7 @@ export const ResumeDocument = withForm({
 			<section className="relative mx-auto w-full max-w-3xl [--page-h:80rem]" ref={containerRef}>
 				<div aria-hidden="true" className="pointer-events-none absolute inset-0" />
 
-				<article className="relative flex w-full flex-col rounded bg-background p-8 shadow-lg ring-1 ring-border/40">
+				<article className="relative flex w-full flex-col rounded-md bg-card p-8 shadow-inner shadow-muted ring-1 ring-border/40">
 					{contactBlock && contactBlock.blockType === "contact" && contactIndex !== undefined && (
 						<section
 							className={cn(

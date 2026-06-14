@@ -687,29 +687,3 @@
 		background: var(--oxblood);
 	}
 }
-
-@layer utilities {
-	.text-balance {
-		text-wrap: balance;
-	}
-
-	/* Static CSS fallbacks for the hero aurora glow.
-	   Used when the WebGL MeshGradient is skipped (light mode, mobile, reduced motion, or out of view). */
-	.hero-glow-dark {
-		background: radial-gradient(
-			95% 70% at 50% 14%,
-			oklch(0.4 0.12 146 / 0.5),
-			oklch(0.22 0.07 150 / 0.3) 42%,
-			transparent 75%
-		);
-	}
-
-	.hero-glow-light {
-		background: radial-gradient(
-			125% 110% at 28% 20%,
-			oklch(0.88 0.13 150 / 0.6),
-			oklch(0.95 0.06 150 / 0.32) 42%,
-			transparent 76%
-		);
-	}
-}

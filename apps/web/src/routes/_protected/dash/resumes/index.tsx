@@ -104,7 +104,7 @@ function RouteComponent() {
 						<MeterValue>{(_formatted, value) => `${value} / ${maxResumes}`}</MeterValue>
 					</div>
 
-					<MeterTrack>
+					<MeterTrack className="rounded-lg">
 						<MeterIndicator />
 					</MeterTrack>
 				</Meter>

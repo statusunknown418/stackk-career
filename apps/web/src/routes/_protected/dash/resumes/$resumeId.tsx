@@ -107,25 +107,67 @@ export const Route = createFileRoute("/_protected/dash/resumes/$resumeId")({
 	validateSearch: resumeSearchSchema,
 });
 
+const RAIL_SKELETON_KEYS = ["all", "contact", "summary", "experience", "education", "skills"] as const;
+const DOC_SECTION_SKELETON_KEYS = ["summary", "experience", "education"] as const;
+
 function ResumeEditorPending() {
 	return (
 		<section className="flex h-full min-h-0 flex-col overflow-hidden">
-			<header className="flex shrink-0 flex-col items-start gap-4 border-b bg-background/80 ps-1 pe-4 pt-6 pb-4 backdrop-blur-md md:flex-row md:justify-between">
-				<article className="w-full max-w-xl space-y-2 pl-3">
-					<Skeleton className="h-4 w-40" />
-					<Skeleton className="h-7 w-64" />
+			<header className="flex shrink-0 flex-col items-center gap-4 border-b py-2.5 ps-1 pe-4 md:flex-row md:justify-between">
+				<article className="w-full max-w-xl space-y-2">
+					<div className="flex items-center gap-3 pl-3">
+						<Skeleton className="h-4 w-44" />
+					</div>
+					<div className="max-w-xs ps-2">
+						<Skeleton className="h-7 w-48" />
+					</div>
+				</article>
+
+				<article className="flex items-center gap-2">
+					<Skeleton className="h-7 w-72 rounded-lg" />
+					<Skeleton className="h-7 w-24 rounded-lg" />
 				</article>
 			</header>
-			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 py-4">
-				<article className="h-full w-72 shrink-0 space-y-2 rounded-lg bg-background p-2">
-					<Skeleton className="h-6 w-full" />
-					<Skeleton className="h-6 w-full" />
-					<Skeleton className="h-6 w-2/3" />
+
+			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
+				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
+					<div className="shrink-0 space-y-2 rounded-lg bg-card p-2">
+						<Skeleton className="h-9 w-full rounded-lg" />
+						<div className="space-y-1 px-1">
+							{RAIL_SKELETON_KEYS.map((key) => (
+								<Skeleton className="h-8 w-full rounded-md" key={key} />
+							))}
+						</div>
+					</div>
+
+					<div className="flex flex-col gap-3 rounded-lg bg-card p-3">
+						<div className="space-y-1.5">
+							<Skeleton className="h-4 w-32" />
+							<Skeleton className="h-3 w-48" />
+						</div>
+						<Skeleton className="h-16 w-full rounded-md" />
+					</div>
 				</article>
-				<article className="min-w-0 flex-1 space-y-3 overflow-y-auto px-4 pb-16">
-					<Skeleton className="h-10 w-1/2" />
-					<Skeleton className="h-32 w-full" />
-					<Skeleton className="h-32 w-full" />
+
+				<article className="min-w-0 flex-1 overflow-y-auto">
+					<section className="mx-auto w-full max-w-3xl">
+						<article className="flex w-full flex-col rounded-md bg-card p-8 shadow-inner shadow-muted ring-1 ring-border/40">
+							<div className="mb-8 flex flex-col items-center gap-2">
+								<Skeleton className="h-8 w-64" />
+								<Skeleton className="h-4 w-48" />
+							</div>
+							<div className="space-y-8">
+								{DOC_SECTION_SKELETON_KEYS.map((key) => (
+									<div className="space-y-3" key={key}>
+										<Skeleton className="h-6 w-56" />
+										<div className="h-px w-full bg-border" />
+										<Skeleton className="h-4 w-full" />
+										<Skeleton className="h-4 w-4/5" />
+									</div>
+								))}
+							</div>
+						</article>
+					</section>
 				</article>
 			</section>
 		</section>
@@ -365,7 +407,7 @@ function RouteComponent() {
 
 	return (
 		<section className="flex h-full min-h-0 flex-col overflow-hidden">
-			<header className="flex shrink-0 flex-col items-center gap-4 border-b bg-background/80 py-2.5 ps-1 pe-4 backdrop-blur-md md:flex-row md:justify-between">
+			<header className="flex shrink-0 flex-col items-center gap-4 border-b py-2.5 ps-1 pe-4 md:flex-row md:justify-between">
 				<article className="w-full max-w-xl">
 					<div className="flex items-center gap-3 pl-3">
 						<p className="text-muted-foreground text-sm">
@@ -426,17 +468,14 @@ function RouteComponent() {
 				</article>
 			</header>
 
-			<section className="relative flex flex-1 gap-2 overflow-hidden bg-muted px-3 pt-3">
+			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
 				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
-					<Collapsible
-						className="shrink-0 rounded-lg bg-background"
-						onOpenChange={setAreSectionsOpen}
-						open={areSectionsOpen}
-					>
+					<Collapsible className="shrink-0 rounded-lg bg-card" onOpenChange={setAreSectionsOpen} open={areSectionsOpen}>
 						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
 							Secciones
 							<CaretDownIcon className={cn("transition-transform", !areSectionsOpen && "-rotate-90")} />
 						</CollapsibleTrigger>
+
 						<CollapsiblePanel className="px-2 pb-2">
 							<SectionRail
 								activeId={focusedSectionId}

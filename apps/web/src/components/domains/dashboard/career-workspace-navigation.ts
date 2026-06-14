@@ -1,11 +1,4 @@
-import {
-	BriefcaseIcon,
-	CalendarIcon,
-	ChatCircleTextIcon,
-	FilesIcon,
-	type Icon,
-	PulseIcon,
-} from "@phosphor-icons/react";
+import { BriefcaseIcon, CalendarIcon, ChatCircleTextIcon, FilesIcon, type Icon } from "@phosphor-icons/react";
 import type { FileRouteTypes } from "@/routeTree.gen";
 
 export interface CareerWorkspaceNavigationItem {
@@ -17,12 +10,12 @@ export interface CareerWorkspaceNavigationItem {
 }
 
 export const careerWorkspaceNavigation = [
-	{
-		icon: PulseIcon,
-		id: "dashboard",
-		label: "Dashboard",
-		to: "/dash",
-	},
+	// {
+	// 	icon: PulseIcon,
+	// 	id: "dashboard",
+	// 	label: "Dashboard",
+	// 	to: "/dash",
+	// },
 	{
 		icon: FilesIcon,
 		id: "curriculums",
