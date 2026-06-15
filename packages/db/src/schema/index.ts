@@ -8,4 +8,5 @@ export * from "./resume-analyses";
 export * from "./resume-blocks";
 export * from "./resumes";
 export * from "./subscriptions";
+export * from "./transactional-emails";
 export * from "./waitlist";

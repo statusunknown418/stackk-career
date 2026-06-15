@@ -2,8 +2,10 @@ import { createDb } from "@stackk-career/db";
 import * as schema from "@stackk-career/db/schema/auth";
 import { userSubscriptions } from "@stackk-career/db/schema/subscriptions";
 import { env } from "@stackk-career/env/server";
+import type { sendWelcomeEmailTask } from "@stackk-career/jobs/trigger/tasks/send-welcome-email";
 import { createMonthlyPeriod } from "@stackk-career/schemas/subscriptions";
 import { toError } from "@stackk-career/schemas/utils/to-error";
+import { tasks } from "@trigger.dev/sdk";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
@@ -38,6 +40,29 @@ export function createAuth() {
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
 		plugins: [tanstackStartCookies()],
+		databaseHooks: {
+			user: {
+				create: {
+					// Fire-and-forget welcome email. `tasks.trigger` only enqueues over HTTP
+					// (~ms) and errors are swallowed, so signup never blocks on or fails from
+					// email delivery — the send itself runs in the `send-welcome-email` task.
+					after: async (createdUser) => {
+						try {
+							await tasks.trigger<typeof sendWelcomeEmailTask>("send-welcome-email", {
+								userId: createdUser.id,
+								email: createdUser.email,
+								name: createdUser.name,
+							});
+						} catch (err) {
+							log.error({
+								auth: { action: "enqueue_welcome_email", userId: createdUser.id },
+								error: toError(err),
+							});
+						}
+					},
+				},
+			},
+		},
 		hooks: {
 			after: createAuthMiddleware(async (ctx) => {
 				const newSession = ctx.context.newSession;

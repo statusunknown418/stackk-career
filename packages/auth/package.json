@@ -13,7 +13,9 @@
   "dependencies": {
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
+    "@stackk-career/jobs": "workspace:*",
     "@stackk-career/schemas": "workspace:*",
+    "@trigger.dev/sdk": "catalog:",
     "better-auth": "catalog:",
     "better-call": "catalog:",
     "dotenv": "catalog:",

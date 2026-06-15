@@ -39,6 +39,9 @@ export const env = createEnv({
 
 		CAL_WEBHOOK_SECRET: z.string().min(1),
 
+		RESEND_API_KEY: z.string().min(1),
+		EMAIL_FROM: z.string().min(1),
+
 		MERCADOPAGO_ACCESS_TOKEN: z.string().min(1),
 		MERCADOPAGO_PUBLIC_KEY: z.string().min(1),
 		MERCADOPAGO_WEBHOOK_SECRET: z.string().min(1),
