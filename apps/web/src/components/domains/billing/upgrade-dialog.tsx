@@ -18,7 +18,7 @@ export function UpgradeDialog({
 }: UpgradeDialogProps): React.ReactElement {
 	return (
 		<Dialog onOpenChange={onOpenChange} open={open}>
-			<DialogPopup className="sm:max-w-md">
+			<DialogPopup className="sm:max-w-2xl">
 				<DialogTitle className="sr-only">{title}</DialogTitle>
 				<DialogDescription className="sr-only">{description}</DialogDescription>
 				<UpgradePanel description={description} title={title} variant="bare" />
