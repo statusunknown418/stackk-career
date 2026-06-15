@@ -1,5 +1,6 @@
 import { env } from "@stackk-career/env/server";
 import { EngagementNudgeEmail } from "./emails/engagement-nudge";
+import { WaitlistEmail } from "./emails/waitlist";
 import { WelcomeEmail } from "./emails/welcome";
 import { sendEmail } from "./send";
 
@@ -30,6 +31,20 @@ export function sendEngagementNudgeEmail({
 		to,
 		subject: "Tu primer CV te está esperando en Assendia",
 		react: <EngagementNudgeEmail appUrl={env.CORS_ORIGIN} name={name} />,
+		idempotencyKey,
+	});
+}
+
+/** Render + send the post-signup waitlist confirmation, with the feature lineup. */
+export function sendWaitlistConfirmationEmail({
+	to,
+	name,
+	idempotencyKey,
+}: SendTransactionalInput): Promise<{ id: string }> {
+	return sendEmail({
+		to,
+		subject: "Ya estás en la waitlist de Assendia!",
+		react: <WaitlistEmail appUrl={env.CORS_ORIGIN} name={name} />,
 		idempotencyKey,
 	});
 }

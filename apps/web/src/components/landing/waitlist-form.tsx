@@ -77,7 +77,6 @@ export function WaitlistForm() {
 							onBlur={field.handleBlur}
 							onChange={(event) => field.handleChange(event.target.value)}
 							placeholder="Tu celular (WhatsApp)"
-							required
 							type="tel"
 							value={field.state.value}
 						/>

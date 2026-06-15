@@ -68,14 +68,14 @@ const divider: CSSProperties = {
 	margin: "28px 0",
 };
 
-const footerText: CSSProperties = {
+export const footerText: CSSProperties = {
 	color: "#9ca3af",
 	fontSize: "12px",
 	lineHeight: "18px",
 	margin: 0,
 };
 
-const footerLink: CSSProperties = {
+export const footerLink: CSSProperties = {
 	color: "#6b7280",
 	textDecoration: "underline",
 };
@@ -83,6 +83,8 @@ const footerLink: CSSProperties = {
 interface EmailLayoutProps {
 	appUrl: string;
 	children: ReactNode;
+	/** Overrides the default account-context footer (e.g. for pre-launch waitlist mail). */
+	footer?: ReactNode;
 	preview: string;
 }
 
@@ -91,7 +93,7 @@ interface EmailLayoutProps {
  * footer. Hierarchy comes from size/color only — no bold weights — per the repo
  * UI guideline.
  */
-export function EmailLayout({ preview, appUrl, children }: EmailLayoutProps) {
+export function EmailLayout({ preview, appUrl, footer, children }: EmailLayoutProps) {
 	return (
 		<Html lang="es">
 			<Head />
@@ -111,15 +113,17 @@ export function EmailLayout({ preview, appUrl, children }: EmailLayoutProps) {
 					<Hr style={divider} />
 					{children}
 					<Hr style={divider} />
-					<Section>
-						<Text style={footerText}>
-							Recibiste este correo porque tienes una cuenta en {BRAND}.{" "}
-							<Link href={appUrl} style={footerLink}>
-								Ir a la app
-							</Link>
-							.
-						</Text>
-					</Section>
+					{footer ?? (
+						<Section>
+							<Text style={footerText}>
+								Recibiste este correo porque tienes una cuenta en {BRAND}.{" "}
+								<Link href={appUrl} style={footerLink}>
+									Ir a la app
+								</Link>
+								.
+							</Text>
+						</Section>
+					)}
 				</Container>
 			</Body>
 		</Html>

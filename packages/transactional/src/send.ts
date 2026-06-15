@@ -1,6 +1,6 @@
 import { env } from "@stackk-career/env/server";
 import type { ReactElement } from "react";
-import { resend } from "./client";
+import { getResend } from "./client";
 
 export interface SendEmailInput {
 	/**
@@ -20,7 +20,7 @@ export interface SendEmailInput {
  * retry policy instead of silently dropping mail.
  */
 export async function sendEmail({ to, subject, react, idempotencyKey }: SendEmailInput): Promise<{ id: string }> {
-	const { data, error } = await resend.emails.send(
+	const { data, error } = await getResend().emails.send(
 		{ from: env.EMAIL_FROM, react, subject, to },
 		idempotencyKey ? { idempotencyKey } : undefined
 	);

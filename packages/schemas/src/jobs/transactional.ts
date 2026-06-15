@@ -12,3 +12,15 @@ export const sendTransactionalEmailInputSchema = z.object({
 });
 
 export type SendTransactionalEmailInput = z.infer<typeof sendTransactionalEmailInputSchema>;
+
+/**
+ * Payload for the `send-waitlist-email` task. Waitlist signups aren't `user`
+ * rows, so there's no `userId` and no `transactional_emails` dedup row — the
+ * Resend idempotency key (`waitlist-confirm:<email>`) is the send-once guard.
+ */
+export const sendWaitlistEmailInputSchema = z.object({
+	email: z.email(),
+	name: z.string().nullable(),
+});
+
+export type SendWaitlistEmailInput = z.infer<typeof sendWaitlistEmailInputSchema>;
