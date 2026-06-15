@@ -6,6 +6,7 @@ import {
 	FileTextIcon,
 	IdentificationCardIcon,
 	PaperPlaneRightIcon,
+	QuestionIcon,
 	ReadCvLogoIcon,
 	WrenchIcon,
 } from "@phosphor-icons/react";
@@ -35,6 +36,7 @@ interface LettersChatPanelProps {
 	maxVersions: number;
 	messages: readonly LettersChatPanelMessage[];
 	onSelectVersion: (messageId: string) => void;
+	onStartTour?: () => void;
 	onTriggerAsync: (input: { extraPrompt?: string }) => Promise<unknown>;
 	resumeTitle: string | null;
 	selectedMessageId: string | null;
@@ -102,6 +104,7 @@ export function LettersChatPanel({
 	maxVersions,
 	messages,
 	onSelectVersion,
+	onStartTour,
 	onTriggerAsync,
 	resumeTitle,
 	selectedMessageId,
@@ -121,7 +124,7 @@ export function LettersChatPanel({
 
 	return (
 		<section className="flex h-full min-h-0 flex-col gap-4">
-			<Conversation className="min-h-0 flex-1 overflow-y-auto">
+			<Conversation className="min-h-0 flex-1 overflow-y-auto" data-tour-step-id="letter-versions">
 				<ConversationContent>
 					<Message from="assistant">
 						<MessageContent>
@@ -139,6 +142,18 @@ export function LettersChatPanel({
 							<p className="mt-2 border-border/40 border-t pt-2 font-medium text-muted-foreground text-xs">
 								{copy.versionsTip}
 							</p>
+							{onStartTour && (
+								<Button
+									aria-label="Ver tutorial del espacio de trabajo"
+									className="mt-3"
+									onClick={onStartTour}
+									size="sm"
+									variant="ghost-muted"
+								>
+									<QuestionIcon weight="bold" />
+									Cómo funciona
+								</Button>
+							)}
 						</MessageContent>
 					</Message>
 
@@ -211,6 +226,7 @@ export function LettersChatPanel({
 
 			<form
 				className="flex shrink-0 flex-col gap-2 border-border border-t pt-4"
+				data-tour-step-id="letter-chat-input"
 				onSubmit={async (e) => {
 					e.preventDefault();
 					if (!canSubmit) {

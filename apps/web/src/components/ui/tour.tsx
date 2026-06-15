@@ -1,19 +1,12 @@
 "use client";
 
+import { CaretLeftIcon, CaretRightIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { XIcon } from "lucide-react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +41,51 @@ interface Step {
 interface Tour {
 	id: string;
 	steps: Step[];
+}
+
+const stepVariants: Variants = {
+	enter: (direction: number) => ({ filter: "blur(4px)", opacity: 0, x: direction * 16 }),
+	exit: (direction: number) => ({ filter: "blur(4px)", opacity: 0, x: direction * -16 }),
+	visible: { filter: "blur(0px)", opacity: 1, x: 0 },
+};
+
+function TourActionButton({
+	icon,
+	iconPosition = "end",
+	label,
+	onClick,
+	route,
+	variant,
+}: {
+	icon: React.ReactNode;
+	iconPosition?: "end" | "start";
+	label: React.ReactNode;
+	onClick: () => void;
+	route?: LinkProps["to"];
+	variant?: React.ComponentProps<typeof Button>["variant"];
+}) {
+	const content =
+		iconPosition === "start" ? (
+			<>
+				{icon}
+				{label}
+			</>
+		) : (
+			<>
+				{label}
+				{icon}
+			</>
+		);
+
+	if (route) {
+		return <Button onClick={onClick} render={<Link to={route}>{content}</Link>} size="sm" variant={variant} />;
+	}
+
+	return (
+		<Button onClick={onClick} size="sm" variant={variant}>
+			{content}
+		</Button>
+	);
 }
 
 function TourProvider({ tours, children }: { tours: Tour[]; children: React.ReactNode }) {
@@ -226,10 +264,20 @@ function TourOverlay({
 		}),
 		[targets]
 	);
+	const previousStepIndex = React.useRef(currentStepIndex);
+	const direction = currentStepIndex >= previousStepIndex.current ? 1 : -1;
+	React.useEffect(() => {
+		previousStepIndex.current = currentStepIndex;
+	}, [currentStepIndex]);
 
 	if (!(isMounted && targets.length > 0)) {
 		return null;
 	}
+
+	const isLastStep = currentStepIndex === totalSteps - 1;
+	const progress = Math.round(((currentStepIndex + 1) / totalSteps) * 100);
+	const nextLabel = step.nextLabel ?? (isLastStep ? "Finalizar" : "Siguiente");
+	const previousLabel = step.previousLabel ?? "Anterior";
 
 	return createPortal(
 		<div className="fixed inset-0 z-50">
@@ -250,78 +298,110 @@ function TourOverlay({
 							/>
 						))}
 					</mask>
+					<filter height="200%" id="tour-glow" width="200%" x="-50%" y="-50%">
+						<feGaussianBlur stdDeviation="3.5" />
+					</filter>
 				</defs>
-				<rect className="fill-black opacity-20" height="100%" mask="url(#tour-mask)" width="100%" />
+				<rect className="fill-black/60" height="100%" mask="url(#tour-mask)" width="100%" />
 				{targets.map((target) => (
-					<rect
-						className="fill-none stroke-2 stroke-primary"
-						height={target.rect.height}
-						key={target.key}
-						rx={target.radius}
-						width={target.rect.width}
-						x={target.rect.left}
-						y={target.rect.top}
-					/>
+					<React.Fragment key={target.key}>
+						<rect
+							className="animate-pulse fill-none stroke-2 stroke-primary opacity-60 motion-reduce:animate-none"
+							filter="url(#tour-glow)"
+							height={target.rect.height}
+							rx={target.radius}
+							width={target.rect.width}
+							x={target.rect.left}
+							y={target.rect.top}
+						/>
+						<rect
+							className="fill-none stroke-2 stroke-primary"
+							height={target.rect.height}
+							rx={target.radius}
+							width={target.rect.width}
+							x={target.rect.left}
+							y={target.rect.top}
+						/>
+					</React.Fragment>
 				))}
 			</svg>
-			{targets.length > 0 && (
-				<Popover key={step.id} open={true}>
-					<PopoverContent
-						align={step.align}
-						alignOffset={step.alignOffset}
-						anchor={virtualAnchor}
-						className={cn("px-0", step.className)}
-						finalFocus={false}
-						initialFocus={false}
-						side={step.side}
-						sideOffset={step.sideOffset}
-					>
-						<Card>
-							<CardHeader>
+			<Popover open={true}>
+				<PopoverContent
+					align={step.align}
+					alignOffset={step.alignOffset}
+					anchor={virtualAnchor}
+					className={cn(
+						"w-100 max-w-[calc(100vw-2rem)] border-0 bg-transparent p-0 shadow-none before:hidden",
+						step.className
+					)}
+					finalFocus={false}
+					initialFocus={false}
+					side={step.side}
+					sideOffset={step.sideOffset}
+				>
+					<Card className="relative w-full gap-0 overflow-hidden p-0">
+						<div className="h-1 w-full bg-border">
+							<motion.div
+								animate={{ width: `${progress}%` }}
+								className="h-full rounded-r-full bg-primary"
+								initial={false}
+								transition={{ damping: 30, stiffness: 260, type: "spring" }}
+							/>
+						</div>
+
+						<Button
+							aria-label="Cerrar tutorial"
+							className="absolute top-2.5 right-2.5 z-10"
+							onClick={onClose}
+							size="icon-sm"
+							variant="ghost"
+						>
+							<XIcon />
+						</Button>
+
+						<AnimatePresence custom={direction} initial={false} mode="wait">
+							<motion.div
+								animate="visible"
+								className="grid gap-1.5 px-5 pt-5 pr-10"
+								custom={direction}
+								exit="exit"
+								initial="enter"
+								key={step.id}
+								transition={{ duration: 0.22, ease: "easeOut" }}
+								variants={stepVariants}
+							>
+								<span className="text-muted-foreground text-xs tabular-nums">
+									Paso {currentStepIndex + 1} de {totalSteps}
+								</span>
 								<CardTitle>{step.title}</CardTitle>
-								<CardDescription>
-									Step {currentStepIndex + 1} of {totalSteps}
-								</CardDescription>
-								<CardAction>
-									<Button aria-label="Close tour" onClick={onClose} size="icon" variant="ghost">
-										<XIcon />
-									</Button>
-								</CardAction>
-							</CardHeader>
-							<CardContent>{step.content}</CardContent>
-							<CardFooter className="justify-between">
-								{currentStepIndex > 0 &&
-									(step.previousRoute ? (
-										<Button
-											onClick={onPrevious}
-											render={<Link to={step.previousRoute}>{step.previousLabel ?? "Previous"}</Link>}
-											variant="outline"
-										/>
-									) : (
-										<Button onClick={onPrevious} variant="outline">
-											{step.previousLabel ?? "Previous"}
-										</Button>
-									))}
-								{step.nextRoute ? (
-									<Button
-										className="ml-auto"
-										onClick={onNext}
-										render={
-											<Link to={step.nextRoute}>
-												{step.nextLabel ?? (currentStepIndex === totalSteps - 1 ? "Finish" : "Next")}
-											</Link>
-										}
-									/>
-								) : (
-									<Button className="ml-auto" onClick={onNext}>
-										{step.nextLabel ?? (currentStepIndex === totalSteps - 1 ? "Finish" : "Next")}
-									</Button>
-								)}
-							</CardFooter>
-						</Card>
-					</PopoverContent>
-				</Popover>
-			)}
+								<div className="text-muted-foreground text-sm">{step.content}</div>
+							</motion.div>
+						</AnimatePresence>
+
+						<div className="flex items-center justify-between gap-2 px-5 pt-4 pb-5">
+							{currentStepIndex > 0 ? (
+								<TourActionButton
+									icon={<CaretLeftIcon />}
+									iconPosition="start"
+									label={previousLabel}
+									onClick={onPrevious}
+									route={step.previousRoute}
+									variant="ghost"
+								/>
+							) : (
+								<span />
+							)}
+
+							<TourActionButton
+								icon={isLastStep ? <CheckIcon /> : <CaretRightIcon />}
+								label={nextLabel}
+								onClick={onNext}
+								route={step.nextRoute}
+							/>
+						</div>
+					</Card>
+				</PopoverContent>
+			</Popover>
 		</div>,
 		document.body
 	);

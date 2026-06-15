@@ -18,6 +18,37 @@ interface LettersCreateFormProps {
 	onClose: () => void;
 }
 
+const JOB_POSITION_MAX = 500;
+const JOB_DESCRIPTION_MAX = 5000;
+
+const validateJobPosition = (value: string): string | undefined => {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return "Indica el puesto al que vas a postular.";
+	}
+	if (trimmed.length > JOB_POSITION_MAX) {
+		return `Usa máximo ${JOB_POSITION_MAX} caracteres.`;
+	}
+	return;
+};
+
+const validateJobDescription = (value: string): string | undefined =>
+	value.trim().length > JOB_DESCRIPTION_MAX ? `Usa máximo ${JOB_DESCRIPTION_MAX} caracteres.` : undefined;
+
+const validateResumeId = (value: string): string | undefined => (value ? undefined : "Selecciona un CV a vincular.");
+
+function FieldErrorText({ errors }: { errors: readonly unknown[] }): React.ReactElement | null {
+	const message = errors.filter(Boolean).join(", ");
+	if (!message) {
+		return null;
+	}
+	return (
+		<p className="text-destructive-foreground text-xs" role="alert">
+			{message}
+		</p>
+	);
+}
+
 /**
  * /letters dialog body. Two fields, one mutation.
  *
@@ -69,12 +100,12 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 	const form = useForm({
 		defaultValues,
 		onSubmit: ({ value }) => {
+			// Fields are validated inline, so a passing submit always parses; safeParse
+			// is kept only to trim + apply the schema's transforms before the mutation.
 			const parsed = createCoverLetterGenerationInputSchema.safeParse(value);
-			if (!parsed.success) {
-				toast.error(parsed.error.issues[0]?.message ?? "Datos inválidos");
-				return;
+			if (parsed.success) {
+				createMutation.mutate(parsed.data);
 			}
-			createMutation.mutate(parsed.data);
 		},
 	});
 
@@ -94,44 +125,48 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 				form.handleSubmit();
 			}}
 		>
-			<form.Field name="jobPosition">
+			<form.Field name="jobPosition" validators={{ onChange: ({ value }) => validateJobPosition(value) }}>
 				{(field) => (
 					<Field>
 						<FieldLabel htmlFor="letters-job-position">Puesto al que postulas</FieldLabel>
 						<Input
+							aria-invalid={field.state.meta.errors.length > 0}
 							autoFocus
 							disabled={createMutation.isPending}
 							id="letters-job-position"
-							maxLength={500}
+							maxLength={JOB_POSITION_MAX}
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
 							placeholder="Ej. Senior Product Manager en Yape"
 							value={field.state.value}
 						/>
+						<FieldErrorText errors={field.state.meta.errors} />
 						<FieldDescription>Sé específico: empresa + rol ayuda a CASEY a redactar mejor.</FieldDescription>
 					</Field>
 				)}
 			</form.Field>
 
-			<form.Field name="jobDescription">
+			<form.Field name="jobDescription" validators={{ onChange: ({ value }) => validateJobDescription(value) }}>
 				{(field) => (
 					<Field>
 						<FieldLabel htmlFor="letters-job-description">Descripción del puesto</FieldLabel>
 						<Textarea
+							aria-invalid={field.state.meta.errors.length > 0}
 							disabled={createMutation.isPending}
 							id="letters-job-description"
-							maxLength={5000}
+							maxLength={JOB_DESCRIPTION_MAX}
 							onBlur={field.handleBlur}
 							onChange={(e) => field.handleChange(e.target.value)}
 							placeholder="Pega aquí la descripción del puesto o contexto de la oferta de trabajo para que CASEY adapte mejor la carta."
 							value={field.state.value}
 						/>
+						<FieldErrorText errors={field.state.meta.errors} />
 						<FieldDescription>Opcional. Ayuda a alinear tus logros a lo que el puesto requiere.</FieldDescription>
 					</Field>
 				)}
 			</form.Field>
 
-			<form.Field name="resumeId">
+			<form.Field name="resumeId" validators={{ onChange: ({ value }) => validateResumeId(value) }}>
 				{(field) => (
 					<Field>
 						<FieldLabel htmlFor="letters-resume-id">CV a vincular</FieldLabel>
@@ -140,7 +175,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 							onValueChange={(value) => field.handleChange(value ?? "")}
 							value={field.state.value}
 						>
-							<SelectTrigger id="letters-resume-id">
+							<SelectTrigger aria-invalid={field.state.meta.errors.length > 0} id="letters-resume-id">
 								<SelectValue placeholder="Elige un CV" />
 							</SelectTrigger>
 							<SelectPopup alignItemWithTrigger={false}>
@@ -151,6 +186,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 								))}
 							</SelectPopup>
 						</Select>
+						<FieldErrorText errors={field.state.meta.errors} />
 						<FieldDescription>CASEY tomará tu experiencia y skills de este CV.</FieldDescription>
 					</Field>
 				)}
@@ -185,9 +221,9 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 				)}
 			</form.Field>
 
-			<form.Subscribe selector={(state) => state.isSubmitting}>
-				{(isSubmitting) => (
-					<Button disabled={isSubmitting || createMutation.isPending} type="submit">
+			<form.Subscribe selector={(state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting })}>
+				{({ canSubmit, isSubmitting }) => (
+					<Button disabled={!canSubmit || isSubmitting || createMutation.isPending} type="submit">
 						{(isSubmitting || createMutation.isPending) && <Loader />}
 						Crear carta
 					</Button>

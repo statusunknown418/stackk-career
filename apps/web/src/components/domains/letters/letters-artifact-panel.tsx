@@ -263,7 +263,7 @@ function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) 
 		return null;
 	}
 	return (
-		<div className="flex items-center gap-1.5">
+		<div className="flex items-center gap-1.5" data-tour-step-id="letter-toolbar">
 			<Button
 				aria-label="Copiar al portapapeles"
 				disabled={!canExport}
@@ -459,7 +459,7 @@ export function LettersArtifactPanel({
 	}
 
 	return (
-		<Frame className={className ?? "h-full min-h-0"}>
+		<Frame className={className ?? "h-full min-h-0"} data-tour-step-id="letter-artifact">
 			<FrameHeader className="flex-row items-start justify-between gap-3">
 				<div className="flex flex-col gap-1.5">
 					<FrameDescription>

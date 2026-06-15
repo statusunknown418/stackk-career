@@ -127,7 +127,7 @@ export function CardHeader({ className, render, ...props }: useRender.ComponentP
 
 export function CardTitle({ className, render, ...props }: useRender.ComponentProps<"div">): React.ReactElement {
 	const defaultProps = {
-		className: cn("font-medium text-lg leading-none", className),
+		className: cn("text-lg leading-none", className),
 		"data-slot": "card-title",
 	};
 

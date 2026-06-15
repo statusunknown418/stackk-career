@@ -30,16 +30,16 @@ export const careerWorkspaceNavigation = [
 	},
 	{
 		disabled: true,
-		icon: BriefcaseIcon,
-		id: "puestos-sugeridos",
-		label: "Targets",
-		to: "/dash/suggested",
-	},
-	{
-		disabled: true,
 		icon: CalendarIcon,
 		id: "coaching",
 		label: "Coaching",
 		to: "/dash/coaches",
+	},
+	{
+		disabled: true,
+		icon: BriefcaseIcon,
+		id: "puestos-sugeridos",
+		label: "Targets",
+		to: "/dash/suggested",
 	},
 ] as const satisfies readonly CareerWorkspaceNavigationItem[];
