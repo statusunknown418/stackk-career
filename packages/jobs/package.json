@@ -18,15 +18,18 @@
     "@stackk-career/db": "workspace:*",
     "@stackk-career/env": "workspace:*",
     "@stackk-career/schemas": "workspace:*",
+    "@stackk-career/transactional": "workspace:*",
     "@trigger.dev/sdk": "catalog:",
     "ai": "catalog:",
     "date-fns": "catalog:",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
+    "@libsql/client": "catalog:",
     "@stackk-career/config": "workspace:*",
     "@types/node": "catalog:",
     "trigger.dev": "catalog:",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
 }
