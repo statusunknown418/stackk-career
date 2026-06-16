@@ -29,6 +29,7 @@ export function FeatureGate({
 	const reduceMotion = useReducedMotion();
 
 	let locked = false;
+
 	if (limitKey) {
 		locked = snapshot != null && !hasFeatureAccess(snapshot.entitlements[limitKey]);
 	} else if (requiresPaid) {
@@ -42,7 +43,7 @@ export function FeatureGate({
 	const panel = (
 		<motion.div
 			animate={{ opacity: 1, scale: 1, y: 0 }}
-			className="w-full max-w-md"
+			className="w-full max-w-2xl"
 			initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 8 }}
 			transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
 		>
@@ -56,11 +57,13 @@ export function FeatureGate({
 
 	return (
 		<div className="relative isolate">
-			<div aria-hidden className="pointer-events-none select-none blur" inert>
+			<div aria-hidden className="pointer-events-none select-none" inert>
 				{children}
 			</div>
 
-			<div className="absolute inset-0 grid place-items-center bg-background/70 p-4">{panel}</div>
+			<div className="absolute inset-0 grid place-items-center rounded-lg bg-background/85 p-4 backdrop-blur-xl">
+				{panel}
+			</div>
 		</div>
 	);
 }

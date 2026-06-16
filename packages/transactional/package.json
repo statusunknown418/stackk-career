@@ -1,0 +1,36 @@
+{
+  "name": "@stackk-career/transactional",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.tsx"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "dev": "email dev --dir ./src/emails --port 3005"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "@react-email/components": "catalog:",
+    "@stackk-career/env": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "resend": "catalog:"
+  },
+  "devDependencies": {
+    "@react-email/render": "catalog:",
+    "@react-email/ui": "catalog:",
+    "@stackk-career/config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react-email": "catalog:",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

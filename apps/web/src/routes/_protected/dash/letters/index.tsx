@@ -1,23 +1,53 @@
 import { ArrowUpRightIcon, ChatCircleTextIcon, ClockIcon, PlusCircleIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { CircleHelpIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { LettersCreateDialog } from "@/components/domains/letters/letters-create-dialog";
 import { TemplateCard } from "@/components/domains/letters/template-card";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
+import { type Tour, TourProvider, useTour } from "@/components/ui/tour";
 import { orpc } from "@/utils/orpc";
+
+const dateTimeFormatter = new Intl.DateTimeFormat("es", {
+	dateStyle: "long",
+});
 
 export const Route = createFileRoute("/_protected/dash/letters/")({
 	component: RouteComponent,
-	loader: ({ context }) => context.queryClient.ensureQueryData(orpc.letters.list.queryOptions()),
+	loader: ({ context }) =>
+		Promise.allSettled([
+			context.queryClient.ensureQueryData(orpc.letters.list.queryOptions()),
+			context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
+		]),
 });
 
-// Module-level: Intl.DateTimeFormat is expensive to build and depends on no props/state.
-// `timeStyle: "short"` adds HH:mm to distinguish letters updated the same day.
-const dateTimeFormatter = new Intl.DateTimeFormat("es", { dateStyle: "long", timeStyle: "short" });
+const TOUR_STORAGE_KEY = "stackk:letters-tour-seen";
+
+const lettersTours: Tour[] = [
+	{
+		id: "letters-onboarding",
+		steps: [
+			{
+				align: "start",
+				content:
+					"Elige el puesto, el CV base y el idioma. Casey redacta la carta y la abre en un espacio donde podrás refinarla.",
+				id: "letters-create",
+				side: "bottom",
+				title: "Crea tu primera carta",
+			},
+			{
+				content: "Aquí aparecen tus cartas. Ábrelas cuando quieras para revisarlas, editarlas o copiarlas.",
+				id: "letters-list",
+				side: "bottom",
+				title: "Tus cartas",
+			},
+		],
+	},
+];
 
 const TEMPLATE_LABELS: Record<string, string> = {
 	centered: "Centrado",
@@ -27,12 +57,35 @@ const TEMPLATE_LABELS: Record<string, string> = {
 };
 
 function RouteComponent() {
+	return (
+		<TourProvider tours={lettersTours}>
+			<LettersView />
+		</TourProvider>
+	);
+}
+
+function LettersView() {
 	const { data } = useSuspenseQuery(orpc.letters.list.queryOptions());
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [selectedTemplate, setSelectedTemplate] = useState<
 		"centered" | "classic" | "minty" | "blue" | null | undefined
 	>(undefined);
 	const [step, setStep] = useState(1);
+
+	const { start: startTour } = useTour();
+	const hasAutoStartedTour = useRef(false);
+
+	useEffect(() => {
+		if (hasAutoStartedTour.current || typeof window === "undefined") {
+			return;
+		}
+		if (localStorage.getItem(TOUR_STORAGE_KEY)) {
+			return;
+		}
+		hasAutoStartedTour.current = true;
+		localStorage.setItem(TOUR_STORAGE_KEY, "1");
+		startTour("letters-onboarding");
+	}, [startTour]);
 
 	if (data.length === 0) {
 		return (
@@ -194,16 +247,29 @@ function RouteComponent() {
 						<Shimmer>CASEY</Shimmer> redacta cartas a partir de tu CV y del puesto al que postulas.
 					</FrameDescription>
 
-					<Button
-						className="mt-4 max-w-max"
-						onClick={() => {
-							setSelectedTemplate(undefined);
-							setIsCreateOpen(true);
-						}}
-					>
-						<PlusCircleIcon />
-						Nueva carta
-					</Button>
+					<div className="mt-4 flex flex-wrap items-center gap-2">
+						<Button
+							className="max-w-max"
+							data-tour-step-id="letters-create"
+							onClick={() => {
+								setSelectedTemplate(undefined);
+								setIsCreateOpen(true);
+							}}
+						>
+							<PlusCircleIcon />
+							Nueva carta
+						</Button>
+
+						<Button
+							aria-label="Ver tutorial de cartas"
+							onClick={() => startTour("letters-onboarding")}
+							size="sm"
+							variant="ghost-muted"
+						>
+							<CircleHelpIcon />
+							Cómo funciona
+						</Button>
+					</div>
 				</article>
 
 				{data.length > 0 && (
@@ -213,9 +279,9 @@ function RouteComponent() {
 				)}
 			</section>
 
-			<section className="px-4 py-2">
+			<section className="px-4 py-2" data-tour-step-id="letters-list">
 				{data.length > 0 ? (
-					<ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{data.map((letter) => (
 							<li key={letter.id}>
 								<Link

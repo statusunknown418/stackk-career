@@ -26,6 +26,7 @@
     "@arc": "https://witharc.co/r/{name}.json",
     "@svgl": "https://svgl.app/r/{name}.json",
     "@loading-ui": "https://loading-ui.com/r/{name}.json",
-    "@dotmatrix": "https://dotmatrix.zzzzshawn.cloud/r/{name}.json"
+    "@dotmatrix": "https://dotmatrix.zzzzshawn.cloud/r/{name}.json",
+    "@tour": "https://onboarding-tour.vercel.app/r/{name}.json"
   }
 }

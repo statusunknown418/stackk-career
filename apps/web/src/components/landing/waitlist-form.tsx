@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { orpc } from "@/utils/orpc";
 
-/** Captura de waitlist en /waitlist: nombre + teléfono (WhatsApp) + email para avisar al lanzar. */
 export function WaitlistForm() {
 	const join = useMutation(
 		orpc.waitlist.join.mutationOptions({
@@ -77,7 +76,6 @@ export function WaitlistForm() {
 							onBlur={field.handleBlur}
 							onChange={(event) => field.handleChange(event.target.value)}
 							placeholder="Tu celular (WhatsApp)"
-							required
 							type="tel"
 							value={field.state.value}
 						/>

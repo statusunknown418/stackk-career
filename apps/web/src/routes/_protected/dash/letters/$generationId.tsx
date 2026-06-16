@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type Tour, TourProvider, useTour } from "@/components/ui/tour";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
@@ -140,11 +141,89 @@ export const Route = createFileRoute("/_protected/dash/letters/$generationId")({
 		),
 });
 
+const LETTER_DETAIL_TOUR_KEY = "stackk:letter-detail-tour-seen";
+
+const letterDetailTours: Tour[] = [
+	{
+		id: "letter-detail",
+		steps: [
+			{
+				align: "start",
+				content:
+					"Casey la redacta a partir de tu CV y del puesto. Edítala en línea: haz clic en cualquier párrafo para ajustarlo.",
+				id: "letter-artifact",
+				side: "left",
+				title: "Tu carta",
+			},
+			{
+				align: "end",
+				content: "Copia el texto, descarga un PDF listo para enviar o regenera la carta con otro tono.",
+				id: "letter-toolbar",
+				side: "bottom",
+				title: "Cópiala, descárgala o regenérala",
+			},
+			{
+				align: "start",
+				content:
+					"Describe en tus palabras qué cambiar —tono, longitud, resaltar un logro— y Casey genera una nueva versión.",
+				id: "letter-chat-input",
+				side: "top",
+				title: "Pídele cambios a Casey",
+			},
+			{
+				align: "start",
+				content: "Cada versión que genera Casey se guarda aquí. Haz clic para volver a cualquiera cuando quieras.",
+				id: "letter-versions",
+				side: "right",
+				title: "Tus versiones",
+			},
+		],
+	},
+];
+
+// Keeps the tour's branching out of the workspace component (cognitive-complexity budget).
+// Fires once, gated on `ready` so it never starts before every target (notably the toolbar,
+// which only mounts with content) is in the DOM.
+function useAutoStartLetterTour(
+	hasData: boolean,
+	isGenerating: boolean,
+	hasArtifact: boolean,
+	hasLatestArtifact: boolean,
+	startTour: (tourId: string) => void
+): boolean {
+	// `ready` also gates the manual "Cómo funciona" trigger (returned to the caller): the
+	// toolbar step's target only mounts with content, so the tour must wait for an idle,
+	// rendered letter or it would stall on that step.
+	const ready = hasData && !isGenerating && (hasArtifact || hasLatestArtifact);
+	const startedRef = useRef(false);
+	useEffect(() => {
+		if (startedRef.current || typeof window === "undefined" || !ready) {
+			return;
+		}
+		if (localStorage.getItem(LETTER_DETAIL_TOUR_KEY)) {
+			return;
+		}
+		startedRef.current = true;
+		localStorage.setItem(LETTER_DETAIL_TOUR_KEY, "1");
+		startTour("letter-detail");
+	}, [ready, startTour]);
+	return ready;
+}
+
 function RouteComponent() {
+	return (
+		<TourProvider tours={letterDetailTours}>
+			<LetterWorkspace />
+		</TourProvider>
+	);
+}
+
+function LetterWorkspace() {
 	const { generationId } = Route.useParams();
 	const queryClient = useQueryClient();
 	const { data } = useQuery(orpc.letters.get.queryOptions({ input: { generationId } }));
 	const lettersGetKey = orpc.letters.get.queryKey({ input: { generationId } });
+	const { start: startTour } = useTour();
 
 	// The route owns the trigger mutation so both panels can fire it (chat from
 	// the textarea, artifact from the "Regenerar" presets) and the realtime
@@ -426,6 +505,14 @@ function RouteComponent() {
 		}
 	}, [isGenerating]);
 
+	const tourReady = useAutoStartLetterTour(
+		Boolean(data),
+		isGenerating,
+		Boolean(artifact),
+		data?.latestArtifact != null,
+		startTour
+	);
+
 	if (!data) {
 		return null;
 	}
@@ -443,6 +530,7 @@ function RouteComponent() {
 					maxVersions={maxVersions}
 					messages={data.messages}
 					onSelectVersion={selectVersion}
+					onStartTour={tourReady ? () => startTour("letter-detail") : undefined}
 					onTriggerAsync={onTriggerAsync}
 					resumeTitle={data.resume?.title ?? null}
 					selectedMessageId={selectedMessageId}
