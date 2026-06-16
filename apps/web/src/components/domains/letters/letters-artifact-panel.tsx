@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameDescription, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { CoverLetterSection, type LetterSectionDef, LetterSectionShell } from "./cover-letter-section";
@@ -96,12 +97,45 @@ const SECTION_DEFS = [
 interface TemplateProps {
 	commit: () => void;
 	draft: CoverLetter;
+	preparing?: boolean;
+	readOnly?: boolean;
 	setField: (key: keyof CoverLetter, value: string) => void;
 	todayDateStr: string;
 	userEmail: string;
+	userImage?: string;
 	userLinkedin: string;
 	userName: string;
 	userPhone: string;
+}
+
+function getCenteredTemplateValues(
+	draft: CoverLetter,
+	userName: string,
+	userEmail: string,
+	userPhone: string,
+	userLinkedin: string,
+	todayDateStr: string,
+	readOnly: boolean,
+	preparing: boolean
+) {
+	return {
+		contactAddressVal: draft.contactAddress || "Lima, Perú",
+		contactEmailVal: draft.contactEmail || userEmail,
+		contactLinkedinVal: draft.contactLinkedin || userLinkedin,
+		contactNameVal: draft.contactName || userName,
+		contactPhoneVal: draft.contactPhone || userPhone,
+		contactTitleVal: draft.contactTitle || "Carta de presentación",
+		contactWebsiteVal: draft.contactWebsite || "",
+		dateStrVal: draft.dateStr || todayDateStr,
+		recipientAddressVal: draft.recipientAddress || "",
+		recipientCompanyVal: draft.recipientCompany || "",
+		recipientNameVal: draft.recipientName || "",
+		showBodyLoader: readOnly && !draft.body && preparing,
+		showClosingLoader: readOnly && !draft.closing && preparing,
+		showGreetingLoader: readOnly && !draft.greeting && preparing,
+		showSignatureLoader: readOnly && !draft.signature && preparing,
+		showWebsite: draft.contactWebsite || draft.contactWebsite === "",
+	};
 }
 
 function CenteredTemplateView({
@@ -113,19 +147,41 @@ function CenteredTemplateView({
 	draft,
 	setField,
 	commit,
+	readOnly = false,
+	preparing = false,
 }: TemplateProps) {
+	const {
+		contactAddressVal,
+		contactEmailVal,
+		contactLinkedinVal,
+		contactNameVal,
+		contactPhoneVal,
+		contactTitleVal,
+		contactWebsiteVal,
+		dateStrVal,
+		recipientAddressVal,
+		recipientCompanyVal,
+		recipientNameVal,
+		showBodyLoader,
+		showClosingLoader,
+		showGreetingLoader,
+		showSignatureLoader,
+		showWebsite,
+	} = getCenteredTemplateValues(draft, userName, userEmail, userPhone, userLinkedin, todayDateStr, readOnly, preparing);
+
 	return (
 		<>
 			{/* Candidate Header Information */}
-			<div className="mb-6 flex flex-col gap-2 text-center text-zinc-800">
+			<div className="mb-6 flex flex-col gap-2 text-center text-foreground">
 				{/* Candidate Name */}
 				<div className="mx-auto w-fit">
 					<InlineTextEditor
-						className="rounded px-1.5 text-center font-bold text-3xl text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 text-center font-semibold text-3xl hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactName", value)}
 						placeholder="Tu Nombre"
-						value={draft.contactName || userName}
+						readOnly={readOnly}
+						value={contactNameVal}
 						variant="plain"
 					/>
 				</div>
@@ -133,78 +189,84 @@ function CenteredTemplateView({
 				{/* Professional Title */}
 				<div className="mx-auto w-fit">
 					<InlineTextEditor
-						className="rounded px-1.5 text-center font-medium text-[10px] text-zinc-500 uppercase tracking-widest hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 text-center font-medium text-muted-foreground text-xs uppercase tracking-widest hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactTitle", value)}
-						placeholder="Título Profesional (ej. Consultor de Desarrollo)"
-						value={draft.contactTitle || "Carta de presentación"}
+						placeholder="Título Profesional"
+						readOnly={readOnly}
+						value={contactTitleVal}
 						variant="plain"
 					/>
 				</div>
 
 				{/* Contact Details Row 1 */}
-				<div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] text-zinc-500">
+				<div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-muted-foreground text-sm">
 					<div className="flex items-center gap-1.5">
-						<EnvelopeSimpleIcon className="size-3.5 text-zinc-400" />
+						<EnvelopeSimpleIcon className="size-3.5 text-muted-foreground/80" />
 						<InlineTextEditor
-							className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("contactEmail", value)}
 							placeholder="tu.email@example.com"
-							value={draft.contactEmail || userEmail}
+							readOnly={readOnly}
+							value={contactEmailVal}
 							variant="plain"
 						/>
 					</div>
-					<span className="text-zinc-300">|</span>
+					<span className="text-border">|</span>
 					<div className="flex items-center gap-1.5">
-						<PhoneIcon className="size-3.5 text-zinc-400" />
+						<PhoneIcon className="size-3.5 text-muted-foreground/80" />
 						<InlineTextEditor
-							className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("contactPhone", value)}
 							placeholder="Teléfono"
-							value={draft.contactPhone || userPhone}
+							readOnly={readOnly}
+							value={contactPhoneVal}
 							variant="plain"
 						/>
 					</div>
-					<span className="text-zinc-300">|</span>
+					<span className="text-border">|</span>
 					<div className="flex items-center gap-1.5">
-						<MapPinIcon className="size-3.5 text-zinc-400" />
+						<MapPinIcon className="size-3.5 text-muted-foreground/80" />
 						<InlineTextEditor
-							className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("contactAddress", value)}
 							placeholder="Ciudad, País"
-							value={draft.contactAddress || "Lima, Perú"}
+							readOnly={readOnly}
+							value={contactAddressVal}
 							variant="plain"
 						/>
 					</div>
 				</div>
 
 				{/* Contact Details Row 2 */}
-				<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] text-zinc-500">
+				<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-muted-foreground text-sm">
 					<div className="flex items-center gap-1.5">
-						<LinkedinLogoIcon className="size-3.5 text-zinc-400" />
+						<LinkedinLogoIcon className="size-3.5 text-muted-foreground/80" />
 						<InlineTextEditor
-							className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("contactLinkedin", value)}
 							placeholder="linkedin.com/in/usuario"
-							value={draft.contactLinkedin || userLinkedin}
+							readOnly={readOnly}
+							value={contactLinkedinVal}
 							variant="plain"
 						/>
 					</div>
-					{(draft.contactWebsite || draft.contactWebsite === "") && (
+					{showWebsite && (
 						<>
-							<span className="text-zinc-300">|</span>
+							<span className="text-border">|</span>
 							<div className="flex items-center gap-1.5">
-								<GlobeIcon className="size-3.5 text-zinc-400" />
+								<GlobeIcon className="size-3.5 text-muted-foreground/80" />
 								<InlineTextEditor
-									className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+									className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
 									onChange={(value) => setField("contactWebsite", value)}
 									placeholder="Sitio web o portafolio"
-									value={draft.contactWebsite || ""}
+									readOnly={readOnly}
+									value={contactWebsiteVal}
 									variant="plain"
 								/>
 							</div>
@@ -213,98 +275,128 @@ function CenteredTemplateView({
 				</div>
 
 				{/* Border Line */}
-				<div className="my-4 border-zinc-200 border-b pb-3" />
+				<div className="my-4 border-border border-b pb-3" />
 			</div>
 
-			<div className="flex flex-col gap-6 text-zinc-800">
+			<div className="flex flex-col gap-6 text-foreground">
 				{/* Date Str (Right aligned) */}
 				<div className="flex justify-end">
 					<InlineTextEditor
-						className="rounded px-1.5 text-right font-medium text-xs text-zinc-400 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 text-right font-medium text-muted-foreground/80 text-xs hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("dateStr", value)}
 						placeholder="Fecha"
-						value={draft.dateStr || todayDateStr}
+						readOnly={readOnly}
+						value={dateStrVal}
 						variant="plain"
 					/>
 				</div>
 
 				{/* Recipient Block (Left aligned) */}
-				<div className="flex max-w-md flex-col gap-1 rounded-lg border border-zinc-150 bg-zinc-50/50 p-3 text-left text-xs">
-					<span className="mb-1 font-semibold text-[10px] text-zinc-400 uppercase tracking-wider">Destinatario</span>
+				<div className="flex max-w-md flex-col gap-1 rounded-lg border border-border bg-muted/30 p-3 text-left text-xs">
+					<span className="mb-1 font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+						Destinatario
+					</span>
 					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientName", value)}
 						placeholder="Nombre del Reclutador"
-						value={draft.recipientName || ""}
+						readOnly={readOnly}
+						value={recipientNameVal}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-foreground/80 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientCompany", value)}
 						placeholder="Nombre de la Empresa"
-						value={draft.recipientCompany || ""}
+						readOnly={readOnly}
+						value={recipientCompanyVal}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-600 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-muted-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientAddress", value)}
 						placeholder="Dirección de la Empresa"
-						value={draft.recipientAddress || ""}
+						readOnly={readOnly}
+						value={recipientAddressVal}
 						variant="plain"
 					/>
 				</div>
 
 				{/* Saludo / Greeting */}
 				<div className="mt-2">
-					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-850 leading-snug hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("greeting", value)}
-						placeholder="Saludo…"
-						value={bodyToHtml(draft.greeting)}
-						variant="prose"
-					/>
+					{showGreetingLoader ? (
+						<Skeleton className="h-4 w-32 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 font-semibold text-foreground leading-snug hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("greeting", value)}
+							placeholder="Saludo…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.greeting)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				{/* Cuerpo / Body */}
 				<div className="mt-2">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("body", value)}
-						placeholder="Cuerpo de la carta…"
-						value={bodyToHtml(draft.body)}
-						variant="prose"
-					/>
+					{showBodyLoader ? (
+						<div className="flex flex-col gap-2">
+							<Skeleton className="h-3 w-full rounded-full" />
+							<Skeleton className="h-3 w-11/12 rounded-full" />
+							<Skeleton className="h-3 w-5/6 rounded-full" />
+						</div>
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("body", value)}
+							placeholder="Cuerpo de la carta…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.body)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				{/* Cierre / Closing */}
 				<div className="mt-2">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("closing", value)}
-						placeholder="Cierre…"
-						value={bodyToHtml(draft.closing)}
-						variant="prose"
-					/>
+					{showClosingLoader ? (
+						<Skeleton className="h-4 w-24 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("closing", value)}
+							placeholder="Cierre…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.closing)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				{/* Firma / Signature */}
 				<div className="mt-6 flex flex-col items-center pt-4 text-center">
-					<span className="mb-1 text-xs text-zinc-500">Atentamente,</span>
-					<InlineTextEditor
-						className="rounded px-1 text-center font-bold text-zinc-850 hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("signature", value)}
-						placeholder="Firma…"
-						value={bodyToHtml(draft.signature)}
-						variant="prose"
-					/>
+					<span className="mb-1 text-muted-foreground text-xs">Atentamente,</span>
+					{showSignatureLoader ? (
+						<Skeleton className="h-4 w-20 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-center font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("signature", value)}
+							placeholder="Firma…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.signature)}
+							variant="prose"
+						/>
+					)}
 				</div>
 			</div>
 		</>
@@ -320,16 +412,19 @@ function ClassicTemplateView({
 	draft,
 	setField,
 	commit,
+	readOnly = false,
+	preparing = false,
 }: TemplateProps) {
 	return (
 		<>
-			<div className="mb-8 flex flex-col gap-1 text-left text-zinc-800">
+			<div className="mb-8 flex flex-col gap-1 text-left text-foreground">
 				<div className="w-fit">
 					<InlineTextEditor
-						className="rounded px-1.5 font-bold text-3xl text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 font-semibold text-3xl hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactName", value)}
 						placeholder="Tu Nombre"
+						readOnly={readOnly}
 						value={draft.contactName || userName}
 						variant="plain"
 					/>
@@ -337,139 +432,174 @@ function ClassicTemplateView({
 				{draft.contactTitle && (
 					<div className="w-fit">
 						<InlineTextEditor
-							className="rounded px-1.5 font-medium text-sm text-zinc-500 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1.5 font-medium text-muted-foreground text-xs hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("contactTitle", value)}
 							placeholder="Título profesional"
+							readOnly={readOnly}
 							value={draft.contactTitle || ""}
 							variant="plain"
 						/>
 					</div>
 				)}
-				<div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">
+				<div className="mt-1 flex flex-wrap items-center gap-x-2 text-muted-foreground text-sm">
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactEmail", value)}
 						placeholder="Email"
+						readOnly={readOnly}
 						value={draft.contactEmail || userEmail}
 						variant="plain"
 					/>
-					<span>·</span>
+					<span className="text-border">·</span>
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactPhone", value)}
 						placeholder="Teléfono"
+						readOnly={readOnly}
 						value={draft.contactPhone || userPhone}
 						variant="plain"
 					/>
-					<span>·</span>
+					<span className="text-border">·</span>
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactLinkedin", value)}
 						placeholder="LinkedIn"
+						readOnly={readOnly}
 						value={draft.contactLinkedin || userLinkedin}
 						variant="plain"
 					/>
 					{draft.contactAddress && (
 						<>
-							<span>·</span>
+							<span className="text-border">·</span>
 							<InlineTextEditor
-								className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+								className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 								onBlur={commit}
 								onChange={(value) => setField("contactAddress", value)}
 								placeholder="Dirección"
+								readOnly={readOnly}
 								value={draft.contactAddress || ""}
 								variant="plain"
 							/>
 						</>
 					)}
 				</div>
-				<div className="my-2 border-zinc-200 border-b pb-3" />
+				<div className="my-2 border-border border-b pb-3" />
 			</div>
 
-			<div className="flex flex-col gap-6 text-zinc-800">
+			<div className="flex flex-col gap-6 text-foreground">
 				<div className="flex justify-end">
 					<InlineTextEditor
-						className="rounded px-1.5 text-right text-xs text-zinc-400 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 text-right text-muted-foreground/80 text-xs hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("dateStr", value)}
 						placeholder="Fecha"
+						readOnly={readOnly}
 						value={draft.dateStr || todayDateStr}
 						variant="plain"
 					/>
 				</div>
 
-				<div className="flex max-w-md flex-col gap-1 rounded border border-zinc-150 bg-zinc-50/50 p-3 text-left text-xs">
-					<span className="mb-1 font-semibold text-[10px] text-zinc-400 uppercase tracking-wider">Destinatario</span>
+				<div className="flex max-w-md flex-col gap-1 rounded border border-border bg-muted/30 p-3 text-left text-xs">
+					<span className="mb-1 font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+						Destinatario
+					</span>
 					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientName", value)}
+						readOnly={readOnly}
 						value={draft.recipientName || ""}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-foreground/80 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientCompany", value)}
+						readOnly={readOnly}
 						value={draft.recipientCompany || ""}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-600 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-muted-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientAddress", value)}
+						readOnly={readOnly}
 						value={draft.recipientAddress || ""}
 						variant="plain"
 					/>
 				</div>
 
 				<div className="mt-2">
-					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-850 leading-snug hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("greeting", value)}
-						placeholder="Saludo…"
-						value={bodyToHtml(draft.greeting)}
-						variant="prose"
-					/>
+					{readOnly && !draft.greeting && preparing ? (
+						<Skeleton className="h-4 w-32 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 font-semibold text-foreground leading-snug hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("greeting", value)}
+							placeholder="Saludo…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.greeting)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				<div className="mt-4">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("body", value)}
-						placeholder="Cuerpo de la carta…"
-						value={bodyToHtml(draft.body)}
-						variant="prose"
-					/>
+					{readOnly && !draft.body && preparing ? (
+						<div className="flex flex-col gap-2">
+							<Skeleton className="h-3 w-full rounded-full" />
+							<Skeleton className="h-3 w-11/12 rounded-full" />
+							<Skeleton className="h-3 w-5/6 rounded-full" />
+						</div>
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("body", value)}
+							placeholder="Cuerpo de la carta…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.body)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				<div className="mt-4">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("closing", value)}
-						placeholder="Cierre…"
-						value={bodyToHtml(draft.closing)}
-						variant="prose"
-					/>
+					{readOnly && !draft.closing && preparing ? (
+						<Skeleton className="h-4 w-24 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("closing", value)}
+							placeholder="Cierre…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.closing)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				<div className="mt-6 flex flex-col items-start pt-4 text-left">
-					<span className="mb-1 text-xs text-zinc-500">Atentamente,</span>
-					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-850 hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("signature", value)}
-						placeholder="Firma…"
-						value={bodyToHtml(draft.signature)}
-						variant="prose"
-					/>
+					<span className="mb-1 text-muted-foreground text-xs">Atentamente,</span>
+					{readOnly && !draft.signature && preparing ? (
+						<Skeleton className="h-4 w-20 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("signature", value)}
+							placeholder="Firma…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.signature)}
+							variant="prose"
+						/>
+					)}
 				</div>
 			</div>
 		</>
@@ -485,68 +615,84 @@ function MintyTemplateView({
 	draft,
 	setField,
 	commit,
+	readOnly = false,
+	preparing = false,
+	userImage,
 }: TemplateProps) {
 	return (
 		<>
-			<div className="-mx-12 -mt-12 mb-8 flex items-center justify-between border-emerald-500/20 border-b bg-emerald-50/50 px-12 py-6">
+			<div className="-mx-6 -mt-6 mb-8 flex items-center justify-between border-emerald-500/20 border-b bg-emerald-500/5 px-6 py-6 md:-mx-8 md:-mt-8 md:px-8 dark:bg-emerald-500/10">
 				<div className="w-fit">
 					<InlineTextEditor
-						className="rounded px-1.5 font-bold text-2xl text-emerald-800 hover:bg-emerald-50/55 focus:bg-emerald-50/55"
+						className="rounded px-1.5 font-semibold text-2xl text-emerald-800 hover:bg-emerald-500/10 focus:bg-emerald-500/10 dark:text-emerald-400"
 						onBlur={commit}
 						onChange={(value) => setField("contactName", value)}
 						placeholder="Tu Nombre"
+						readOnly={readOnly}
 						value={draft.contactName || userName}
 						variant="plain"
 					/>
 				</div>
-				<p className="font-medium text-[10px] text-emerald-600 uppercase tracking-wide">Carta de presentación</p>
+				<p className="font-medium text-emerald-600 text-xs uppercase tracking-wide dark:text-emerald-500">
+					Carta de presentación
+				</p>
 			</div>
 
-			<div className="grid grid-cols-4 gap-8 text-zinc-800">
-				<aside className="col-span-1 flex flex-col gap-6 border-zinc-150 border-r pr-4">
-					<div className="mx-auto flex size-14 items-center justify-center overflow-hidden rounded-full border border-emerald-500/20 bg-emerald-50">
-						<span className="text-emerald-600 text-xl">👤</span>
+			<div className="grid grid-cols-4 gap-8 text-foreground">
+				<aside className="col-span-1 flex flex-col gap-6 border-border border-r pr-4">
+					<div className="mx-auto flex size-14 items-center justify-center overflow-hidden rounded-full border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10">
+						{userImage ? (
+							<img alt={userName} className="size-full object-cover" height={56} src={userImage} width={56} />
+						) : (
+							<span className="text-emerald-600 text-xl dark:text-emerald-400">👤</span>
+						)}
 					</div>
 					<div className="flex flex-col gap-3">
-						<h2 className="font-bold text-[10px] text-emerald-700 uppercase tracking-wider">Contacto</h2>
-						<div className="flex flex-col gap-2 break-all text-[11px] text-zinc-600 leading-relaxed">
+						<h2 className="font-semibold text-emerald-700 text-xs uppercase tracking-wider dark:text-emerald-400">
+							Contacto
+						</h2>
+						<div className="flex flex-col gap-2 break-all text-muted-foreground text-xs leading-relaxed">
 							<div>
-								<strong className="text-[10px] text-zinc-700 uppercase">Email</strong>
+								<strong className="text-[10px] text-foreground uppercase">Email</strong>
 								<InlineTextEditor
-									className="rounded hover:bg-zinc-50 focus:bg-zinc-50"
+									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
 									onChange={(value) => setField("contactEmail", value)}
+									readOnly={readOnly}
 									value={draft.contactEmail || userEmail}
 									variant="plain"
 								/>
 							</div>
 							<div>
-								<strong className="text-[10px] text-zinc-700 uppercase">Teléfono</strong>
+								<strong className="text-[10px] text-foreground uppercase">Teléfono</strong>
 								<InlineTextEditor
-									className="rounded hover:bg-zinc-50 focus:bg-zinc-50"
+									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
 									onChange={(value) => setField("contactPhone", value)}
+									readOnly={readOnly}
 									value={draft.contactPhone || userPhone}
 									variant="plain"
 								/>
 							</div>
 							<div>
-								<strong className="text-[10px] text-zinc-700 uppercase">LinkedIn</strong>
+								<strong className="text-[10px] text-foreground uppercase">LinkedIn</strong>
 								<InlineTextEditor
-									className="rounded hover:bg-zinc-50 focus:bg-zinc-50"
+									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
 									onChange={(value) => setField("contactLinkedin", value)}
+									readOnly={readOnly}
 									value={draft.contactLinkedin || userLinkedin}
 									variant="plain"
 								/>
 							</div>
 							{draft.contactAddress && (
 								<div>
-									<strong className="text-[10px] text-zinc-700 uppercase">Dirección</strong>
+									<strong className="text-[10px] text-foreground uppercase">Dirección</strong>
 									<InlineTextEditor
-										className="rounded hover:bg-zinc-50 focus:bg-zinc-50"
+										className="rounded hover:bg-accent/40 focus:bg-accent/40"
 										onBlur={commit}
 										onChange={(value) => setField("contactAddress", value)}
+										readOnly={readOnly}
 										value={draft.contactAddress || ""}
 										variant="plain"
 									/>
@@ -555,11 +701,14 @@ function MintyTemplateView({
 						</div>
 					</div>
 					<div className="flex flex-col gap-1">
-						<h2 className="font-bold text-[10px] text-emerald-700 uppercase tracking-wider">Fecha</h2>
+						<h2 className="font-semibold text-emerald-700 text-xs uppercase tracking-wider dark:text-emerald-400">
+							Fecha
+						</h2>
 						<InlineTextEditor
-							className="rounded text-[11px] text-zinc-500 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded text-muted-foreground text-xs hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("dateStr", value)}
+							readOnly={readOnly}
 							value={draft.dateStr || todayDateStr}
 							variant="plain"
 						/>
@@ -567,76 +716,103 @@ function MintyTemplateView({
 				</aside>
 
 				<div className="col-span-3 flex flex-col gap-6">
-					<div className="flex flex-col gap-1 rounded border border-zinc-150 bg-zinc-50/50 p-3 text-left text-xs">
-						<span className="mb-1 font-semibold text-[10px] text-emerald-700 uppercase tracking-wider">
+					<div className="flex flex-col gap-1 rounded border border-border bg-muted/30 p-3 text-left text-xs">
+						<span className="mb-1 font-semibold text-emerald-700 text-xs uppercase tracking-wider dark:text-emerald-400">
 							Destinatario
 						</span>
 						<InlineTextEditor
-							className="rounded px-1 font-bold text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("recipientName", value)}
+							readOnly={readOnly}
 							value={draft.recipientName || ""}
 							variant="plain"
 						/>
 						<InlineTextEditor
-							className="rounded px-1 text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 text-foreground/80 hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("recipientCompany", value)}
+							readOnly={readOnly}
 							value={draft.recipientCompany || ""}
 							variant="plain"
 						/>
 						<InlineTextEditor
-							className="rounded px-1 text-zinc-600 hover:bg-zinc-50 focus:bg-zinc-50"
+							className="rounded px-1 text-muted-foreground hover:bg-accent/40 focus:bg-accent/40"
 							onBlur={commit}
 							onChange={(value) => setField("recipientAddress", value)}
+							readOnly={readOnly}
 							value={draft.recipientAddress || ""}
 							variant="plain"
 						/>
 					</div>
 
 					<div className="mt-2">
-						<InlineTextEditor
-							className="rounded px-1 font-bold text-zinc-850 leading-snug hover:bg-zinc-50 focus:bg-zinc-50"
-							onBlur={commit}
-							onChange={(value) => setField("greeting", value)}
-							placeholder="Saludo…"
-							value={bodyToHtml(draft.greeting)}
-							variant="prose"
-						/>
+						{readOnly && !draft.greeting && preparing ? (
+							<Skeleton className="h-4 w-32 rounded-full" />
+						) : (
+							<InlineTextEditor
+								className="rounded px-1 font-semibold text-foreground leading-snug hover:bg-accent/40 focus:bg-accent/40"
+								onBlur={commit}
+								onChange={(value) => setField("greeting", value)}
+								placeholder="Saludo…"
+								readOnly={readOnly}
+								value={bodyToHtml(draft.greeting)}
+								variant="prose"
+							/>
+						)}
 					</div>
 
 					<div className="mt-4">
-						<InlineTextEditor
-							className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-							onBlur={commit}
-							onChange={(value) => setField("body", value)}
-							placeholder="Cuerpo de la carta…"
-							value={bodyToHtml(draft.body)}
-							variant="prose"
-						/>
+						{readOnly && !draft.body && preparing ? (
+							<div className="flex flex-col gap-2">
+								<Skeleton className="h-3 w-full rounded-full" />
+								<Skeleton className="h-3 w-11/12 rounded-full" />
+								<Skeleton className="h-3 w-5/6 rounded-full" />
+							</div>
+						) : (
+							<InlineTextEditor
+								className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+								onBlur={commit}
+								onChange={(value) => setField("body", value)}
+								placeholder="Cuerpo de la carta…"
+								readOnly={readOnly}
+								value={bodyToHtml(draft.body)}
+								variant="prose"
+							/>
+						)}
 					</div>
 
 					<div className="mt-4">
-						<InlineTextEditor
-							className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-							onBlur={commit}
-							onChange={(value) => setField("closing", value)}
-							placeholder="Cierre…"
-							value={bodyToHtml(draft.closing)}
-							variant="prose"
-						/>
+						{readOnly && !draft.closing && preparing ? (
+							<Skeleton className="h-4 w-24 rounded-full" />
+						) : (
+							<InlineTextEditor
+								className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+								onBlur={commit}
+								onChange={(value) => setField("closing", value)}
+								placeholder="Cierre…"
+								readOnly={readOnly}
+								value={bodyToHtml(draft.closing)}
+								variant="prose"
+							/>
+						)}
 					</div>
 
-					<div className="mt-6 flex flex-col items-start border-emerald-100 border-t pt-4 text-left">
-						<span className="mb-1 font-semibold text-emerald-700 text-xs">Atentamente,</span>
-						<InlineTextEditor
-							className="rounded px-1 font-bold text-zinc-850 hover:bg-zinc-50 focus:bg-zinc-50"
-							onBlur={commit}
-							onChange={(value) => setField("signature", value)}
-							placeholder="Firma…"
-							value={bodyToHtml(draft.signature)}
-							variant="prose"
-						/>
+					<div className="mt-6 flex flex-col items-start border-emerald-500/20 border-t pt-4 text-left">
+						<span className="mb-1 font-semibold text-emerald-700 text-xs dark:text-emerald-400">Atentamente,</span>
+						{readOnly && !draft.signature && preparing ? (
+							<Skeleton className="h-4 w-20 rounded-full" />
+						) : (
+							<InlineTextEditor
+								className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
+								onBlur={commit}
+								onChange={(value) => setField("signature", value)}
+								placeholder="Firma…"
+								readOnly={readOnly}
+								value={bodyToHtml(draft.signature)}
+								variant="prose"
+							/>
+						)}
 					</div>
 				</div>
 			</div>
@@ -653,130 +829,171 @@ function BlueTemplateView({
 	draft,
 	setField,
 	commit,
+	readOnly = false,
+	preparing = false,
+	userImage,
 }: TemplateProps) {
 	return (
 		<>
-			<div className="mb-8 flex flex-col items-center gap-3 border-blue-100 border-b pb-6 text-zinc-800">
-				<div className="flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-blue-500 bg-blue-50">
-					<span className="text-blue-500 text-xl">👤</span>
+			<div className="mb-8 flex flex-col items-center gap-3 border-blue-500/10 border-b pb-6 text-foreground">
+				<div className="flex size-14 items-center justify-center overflow-hidden rounded-full border-2 border-blue-500 bg-blue-500/5 dark:bg-blue-500/10">
+					{userImage ? (
+						<img alt={userName} className="size-full object-cover" height={56} src={userImage} width={56} />
+					) : (
+						<span className="text-blue-500 text-xl dark:text-blue-400">👤</span>
+					)}
 				</div>
 				<div className="w-fit">
 					<InlineTextEditor
-						className="rounded px-1.5 font-bold text-2xl text-blue-600 hover:bg-blue-50/50 focus:bg-blue-50/50"
+						className="rounded px-1.5 font-semibold text-2xl text-blue-600 hover:bg-blue-500/10 focus:bg-blue-500/10 dark:text-blue-400"
 						onBlur={commit}
 						onChange={(value) => setField("contactName", value)}
 						placeholder="Tu Nombre"
+						readOnly={readOnly}
 						value={draft.contactName || userName}
 						variant="plain"
 					/>
 				</div>
-				<p className="text-xs text-zinc-400 uppercase tracking-widest">Carta de presentación</p>
-				<div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-zinc-505">
+				<p className="text-muted-foreground text-xs uppercase tracking-widest">Carta de presentación</p>
+				<div className="flex flex-wrap items-center justify-center gap-x-2 text-muted-foreground text-sm">
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactEmail", value)}
+						readOnly={readOnly}
 						value={draft.contactEmail || userEmail}
 						variant="plain"
 					/>
-					<span>|</span>
+					<span className="text-border">|</span>
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactPhone", value)}
+						readOnly={readOnly}
 						value={draft.contactPhone || userPhone}
 						variant="plain"
 					/>
-					<span>|</span>
+					<span className="text-border">|</span>
 					<InlineTextEditor
-						className="rounded px-1 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("contactLinkedin", value)}
+						readOnly={readOnly}
 						value={draft.contactLinkedin || userLinkedin}
 						variant="plain"
 					/>
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-6 text-zinc-800">
+			<div className="flex flex-col gap-6 text-foreground">
 				<div className="flex justify-end">
 					<InlineTextEditor
-						className="rounded px-1.5 text-right text-xs text-zinc-400 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1.5 text-right text-muted-foreground/80 text-xs hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("dateStr", value)}
+						readOnly={readOnly}
 						value={draft.dateStr || todayDateStr}
 						variant="plain"
 					/>
 				</div>
 
-				<div className="flex max-w-md flex-col gap-1 rounded border border-zinc-150 bg-zinc-50/50 p-3 text-left text-xs">
-					<span className="mb-1 font-semibold text-[10px] text-blue-600 uppercase tracking-wider">Destinatario</span>
+				<div className="flex max-w-md flex-col gap-1 rounded border border-border bg-muted/30 p-3 text-left text-xs">
+					<span className="mb-1 font-semibold text-blue-600 text-xs uppercase tracking-wider dark:text-blue-400">
+						Destinatario
+					</span>
 					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-900 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientName", value)}
+						readOnly={readOnly}
 						value={draft.recipientName || ""}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-foreground/80 hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientCompany", value)}
+						readOnly={readOnly}
 						value={draft.recipientCompany || ""}
 						variant="plain"
 					/>
 					<InlineTextEditor
-						className="rounded px-1 text-zinc-600 hover:bg-zinc-50 focus:bg-zinc-50"
+						className="rounded px-1 text-muted-foreground hover:bg-accent/40 focus:bg-accent/40"
 						onBlur={commit}
 						onChange={(value) => setField("recipientAddress", value)}
+						readOnly={readOnly}
 						value={draft.recipientAddress || ""}
 						variant="plain"
 					/>
 				</div>
 
 				<div className="mt-2">
-					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-850 leading-snug hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("greeting", value)}
-						placeholder="Saludo…"
-						value={bodyToHtml(draft.greeting)}
-						variant="prose"
-					/>
+					{readOnly && !draft.greeting && preparing ? (
+						<Skeleton className="h-4 w-32 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 font-semibold text-foreground leading-snug hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("greeting", value)}
+							placeholder="Saludo…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.greeting)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				<div className="mt-4">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("body", value)}
-						placeholder="Cuerpo de la carta…"
-						value={bodyToHtml(draft.body)}
-						variant="prose"
-					/>
+					{readOnly && !draft.body && preparing ? (
+						<div className="flex flex-col gap-2">
+							<Skeleton className="h-3 w-full rounded-full" />
+							<Skeleton className="h-3 w-11/12 rounded-full" />
+							<Skeleton className="h-3 w-5/6 rounded-full" />
+						</div>
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("body", value)}
+							placeholder="Cuerpo de la carta…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.body)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
 				<div className="mt-4">
-					<InlineTextEditor
-						className="rounded px-1 text-zinc-750 leading-relaxed hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("closing", value)}
-						placeholder="Cierre…"
-						value={bodyToHtml(draft.closing)}
-						variant="prose"
-					/>
+					{readOnly && !draft.closing && preparing ? (
+						<Skeleton className="h-4 w-24 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 text-foreground/90 leading-relaxed hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("closing", value)}
+							placeholder="Cierre…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.closing)}
+							variant="prose"
+						/>
+					)}
 				</div>
 
-				<div className="mt-6 flex flex-col items-start border-blue-100 border-t pt-4 text-left">
-					<span className="mb-1 font-semibold text-blue-600 text-xs">Atentamente,</span>
-					<InlineTextEditor
-						className="rounded px-1 font-bold text-zinc-850 hover:bg-zinc-50 focus:bg-zinc-50"
-						onBlur={commit}
-						onChange={(value) => setField("signature", value)}
-						placeholder="Firma…"
-						value={bodyToHtml(draft.signature)}
-						variant="prose"
-					/>
+				<div className="mt-6 flex flex-col items-start border-blue-500/10 border-t pt-4 text-left">
+					<span className="mb-1 font-semibold text-blue-600 text-xs dark:text-blue-400">Atentamente,</span>
+					{readOnly && !draft.signature && preparing ? (
+						<Skeleton className="h-4 w-20 rounded-full" />
+					) : (
+						<InlineTextEditor
+							className="rounded px-1 font-semibold text-foreground hover:bg-accent/40 focus:bg-accent/40"
+							onBlur={commit}
+							onChange={(value) => setField("signature", value)}
+							placeholder="Firma…"
+							readOnly={readOnly}
+							value={bodyToHtml(draft.signature)}
+							variant="prose"
+						/>
+					)}
 				</div>
 			</div>
 		</>
@@ -788,19 +1005,24 @@ function EditableLetter({
 	letter,
 	onSaveArtifact,
 	template,
+	userName,
+	userEmail,
+	userPhone,
+	userLinkedin,
+	userImage,
+	todayDateStr,
 }: {
 	activeMessageId: string;
 	letter: CoverLetter;
 	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>;
 	template?: "centered" | "classic" | "minty" | "blue" | null;
+	userName: string;
+	userEmail: string;
+	userPhone: string;
+	userLinkedin: string;
+	userImage?: string;
+	todayDateStr: string;
 }) {
-	const { data: session } = authClient.useSession();
-	const userName = session?.user?.name || "Tu Nombre";
-	const userEmail = session?.user?.email || "tu.email@example.com";
-	const userPhone = "+51 999 999 999";
-	const userLinkedin = "linkedin.com/in/candidato";
-	const todayDateStr = new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date());
-
 	const [draft, setDraft] = useState<CoverLetter>(letter);
 	const dirtyRef = useRef(false);
 	const [saving, setSaving] = useState(false);
@@ -851,10 +1073,12 @@ function EditableLetter({
 		userEmail,
 		userPhone,
 		userLinkedin,
+		userImage,
 		todayDateStr,
 		draft,
 		setField,
 		commit,
+		readOnly: false,
 	};
 
 	if (!template) {
@@ -888,14 +1112,14 @@ function EditableLetter({
 	}
 
 	return (
-		<FramePanel className="flex flex-1 flex-col overflow-y-auto bg-muted/35 p-6 dark:bg-zinc-900/35">
-			<div className="mx-auto w-full max-w-3xl">
+		<FramePanel className="flex flex-1 flex-col overflow-y-auto bg-muted/35 p-6">
+			<div className="mx-auto w-full max-w-4xl">
 				<p className="mb-4 px-1 text-muted-foreground text-xs">
 					Edita cualquier texto directamente; se guarda solo
 					{saving ? <span className="text-foreground/70"> · Guardando…</span> : null}
 				</p>
 
-				<article className="relative flex w-full flex-col rounded-xl border border-zinc-200 bg-white p-12 text-zinc-800 shadow-md ring-1 ring-zinc-100">
+				<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-md md:p-8">
 					{template === "centered" && <CenteredTemplateView {...props} />}
 					{template === "classic" && <ClassicTemplateView {...props} />}
 					{template === "minty" && <MintyTemplateView {...props} />}
@@ -966,7 +1190,10 @@ interface ArtifactToolbarProps {
 
 /** Header buttons: copy / download PDF / regenerate. (Editing is inline, no button.) */
 function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) {
-	const { artifact, currentLanguage, generationCount, hasContent, maxVersions } = letter;
+	const { artifact, currentLanguage, generationCount, hasContent, maxVersions, template } = letter;
+	const { data: session } = authClient.useSession();
+	const userName = session?.user?.name || "Tu Nombre";
+	const userEmail = session?.user?.email || "tu.email@example.com";
 	const [popoverOpen, setPopoverOpen] = useState(false);
 
 	// Presence check only — the actual text conversion happens inside the click handlers
@@ -1001,12 +1228,12 @@ function ArtifactToolbar({ letter, onTriggerAsync, run }: ArtifactToolbarProps) 
 	};
 
 	const handleDownload = () => {
-		const letter = toCompleteCoverLetter(artifact);
-		if (!letter) {
+		const completeLetter = toCompleteCoverLetter(artifact);
+		if (!completeLetter) {
 			return;
 		}
 		try {
-			downloadCoverLetterPdf(letter);
+			downloadCoverLetterPdf(completeLetter, template, userName, userEmail);
 			toast.success("Carta descargada como PDF");
 		} catch {
 			toast.error("No se pudo generar el PDF");
@@ -1096,13 +1323,50 @@ function ReadOnlyLetter({
 	isStreaming,
 	preparing,
 	showLoaders,
+	template,
+	userName,
+	userEmail,
+	userPhone,
+	userLinkedin,
+	userImage,
+	todayDateStr,
 }: {
 	artifact: DeepPartial<CoverLetter> | undefined;
 	isStreaming: boolean;
 	/** Generating but no content yet: show a friendly message above the skeleton. */
 	preparing: boolean;
 	showLoaders: boolean;
+	template?: "centered" | "classic" | "minty" | "blue" | null;
+	userName: string;
+	userEmail: string;
+	userPhone: string;
+	userLinkedin: string;
+	userImage?: string;
+	todayDateStr: string;
 }) {
+	const emptyDraft: CoverLetter = {
+		greeting: "",
+		body: "",
+		closing: "",
+		signature: "",
+		contactName: null,
+		contactTitle: null,
+		contactEmail: null,
+		contactPhone: null,
+		contactAddress: null,
+		contactLinkedin: null,
+		contactWebsite: null,
+		recipientName: null,
+		recipientCompany: null,
+		recipientAddress: null,
+		dateStr: null,
+	};
+
+	const draft: CoverLetter = {
+		...emptyDraft,
+		...artifact,
+	};
+
 	// Active section (the one CASEY is writing) = the last one with content. Only the active
 	// one shows "redactando…"; pending ones show only the skeleton.
 	const activeIndex = SECTION_DEFS.reduce((acc, def, i) => {
@@ -1110,27 +1374,66 @@ function ReadOnlyLetter({
 		return typeof v === "string" && v.trim() ? i : acc;
 	}, 0);
 
+	const props: TemplateProps = {
+		userName,
+		userEmail,
+		userPhone,
+		userLinkedin,
+		userImage,
+		todayDateStr,
+		draft,
+		setField: () => {
+			/* No-op in read-only mode */
+		},
+		commit: () => {
+			/* No-op in read-only mode */
+		},
+		readOnly: true,
+		preparing: showLoaders,
+	};
+
+	if (!template) {
+		return (
+			<FramePanel className="flex flex-1 flex-col overflow-y-auto">
+				<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
+					{preparing && (
+						<p className="px-1 text-muted-foreground text-sm">
+							<Shimmer>CASEY está leyendo tu CV y redactando tu carta…</Shimmer>
+						</p>
+					)}
+					{SECTION_DEFS.map((def, i) => {
+						const value = artifact?.[def.key];
+						const text = typeof value === "string" ? value : undefined;
+						return (
+							<CoverLetterSection
+								def={def}
+								isStreaming={isStreaming && i === activeIndex}
+								key={def.key}
+								showSkeleton={showLoaders && !text}
+								text={text}
+							/>
+						);
+					})}
+				</div>
+			</FramePanel>
+		);
+	}
+
 	return (
-		<FramePanel className="flex flex-1 flex-col overflow-y-auto">
-			<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
+		<FramePanel className="flex flex-1 flex-col overflow-y-auto bg-muted/35 p-6">
+			<div className="mx-auto w-full max-w-4xl">
 				{preparing && (
-					<p className="px-1 text-muted-foreground text-sm">
+					<p className="mb-4 px-1 text-muted-foreground text-sm">
 						<Shimmer>CASEY está leyendo tu CV y redactando tu carta…</Shimmer>
 					</p>
 				)}
-				{SECTION_DEFS.map((def, i) => {
-					const value = artifact?.[def.key];
-					const text = typeof value === "string" ? value : undefined;
-					return (
-						<CoverLetterSection
-							def={def}
-							isStreaming={isStreaming && i === activeIndex}
-							key={def.key}
-							showSkeleton={showLoaders && !text}
-							text={text}
-						/>
-					);
-				})}
+
+				<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-md md:p-8">
+					{template === "centered" && <CenteredTemplateView {...props} />}
+					{template === "classic" && <ClassicTemplateView {...props} />}
+					{template === "minty" && <MintyTemplateView {...props} />}
+					{template === "blue" && <BlueTemplateView {...props} />}
+				</article>
 			</div>
 		</FramePanel>
 	);
@@ -1156,6 +1459,14 @@ export function LettersArtifactPanel({
 	onTriggerAsync,
 	run,
 }: LettersArtifactPanelProps) {
+	const { data: session } = authClient.useSession();
+	const userName = session?.user?.name || "Tu Nombre";
+	const userEmail = session?.user?.email || "tu.email@example.com";
+	const userPhone = "+51 999 999 999";
+	const userLinkedin = "linkedin.com/in/candidato";
+	const userImage = session?.user?.image ?? undefined;
+	const todayDateStr = new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date());
+
 	const { activeMessageId, activeVersion, artifact, hasContent, maxVersions } = letter;
 	const { error, isPending, isStreaming } = run;
 	// Show skeletons for the whole generation (including the pre-stream window while CASEY reads
@@ -1195,6 +1506,12 @@ export function LettersArtifactPanel({
 					letter={completeLetter}
 					onSaveArtifact={onSaveArtifact}
 					template={letter.template}
+					todayDateStr={todayDateStr}
+					userEmail={userEmail}
+					userImage={userImage}
+					userLinkedin={userLinkedin}
+					userName={userName}
+					userPhone={userPhone}
 				/>
 			</motion.div>
 		);
@@ -1208,7 +1525,19 @@ export function LettersArtifactPanel({
 				key="readonly"
 				transition={panelTransition}
 			>
-				<ReadOnlyLetter artifact={artifact} isStreaming={isStreaming} preparing={preparing} showLoaders={showLoaders} />
+				<ReadOnlyLetter
+					artifact={artifact}
+					isStreaming={isStreaming}
+					preparing={preparing}
+					showLoaders={showLoaders}
+					template={letter.template}
+					todayDateStr={todayDateStr}
+					userEmail={userEmail}
+					userImage={userImage}
+					userLinkedin={userLinkedin}
+					userName={userName}
+					userPhone={userPhone}
+				/>
 			</motion.div>
 		);
 	}

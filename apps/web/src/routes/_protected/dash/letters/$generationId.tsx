@@ -414,7 +414,17 @@ function RouteComponent() {
 	// fall back to the selected / latest persisted version.
 	const artifact = resolveDisplayedArtifact({ cachedArtifact, isGenerating, selectedArtifact, streamedArtifact });
 
-	const error = realtime.error;
+	// Auto-scroll to the artifact panel on mobile devices when generation is in progress,
+	// so the user gets instant visual feedback of the streaming or skeleton load.
+	const artifactPanelRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		if (isGenerating && typeof window !== "undefined" && window.innerWidth < 768) {
+			const timer = setTimeout(() => {
+				artifactPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [isGenerating]);
 
 	if (!data) {
 		return null;
@@ -438,21 +448,23 @@ function RouteComponent() {
 					selectedMessageId={selectedMessageId}
 				/>
 
-				<LettersArtifactPanel
-					letter={{
-						activeMessageId,
-						activeVersion: activeVersion > 0 ? activeVersion : 1,
-						artifact,
-						currentLanguage: data.generation.language,
-						generationCount,
-						hasContent: Boolean(artifact) || data.latestArtifact !== null,
-						maxVersions,
-						template: data.generation.template as "centered" | "classic" | "minty" | "blue" | null | undefined,
-					}}
-					onSaveArtifact={onSaveArtifact}
-					onTriggerAsync={onTriggerAsync}
-					run={{ error, isPending: isGenerating, isStreaming }}
-				/>
+				<div className="flex h-full min-h-0 flex-col" ref={artifactPanelRef}>
+					<LettersArtifactPanel
+						letter={{
+							activeMessageId,
+							activeVersion: activeVersion > 0 ? activeVersion : 1,
+							artifact,
+							currentLanguage: data.generation.language,
+							generationCount,
+							hasContent: Boolean(artifact) || data.latestArtifact !== null,
+							maxVersions,
+							template: data.generation.template as "centered" | "classic" | "minty" | "blue" | null | undefined,
+						}}
+						onSaveArtifact={onSaveArtifact}
+						onTriggerAsync={onTriggerAsync}
+						run={{ error: realtimeError, isPending: isGenerating, isStreaming }}
+					/>
+				</div>
 			</section>
 
 			<AlertDialog onOpenChange={setShowLimitDialog} open={showLimitDialog}>

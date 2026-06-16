@@ -36,16 +36,7 @@ function RouteComponent() {
 
 	if (data.length === 0) {
 		return (
-			<section className="space-y-4">
-				<section className="flex items-start justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
-					<article className="grid gap-1">
-						<h1 className="font-light text-2xl">Cartas de presentación</h1>
-						<FrameDescription>
-							<Shimmer>CASEY</Shimmer> redacta cartas a partir de tu CV y del puesto al que postulas.
-						</FrameDescription>
-					</article>
-				</section>
-
+			<section className="space-y-4 pt-6">
 				<section className="mx-auto w-full max-w-7xl px-4 py-2">
 					{step === 1 ? (
 						<div className="relative overflow-hidden rounded-2xl border bg-card/50 p-8 shadow-xl backdrop-blur-md transition-all duration-300">
@@ -68,11 +59,12 @@ function RouteComponent() {
 								</div>
 
 								<Button
-									className="mt-4 px-8 py-5 text-base"
+									className="mt-4 px-8 py-6 font-semibold text-base shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-primary/30 hover:shadow-xl"
 									onClick={() => {
 										setSelectedTemplate(null);
 										setStep(2);
 									}}
+									size="lg"
 								>
 									Siguiente
 									<PlusCircleIcon size={20} />

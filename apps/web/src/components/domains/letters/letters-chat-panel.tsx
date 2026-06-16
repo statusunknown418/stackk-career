@@ -238,6 +238,12 @@ export function LettersChatPanel({
 						id="extra-prompt"
 						maxLength={2000}
 						onChange={(e) => setExtraPrompt(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && !e.shiftKey) {
+								e.preventDefault();
+								e.currentTarget.form?.requestSubmit();
+							}
+						}}
 						placeholder={copy.placeholder}
 						rows={3}
 						value={extraPrompt}
