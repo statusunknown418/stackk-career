@@ -1,4 +1,3 @@
-import type { Icon } from "@phosphor-icons/react";
 import { Button, Column, Row, Section, Text } from "@react-email/components";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -44,7 +43,6 @@ export function CtaButton({ href, children }: CtaButtonProps) {
 
 export interface FeatureItem {
 	body: string;
-	icon: Icon;
 	title: string;
 }
 
@@ -67,8 +65,9 @@ const featureMarker: CSSProperties = {
 	width: "32px",
 };
 
-const featureIcon: CSSProperties = {
-	verticalAlign: "middle",
+const featureCheck: CSSProperties = {
+	color: "#111827",
+	fontSize: "16px",
 };
 
 const featureTitle: CSSProperties = {
@@ -86,30 +85,27 @@ const featureBody: CSSProperties = {
 };
 
 /**
- * Feature list. Each row pairs a Phosphor icon in a neutral badge with a title
+ * Feature list. Each row pairs a check glyph in a neutral badge with a title
  * and supporting line — hierarchy via size/color only, no bold weights, per the
- * repo UI guideline. Rows are keyed by `title`. Note: inline SVG renders in
- * Apple/iOS Mail but is stripped by Gmail, where the badge degrades to empty.
+ * repo UI guideline. Rows keyed by `title`. Plain text marker (no inline SVG):
+ * SVG is stripped by Gmail/Outlook, leaving an empty badge.
  */
 export function FeatureList({ items }: { items: readonly FeatureItem[] }) {
 	return (
 		<Section>
-			{items.map((item) => {
-				const FeatureMarkerIcon = item.icon;
-				return (
-					<Row key={item.title} style={featureRow}>
-						<Column style={featureMarkerCell}>
-							<span style={featureMarker}>
-								<FeatureMarkerIcon color="#111827" size={18} style={featureIcon} weight="regular" />
-							</span>
-						</Column>
-						<Column>
-							<Text style={featureTitle}>{item.title}</Text>
-							<Text style={featureBody}>{item.body}</Text>
-						</Column>
-					</Row>
-				);
-			})}
+			{items.map((item) => (
+				<Row key={item.title} style={featureRow}>
+					<Column style={featureMarkerCell}>
+						<span style={featureMarker}>
+							<span style={featureCheck}>✓</span>
+						</span>
+					</Column>
+					<Column>
+						<Text style={featureTitle}>{item.title}</Text>
+						<Text style={featureBody}>{item.body}</Text>
+					</Column>
+				</Row>
+			))}
 		</Section>
 	);
 }

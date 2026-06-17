@@ -170,11 +170,12 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "pro",
 		name: "Pro",
-		tagline: "Todas las herramientas de IA, sin límite.",
+		tagline: "1 sesión de coaching y todas las herramientas de IA, sin límite.",
 		priceSoles: 79,
 		priceUsd: 23,
 		per: "al mes, cancelas cuando quieras",
 		features: [
+			"1 sesión de coaching 1:1 (45 min)",
 			"Score CV ilimitado, con comparación directa contra cada oferta",
 			"La IA reescribe automáticamente las secciones débiles",
 			"CVs ilimitados, una versión distinta por cada puesto",
@@ -192,13 +193,13 @@ export const PLANS: readonly Plan[] = [
 		priceUsd: 51,
 		per: "al mes, camino completo",
 		features: [
-			"Todo lo que incluye el plan Pro",
-			"Mensajes ilimitados para reclutadores",
 			"Sesión 1: Mapeo del próximo puesto (45 min)",
 			"Sesión 2: Dominas la entrevista (45 min)",
 			"Sesión 3: Refuerzo después de la entrevista (30 min)",
-			"Revisión humana de tu CV y tu LinkedIn",
 			"WhatsApp directo con tu coach (respuesta en 24 horas)",
+			"Revisión humana de tu CV y tu LinkedIn",
+			"Todo lo que incluye el plan Pro",
+			"Mensajes ilimitados para reclutadores",
 		],
 		cta: "Empezar Premium",
 	},
@@ -423,7 +424,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Cuál es la diferencia con otras plataformas?",
-		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, el plan Pro te da todas las herramientas de IA sin límite por S/79. Premium suma el coaching humano: el camino completo de tres sesiones estructuradas y WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
+		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, el plan Pro te da 1 sesión de coaching 1:1 y todas las herramientas de IA sin límite por S/79. Premium te da el camino completo de tres sesiones estructuradas y WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
 	},
 	{
 		q: "¿Y si no consigo entrevistas?",

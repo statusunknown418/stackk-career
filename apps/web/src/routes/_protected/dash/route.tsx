@@ -10,6 +10,7 @@ import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack
 import { BillingSheet } from "@/components/domains/billing/billing-sheet";
 import { useBillingSheet } from "@/components/domains/billing/use-billing-sheet";
 import { careerWorkspaceNavigation } from "@/components/domains/dashboard/career-workspace-navigation";
+import { ProfileSheet } from "@/components/domains/profile/profile-sheet";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -158,6 +159,7 @@ function DashLayout() {
 			</SidebarInset>
 
 			<BillingSheet />
+			<ProfileSheet />
 		</SidebarProvider>
 	);
 }

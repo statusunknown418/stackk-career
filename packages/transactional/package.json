@@ -16,7 +16,6 @@
     "dev": "email dev --dir ./src/emails --port 3005"
   },
   "dependencies": {
-    "@phosphor-icons/react": "^2.1.10",
     "@react-email/components": "catalog:",
     "@stackk-career/env": "workspace:*",
     "react": "catalog:",

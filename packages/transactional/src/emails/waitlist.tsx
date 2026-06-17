@@ -1,4 +1,3 @@
-import { ChalkboardTeacherIcon, GaugeIcon, MicrophoneIcon, PackageIcon, SparkleIcon } from "@phosphor-icons/react/ssr";
 import { Link, Section, Text } from "@react-email/components";
 import { EmailLayout, footerLink, footerText } from "./components/layout";
 import { type FeatureItem, FeatureList, heading, paragraph } from "./components/ui";
@@ -15,27 +14,22 @@ const INSTAGRAM_URL = "https://www.instagram.com/statusunknown418/";
 /** What a new waitlist signup will get to explore at launch — sourced from the landing copy. */
 const FEATURES: readonly FeatureItem[] = [
 	{
-		icon: GaugeIcon,
 		title: "Diagnóstico de tu CV en 1 minuto",
 		body: "Un score instantáneo que te muestra dónde estás y qué te separa de la siguiente entrevista.",
 	},
 	{
-		icon: SparkleIcon,
 		title: "CV, carta y LinkedIn con IA",
 		body: "Un Agente especializado arma cada postulación a medida según la oferta a la que apuntas.",
 	},
 	{
-		icon: ChalkboardTeacherIcon,
 		title: "Un coach senior, 1:1",
 		body: "Un profesional que pasó las mismas entrevistas técnicas te ayuda a decidir qué resaltar y cómo contar tu historia.",
 	},
 	{
-		icon: MicrophoneIcon,
 		title: "Simulacros de entrevista",
 		body: "Práctica 1:1 con preguntas reales de tu sector y feedback directo sobre qué decir y qué evitar.",
 	},
 	{
-		icon: PackageIcon,
 		title: "Todo en una sola suscripción",
 		body: "CV, carta, LinkedIn y score juntos, sin pagar cada pieza por separado.",
 	},

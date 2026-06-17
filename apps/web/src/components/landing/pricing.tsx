@@ -38,8 +38,9 @@ function PricingHeader() {
 				</h2>
 				<Reveal delay={0.2}>
 					<p className="mt-4 text-balance text-base text-foreground/65 leading-relaxed">
-						Empieza gratis con tu Score CV. Pasa a Pro para usar todas las herramientas de IA sin límite. Premium suma
-						tu coach y el camino completo con garantía de entrevista en 90 días.
+						Empieza gratis con tu Score CV. Pasa a Pro para 1 sesión de coaching y todas las herramientas de IA sin
+						límite. Premium suma el camino completo de 3 sesiones y WhatsApp directo con garantía de entrevista en 90
+						días.
 					</p>
 				</Reveal>
 			</div>
