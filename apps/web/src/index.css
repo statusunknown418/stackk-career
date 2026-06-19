@@ -687,3 +687,25 @@
 		background: var(--oxblood);
 	}
 }
+
+.letter-paper-preview {
+	--background: var(--color-white);
+	--color-background: var(--color-white);
+	--card: var(--color-white);
+	--color-card: var(--color-white);
+	--border: var(--color-neutral-200);
+	--color-border: var(--color-neutral-200);
+	--foreground: var(--color-neutral-800);
+	--color-foreground: var(--color-neutral-800);
+	--card-foreground: var(--color-neutral-800);
+	--color-card-foreground: var(--color-neutral-800);
+	--muted: var(--color-neutral-50);
+	--color-muted: var(--color-neutral-50);
+	--muted-foreground: var(--color-neutral-500);
+	--color-muted-foreground: var(--color-neutral-500);
+	--accent: var(--color-neutral-100);
+	--color-accent: var(--color-neutral-100);
+	--accent-foreground: var(--color-neutral-800);
+	--color-accent-foreground: var(--color-neutral-800);
+	min-height: 1050px;
+}

@@ -3,7 +3,7 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
+import { COVER_LETTER_OBJECT_TYPE, type CoverLetter, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
@@ -72,7 +72,10 @@ export const caseyLettersTask = schemaTask({
 		// without passing it, the model regenerates from scratch and manual edits are lost.
 		// A re-run without extraPrompt is an intentional from-scratch regeneration.
 		const previousLetter = extraPrompt ? await loadPreviousLetterPlaintext(db, generationId, messageId) : undefined;
-		const previousObject = await loadPreviousLetterObject(db, generationId, messageId);
+		const previousObject = (await loadPreviousLetterObject(db, generationId, messageId)) as
+			| Partial<CoverLetter>
+			| null
+			| undefined;
 
 		metadata.set("step", "generating");
 		const result = await runCaseyLettersAgent({
@@ -92,7 +95,7 @@ export const caseyLettersTask = schemaTask({
 		// the schema-enforced `output` is complete before we read it.
 		const { waitUntilComplete } = coverLetterArtifactStream.pipe(result.partialOutputStream);
 
-		const object = await result.output;
+		const object = (await result.output) as CoverLetter;
 		const toolCalls = await result.toolCalls;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;

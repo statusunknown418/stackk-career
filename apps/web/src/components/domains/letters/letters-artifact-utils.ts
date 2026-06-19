@@ -407,21 +407,15 @@ export function downloadCoverLetterPdf(
 	writeBlockAtX(htmlToText(letter.closing), startX, contentWidth, 8);
 
 	if (template === "centered") {
-		doc.setFont(doc.getFont().fontName, "normal");
-		writeBlockAtX("Atentamente,", startX, contentWidth, 4, "center");
 		doc.setFont(doc.getFont().fontName, "bold");
 		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0, "center");
 	} else if (template === "blue") {
 		doc.setFont(doc.getFont().fontName, "bold");
 		doc.setTextColor(30, 100, 200);
-		writeBlockAtX("Atentamente,", startX, contentWidth, 4);
-		doc.setTextColor(40, 40, 40);
 		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0);
 	} else if (template === "minty") {
 		doc.setFont(doc.getFont().fontName, "bold");
 		doc.setTextColor(16, 120, 75);
-		writeBlockAtX("Atentamente,", startX, contentWidth, 4);
-		doc.setTextColor(40, 40, 40);
 		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0);
 	} else {
 		doc.setFont(doc.getFont().fontName, "bold");
