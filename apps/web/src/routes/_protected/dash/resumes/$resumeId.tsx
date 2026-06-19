@@ -9,6 +9,7 @@ import { formatDate } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { exportResumeToPdf } from "@/components/domains/resume-document/export-pdf";
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
@@ -337,6 +338,14 @@ function RouteComponent() {
 		await deleteMutation.mutateAsync({ id: params.resumeId });
 	};
 
+	const handleExport = () => {
+		try {
+			exportResumeToPdf({ rootBlocks, title: form.state.values.title });
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "No se pudo exportar el CV");
+		}
+	};
+
 	const handleViewSection = (edit: ResumeEdit) => {
 		if (!edit.targetBlockId) {
 			return;
@@ -448,7 +457,7 @@ function RouteComponent() {
 
 						<GroupSeparator />
 
-						<Button size="sm" variant="outline">
+						<Button onClick={handleExport} size="sm" variant="outline">
 							<ExportIcon />
 							Exportar
 						</Button>

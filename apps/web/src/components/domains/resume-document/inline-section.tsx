@@ -72,6 +72,7 @@ export const InlineSection = withForm({
 					entryStyle: "standard",
 					isCurrent: false,
 					isRemote: false,
+					workSetting: "onsite",
 				},
 			});
 		};

@@ -45,6 +45,7 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 					entryStyle: "standard",
 					isCurrent: false,
 					isRemote: false,
+					workSetting: "onsite",
 				},
 			};
 	}

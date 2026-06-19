@@ -70,6 +70,7 @@
     "motion": "^12.40.0",
     "nanoid": "^5.1.11",
     "nitro": "catalog:",
+    "posthog-js": "^1.390.2",
     "radix-ui": "^1.5.0",
     "react": "catalog:",
     "react-day-picker": "^10.0.1",

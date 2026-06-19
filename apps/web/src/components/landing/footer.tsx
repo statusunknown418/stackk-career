@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowUpRightIcon, InstagramLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { Button } from "../ui/button";
 import { FOOTER_COLUMNS } from "./data";
@@ -76,7 +75,12 @@ export function LandingFooter() {
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
 						<p className="font-mono text-foreground/65 text-xs">
 							Assendia.com, un producto de ©{" "}
-							<Button render={<Link to={"https://stackkstudios.com"} />} size="sm" variant="link">
+							<Button
+								// biome-ignore lint/a11y/useAnchorContent: external nav
+								render={<a href="https://stackkstudios.com" rel="noopener" target="_blank" />}
+								size="sm"
+								variant="link"
+							>
 								Stackk Studios
 							</Button>
 						</p>

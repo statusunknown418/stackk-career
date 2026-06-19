@@ -1,3 +1,4 @@
+import { WarningCircleIcon } from "@phosphor-icons/react";
 import { createResumeInputSchema } from "@stackk-career/schemas/api/resumes";
 import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
 import { useForm } from "@tanstack/react-form";
@@ -5,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -108,11 +110,20 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 			<Separator />
 
 			<section className="flex flex-col gap-3">
-				<p className="text-muted-foreground text-sm">
-					{canUseAi
-						? "También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente."
-						: "Has alcanzado el límite de generaciones con IA de este ciclo. Crea tu CV desde cero o mejora tu plan para subir un PDF."}
-				</p>
+				{canUseAi ? (
+					<p className="text-muted-foreground text-sm">
+						También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente.
+					</p>
+				) : (
+					<Alert variant="warning">
+						<WarningCircleIcon />
+						<AlertTitle>Límite de generaciones con IA alcanzado</AlertTitle>
+						<AlertDescription>
+							Usaste todas las generaciones con IA de este ciclo. Crea tu CV desde cero o mejora tu plan para subir un
+							PDF.
+						</AlertDescription>
+					</Alert>
+				)}
 
 				<form.Subscribe selector={(state) => state.values.targetRole}>
 					{(targetRole) => {
