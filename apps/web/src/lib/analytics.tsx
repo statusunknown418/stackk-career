@@ -1,6 +1,5 @@
 import { PostHogProvider, usePostHog } from "@posthog/react";
 import { env } from "@stackk-career/env/web";
-import { useRouter } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -32,35 +31,15 @@ export function clearPendingSignup(): void {
 }
 
 /**
- * Renders nothing. Lives inside the provider and drives every PostHog-specific
- * client behaviour: SPA pageviews, user identification, and the sign-up event.
+ * Renders nothing. Lives inside the provider and drives the PostHog client
+ * behaviour that isn't automatic: user identification and the sign-up event.
+ * (Pageviews are captured automatically — see `capture_pageview` in
+ * `AnalyticsProvider`.)
  */
 function AnalyticsBridge() {
 	const posthog = usePostHog();
-	const router = useRouter();
 	const { data: sessionData } = authClient.useSession();
 	const user = sessionData?.user;
-
-	// SPA pageviews. TanStack Router navigates via the History API; we disable
-	// PostHog's own pageview capture (see `AnalyticsProvider`) and emit one
-	// manually on the initial mount plus every resolved client-side navigation,
-	// so each route change is counted exactly once.
-	useEffect(() => {
-		if (!posthog) {
-			return;
-		}
-
-		const capturePageview = () => {
-			posthog.capture("$pageview", {
-				$current_url: window.location.href,
-				$pathname: window.location.pathname,
-			});
-		};
-
-		capturePageview();
-		// `router.subscribe` returns its own unsubscribe function.
-		return router.subscribe("onResolved", capturePageview);
-	}, [posthog, router]);
 
 	// Identify on session restore *and* after login. Runs whenever the resolved
 	// user changes; `identify` is idempotent, so re-running is safe and ensures
@@ -114,12 +93,20 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
 		<PostHogProvider
 			apiKey={apiKey}
 			options={{
-				api_host: env.VITE_PUBLIC_POSTHOG_HOST,
+				// First-party path (reverse-proxied to PostHog in nitro.config.ts) so
+				// ad blockers keying off *.posthog.com don't drop client pageviews.
+				// Relative → posthog-js prepends window.location.origin (client only).
+				api_host: "/ingest",
+				// Direct PostHog host so dashboard links, toolbar and quota checks
+				// still resolve; only ingestion/assets traffic goes through the proxy.
+				ui_host: "https://us.posthog.com",
 				defaults: "2026-01-30",
-				// We capture pageviews manually on the router's `onResolved` event
-				// (see `AnalyticsBridge`); disabling the automatic SPA capture that
-				// `defaults` enables prevents double-counting navigations.
-				capture_pageview: false,
+				// Automatic pageviews. `'history_change'` makes posthog-js patch the
+				// History API (pushState/replaceState) and listen for popstate, so
+				// TanStack Router's client-side navigations are captured automatically
+				// alongside the initial hard load — no manual router subscription.
+				capture_pageview: "history_change",
+				capture_exceptions: true,
 			}}
 		>
 			<AnalyticsBridge />
