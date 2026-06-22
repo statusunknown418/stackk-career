@@ -11,6 +11,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { log } from "evlog";
+import { getServerPostHog } from "./posthog";
 
 export function createAuth() {
 	const db = createDb();
@@ -56,6 +57,25 @@ export function createAuth() {
 						} catch (err) {
 							log.error({
 								auth: { action: "enqueue_welcome_email", userId: createdUser.id },
+								error: toError(err),
+							});
+						}
+
+						// Backend-independent signup signal: tracked even if the client never
+						// returns from the OAuth redirect to fire `signed_up`. `$set` seeds the
+						// person profile so it matches the client-side identify() call.
+						try {
+							getServerPostHog()?.capture({
+								distinctId: createdUser.id,
+								event: "signed_up",
+								properties: {
+									source: "server",
+									$set: { email: createdUser.email, name: createdUser.name },
+								},
+							});
+						} catch (err) {
+							log.error({
+								auth: { action: "posthog_signed_up", userId: createdUser.id },
 								error: toError(err),
 							});
 						}

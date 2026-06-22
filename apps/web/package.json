@@ -27,6 +27,7 @@
     "@paper-design/shaders-react": "^0.0.76",
     "@paralleldrive/cuid2": "^3.3.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@posthog/react": "^1.10.2",
     "@radix-ui/react-use-controllable-state": "^1.2.3",
     "@rive-app/react-webgl2": "^4.29.1",
     "@stackk-career/api": "workspace:*",

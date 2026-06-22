@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircleIcon, EnvelopeSimpleIcon, UserIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,9 +11,14 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { orpc } from "@/utils/orpc";
 
 export function WaitlistForm() {
+	const posthog = usePostHog();
 	const join = useMutation(
 		orpc.waitlist.join.mutationOptions({
 			onError: (error) => toast.error(error.message),
+			// Client-side conversion event. Fire-and-forget (capture is async and
+			// never awaited) so it can't delay the success UI. Kept on the client to
+			// preserve the visitor's anonymous→identified PostHog session continuity.
+			onSuccess: () => posthog?.capture("waitlist_submitted", { $pathname: "/waitlist" }),
 		})
 	);
 
