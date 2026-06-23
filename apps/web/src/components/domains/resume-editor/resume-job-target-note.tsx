@@ -50,30 +50,37 @@ function ResumeJobTargetNote({ jobTarget }: { jobTarget: JobTargetData }) {
 
 	if (jobTarget.status !== "ready" || !jobTarget.title) {
 		return (
-			<div className="flex items-start gap-2 rounded-md bg-muted/60 p-2.5 text-muted-foreground text-sm">
-				<TargetIcon className="mt-0.5 size-3.5 shrink-0" />
-				<p>Buscando los detalles del puesto para personalizar las sugerencias…</p>
+			<div className="flex items-center gap-2.5 rounded-lg border bg-card p-3 text-muted-foreground text-sm">
+				<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
+					<TargetIcon className="size-4 animate-pulse" weight="duotone" />
+				</span>
+				<p className="leading-snug">Buscando los detalles del puesto para personalizar las sugerencias…</p>
 			</div>
 		);
 	}
 
-	const roleLabel = jobTarget.company ? `${jobTarget.title} · ${jobTarget.company}` : jobTarget.title;
 	const meta = [jobTarget.location, jobTarget.seniority, jobTarget.employmentType].filter((value): value is string =>
 		Boolean(value)
 	);
 	const { structured } = jobTarget;
 
 	return (
-		<Collapsible className="rounded-md bg-muted/60 text-sm">
-			<CollapsibleTrigger className="group flex w-full items-start gap-2 p-2.5 text-left text-muted-foreground">
-				<TargetIcon className="mt-0.5 size-3.5 shrink-0" />
-				<span className="flex-1">
-					Adaptado al puesto: <span className="text-foreground">{roleLabel}</span>
+		<Collapsible className="rounded-lg border bg-card text-sm">
+			<CollapsibleTrigger className="group flex w-full items-center gap-2.5 p-3 text-left">
+				<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-success/10 text-success-foreground">
+					<TargetIcon className="size-4" weight="duotone" />
 				</span>
-				<CaretDownIcon className="mt-0.5 size-3.5 shrink-0 transition-transform group-data-panel-open:rotate-180" />
+				<span className="flex min-w-0 flex-1 flex-col gap-0.5">
+					<span className="text-muted-foreground text-xs">Adaptado al puesto</span>
+					<span className="text-foreground leading-snug">
+						{jobTarget.title}
+						{jobTarget.company ? <span className="text-muted-foreground"> · {jobTarget.company}</span> : null}
+					</span>
+				</span>
+				<CaretDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-panel-open:rotate-180" />
 			</CollapsibleTrigger>
 			<CollapsibleContent>
-				<div className="flex flex-col gap-3 px-2.5 pb-2.5 text-muted-foreground">
+				<div className="flex flex-col gap-3 border-border/60 border-t px-3 pt-3 pb-3 text-muted-foreground">
 					<a
 						className="inline-flex w-fit items-center gap-1.5 text-foreground underline-offset-2 hover:underline"
 						href={jobTarget.sourceUrl}
