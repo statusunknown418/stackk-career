@@ -32,6 +32,7 @@ function ResumeCreateFlow({ onClose, open }: ResumeCreateFlowProps): React.React
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [parserRunId, setParserRunId] = useState<string | undefined>(undefined);
+	const [parserHasTargetJobUrl, setParserHasTargetJobUrl] = useState(false);
 
 	const tokenQuery = useQuery({
 		...orpc.viewer.realtimeToken.queryOptions(),
@@ -46,22 +47,31 @@ function ResumeCreateFlow({ onClose, open }: ResumeCreateFlowProps): React.React
 			invalidateBillingQueries(queryClient),
 		]);
 		setParserRunId(undefined);
+		setParserHasTargetJobUrl(false);
 		onClose();
 		navigate({ to: "/dash/resumes/$resumeId", params: { resumeId } });
 	};
 
-	const handleTerminal = () => setParserRunId(undefined);
-	const handleRetry = () => setParserRunId(undefined);
+	const clearParserRun = () => {
+		setParserRunId(undefined);
+		setParserHasTargetJobUrl(false);
+	};
+	const handleParseStart = (runId: string, hasTargetJobUrl: boolean) => {
+		setParserHasTargetJobUrl(hasTargetJobUrl);
+		setParserRunId(runId);
+	};
+	const handleTerminal = clearParserRun;
+	const handleRetry = clearParserRun;
 	let body: React.ReactNode;
 
 	if (!parserRunId) {
 		body = (
 			<ResumeCreateForm
 				onClose={() => {
-					setParserRunId(undefined);
+					clearParserRun();
 					onClose();
 				}}
-				onParseStart={setParserRunId}
+				onParseStart={handleParseStart}
 			/>
 		);
 	} else if (accessToken) {
@@ -78,15 +88,22 @@ function ResumeCreateFlow({ onClose, open }: ResumeCreateFlowProps): React.React
 		body = <Shimmer>Conectando con el agente…</Shimmer>;
 	}
 
+	let dialogTitle = "Crear o mejorar tu CV";
+	let dialogDescription =
+		"Usa LinkedIn como contexto, tu PDF como punto de partida o ambos. Si adjuntas un PDF, el análisis empieza cuando pulses continuar.";
+
+	if (parserRunId) {
+		dialogTitle = "Importando tu CV";
+		dialogDescription = parserHasTargetJobUrl
+			? "Estamos importando tu PDF y sincronizando la oferta de LinkedIn para personalizar las sugerencias. Puedes cerrar este panel; seguirá en segundo plano."
+			: "Estamos importando tu PDF. Puedes cerrar este panel; seguirá en segundo plano.";
+	}
+
 	return (
 		<>
 			<DialogHeader>
-				<DialogTitle>{parserRunId ? "Importando CV" : "Nuevo CV"}</DialogTitle>
-				<DialogDescription>
-					{parserRunId
-						? "Estamos analizando tu PDF. Puedes cerrar este panel, seguirá en segundo plano."
-						: "¿Para qué puesto es este CV? Sube un PDF o créalo en blanco."}
-				</DialogDescription>
+				<DialogTitle>{dialogTitle}</DialogTitle>
+				<DialogDescription>{dialogDescription}</DialogDescription>
 			</DialogHeader>
 
 			<DialogPanel>{body}</DialogPanel>

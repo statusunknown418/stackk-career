@@ -1,4 +1,4 @@
-import { ArrowRightIcon, SparkleIcon, StarIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon } from "@phosphor-icons/react";
 import type { ResumeListItem } from "@stackk-career/schemas/api/resumes";
 import type { ResumeStatus } from "@stackk-career/schemas/db/resumes";
 import { Link } from "@tanstack/react-router";
@@ -88,6 +88,15 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 								<Badge size="sm" variant="secondary">
 									<SparkleIcon weight="fill" />
 									IA
+								</Badge>
+							</li>
+						)}
+
+						{(resume.jobTargetStatus === "pending" || resume.jobTargetStatus === "fetching") && (
+							<li>
+								<Badge size="sm" variant="secondary">
+									<MagnifyingGlassIcon />
+									Buscando puesto…
 								</Badge>
 							</li>
 						)}

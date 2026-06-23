@@ -1,5 +1,5 @@
 import { WarningCircleIcon } from "@phosphor-icons/react";
-import { createResumeInputSchema } from "@stackk-career/schemas/api/resumes";
+import { createResumeInputSchema, parseLinkedinJobId } from "@stackk-career/schemas/api/resumes";
 import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,9 +7,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import Loader from "@/components/loader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dropzone } from "@/components/ui/dropzone";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { invalidateBillingQueries } from "@/lib/billing-cache";
@@ -17,7 +18,7 @@ import { orpc } from "@/utils/orpc";
 
 interface ResumeCreateFormProps {
 	onClose: () => void;
-	onParseStart: (runId: string) => void;
+	onParseStart: (runId: string, hasTargetJobUrl: boolean) => void;
 }
 
 const parseTargetRole = (value: string): string | undefined => {
@@ -27,6 +28,25 @@ const parseTargetRole = (value: string): string | undefined => {
 	}
 	const parsed = createResumeInputSchema.shape.targetRole.safeParse(trimmed);
 	return parsed.success ? parsed.data : undefined;
+};
+
+const parseJobUrl = (value: string): string | undefined => {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return;
+	}
+	const parsed = createResumeInputSchema.shape.targetJobUrl.safeParse(trimmed);
+	return parsed.success ? parsed.data : undefined;
+};
+
+const validateJobUrl = (value: string): string | undefined => {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return;
+	}
+	return parseLinkedinJobId(trimmed)
+		? undefined
+		: "Pega el enlace de una oferta de LinkedIn (ej. linkedin.com/jobs/view/...)";
 };
 
 export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProps): React.ReactElement {
@@ -55,7 +75,7 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 	);
 	const parseMutation = useMutation(
 		orpc.agents.triggerK02ParseResume.mutationOptions({
-			onSuccess: ({ runId }) => onParseStart(runId),
+			onSuccess: ({ runId }, variables) => onParseStart(runId, variables.targetJobUrl !== undefined),
 			onError: (err) => toast.error(err.message),
 		})
 	);
@@ -63,9 +83,13 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 	const form = useForm({
 		defaultValues: {
 			targetRole: "",
+			targetJobUrl: "",
 		},
 		onSubmit: ({ value }) => {
-			createBlankMutation.mutate({ targetRole: parseTargetRole(value.targetRole) });
+			createBlankMutation.mutate({
+				targetRole: parseTargetRole(value.targetRole),
+				targetJobUrl: parseJobUrl(value.targetJobUrl),
+			});
 		},
 	});
 
@@ -77,12 +101,58 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 				form.handleSubmit();
 			}}
 		>
+			<form.Field
+				name="targetJobUrl"
+				validators={{
+					onBlur: ({ value }) => validateJobUrl(value),
+					onChange: ({ value }) => validateJobUrl(value),
+				}}
+			>
+				{(field) => {
+					const error = field.state.meta.errors[0];
+					const hasValue = field.state.value.trim().length > 0;
+					return (
+						<Field>
+							<FieldLabel htmlFor="resume-target-job-url">
+								Oferta de LinkedIn
+								<Badge size="sm" variant="info">
+									Contexto recomendado
+								</Badge>
+							</FieldLabel>
+							<Input
+								autoFocus
+								disabled={createBlankMutation.isPending || parseMutation.isPending}
+								id="resume-target-job-url"
+								inputMode="url"
+								onBlur={field.handleBlur}
+								onChange={(e) => field.handleChange(e.target.value)}
+								placeholder="https://www.linkedin.com/jobs/view/..."
+								value={field.state.value}
+							/>
+							{error ? (
+								<FieldError>{error}</FieldError>
+							) : (
+								<FieldDescription>
+									{hasValue
+										? "Sincronizaremos ese puesto para personalizar las sugerencias del editor."
+										: "Úsala cuando ya sabes a qué puesto vas a aplicar."}
+								</FieldDescription>
+							)}
+						</Field>
+					);
+				}}
+			</form.Field>
+
 			<form.Field name="targetRole">
 				{(field) => (
 					<Field>
-						<FieldLabel htmlFor="resume-target-role">Puesto objetivo</FieldLabel>
+						<FieldLabel htmlFor="resume-target-role">
+							Puesto objetivo
+							<Badge size="sm" variant="outline">
+								Opcional
+							</Badge>
+						</FieldLabel>
 						<Input
-							autoFocus
 							disabled={createBlankMutation.isPending || parseMutation.isPending}
 							id="resume-target-role"
 							maxLength={120}
@@ -91,49 +161,46 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 							placeholder="Ej. Senior Product Manager"
 							value={field.state.value}
 						/>
-						<FieldDescription>
-							Opcional. Lo usaremos para adaptar el contenido. Lo puedes cambiar después.
-						</FieldDescription>
+						<FieldDescription>Úsalo si no tienes una oferta de LinkedIn definida aún.</FieldDescription>
 					</Field>
 				)}
 			</form.Field>
 
-			<form.Subscribe selector={(state) => state.isSubmitting}>
-				{(isSubmitting) => (
-					<Button disabled={isSubmitting || createBlankMutation.isPending || parseMutation.isPending} type="submit">
-						{isSubmitting && <Loader />}
-						Crear desde cero
-					</Button>
-				)}
-			</form.Subscribe>
-
 			<Separator />
 
-			<section className="flex flex-col gap-3">
+			<section aria-labelledby="resume-pdf-upload-title" className="flex flex-col gap-3">
+				<div className="flex flex-wrap items-center gap-2">
+					<h3 className="text-foreground text-sm" id="resume-pdf-upload-title">
+						CV actual
+					</h3>
+					<Badge size="sm" variant="info">
+						Importa tu experiencia
+					</Badge>
+				</div>
+
 				{canUseAi ? (
-					<p className="text-muted-foreground text-sm">
-						También puedes subir un PDF y dejaremos que el agente extraiga las secciones automáticamente.
-					</p>
+					<p className="text-muted-foreground text-sm">Adjunta tu PDF para mejorarlo con Casey</p>
 				) : (
 					<Alert variant="warning">
 						<WarningCircleIcon />
 						<AlertTitle>Límite de generaciones con IA alcanzado</AlertTitle>
 						<AlertDescription>
-							Usaste todas las generaciones con IA de este ciclo. Crea tu CV desde cero o mejora tu plan para subir un
-							PDF.
+							Usaste todas las generaciones con IA de este ciclo. Aún puedes pegar una oferta de LinkedIn y crear un CV
+							en blanco.
 						</AlertDescription>
 					</Alert>
 				)}
 
-				<form.Subscribe selector={(state) => state.values.targetRole}>
-					{(targetRole) => {
-						const parsedRole = parseTargetRole(targetRole);
+				<form.Subscribe selector={(state) => state.values}>
+					{(values) => {
+						const parsedRole = parseTargetRole(values.targetRole);
+						const parsedJobUrl = parseJobUrl(values.targetJobUrl);
+						const jobUrlInvalid = values.targetJobUrl.trim().length > 0 && parsedJobUrl === undefined;
 						const isBusy = createBlankMutation.isPending || parseMutation.isPending;
 
 						return (
 							<Dropzone<{ generationId: string | undefined }>
-								autoUpload
-								disabled={isBusy || !canUseAi}
+								disabled={isBusy || !canUseAi || jobUrlInvalid}
 								endpoint="resumeUploader"
 								input={{ generationId: undefined }}
 								onClientUploadComplete={(files) => {
@@ -142,12 +209,41 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 										toast.error("No pudimos registrar el archivo. Intenta de nuevo.");
 										return;
 									}
-									parseMutation.mutate({ fileId, displayName: parsedRole });
+									parseMutation.mutate({ fileId, displayName: parsedRole, targetJobUrl: parsedJobUrl });
 								}}
 								onUploadError={(err) => toast.error(err.message)}
+								uploadButtonLabel="Continuar con este PDF"
 							/>
 						);
 					}}
+				</form.Subscribe>
+			</section>
+
+			<Separator />
+
+			<section aria-labelledby="resume-blank-create-title" className="flex flex-col gap-3">
+				<div className="flex flex-wrap items-center gap-2">
+					<h3 className="text-foreground text-sm" id="resume-blank-create-title">
+						No tengo un PDF ahora
+					</h3>
+					<Badge size="sm" variant="outline">
+						Alternativa
+					</Badge>
+				</div>
+				<p className="text-muted-foreground text-sm">
+					Crea un CV en blanco. Si pegaste una oferta de LinkedIn, Casey usará ese contexto en el editor.
+				</p>
+				<form.Subscribe selector={(state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting })}>
+					{({ canSubmit, isSubmitting }) => (
+						<Button
+							disabled={!canSubmit || isSubmitting || createBlankMutation.isPending || parseMutation.isPending}
+							type="submit"
+							variant="outline"
+						>
+							{isSubmitting && <Loader />}
+							Crear CV en blanco
+						</Button>
+					)}
 				</form.Subscribe>
 			</section>
 		</form>

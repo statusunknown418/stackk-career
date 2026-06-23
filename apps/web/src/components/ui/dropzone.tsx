@@ -27,6 +27,7 @@ export interface DropzoneProps<T> extends Omit<React.ComponentProps<"div">, "onC
 	onClientUploadComplete?: (files: ClientUploadedFileData<{ storedId?: string }>[]) => void;
 	onDragReject?: () => void;
 	onUploadError?: (error: Error) => void;
+	uploadButtonLabel?: string;
 }
 
 export function Dropzone<T extends Record<string, unknown>>({
@@ -39,6 +40,7 @@ export function Dropzone<T extends Record<string, unknown>>({
 	disabled,
 	className,
 	input,
+	uploadButtonLabel,
 	...props
 }: DropzoneProps<T>): React.ReactElement {
 	const [files, setFiles] = React.useState<File[]>([]);
@@ -87,7 +89,9 @@ export function Dropzone<T extends Record<string, unknown>>({
 		}
 		wasDragRejectRef.current = isDragReject;
 	}, [isDragReject, onDragReject]);
-	let dragMessage = "Arrastra y suelta o haz clic para subir";
+	let dragMessage = autoUpload
+		? "Arrastra y suelta o haz clic para subir"
+		: "Arrastra y suelta o haz clic para seleccionar";
 
 	if (isDragActive) {
 		dragMessage = "Suelta los archivos aquí";
@@ -97,7 +101,8 @@ export function Dropzone<T extends Record<string, unknown>>({
 		dragMessage = "Archivo no permitido";
 	}
 
-	const rootProps = getRootProps();
+	const rootProps = getRootProps() as React.ComponentProps<"div">;
+	const inputProps = getInputProps() as React.ComponentProps<"input">;
 
 	return (
 		<div
@@ -115,7 +120,7 @@ export function Dropzone<T extends Record<string, unknown>>({
 			{...props}
 			{...rootProps}
 		>
-			<input {...getInputProps()} />
+			<input {...inputProps} />
 
 			<div className="flex size-10 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-xs">
 				<CloudUploadIcon className="size-5" />
@@ -170,7 +175,7 @@ export function Dropzone<T extends Record<string, unknown>>({
 					type="button"
 				>
 					<UploadIcon />
-					Subir archivo{files.length > 1 ? "s" : ""}
+					{uploadButtonLabel ?? `Subir archivo${files.length > 1 ? "s" : ""}`}
 				</Button>
 			)}
 		</div>

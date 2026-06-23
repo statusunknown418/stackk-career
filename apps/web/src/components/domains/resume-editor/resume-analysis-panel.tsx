@@ -189,7 +189,7 @@ export function ResumeEditorAnalysisPanel({
 	};
 
 	return (
-		<section className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-lg bg-background p-3">
+		<section className="flex flex-col gap-4 rounded-lg bg-card p-3">
 			<header className="flex items-start justify-between gap-2">
 				<hgroup>
 					<h3 className="font-medium text-sm">Análisis de tu CV</h3>
@@ -268,7 +268,7 @@ export function ResumeEditorAnalysisPanel({
 			)}
 
 			{(partial?.edits?.length || showLoaders) && (
-				<section aria-label="Mejoras sugeridas" className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+				<section aria-label="Mejoras sugeridas" className="flex flex-col gap-2">
 					<header className="text-muted-foreground text-xs">
 						{partial?.edits?.length ? (
 							`+${partial.edits.length} mejoras de mayor impacto`
@@ -277,7 +277,7 @@ export function ResumeEditorAnalysisPanel({
 						)}
 					</header>
 
-					<ItemGroup className="min-h-0 flex-1 gap-2 overflow-y-auto">
+					<ItemGroup className="gap-2">
 						{EDIT_PLACEHOLDERS.map((slot) => {
 							const edit = partial?.edits?.[slot];
 							const isComplete = Boolean(
