@@ -1,4 +1,4 @@
-import type { RouterClient } from "@orpc/server";
+import type { InferRouterInputs, InferRouterOutputs, RouterClient } from "@orpc/server";
 
 import { publicProcedure } from "../index";
 import { agentsRouter } from "./agents";
@@ -41,3 +41,11 @@ export const appRouter = {
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
+
+/**
+ * Inferred input/output maps for every procedure in {@link appRouter}. Index by
+ * router path to derive a procedure's I/O type from the contract instead of
+ * hand-writing it, e.g. `AppRouterOutputs["resumes"]["getJobTarget"]`.
+ */
+export type AppRouterInputs = InferRouterInputs<typeof appRouter>;
+export type AppRouterOutputs = InferRouterOutputs<typeof appRouter>;

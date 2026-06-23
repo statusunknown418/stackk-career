@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { blockRowSchema, contactContentSchema, sectionContentSchema } from "../db/resume-blocks";
+import { resumeJobTargetStatusEnum } from "../db/resume-job-targets";
 import { selectResumeSchema } from "../db/resumes";
 
 export const listResumesInputSchema = z
@@ -18,6 +19,7 @@ export const resumeListContactSchema = contactContentSchema
 
 export const resumeListItemSchema = selectResumeSchema.extend({
 	contact: resumeListContactSchema.nullable().optional(),
+	jobTargetStatus: z.enum(resumeJobTargetStatusEnum).nullable().optional(),
 });
 
 export const blankResumeSectionSchema = sectionContentSchema.pick({
@@ -186,8 +188,52 @@ export const updateResumeTitleSchema = z.object({
 	title: z.string().min(1),
 });
 
+const LINKEDIN_HOST = /(^|\.)linkedin\.com$/i;
+const NUMERIC_JOB_ID = /^\d+$/;
+const JOBS_VIEW_JOB_ID = /\/jobs\/view\/(?:[\w-]*?-)?(\d{4,})/i;
+const JOBPOSTING_JOB_ID = /\/jobposting\/(\d{4,})/i;
+
+/**
+ * Extract the numeric LinkedIn job id from any common job URL shape:
+ * `/jobs/view/<id>`, `/jobs/view/<slug>-<id>`, `?currentJobId=<id>`, and the
+ * guest `/jobPosting/<id>` endpoint. Returns undefined for non-job LinkedIn URLs.
+ */
+export const parseLinkedinJobId = (value: string): string | undefined => {
+	let url: URL;
+	try {
+		url = new URL(value.trim());
+	} catch {
+		return;
+	}
+	if (!LINKEDIN_HOST.test(url.hostname)) {
+		return;
+	}
+	const currentJobId = url.searchParams.get("currentJobId");
+	if (currentJobId && NUMERIC_JOB_ID.test(currentJobId)) {
+		return currentJobId;
+	}
+	const viewId = url.pathname.match(JOBS_VIEW_JOB_ID)?.[1];
+	if (viewId) {
+		return viewId;
+	}
+	return url.pathname.match(JOBPOSTING_JOB_ID)?.[1];
+};
+
+// `parseLinkedinJobId` runs `new URL()` + a linkedin.com host check, so the refine
+// alone validates both URL syntax and that this is a LinkedIn job posting — no need
+// for the deprecated `z.string().url()` method (zod v4 prefers top-level `z.url()`).
+export const linkedinJobUrlSchema = z
+	.string()
+	.trim()
+	.refine((value) => parseLinkedinJobId(value) !== undefined, {
+		message: "Ingresa el enlace de una oferta de LinkedIn (ej. linkedin.com/jobs/view/...)",
+	});
+
+export type LinkedinJobUrl = z.infer<typeof linkedinJobUrlSchema>;
+
 export const createResumeInputSchema = z.object({
 	targetRole: z.string().trim().min(1).max(120).optional(),
+	targetJobUrl: linkedinJobUrlSchema.optional(),
 });
 
 export const getResumeAnalysisInputSchema = z.object({

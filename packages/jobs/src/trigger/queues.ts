@@ -35,3 +35,12 @@ export const letterQueue = queue({
 	name: "casey-letters",
 	concurrencyLimit: envNumber(process.env.LETTER_QUEUE_CONCURRENCY, 10),
 });
+
+/**
+ * LinkedIn job fetch makes one provider call + one normalizer LLM call per run.
+ * Provider runs can be slow (synchronous scrape), so keep concurrency conservative.
+ */
+export const linkedinJobQueue = queue({
+	name: "linkedin-job-fetch",
+	concurrencyLimit: Number(process.env.LINKEDIN_JOB_QUEUE_CONCURRENCY ?? 5),
+});

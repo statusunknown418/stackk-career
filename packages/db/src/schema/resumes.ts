@@ -5,6 +5,7 @@ import { user } from "./auth";
 import { generations } from "./generations";
 import { resumeAnalyses } from "./resume-analyses";
 import { resumeBlocks } from "./resume-blocks";
+import { resumeJobTargets } from "./resume-job-targets";
 
 export const resumeStatusEnum = ["draft", "ready", "archived"] as const;
 
@@ -52,6 +53,10 @@ export const resumes = sqliteTable(
 export const resumeRelations = relations(resumes, ({ one, many }) => ({
 	blocks: many(resumeBlocks),
 	analyses: many(resumeAnalyses),
+	jobTarget: one(resumeJobTargets, {
+		fields: [resumes.id],
+		references: [resumeJobTargets.resumeId],
+	}),
 
 	generation: one(generations, {
 		fields: [resumes.generationId],

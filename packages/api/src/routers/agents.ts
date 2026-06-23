@@ -286,6 +286,7 @@ export const agentsRouter = {
 						fileId: input.fileId,
 						fileUrl: input.fileUrl,
 						displayName: input.displayName,
+						targetJobUrl: input.targetJobUrl,
 					},
 					{
 						concurrencyKey: userId,

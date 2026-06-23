@@ -8,6 +8,7 @@ export const K02_DETAILED_ANALYSIS_OBJECT_TYPE = "resume-analysis-detailed";
 const K02_TIMEOUT_MS = Number(process.env.K02_DETAILED_ANALYSIS_TIMEOUT_MS ?? 5 * 60 * 1000);
 
 export interface RunK02DetailedAnalysisInput {
+	jobTargetText?: string | null;
 	priorAnalysis?: PriorAnalysisContext;
 	resumeContent: string;
 	signal?: AbortSignal;
@@ -111,6 +112,7 @@ export async function runK02DetailedAnalysisAgent({
 	userId,
 	signal,
 	priorAnalysis,
+	jobTargetText,
 }: RunK02DetailedAnalysisInput) {
 	const metadata = await getUserMetadata(userId);
 
@@ -136,6 +138,7 @@ export async function runK02DetailedAnalysisAgent({
 				role: "user",
 				content: [
 					{ type: "text", text: userContextText },
+					...(jobTargetText ? [{ type: "text" as const, text: jobTargetText }] : []),
 					...(priorAnalysisText ? [{ type: "text" as const, text: priorAnalysisText }] : []),
 					{
 						type: "text",

@@ -21,6 +21,7 @@ import {
 	K02_DETAILED_ANALYSIS_OBJECT_TYPE,
 	runK02DetailedAnalysisAgent,
 } from "../../agents/k02-detailed-analysis.handler";
+import { buildJobTargetContextText, getResumeJobTarget } from "../../lib/resume-job-target";
 import { k02DetailedQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
 
@@ -69,6 +70,12 @@ export const k02DetailedAnalysisTask = schemaTask({
 
 		const priorAnalysis = parentAnalysisId ? await loadPriorAnalysisContext(db, parentAnalysisId, userId) : undefined;
 
+		const jobTarget = await getResumeJobTarget(resumeId, userId);
+		const jobTargetText = buildJobTargetContextText(jobTarget);
+		if (jobTarget) {
+			metadata.set("jobTarget", { title: jobTarget.title, company: jobTarget.company });
+		}
+
 		if (parentAnalysisId && !priorAnalysis) {
 			logger.warn("k02-detailed-analysis = parent_unavailable", {
 				analysisId,
@@ -90,7 +97,7 @@ export const k02DetailedAnalysisTask = schemaTask({
 			});
 		}
 
-		const result = await runK02DetailedAnalysisAgent({ resumeContent, userId, signal, priorAnalysis });
+		const result = await runK02DetailedAnalysisAgent({ resumeContent, userId, signal, priorAnalysis, jobTargetText });
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
 		const rawObject = await result.output;

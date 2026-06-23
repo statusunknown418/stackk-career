@@ -2,25 +2,24 @@ import { ORPCError } from "@orpc/client";
 import { generations } from "@stackk-career/db/schema/generations";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
+import { resumeJobTargets } from "@stackk-career/db/schema/resume-job-targets";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import {
-	blankResumeSections,
 	createResumeInputSchema,
 	getResumeAnalysisInputSchema,
 	listResumesInputSchema,
 	updateResumeTitleSchema,
 } from "@stackk-career/schemas/api/resumes";
-import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
-import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
+import { jobPostingSchema } from "@stackk-career/schemas/jobs/linkedin-job-fetch";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
-import { createContactSeedBlock, createStarterChildPayload } from "../lib/resume-block-starters";
+import { buildResumeRootSeed, buildStarterChildBlocks } from "../lib/resume-block-starters";
+import { summarizeContactBlock } from "../lib/resume-contact";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
+import { startResumeJobTargetFetch } from "../services/resume-job-targets";
 import { assertSingleQuota } from "../services/subscriptions";
-
-const CONTACT_DETAIL_PRIORITY = ["email", "address", "website", "phone", "linkedin", "other"] as const;
 
 export const resumesRouter = {
 	list: protectedProcedure.input(listResumesInputSchema).handler(async ({ context, input }) => {
@@ -65,37 +64,20 @@ export const resumesRouter = {
 			records: userResumes.length,
 		});
 
-		const mappedResumeWithRightBlock = new Map(
-			contactBlocks.map((raw) => {
-				const block = parseBlock(raw);
+		const contactByResume = new Map(contactBlocks.map((raw) => [raw.resumeId, summarizeContactBlock(raw)] as const));
 
-				if (block.blockType !== "contact") {
-					return [raw.resumeId, null];
-				}
+		const jobTargetRows = await context.db
+			.select({ resumeId: resumeJobTargets.resumeId, status: resumeJobTargets.status })
+			.from(resumeJobTargets)
+			.where(inArray(resumeJobTargets.resumeId, resumeIds))
+			.$withCache();
 
-				let detail: string | null = null;
-				for (const kind of CONTACT_DETAIL_PRIORITY) {
-					const value = block.content.items.find((item) => item.kind === kind)?.value.trim();
-					if (value) {
-						detail = value;
-						break;
-					}
-				}
-
-				return [
-					raw.resumeId,
-					{
-						detail,
-						firstName: block.content.firstName,
-						lastName: block.content.lastName,
-					},
-				];
-			})
-		);
+		const jobTargetStatusByResume = new Map(jobTargetRows.map((row) => [row.resumeId, row.status]));
 
 		return userResumes.map((res) => ({
 			...res,
-			contact: mappedResumeWithRightBlock.get(res.id),
+			contact: contactByResume.get(res.id),
+			jobTargetStatus: jobTargetStatusByResume.get(res.id) ?? null,
 		}));
 	}),
 
@@ -104,18 +86,12 @@ export const resumesRouter = {
 
 		await assertSingleQuota(context.db, userId, "resumes_total");
 
-		const firstChildPosition = generateLexoKeyBetween(null, null);
-
 		const title = input.targetRole ?? "CV sin título";
 
 		const newResume = await context.db.transaction(async (tx) => {
 			const [createdGeneration] = await tx
 				.insert(generations)
-				.values({
-					owner: userId,
-					type: "resume-manual",
-					title,
-				})
+				.values({ owner: userId, type: "resume-manual", title })
 				.returning({ id: generations.id });
 
 			if (!createdGeneration) {
@@ -131,68 +107,34 @@ export const resumesRouter = {
 					targetRole: input.targetRole,
 					generationId: createdGeneration.id,
 				})
-				.returning({
-					id: resumes.id,
-				});
+				.returning({ id: resumes.id });
 
 			if (!createdResume) {
 				return null;
 			}
 
-			let previousRootPosition: string | null = null;
-			const contactPosition = generateLexoKeyBetween(previousRootPosition, null);
-			const contactSeedBlock = createContactSeedBlock(createdResume.id, name, email, contactPosition);
-
-			previousRootPosition = contactPosition;
-
-			const sectionSeedBlocks = blankResumeSections.map((section) => {
-				const position = generateLexoKeyBetween(previousRootPosition, null);
-
-				previousRootPosition = position;
-
-				return {
-					resumeId: createdResume.id,
-					blockType: "section" as const,
-					position,
-					content: section,
-				};
+			const { rootBlocks, sectionContentByPosition } = buildResumeRootSeed({
+				email,
+				name,
+				resumeId: createdResume.id,
 			});
 
-			const sectionSeedBlocksByPosition = new Map(
-				sectionSeedBlocks.map((section) => [section.position, section.content] as const)
-			);
+			const createdRootBlocks = await tx.insert(resumeBlocks).values(rootBlocks).returning({
+				id: resumeBlocks.id,
+				blockType: resumeBlocks.blockType,
+				position: resumeBlocks.position,
+			});
 
-			const createdRootBlocks = await tx
-				.insert(resumeBlocks)
-				.values([contactSeedBlock, ...sectionSeedBlocks])
-				.returning({
-					id: resumeBlocks.id,
-					blockType: resumeBlocks.blockType,
-					position: resumeBlocks.position,
-				});
+			const createdSections = createdRootBlocks.filter((block) => block.blockType === "section");
 
-			const createdSectionBlocks = createdRootBlocks.filter((block) => block.blockType === "section");
-
-			if (createdSectionBlocks.length !== blankResumeSections.length) {
+			if (createdSections.length !== sectionContentByPosition.size) {
 				return null;
 			}
 
-			const starterChildBlocks = createdSectionBlocks.map((block) => {
-				const section = sectionSeedBlocksByPosition.get(block.position);
-
-				if (!section) {
-					throw new Error(`Missing section seed metadata for position: ${block.position}`);
-				}
-
-				const starterChild = createStarterChildPayload(section.layout);
-
-				return {
-					resumeId: createdResume.id,
-					parentBlockId: block.id,
-					blockType: starterChild.blockType,
-					content: starterChild.content,
-					position: firstChildPosition,
-				};
+			const starterChildBlocks = buildStarterChildBlocks({
+				createdSections,
+				resumeId: createdResume.id,
+				sectionContentByPosition,
 			});
 
 			if (starterChildBlocks.length > 0) {
@@ -211,6 +153,17 @@ export const resumesRouter = {
 
 		await invalidateViewerUsage(context.db, userId, ["resumes_total"]);
 
+		// Best-effort: a failed job-target fetch must never break resume creation (already committed).
+		const jobTarget = input.targetJobUrl
+			? await startResumeJobTargetFetch({
+					db: context.db,
+					log: context.log,
+					resumeId: newResume.id,
+					sourceUrl: input.targetJobUrl,
+					userId,
+				})
+			: undefined;
+
 		context.log?.set({
 			outcome: "success",
 			action: "create_resume",
@@ -222,6 +175,7 @@ export const resumesRouter = {
 		return {
 			success: true,
 			resumeId: newResume.id,
+			jobTarget,
 		};
 	}),
 
@@ -366,5 +320,33 @@ export const resumesRouter = {
 		}
 
 		return updatedResume;
+	}),
+
+	getJobTarget: protectedProcedure.input(z.object({ resumeId: z.string() })).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+
+		const [row] = await context.db
+			.select({
+				id: resumeJobTargets.id,
+				status: resumeJobTargets.status,
+				sourceUrl: resumeJobTargets.sourceUrl,
+				title: resumeJobTargets.title,
+				company: resumeJobTargets.company,
+				location: resumeJobTargets.location,
+				employmentType: resumeJobTargets.employmentType,
+				seniority: resumeJobTargets.seniority,
+				structured: resumeJobTargets.structured,
+				error: resumeJobTargets.error,
+			})
+			.from(resumeJobTargets)
+			.where(and(eq(resumeJobTargets.resumeId, input.resumeId), eq(resumeJobTargets.userId, userId)))
+			.limit(1);
+
+		if (!row) {
+			return null;
+		}
+
+		const structured = jobPostingSchema.safeParse(row.structured);
+		return { ...row, structured: structured.success ? structured.data : null };
 	}),
 };
