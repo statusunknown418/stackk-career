@@ -1,21 +1,5 @@
 import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
-import {
-	AlignLeftIcon,
-	AtSignIcon,
-	AwardIcon,
-	BriefcaseBusinessIcon,
-	CheckCircle2Icon,
-	DatabaseIcon,
-	FileSearchIcon,
-	FolderKanbanIcon,
-	GraduationCapIcon,
-	HandshakeIcon,
-	LayersIcon,
-	ListChecksIcon,
-	type LucideIcon,
-	SparklesIcon,
-	UserIcon,
-} from "lucide-react";
+import { SparklesIcon } from "lucide-react";
 import {
 	ChainOfThought,
 	ChainOfThoughtContent,
@@ -24,26 +8,7 @@ import {
 } from "@/components/ai-elements/chain-of-thought";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Badge } from "@/components/ui/badge";
-
-const ICON_BY_KIND: Record<ResumeParserEvent["kind"], LucideIcon> = {
-	resolving_file: FileSearchIcon,
-	running_agent: SparklesIcon,
-	creating_records: DatabaseIcon,
-	inserting_blocks: LayersIcon,
-	complete: CheckCircle2Icon,
-	validation: FileSearchIcon,
-	outline: ListChecksIcon,
-	header: UserIcon,
-	experience: BriefcaseBusinessIcon,
-	education: GraduationCapIcon,
-	certifications: AwardIcon,
-	projects: FolderKanbanIcon,
-	volunteering: HandshakeIcon,
-	skills: SparklesIcon,
-	languages: SparklesIcon,
-	summary: AlignLeftIcon,
-	contact: AtSignIcon,
-};
+import { ICON_BY_KIND } from "./resume-parser-timeline";
 
 const STATUS_TO_STEP: Record<ResumeParserEvent["status"], "active" | "complete" | "pending"> = {
 	running: "active",
