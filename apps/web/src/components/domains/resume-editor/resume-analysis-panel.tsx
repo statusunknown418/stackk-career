@@ -57,8 +57,8 @@ const EDIT_PLACEHOLDERS = [0, 1, 2, 3, 4] as const;
 
 export function ResumeEditorAnalysisPanel({
 	analysis,
-	appliedSlots,
-	dismissedSlots,
+	appliedEditIds,
+	dismissedEditIds,
 	error,
 	isStreaming,
 	onApplyEdit,
@@ -67,12 +67,12 @@ export function ResumeEditorAnalysisPanel({
 	onViewSection,
 }: {
 	analysis: DeepPartial<ResumeAnalysis> | undefined;
-	appliedSlots?: Set<number>;
-	dismissedSlots?: Set<number>;
+	appliedEditIds?: Set<string>;
+	dismissedEditIds?: Set<string>;
 	error: Error | undefined;
 	isStreaming: boolean;
-	onApplyEdit?: (edit: ResumeEdit, slot: number) => void;
-	onDismissEdit?: (slot: number, dismissed: boolean) => void;
+	onApplyEdit?: (edit: ResumeEdit) => void;
+	onDismissEdit?: (editId: string, dismissed: boolean) => void;
 	onRetry?: () => void;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
@@ -93,7 +93,8 @@ export function ResumeEditorAnalysisPanel({
 		});
 	};
 
-	const renderActions = (slot: number, completeEdit: ResumeEdit, isApplied: boolean, isDelete: boolean) => {
+	const renderActions = (completeEdit: ResumeEdit, isApplied: boolean, isDelete: boolean) => {
+		const editId = completeEdit.editId;
 		const labels = isDelete
 			? {
 					Icon: TrashSimpleIcon,
@@ -130,7 +131,7 @@ export function ResumeEditorAnalysisPanel({
 							render={
 								<Button
 									aria-label={labels.applyTitle}
-									onClick={() => onApplyEdit?.(completeEdit, slot)}
+									onClick={() => onApplyEdit?.(completeEdit)}
 									size="xs"
 									variant="secondary"
 								/>
@@ -166,13 +167,13 @@ export function ResumeEditorAnalysisPanel({
 					</>
 				)}
 
-				{onDismissEdit && (
+				{onDismissEdit && editId && (
 					<Tooltip>
 						<TooltipTrigger
 							render={
 								<Button
 									aria-label="Descartar sugerencia"
-									onClick={() => onDismissEdit(slot, true)}
+									onClick={() => onDismissEdit(editId, true)}
 									size="xs"
 									variant="secondary"
 								/>
@@ -293,8 +294,9 @@ export function ResumeEditorAnalysisPanel({
 							const isTruncatable = description.length > 80;
 							const completeEdit = edit as ResumeEdit;
 							const isDelete = completeEdit.action === "delete";
-							const isApplied = appliedSlots?.has(slot) ?? false;
-							const isDismissed = dismissedSlots?.has(slot) ?? false;
+							const editId = completeEdit.editId;
+							const isApplied = editId ? (appliedEditIds?.has(editId) ?? false) : false;
+							const isDismissed = editId ? (dismissedEditIds?.has(editId) ?? false) : false;
 
 							if (isDismissed) {
 								return (
@@ -303,13 +305,13 @@ export function ResumeEditorAnalysisPanel({
 											<ItemTitle className="truncate text-xs leading-tight line-through">{edit?.title}</ItemTitle>
 										</ItemContent>
 
-										{onDismissEdit && (
+										{onDismissEdit && editId && (
 											<Tooltip>
 												<TooltipTrigger
 													render={
 														<Button
 															aria-label="Restaurar sugerencia"
-															onClick={() => onDismissEdit(slot, false)}
+															onClick={() => onDismissEdit(editId, false)}
 															size="xs"
 															variant="secondary"
 														/>
@@ -331,7 +333,7 @@ export function ResumeEditorAnalysisPanel({
 									size="sm"
 									variant="outline"
 								>
-									<ItemHeader className="flex">{renderActions(slot, completeEdit, isApplied, isDelete)}</ItemHeader>
+									<ItemHeader className="flex">{renderActions(completeEdit, isApplied, isDelete)}</ItemHeader>
 
 									<ItemContent className="gap-1">
 										<ItemTitle className="text-sm leading-tight">{edit?.title}</ItemTitle>

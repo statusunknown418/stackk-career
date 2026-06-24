@@ -1,6 +1,11 @@
 import { GpsSlashIcon, SparkleIcon } from "@phosphor-icons/react";
 import type { k02DetailedAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-detailed-analysis";
-import type { ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
+import type {
+	ResumeAnalysis,
+	ResumeAnalysisDraft,
+	ResumeAnalysisEditStatuses,
+	ResumeEdit,
+} from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
@@ -11,14 +16,13 @@ import { Button } from "@/components/ui/button";
 import { orpc } from "@/utils/orpc";
 
 interface ResumeStreams {
-	"resume-analysis": DeepPartial<ResumeAnalysis>;
+	"resume-analysis": DeepPartial<ResumeAnalysisDraft>;
 }
 
 type CachedAnalysis = {
 	id: string;
 	analysis: ResumeAnalysis;
-	appliedEditIndices: number[];
-	dismissedEditIndices: number[];
+	editStatuses: ResumeAnalysisEditStatuses;
 } | null;
 
 export function ResumeAnalysisSection({
@@ -54,20 +58,20 @@ export function ResumeAnalysisSection({
 
 	const setEditApplied = useMutation(
 		orpc.resumeAnalyses.setEditApplied.mutationOptions({
-			onMutate: async ({ editIndex, applied }) => {
+			onMutate: async ({ editId, applied }) => {
 				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
 				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
 				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
 					if (!prev) {
 						return prev;
 					}
-					const nextSet = new Set(prev.appliedEditIndices);
+					const next = { ...prev.editStatuses };
 					if (applied) {
-						nextSet.add(editIndex);
-					} else {
-						nextSet.delete(editIndex);
+						next[editId] = { status: "applied", appliedAt: Date.now() };
+					} else if (next[editId]?.status === "applied") {
+						delete next[editId];
 					}
-					return { ...prev, appliedEditIndices: [...nextSet].sort((a, b) => a - b) };
+					return { ...prev, editStatuses: next };
 				});
 				return { previous };
 			},
@@ -85,20 +89,20 @@ export function ResumeAnalysisSection({
 
 	const setEditDismissed = useMutation(
 		orpc.resumeAnalyses.setEditDismissed.mutationOptions({
-			onMutate: async ({ editIndex, dismissed }) => {
+			onMutate: async ({ editId, dismissed }) => {
 				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
 				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
 				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
 					if (!prev) {
 						return prev;
 					}
-					const nextSet = new Set(prev.dismissedEditIndices);
+					const next = { ...prev.editStatuses };
 					if (dismissed) {
-						nextSet.add(editIndex);
-					} else {
-						nextSet.delete(editIndex);
+						next[editId] = { status: "dismissed", dismissedAt: Date.now() };
+					} else if (next[editId]?.status === "dismissed") {
+						delete next[editId];
 					}
-					return { ...prev, dismissedEditIndices: [...nextSet].sort((a, b) => a - b) };
+					return { ...prev, editStatuses: next };
 				});
 				return { previous };
 			},
@@ -131,15 +135,27 @@ export function ResumeAnalysisSection({
 
 	const activeAnalysisId = runHandle?.analysisId ?? cachedAnalysis.data?.id;
 
-	const appliedSlots = useMemo(
-		() => new Set(cachedAnalysis.data?.appliedEditIndices ?? []),
-		[cachedAnalysis.data?.appliedEditIndices]
-	);
+	const editStatuses = cachedAnalysis.data?.editStatuses;
 
-	const dismissedSlots = useMemo(
-		() => new Set(cachedAnalysis.data?.dismissedEditIndices ?? []),
-		[cachedAnalysis.data?.dismissedEditIndices]
-	);
+	const appliedEditIds = useMemo(() => {
+		const ids = new Set<string>();
+		for (const [id, record] of Object.entries(editStatuses ?? {})) {
+			if (record.status === "applied") {
+				ids.add(id);
+			}
+		}
+		return ids;
+	}, [editStatuses]);
+
+	const dismissedEditIds = useMemo(() => {
+		const ids = new Set<string>();
+		for (const [id, record] of Object.entries(editStatuses ?? {})) {
+			if (record.status === "dismissed") {
+				ids.add(id);
+			}
+		}
+		return ids;
+	}, [editStatuses]);
 
 	const runStatus = run?.status;
 	const isFailed =
@@ -158,7 +174,7 @@ export function ResumeAnalysisSection({
 
 	const analysisData: DeepPartial<ResumeAnalysis> | undefined = isStreaming
 		? streamedAnalysis
-		: (streamedAnalysis ?? cachedData);
+		: (cachedData ?? streamedAnalysis);
 
 	const handleAnalyze = () => {
 		const parentAnalysisId = cachedAnalysis.data?.id;
@@ -167,22 +183,22 @@ export function ResumeAnalysisSection({
 		initiateAnalysis.mutate({ resumeId, parentAnalysisId });
 	};
 
-	const handleApply = (edit: ResumeEdit, slot: number) => {
+	const handleApply = (edit: ResumeEdit) => {
 		if (!onApplyEdit) {
 			return;
 		}
 		const ok = onApplyEdit(edit);
-		if (!(ok && activeAnalysisId)) {
+		if (!(ok && activeAnalysisId && edit.editId)) {
 			return;
 		}
-		setEditApplied.mutate({ analysisId: activeAnalysisId, editIndex: slot, applied: true });
+		setEditApplied.mutate({ analysisId: activeAnalysisId, editId: edit.editId, applied: true });
 	};
 
-	const handleDismiss = (slot: number, dismissed: boolean) => {
+	const handleDismiss = (editId: string, dismissed: boolean) => {
 		if (!activeAnalysisId) {
 			return;
 		}
-		setEditDismissed.mutate({ analysisId: activeAnalysisId, editIndex: slot, dismissed });
+		setEditDismissed.mutate({ analysisId: activeAnalysisId, editId, dismissed });
 	};
 
 	if (cachedAnalysis.isLoading) {
@@ -216,8 +232,8 @@ export function ResumeAnalysisSection({
 	return (
 		<ResumeEditorAnalysisPanel
 			analysis={analysisData}
-			appliedSlots={appliedSlots}
-			dismissedSlots={dismissedSlots}
+			appliedEditIds={appliedEditIds}
+			dismissedEditIds={dismissedEditIds}
 			error={error}
 			isStreaming={isStreaming}
 			onApplyEdit={onApplyEdit ? handleApply : undefined}

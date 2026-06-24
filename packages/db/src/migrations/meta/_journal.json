@@ -169,6 +169,20 @@
       "when": 1782189889647,
       "tag": "0023_aberrant_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1782314522057,
+      "tag": "0024_add_rubric_edit_statuses",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1782314532873,
+      "tag": "0025_drop_edit_indices",
+      "breakpoints": true
     }
   ]
 }
