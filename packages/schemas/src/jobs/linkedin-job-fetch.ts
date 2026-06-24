@@ -10,11 +10,25 @@ import { z } from "zod";
  * prose. Mirrors the parser-schema convention used across this package.
  */
 export const jobPostingSchema = z.object({
-	title: z.string().nullable().describe("The job title exactly as posted, or null if not present."),
+	title: z
+		.string()
+		.nullable()
+		.describe(
+			"The job title in Spanish, faithful to the posting (translate when needed; do not embellish), or null if not present."
+		),
 	company: z.string().nullable().describe("Hiring company / organization name, or null if not present."),
-	location: z.string().nullable().describe("Primary location or work mode (e.g. 'Remote', 'Lima, Peru'), or null."),
-	employmentType: z.string().nullable().describe("Employment type if stated (e.g. 'Full-time', 'Contract'), or null."),
-	seniority: z.string().nullable().describe("Seniority level if stated (e.g. 'Senior', 'Entry level'), or null."),
+	location: z
+		.string()
+		.nullable()
+		.describe("Primary location or work mode in Spanish (e.g. 'Remoto', 'Lima, Perú'), or null."),
+	employmentType: z
+		.string()
+		.nullable()
+		.describe("Employment type in Spanish if stated (e.g. 'Tiempo completo', 'Contrato'), or null."),
+	seniority: z
+		.string()
+		.nullable()
+		.describe("Seniority level in Spanish if stated (e.g. 'Senior', 'Nivel inicial'), or null."),
 	summary: z.string().nullable().describe("One or two sentence neutral summary of the role, grounded in the posting."),
 	responsibilities: z
 		.array(z.string())

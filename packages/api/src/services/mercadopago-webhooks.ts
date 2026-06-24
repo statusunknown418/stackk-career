@@ -6,9 +6,11 @@ import {
 	type MercadopagoWebhookEnvelope,
 	mercadopagoWebhookEnvelopeSchema,
 } from "@stackk-career/schemas/api/mercadopago-webhooks";
+import { hasActiveSubscriptionAccess } from "@stackk-career/schemas/subscriptions";
 import { and, eq } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
 import { WebhookSignatureValidator } from "mercadopago";
+import { getServerPostHog } from "../lib/posthog";
 import { applyProviderCheckoutResult, fetchAuthorizedPayment, fetchPreapproval } from "./mercadopago";
 
 interface WebhookSignatureInput {
@@ -198,6 +200,21 @@ export async function handleMercadopagoWebhook(
 				status: row.status,
 			},
 		});
+
+		// Fire-and-forget conversion signal: a paid plan reached an access-granting
+		// state. Renewals re-fire this, but funnels keyed on unique users are unaffected.
+		// Wrapped in its own try/catch so a PostHog failure never fails the webhook.
+		if (row.planId !== "free" && hasActiveSubscriptionAccess(row.status)) {
+			try {
+				getServerPostHog()?.capture({
+					distinctId: userId,
+					event: "plan_upgraded",
+					properties: { planId: row.planId, status: row.status, source: "mercadopago_webhook" },
+				});
+			} catch (captureError) {
+				log?.error(captureError instanceof Error ? captureError : new Error("posthog_capture_failed"));
+			}
+		}
 
 		await markProcessed(recorded.rowId, userId, row.id);
 		return { duplicate: false, processed: true, preapprovalId, userId };

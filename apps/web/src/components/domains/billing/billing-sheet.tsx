@@ -8,6 +8,7 @@ import {
 	SparkleIcon,
 	WarningCircleIcon,
 } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import type { PaidPlanIdInput } from "@stackk-career/schemas/api/billing";
 import type { CachedUsageLimitKey, LimitValue, SubscriptionStatus } from "@stackk-career/schemas/subscriptions";
 import { hasActiveSubscriptionAccess, isUnlimited, PLAN_CATALOG } from "@stackk-career/schemas/subscriptions";
@@ -499,6 +500,7 @@ function PlanCheckout({
 
 function BillingSheetContent({ initialView }: { initialView: BillingSheetView }): React.ReactElement {
 	const [view, setView] = useState<View>(initialView === "selector" ? { kind: "selector" } : { kind: "overview" });
+	const posthog = usePostHog();
 	const refreshBilling = useRefreshBilling();
 	const snapshotQuery = useQuery(orpc.billing.getSnapshot.queryOptions());
 
@@ -572,7 +574,13 @@ function BillingSheetContent({ initialView }: { initialView: BillingSheetView })
 			<SheetPanel>
 				{view.kind === "overview" && <PlanOverview snapshot={snapshot} />}
 				{view.kind === "selector" && (
-					<PlanSelector onSelectPlan={(planId) => setView({ kind: "checkout", planId })} snapshot={snapshot} />
+					<PlanSelector
+						onSelectPlan={(planId) => {
+							posthog?.capture("checkout_started", { planId });
+							setView({ kind: "checkout", planId });
+						}}
+						snapshot={snapshot}
+					/>
 				)}
 				{view.kind === "checkout" && (
 					<PlanCheckout onCompleted={() => setView({ kind: "overview" })} planId={view.planId} snapshot={snapshot} />

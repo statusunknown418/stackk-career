@@ -474,7 +474,7 @@ function RouteComponent() {
 			</header>
 
 			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
-				<aside className="flex h-full min-h-0 w-72 shrink-0 flex-col gap-2 overflow-y-auto pb-2">
+				<aside className="flex h-full min-h-0 w-72 shrink-0 flex-col gap-2 pb-2">
 					<Collapsible className="shrink-0 rounded-lg bg-card" onOpenChange={setAreSectionsOpen} open={areSectionsOpen}>
 						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
 							Secciones
@@ -490,7 +490,9 @@ function RouteComponent() {
 							/>
 						</CollapsiblePanel>
 					</Collapsible>
-					<ResumeJobTargetPanel resumeId={params.resumeId} />
+					<div className="min-h-0 overflow-y-auto">
+						<ResumeJobTargetPanel resumeId={params.resumeId} />
+					</div>
 				</aside>
 
 				<article className="min-w-0 flex-1 overflow-y-auto">
@@ -504,13 +506,15 @@ function RouteComponent() {
 					/>
 				</article>
 
-				<aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-y-auto pb-3">
-					<ResumeAnalysisSection
-						hasJobExperience={hasJobExperience}
-						onApplyEdit={handleApplyEdit}
-						onViewSection={handleViewSection}
-						resumeId={params.resumeId}
-					/>
+				<aside className="flex h-full min-h-0 w-80 shrink-0 flex-col pb-3">
+					<div className="min-h-0 overflow-y-auto">
+						<ResumeAnalysisSection
+							hasJobExperience={hasJobExperience}
+							onApplyEdit={handleApplyEdit}
+							onViewSection={handleViewSection}
+							resumeId={params.resumeId}
+						/>
+					</div>
 				</aside>
 			</section>
 

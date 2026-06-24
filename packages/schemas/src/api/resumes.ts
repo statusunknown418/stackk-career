@@ -236,6 +236,11 @@ export const createResumeInputSchema = z.object({
 	targetJobUrl: linkedinJobUrlSchema.optional(),
 });
 
+export const changeResumeJobTargetSchema = z.object({
+	resumeId: z.string().nonempty(),
+	targetJobUrl: linkedinJobUrlSchema,
+});
+
 export const getResumeAnalysisInputSchema = z.object({
 	resumeId: z.string().nonempty(),
 });
@@ -244,3 +249,4 @@ export type GetResumeAnalysisInput = z.infer<typeof getResumeAnalysisInputSchema
 export type ResumeDocumentWrapperForm = z.infer<typeof resumeDocumentWrapperFormSchema>;
 export type UpdateResumeTitleInput = z.infer<typeof updateResumeTitleSchema>;
 export type CreateResumeInput = z.infer<typeof createResumeInputSchema>;
+export type ChangeResumeJobTargetInput = z.infer<typeof changeResumeJobTargetSchema>;

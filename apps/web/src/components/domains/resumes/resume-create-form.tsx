@@ -1,4 +1,5 @@
 import { WarningCircleIcon } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import { createResumeInputSchema, parseLinkedinJobId } from "@stackk-career/schemas/api/resumes";
 import { hasQuotaRemaining } from "@stackk-career/schemas/subscriptions";
 import { useForm } from "@tanstack/react-form";
@@ -52,6 +53,7 @@ const validateJobUrl = (value: string): string | undefined => {
 export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProps): React.ReactElement {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const posthog = usePostHog();
 	const snapshot = useQuery(orpc.billing.getSnapshot.queryOptions()).data;
 	// AI-from-PDF parsing consumes the per-cycle resume-creation quota; manual "desde cero" does not.
 	const canUseAi =
@@ -210,6 +212,7 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 										return;
 									}
 									parseMutation.mutate({ fileId, displayName: parsedRole, targetJobUrl: parsedJobUrl });
+									posthog?.capture("resume_uploaded", { context: "dash" });
 								}}
 								onUploadError={(err) => toast.error(err.message)}
 								uploadButtonLabel="Continuar con este PDF"

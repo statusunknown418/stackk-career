@@ -1,5 +1,6 @@
 "use client";
 
+import { usePostHog } from "@posthog/react";
 import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
 import { coverLetterLanguageSchema, createCoverLetterGenerationInputSchema } from "@stackk-career/schemas/api/letters";
 import { useForm } from "@tanstack/react-form";
@@ -60,6 +61,7 @@ function FieldErrorText({ errors }: { errors: readonly unknown[] }): React.React
 export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const posthog = usePostHog();
 	const { data: resumes } = useSuspenseQuery(orpc.resumes.list.queryOptions());
 
 	const resumeOptions = resumes.map((resume) => ({
@@ -76,6 +78,7 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 		orpc.letters.createGeneration.mutationOptions({
 			onSuccess: ({ generationId }) => {
 				queryClient.invalidateQueries({ queryKey: orpc.letters.list.queryKey() });
+				posthog?.capture("cover_letter_created", { generationId });
 				onClose();
 				navigate({ params: { generationId }, to: "/dash/letters/$generationId" });
 			},

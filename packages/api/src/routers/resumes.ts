@@ -6,6 +6,7 @@ import { resumeJobTargets } from "@stackk-career/db/schema/resume-job-targets";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import {
+	changeResumeJobTargetSchema,
 	createResumeInputSchema,
 	getResumeAnalysisInputSchema,
 	listResumesInputSchema,
@@ -18,7 +19,7 @@ import { protectedProcedure } from "..";
 import { buildResumeRootSeed, buildStarterChildBlocks } from "../lib/resume-block-starters";
 import { summarizeContactBlock } from "../lib/resume-contact";
 import { invalidateViewerUsage } from "../lib/viewer-cache";
-import { startResumeJobTargetFetch } from "../services/resume-job-targets";
+import { changeResumeJobTarget, startResumeJobTargetFetch } from "../services/resume-job-targets";
 import { assertSingleQuota } from "../services/subscriptions";
 
 export const resumesRouter = {
@@ -348,5 +349,41 @@ export const resumesRouter = {
 
 		const structured = jobPostingSchema.safeParse(row.structured);
 		return { ...row, structured: structured.success ? structured.data : null };
+	}),
+
+	changeJobTarget: protectedProcedure.input(changeResumeJobTargetSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+
+		const [resume] = await context.db
+			.select({ id: resumes.id })
+			.from(resumes)
+			.where(and(eq(resumes.id, input.resumeId), eq(resumes.userId, userId)))
+			.limit(1);
+
+		if (!resume) {
+			throw new ORPCError("NOT_FOUND", { message: "No encontramos este CV" });
+		}
+
+		const handle = await changeResumeJobTarget({
+			db: context.db,
+			log: context.log,
+			resumeId: input.resumeId,
+			sourceUrl: input.targetJobUrl,
+			userId,
+		});
+
+		if (!handle) {
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "No pudimos actualizar el objetivo. Intenta de nuevo en unos minutos.",
+			});
+		}
+
+		context.log?.set({
+			outcome: "success",
+			action: "change_job_target",
+			data: { resumeId: input.resumeId },
+		});
+
+		return { success: true, status: "pending" as const };
 	}),
 };

@@ -1,4 +1,5 @@
 import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
@@ -172,6 +173,7 @@ function useResumeAnalysis(generationId: string, fileId: string | undefined) {
 	const search = Route.useSearch();
 	const navigate = Route.useNavigate();
 	const queryClient = useQueryClient();
+	const posthog = usePostHog();
 	const hasStartedRef = useRef(false);
 	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string } | null>(null);
 
@@ -219,6 +221,7 @@ function useResumeAnalysis(generationId: string, fileId: string | undefined) {
 		enabled: Boolean(runHandle),
 		onComplete: () => {
 			queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
+			posthog?.capture("resume_score_generated", { generationId });
 		},
 	});
 
