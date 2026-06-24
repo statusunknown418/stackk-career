@@ -1,5 +1,8 @@
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
+import type { CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { jsPDF } from "jspdf";
 
 export const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
@@ -77,7 +80,7 @@ export function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undef
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: PDF generation template orchestration has high complexity
 export function downloadCoverLetterPdf(
 	letter: CoverLetter,
-	template?: "centered" | "classic" | "minty" | "blue" | null,
+	template?: CoverLetterTemplate,
 	userName?: string,
 	userEmail?: string
 ) {
@@ -85,22 +88,24 @@ export function downloadCoverLetterPdf(
 	const pageHeight = 297;
 	const margin = 25;
 
+	const getVal = (val: string | null | undefined, fallbackVal = "") => val || fallbackVal;
+
 	// Resolve candidate contact details
-	const name = letter.contactName || userName || "Tu Nombre";
-	const email = letter.contactEmail || userEmail || "tu.email@example.com";
-	const phone = letter.contactPhone || "+51 999 999 999";
-	const linkedin = letter.contactLinkedin || "linkedin.com/in/candidato";
-	const title = letter.contactTitle || "";
-	const address = letter.contactAddress || "";
-	const website = letter.contactWebsite || "";
+	const name = getVal(letter.contactName, userName || "Tu Nombre");
+	const email = getVal(letter.contactEmail, userEmail || "tu.email@example.com");
+	const phone = getVal(letter.contactPhone, "+51 999 999 999");
+	const linkedin = getVal(letter.contactLinkedin, "linkedin.com/in/candidato");
+	const title = getVal(letter.contactTitle);
+	const address = getVal(letter.contactAddress);
+	const website = getVal(letter.contactWebsite);
 
 	// Resolve recipient details
-	const recipientName = letter.recipientName || "";
-	const recipientCompany = letter.recipientCompany || "";
-	const recipientAddress = letter.recipientAddress || "";
+	const recipientName = getVal(letter.recipientName);
+	const recipientCompany = getVal(letter.recipientCompany);
+	const recipientAddress = getVal(letter.recipientAddress);
 
 	// Resolve date
-	const todayDateStr = letter.dateStr || new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date());
+	const todayDateStr = letter.dateStr || format(new Date(), "PPP", { locale: es });
 
 	let cursorY = margin;
 	let contentWidth = 210 - margin * 2;

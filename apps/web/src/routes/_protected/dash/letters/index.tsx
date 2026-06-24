@@ -1,6 +1,9 @@
 import { ArrowUpRightIcon, ChatCircleTextIcon, ClockIcon, PlusCircleIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
+import { TEMPLATE_LABELS } from "@stackk-career/schemas/api/letters";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { CircleHelpIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
@@ -11,10 +14,6 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { FrameDescription } from "@/components/ui/frame";
 import { type Tour, TourProvider, useTour } from "@/components/ui/tour";
 import { orpc } from "@/utils/orpc";
-
-const dateTimeFormatter = new Intl.DateTimeFormat("es", {
-	dateStyle: "long",
-});
 
 export const Route = createFileRoute("/_protected/dash/letters/")({
 	component: RouteComponent,
@@ -48,13 +47,6 @@ const lettersTours: Tour[] = [
 		],
 	},
 ];
-
-const TEMPLATE_LABELS: Record<string, string> = {
-	centered: "Centrado",
-	classic: "Clásico",
-	minty: "Minty",
-	blue: "Azul",
-};
 
 function RouteComponent() {
 	return (
@@ -301,16 +293,16 @@ function LettersView() {
 											</span>
 											<div className="flex items-center gap-1.5">
 												{letter.template && (
-													<span className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-1.5 py-0.5 font-medium text-[0.6rem] text-indigo-650 uppercase tracking-wide dark:text-indigo-400">
+													<span className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-1.5 py-0.5 font-medium text-indigo-650 text-xs uppercase tracking-wide dark:text-indigo-400">
 														{TEMPLATE_LABELS[letter.template] || letter.template}
 													</span>
 												)}
 												{!letter.template && (
-													<span className="rounded-md border px-1.5 py-0.5 font-medium text-[0.6rem] text-muted-foreground uppercase tracking-wide">
+													<span className="rounded-md border px-1.5 py-0.5 font-medium text-muted-foreground text-xs uppercase tracking-wide">
 														En blanco
 													</span>
 												)}
-												<span className="rounded-md border px-1.5 py-0.5 font-mono text-[0.6rem] text-muted-foreground uppercase tracking-wide">
+												<span className="rounded-md border px-1.5 py-0.5 font-mono text-muted-foreground text-xs uppercase tracking-wide">
 													{letter.language === "en" ? "EN" : "ES"}
 												</span>
 												<ArrowUpRightIcon
@@ -337,7 +329,7 @@ function LettersView() {
 											{letter.updatedAt && (
 												<p className="mt-auto flex items-center gap-1.5 pt-4 text-muted-foreground text-xs">
 													<ClockIcon className="shrink-0" size={12} weight="bold" />
-													<span>Actualizada el {dateTimeFormatter.format(new Date(letter.updatedAt))}</span>
+													<span>Actualizada el {format(new Date(letter.updatedAt), "PPP", { locale: es })}</span>
 												</p>
 											)}
 										</div>

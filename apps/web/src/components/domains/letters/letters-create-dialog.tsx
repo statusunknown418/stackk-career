@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusCircleIcon } from "@phosphor-icons/react";
+import type { CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
 import { ArrowLeftIcon } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
@@ -21,7 +22,7 @@ import { TemplateCard } from "./template-card";
 interface LettersCreateDialogProps {
 	onOpenChange: (open: boolean) => void;
 	open: boolean;
-	template?: "centered" | "classic" | "minty" | "blue" | null;
+	template?: CoverLetterTemplate;
 }
 
 /**
@@ -31,9 +32,7 @@ interface LettersCreateDialogProps {
  * Step 2: Enter Job Details Form
  */
 export function LettersCreateDialog({ onOpenChange, open, template }: LettersCreateDialogProps) {
-	const [activeTemplate, setActiveTemplate] = useState<"centered" | "classic" | "minty" | "blue" | null | undefined>(
-		undefined
-	);
+	const [activeTemplate, setActiveTemplate] = useState<CoverLetterTemplate>(undefined);
 	const [step, setStep] = useState(1);
 
 	// Synchronize internal state when the dialog is opened/closed

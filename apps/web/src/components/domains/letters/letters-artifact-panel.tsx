@@ -23,8 +23,10 @@ import {
 	XIcon,
 } from "@phosphor-icons/react";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterLanguage, CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -58,7 +60,7 @@ export interface LetterView {
 	generationCount: number;
 	hasContent: boolean;
 	maxVersions: number;
-	template?: "centered" | "classic" | "minty" | "blue" | null;
+	template?: CoverLetterTemplate;
 }
 
 /** State of the in-flight CASEY run (or its error), shared by header, toolbar and body. */
@@ -176,7 +178,7 @@ function RecipientBlock({ draft, readOnly, setField, commit, theme }: RecipientB
 		);
 	}
 
-	let labelColorClass = "text-muted-foreground font-medium text-[10px]";
+	let labelColorClass = "text-muted-foreground font-medium text-xs";
 	if (theme === "minty") {
 		labelColorClass = "text-emerald-700 font-semibold";
 	} else if (theme === "blue") {
@@ -721,7 +723,7 @@ function MintyTemplateView({
 						<h2 className="font-semibold text-emerald-700 text-xs uppercase tracking-wider">Contacto</h2>
 						<div className="flex flex-col gap-2 break-all text-muted-foreground text-xs leading-relaxed">
 							<div>
-								<strong className="text-[10px] text-foreground uppercase">Email</strong>
+								<strong className="text-foreground text-xs uppercase">Email</strong>
 								<InlineTextEditor
 									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
@@ -732,7 +734,7 @@ function MintyTemplateView({
 								/>
 							</div>
 							<div>
-								<strong className="text-[10px] text-foreground uppercase">Teléfono</strong>
+								<strong className="text-foreground text-xs uppercase">Teléfono</strong>
 								<InlineTextEditor
 									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
@@ -743,7 +745,7 @@ function MintyTemplateView({
 								/>
 							</div>
 							<div>
-								<strong className="text-[10px] text-foreground uppercase">LinkedIn</strong>
+								<strong className="text-foreground text-xs uppercase">LinkedIn</strong>
 								<InlineTextEditor
 									className="rounded hover:bg-accent/40 focus:bg-accent/40"
 									onBlur={commit}
@@ -755,7 +757,7 @@ function MintyTemplateView({
 							</div>
 							{draft.contactAddress && (
 								<div>
-									<strong className="text-[10px] text-foreground uppercase">Dirección</strong>
+									<strong className="text-foreground text-xs uppercase">Dirección</strong>
 									<InlineTextEditor
 										className="rounded hover:bg-accent/40 focus:bg-accent/40"
 										onBlur={commit}
@@ -1028,7 +1030,7 @@ function EditableLetter({
 	activeMessageId: string;
 	letter: CoverLetter;
 	onSaveArtifact: (messageId: string, artifact: CoverLetter) => Promise<unknown>;
-	template?: "centered" | "classic" | "minty" | "blue" | null;
+	template?: CoverLetterTemplate;
 	userName: string;
 	userEmail: string;
 	userPhone: string;
@@ -1347,7 +1349,7 @@ function ReadOnlyLetter({
 	/** Generating but no content yet: show a friendly message above the skeleton. */
 	preparing: boolean;
 	showLoaders: boolean;
-	template?: "centered" | "classic" | "minty" | "blue" | null;
+	template?: CoverLetterTemplate;
 	userName: string;
 	userEmail: string;
 	userPhone: string;
@@ -1477,7 +1479,7 @@ export function LettersArtifactPanel({
 	const userPhone = "+51 999 999 999";
 	const userLinkedin = "linkedin.com/in/candidato";
 	const userImage = session?.user?.image ?? undefined;
-	const todayDateStr = new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date());
+	const todayDateStr = format(new Date(), "PPP", { locale: es });
 
 	const { activeMessageId, activeVersion, artifact, hasContent, maxVersions } = letter;
 	const { error, isPending, isStreaming } = run;

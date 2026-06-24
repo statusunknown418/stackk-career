@@ -163,20 +163,24 @@ export const caseyLettersTask = schemaTask({
 		}
 
 		// Merge generated letter details with any custom contact/recipient overrides
-		const mergedObject = {
-			...object,
-			contactName: previousObject?.contactName ?? object.contactName ?? null,
-			contactTitle: previousObject?.contactTitle ?? object.contactTitle ?? null,
-			contactEmail: previousObject?.contactEmail ?? object.contactEmail ?? null,
-			contactPhone: previousObject?.contactPhone ?? object.contactPhone ?? null,
-			contactAddress: previousObject?.contactAddress ?? object.contactAddress ?? null,
-			contactLinkedin: previousObject?.contactLinkedin ?? object.contactLinkedin ?? null,
-			contactWebsite: previousObject?.contactWebsite ?? object.contactWebsite ?? null,
-			recipientName: previousObject?.recipientName ?? object.recipientName ?? null,
-			recipientCompany: previousObject?.recipientCompany ?? object.recipientCompany ?? null,
-			recipientAddress: previousObject?.recipientAddress ?? object.recipientAddress ?? null,
-			dateStr: previousObject?.dateStr ?? object.dateStr ?? null,
-		};
+		const overrideKeys = [
+			"contactName",
+			"contactTitle",
+			"contactEmail",
+			"contactPhone",
+			"contactAddress",
+			"contactLinkedin",
+			"contactWebsite",
+			"recipientName",
+			"recipientCompany",
+			"recipientAddress",
+			"dateStr",
+		] as const;
+
+		const mergedObject: CoverLetter = { ...object };
+		for (const key of overrideKeys) {
+			mergedObject[key] = previousObject?.[key] ?? object[key] ?? null;
+		}
 
 		metadata.set("step", "persisting");
 		await db

@@ -1,7 +1,7 @@
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterLanguage, CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -546,7 +546,7 @@ function LetterWorkspace() {
 							generationCount,
 							hasContent: Boolean(artifact) || data.latestArtifact !== null,
 							maxVersions,
-							template: data.generation.template as "centered" | "classic" | "minty" | "blue" | null | undefined,
+							template: data.generation.template as CoverLetterTemplate,
 						}}
 						onSaveArtifact={onSaveArtifact}
 						onTriggerAsync={onTriggerAsync}
