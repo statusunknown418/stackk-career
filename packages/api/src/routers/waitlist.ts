@@ -3,6 +3,7 @@ import type { sendWaitlistEmailTask } from "@stackk-career/jobs/trigger/tasks/se
 import { joinWaitlistInputSchema } from "@stackk-career/schemas/api/waitlist";
 import { tasks } from "@trigger.dev/sdk";
 import { publicProcedure } from "..";
+import { getServerPostHog } from "../lib/posthog";
 
 export const waitlistRouter = {
 	join: publicProcedure.input(joinWaitlistInputSchema).handler(async ({ context, input }) => {
@@ -37,6 +38,19 @@ export const waitlistRouter = {
 				context.log?.set({ waitlistEmail: "enqueue_failed" });
 				context.log?.error(error instanceof Error ? error : new Error("waitlist_email_enqueue_failed"));
 			}
+		}
+
+		// Backend-independent signal: a waitlist join is tracked server-side even
+		// if the client `waitlist_submitted` event never fires (visitor navigates
+		// away). Anonymous visitors → distinct id falls back to email then phone.
+		try {
+			getServerPostHog()?.capture({
+				distinctId: input.email ?? input.phone,
+				event: "waitlist_submitted",
+				properties: { source: "server" },
+			});
+		} catch (error) {
+			context.log?.error(error instanceof Error ? error : new Error("posthog_capture_failed"));
 		}
 
 		context.log?.set({ outcome: "joined" });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { linkedinJobUrlSchema } from "./resumes";
 
 export const triggerResumeAnalysisInputSchema = z.object({
 	generationId: z.string().nonempty(),
@@ -17,6 +18,7 @@ export const triggerResumeParserInputSchema = z
 		fileId: z.string().optional(),
 		fileUrl: z.url().optional(),
 		displayName: z.string().trim().min(1).max(120).optional(),
+		targetJobUrl: linkedinJobUrlSchema.optional(),
 	})
 	.refine((value) => Boolean(value.fileId) !== Boolean(value.fileUrl), {
 		message: "Provide exactly one of fileId or fileUrl",

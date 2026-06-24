@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/noNestedTernary: shadcn */
-import { ScriptOnce } from "@tanstack/react-router";
+import { ScriptOnce, useRouterState } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -15,11 +15,21 @@ interface ThemeProviderState {
 	theme: Theme;
 }
 
+/**
+ * Routes that lock to a specific theme regardless of the user's preference.
+ * The landing page is designed dark-only, so it always renders dark while the
+ * rest of the app stays fully theme-switchable.
+ */
+const FORCED_ROUTE_THEMES: Record<string, Theme> = {
+	"/": "dark",
+};
+
 function getThemeScript(storageKey: string, defaultTheme: Theme) {
 	const key = JSON.stringify(storageKey);
 	const fallback = JSON.stringify(defaultTheme);
+	const forced = JSON.stringify(FORCED_ROUTE_THEMES);
 
-	return `(function(){try{var t=localStorage.getItem(${key});if(t!=='light'&&t!=='dark'&&t!=='system'){t=${fallback}}var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`;
+	return `(function(){try{var f=${forced};var t=f[location.pathname];if(!t){t=localStorage.getItem(${key});if(t!=='light'&&t!=='dark'&&t!=='system'){t=${fallback}}}var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.remove('light','dark');e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`;
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>({
@@ -41,6 +51,9 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children, defaultTheme = "system", storageKey = "theme" }: ThemeProviderProps) {
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
+	const forcedTheme = FORCED_ROUTE_THEMES[pathname];
+
 	const [theme, setThemeState] = useState<Theme>(defaultTheme);
 	const [mounted, setMounted] = useState(false);
 
@@ -50,15 +63,17 @@ export function ThemeProvider({ children, defaultTheme = "system", storageKey = 
 		setMounted(true);
 	}, [defaultTheme, storageKey]);
 
+	const appliedTheme = forcedTheme ?? theme;
+
 	useEffect(() => {
 		if (!mounted) {
 			return;
 		}
-		applyTheme(theme);
-	}, [theme, mounted]);
+		applyTheme(appliedTheme);
+	}, [appliedTheme, mounted]);
 
 	useEffect(() => {
-		if (!mounted || theme !== "system") {
+		if (!mounted || appliedTheme !== "system") {
 			return;
 		}
 
@@ -66,7 +81,7 @@ export function ThemeProvider({ children, defaultTheme = "system", storageKey = 
 		const onChange = () => applyTheme("system");
 		media.addEventListener("change", onChange);
 		return () => media.removeEventListener("change", onChange);
-	}, [theme, mounted]);
+	}, [appliedTheme, mounted]);
 
 	const setTheme = (next: Theme) => {
 		localStorage.setItem(storageKey, next);

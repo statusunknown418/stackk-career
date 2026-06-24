@@ -3,6 +3,7 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
+import { clearPendingSignup, markPendingSignup } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { AnimatedThemeToggler } from "./ui/animated-theme-toggler";
@@ -36,6 +37,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 							<section className="grid grid-cols-1 gap-2">
 								<Button
 									onClick={() => {
+										// Arm the sign-up conversion capture before the OAuth redirect;
+										// `AnalyticsBridge` consumes it once the session is restored.
+										markPendingSignup();
 										authClient.signIn.social({
 											provider: "google",
 											newUserCallbackURL: "/setup",
@@ -48,6 +52,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 												},
 												onError: () => {
 													isLoading(false);
+													// Sign-in never left the page — disarm the conversion flag.
+													clearPendingSignup();
 												},
 											},
 										});

@@ -14,7 +14,13 @@ interface ResumeImportProgressProps {
 	parserRunId: string;
 }
 
-const FAILURE_STATUSES = new Set<string>(["FAILED", "CRASHED", "SYSTEM_FAILURE", "TIMED_OUT", "EXPIRED"]);
+const FAILURE_STATUSES: Record<string, true> = {
+	CRASHED: true,
+	EXPIRED: true,
+	FAILED: true,
+	SYSTEM_FAILURE: true,
+	TIMED_OUT: true,
+};
 
 export function ResumeImportProgress({
 	accessToken,
@@ -51,7 +57,7 @@ export function ResumeImportProgress({
 		);
 	}
 
-	if (status && FAILURE_STATUSES.has(status)) {
+	if (status && FAILURE_STATUSES[status]) {
 		return (
 			<section className="flex flex-col gap-4">
 				<header className="flex flex-col gap-1">

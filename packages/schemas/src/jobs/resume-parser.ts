@@ -8,6 +8,7 @@ export const resumeParserInputSchema = z
 		fileUrl: z.url().optional(),
 		generationId: z.string().optional(),
 		displayName: z.string().optional(),
+		targetJobUrl: z.url().optional(),
 	})
 	.refine((value) => Boolean(value.fileId) !== Boolean(value.fileUrl), {
 		message: "Provide exactly one of fileId or fileUrl",

@@ -1,5 +1,6 @@
-import type { BlankResumeSection } from "@stackk-career/schemas/api/resumes";
+import { type BlankResumeSection, blankResumeSections } from "@stackk-career/schemas/api/resumes";
 import type { ContentOf } from "@stackk-career/schemas/db/resume-blocks";
+import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
 
 export type StarterChildPayload =
 	| {
@@ -45,6 +46,7 @@ export const createStarterChildPayload = (layout: BlankResumeSection["layout"]):
 					entryStyle: "standard",
 					isCurrent: false,
 					isRemote: false,
+					workSetting: "onsite",
 				},
 			};
 	}
@@ -101,4 +103,82 @@ export const createContactSeedBlock = (
 			],
 		},
 	};
+};
+
+/**
+ * Build the ordered root seed blocks for a new resume (contact + one block per default
+ * section), assigning fractional positions in order. Returns the section content keyed by
+ * position so {@link buildStarterChildBlocks} can attach the matching starter child once the
+ * rows have been inserted and their ids are known.
+ */
+export const buildResumeRootSeed = ({
+	email,
+	name,
+	resumeId,
+}: {
+	email: string;
+	name: string | null | undefined;
+	resumeId: string;
+}) => {
+	let previousPosition: string | null = null;
+
+	const contactPosition = generateLexoKeyBetween(previousPosition, null);
+	previousPosition = contactPosition;
+	const contactSeedBlock = createContactSeedBlock(resumeId, name, email, contactPosition);
+
+	const sectionSeedBlocks = blankResumeSections.map((section) => {
+		const position = generateLexoKeyBetween(previousPosition, null);
+		previousPosition = position;
+
+		return {
+			resumeId,
+			blockType: "section" as const,
+			position,
+			content: section,
+		};
+	});
+
+	const sectionContentByPosition = new Map(
+		sectionSeedBlocks.map((section) => [section.position, section.content] as const)
+	);
+
+	return {
+		rootBlocks: [contactSeedBlock, ...sectionSeedBlocks],
+		sectionContentByPosition,
+	};
+};
+
+/**
+ * Attach a starter child block to each freshly-inserted section, picking the child layout
+ * from the section content recorded by {@link buildResumeRootSeed}. All children share one
+ * fractional position since each lives under a distinct parent.
+ */
+export const buildStarterChildBlocks = ({
+	createdSections,
+	resumeId,
+	sectionContentByPosition,
+}: {
+	createdSections: { id: number; position: string }[];
+	resumeId: string;
+	sectionContentByPosition: Map<string, BlankResumeSection>;
+}) => {
+	const position = generateLexoKeyBetween(null, null);
+
+	return createdSections.map((block) => {
+		const section = sectionContentByPosition.get(block.position);
+
+		if (!section) {
+			throw new Error(`Missing section seed metadata for position: ${block.position}`);
+		}
+
+		const starterChild = createStarterChildPayload(section.layout);
+
+		return {
+			resumeId,
+			parentBlockId: block.id,
+			blockType: starterChild.blockType,
+			content: starterChild.content,
+			position,
+		};
+	});
 };

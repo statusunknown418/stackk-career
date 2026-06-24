@@ -1,4 +1,4 @@
-import { CaretDownIcon, CopyIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
@@ -9,10 +9,12 @@ import { formatDate } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { exportResumeToPdf } from "@/components/domains/resume-document/export-pdf";
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
 import { ResumeAnalysisSection } from "@/components/domains/resume-editor/resume-analysis-section";
+import { ResumeJobTargetPanel } from "@/components/domains/resume-editor/resume-job-target-note";
 import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
 import { useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
@@ -130,7 +132,7 @@ function ResumeEditorPending() {
 			</header>
 
 			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
-				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
+				<aside className="flex h-full min-h-0 w-54 shrink-0 flex-col overflow-y-auto pb-3">
 					<div className="shrink-0 space-y-2 rounded-lg bg-card p-2">
 						<Skeleton className="h-9 w-full rounded-lg" />
 						<div className="space-y-1 px-1">
@@ -139,15 +141,7 @@ function ResumeEditorPending() {
 							))}
 						</div>
 					</div>
-
-					<div className="flex flex-col gap-3 rounded-lg bg-card p-3">
-						<div className="space-y-1.5">
-							<Skeleton className="h-4 w-32" />
-							<Skeleton className="h-3 w-48" />
-						</div>
-						<Skeleton className="h-16 w-full rounded-md" />
-					</div>
-				</article>
+				</aside>
 
 				<article className="min-w-0 flex-1 overflow-y-auto">
 					<section className="mx-auto w-full max-w-3xl">
@@ -169,6 +163,16 @@ function ResumeEditorPending() {
 						</article>
 					</section>
 				</article>
+
+				<aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-y-auto pb-3">
+					<div className="flex flex-col gap-3 rounded-lg bg-card p-3">
+						<div className="space-y-1.5">
+							<Skeleton className="h-4 w-32" />
+							<Skeleton className="h-3 w-48" />
+						</div>
+						<Skeleton className="h-16 w-full rounded-md" />
+					</div>
+				</aside>
 			</section>
 		</section>
 	);
@@ -337,6 +341,14 @@ function RouteComponent() {
 		await deleteMutation.mutateAsync({ id: params.resumeId });
 	};
 
+	const handleExport = () => {
+		try {
+			exportResumeToPdf({ rootBlocks, title: form.state.values.title });
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "No se pudo exportar el CV");
+		}
+	};
+
 	const handleViewSection = (edit: ResumeEdit) => {
 		if (!edit.targetBlockId) {
 			return;
@@ -448,16 +460,9 @@ function RouteComponent() {
 
 						<GroupSeparator />
 
-						<Button size="sm" variant="outline">
+						<Button onClick={handleExport} size="sm" variant="outline">
 							<ExportIcon />
 							Exportar
-						</Button>
-
-						<GroupSeparator />
-
-						<Button size="sm" variant="outline">
-							<CopyIcon />
-							Duplicar
 						</Button>
 					</Group>
 
@@ -469,7 +474,7 @@ function RouteComponent() {
 			</header>
 
 			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
-				<article className="flex h-full w-80 shrink-0 flex-col gap-2 overflow-hidden">
+				<aside className="flex h-full min-h-0 w-72 shrink-0 flex-col gap-2 overflow-y-auto pb-2">
 					<Collapsible className="shrink-0 rounded-lg bg-card" onOpenChange={setAreSectionsOpen} open={areSectionsOpen}>
 						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
 							Secciones
@@ -485,14 +490,8 @@ function RouteComponent() {
 							/>
 						</CollapsiblePanel>
 					</Collapsible>
-
-					<ResumeAnalysisSection
-						hasJobExperience={hasJobExperience}
-						onApplyEdit={handleApplyEdit}
-						onViewSection={handleViewSection}
-						resumeId={params.resumeId}
-					/>
-				</article>
+					<ResumeJobTargetPanel resumeId={params.resumeId} />
+				</aside>
 
 				<article className="min-w-0 flex-1 overflow-y-auto">
 					<ResumeDocument
@@ -504,6 +503,15 @@ function RouteComponent() {
 						rootBlocks={rootBlocks}
 					/>
 				</article>
+
+				<aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-y-auto pb-3">
+					<ResumeAnalysisSection
+						hasJobExperience={hasJobExperience}
+						onApplyEdit={handleApplyEdit}
+						onViewSection={handleViewSection}
+						resumeId={params.resumeId}
+					/>
+				</aside>
 			</section>
 
 			<AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>

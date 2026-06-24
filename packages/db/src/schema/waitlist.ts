@@ -13,7 +13,7 @@ export const waitlist = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => `wl_${createId()}`),
 		name: t.text(),
-		phone: t.text().notNull(),
+		phone: t.text(),
 		email: t.text(),
 		/** Where the signup came from (e.g. "landing-waitlist"). */
 		source: t.text(),

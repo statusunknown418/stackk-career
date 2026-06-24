@@ -5,6 +5,7 @@ import { createMiddleware } from "@tanstack/react-start";
 import { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AnalyticsProvider } from "@/lib/analytics";
 import { evlogErrorHandler } from "@/lib/evlog-error-handler.server";
 import type { orpc } from "@/utils/orpc";
 
@@ -84,11 +85,14 @@ function RootDocument() {
 			</head>
 
 			<body>
-				<ThemeProvider defaultTheme="dark" storageKey="theme">
-					<div className="grid min-h-svh grid-cols-1">
-						<Outlet />
-					</div>
-				</ThemeProvider>
+				{/* Client-only PostHog: SPA pageviews, identify, sign-up conversion. */}
+				<AnalyticsProvider>
+					<ThemeProvider defaultTheme="dark" storageKey="theme">
+						<div className="grid min-h-svh grid-cols-1">
+							<Outlet />
+						</div>
+					</ThemeProvider>
+				</AnalyticsProvider>
 
 				<Toaster richColors />
 

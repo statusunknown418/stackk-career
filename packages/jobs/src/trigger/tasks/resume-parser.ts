@@ -15,12 +15,13 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { generations } from "@stackk-career/db/schema/generations";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
+import { resumeJobTargets } from "@stackk-career/db/schema/resume-job-targets";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import { resumeParserInputSchema } from "@stackk-career/schemas/jobs/resume-parser";
 import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { generateLexoKeyBetween, withLexoPositions } from "@stackk-career/schemas/utils/lexographical";
 import { toError } from "@stackk-career/schemas/utils/to-error";
-import { AbortTaskRunError, logger, metadata, schemaTask } from "@trigger.dev/sdk";
+import { AbortTaskRunError, idempotencyKeys, logger, metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import { constructNow, formatDate } from "date-fns";
 import { and, eq, isNull } from "drizzle-orm";
 import {
@@ -33,6 +34,7 @@ import { fallbackContactFromName, insertSectionChildren } from "../../lib/resume
 import { planSections } from "../../lib/resume-parser/plan-sections";
 import { resolveFile } from "../../lib/resume-parser/resolve-file";
 import { resumeParserQueue } from "../queues";
+import type { linkedinJobFetchTask } from "./linkedin-job-fetch";
 
 const RECENT_TRACE_LIMIT = 3;
 const RESUME_PARSER_MODEL_SLUG = String(RESUME_PARSER_MODEL);
@@ -179,6 +181,42 @@ async function runResumeParserAgentWithObservability({
 		}
 
 		throw error;
+	}
+}
+
+async function kickoffLinkedinJobFetch(
+	db: ReturnType<typeof getTriggerDb>,
+	{ resumeId, userId, targetJobUrl }: { resumeId: string; userId: string; targetJobUrl: string | undefined }
+): Promise<void> {
+	if (!targetJobUrl) {
+		return;
+	}
+	try {
+		const [createdJobTarget] = await db
+			.insert(resumeJobTargets)
+			.values({ resumeId, userId, sourceUrl: targetJobUrl, status: "pending" })
+			.returning({ id: resumeJobTargets.id });
+		if (!createdJobTarget) {
+			return;
+		}
+		const jobIdempotencyKey = await idempotencyKeys.create(`linkedin-job-${createdJobTarget.id}`);
+		await tasks.trigger<typeof linkedinJobFetchTask>(
+			"linkedin-job-fetch",
+			{ userId, resumeId, jobTargetId: createdJobTarget.id, sourceUrl: targetJobUrl },
+			{
+				concurrencyKey: userId,
+				idempotencyKey: jobIdempotencyKey,
+				idempotencyKeyTTL: "24h",
+				tags: [`user:${userId}`, `resume:${resumeId}`, "agent:linkedin-job-fetch", "source:resume-parser"],
+			}
+		);
+		metadata.set("jobTargetId", createdJobTarget.id);
+	} catch (jobErr) {
+		logger.warn("resume-parser = job_target_trigger_failed", {
+			error: toError(jobErr).message,
+			resumeId,
+			userId,
+		});
 	}
 }
 
@@ -345,6 +383,14 @@ export const resumeParserTask = schemaTask({
 			if (!createdResume) {
 				throw new Error("Failed to create resume row");
 			}
+
+			// Kick off the background LinkedIn job fetch when the upload flow carried a target URL.
+			// Best-effort: a failure must not abort resume creation.
+			await kickoffLinkedinJobFetch(db, {
+				resumeId: createdResume.id,
+				userId: payload.userId,
+				targetJobUrl: payload.targetJobUrl,
+			});
 
 			// Backlink prior analyses (from upstream generation, e.g. k02-fast-analysis)
 			// to the freshly created resume so the editor's analysis panel can find them.
