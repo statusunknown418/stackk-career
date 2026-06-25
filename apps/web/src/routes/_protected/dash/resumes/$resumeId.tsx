@@ -435,6 +435,7 @@ function RouteComponent() {
 				<aside className="flex h-full min-h-0 w-80 shrink-0 flex-col pb-3">
 					<div className="min-h-0 overflow-y-auto">
 						<ResumeAnalysisSection
+							flushPendingSaves={autosave.flushAndWait}
 							hasJobExperience={hasJobExperience}
 							onEditsApplied={handleEditsApplied}
 							onViewSection={handleViewSection}

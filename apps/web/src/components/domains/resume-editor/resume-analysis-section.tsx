@@ -73,16 +73,21 @@ function notifyApplyResults(results: ApplyEditsResult["results"], options: { all
 export function ResumeAnalysisSection({
 	resumeId,
 	hasJobExperience,
+	flushPendingSaves,
 	onEditsApplied,
 	onViewSection,
 }: {
 	resumeId: string;
 	hasJobExperience: boolean;
+	/** Flush pending autosaves and resolve once the server reflects them, so analysis never reads a stale resume. */
+	flushPendingSaves?: () => Promise<void>;
 	onEditsApplied?: (rewrites: AppliedEditRewrites) => void;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
 	const queryClient = useQueryClient();
 	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string; analysisId: string } | null>(null);
+	/** True while pending autosaves flush before an analysis run is triggered. */
+	const [isPreparing, setIsPreparing] = useState(false);
 
 	const cachedAnalysisOptions = orpc.resumes.getResumeAnalysis.queryOptions({
 		input: { resumeId },
@@ -197,7 +202,7 @@ export function ResumeAnalysisSection({
 		runStatus === "EXPIRED";
 	const isTerminal = runStatus === "COMPLETED" || isFailed;
 	const isRunActive = Boolean(runHandle) && !isTerminal;
-	const isStreaming = initiateAnalysis.isPending || isRunActive;
+	const isStreaming = isPreparing || initiateAnalysis.isPending || isRunActive;
 	const error =
 		realtimeError ??
 		(isFailed ? new Error("Algo ocurrió con el análisis, por favor intenta nuevamente en unos minutos") : undefined);
@@ -206,10 +211,21 @@ export function ResumeAnalysisSection({
 		? streamedAnalysis
 		: (cachedData ?? streamedAnalysis);
 
-	const handleAnalyze = () => {
+	const handleAnalyze = async () => {
+		if (isPreparing || initiateAnalysis.isPending) {
+			return;
+		}
 		const parentAnalysisId = cachedAnalysis.data?.id;
 		setRunHandle(null);
 		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, null);
+		// Wait for autosave to land server-side; analyzing a stale resume yields
+		// suggestions for content the user has already written.
+		setIsPreparing(true);
+		try {
+			await flushPendingSaves?.();
+		} finally {
+			setIsPreparing(false);
+		}
 		initiateAnalysis.mutate({ resumeId, parentAnalysisId });
 	};
 
@@ -248,7 +264,7 @@ export function ResumeAnalysisSection({
 					<p className="text-muted-foreground text-xs">Puntajes y sugerencias sobre tu CV actual.</p>
 				</hgroup>
 				{hasJobExperience ? (
-					<Button className="w-full" disabled={initiateAnalysis.isPending} onClick={handleAnalyze}>
+					<Button className="w-full" disabled={isPreparing || initiateAnalysis.isPending} onClick={handleAnalyze}>
 						<SparkleIcon />
 						Analizar
 					</Button>

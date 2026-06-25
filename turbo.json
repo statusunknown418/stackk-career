@@ -26,7 +26,8 @@
     "MERCADOPAGO_PRO_MONTHLY_PLAN_ID",
     "MERCADOPAGO_MAX_MONTHLY_PLAN_ID",
     "RESEND_API_KEY",
-    "EMAIL_FROM"
+    "EMAIL_FROM",
+    "RESEND_WEBHOOK_SECRET"
   ],
   "tasks": {
     "build": {
