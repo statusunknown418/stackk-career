@@ -32,7 +32,7 @@
     "drizzle-orm": "catalog:",
     "evlog": "catalog:",
     "mercadopago": "^3.1.0",
-    "posthog-node": "^5.38.2",
+    "posthog-node": "^5.38.4",
     "resend": "catalog:"
   },
   "devDependencies": {
