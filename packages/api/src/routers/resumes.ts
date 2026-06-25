@@ -269,8 +269,7 @@ export const resumesRouter = {
 			.select({
 				id: resumeAnalyses.id,
 				object: resumeAnalyses.object,
-				appliedEditIndices: resumeAnalyses.appliedEditIndices,
-				dismissedEditIndices: resumeAnalyses.dismissedEditIndices,
+				editStatuses: resumeAnalyses.editStatuses,
 			})
 			.from(resumeAnalyses)
 			.where(
@@ -298,8 +297,7 @@ export const resumesRouter = {
 		return {
 			id: row.id,
 			analysis: parsed.data,
-			appliedEditIndices: row.appliedEditIndices,
-			dismissedEditIndices: row.dismissedEditIndices,
+			editStatuses: row.editStatuses,
 		};
 	}),
 

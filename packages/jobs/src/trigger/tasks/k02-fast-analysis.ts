@@ -2,6 +2,7 @@ import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
+import { buildResumeSnapshot } from "@stackk-career/schemas/ai/resume-snapshot";
 import { k02FastAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-fast-analysis";
 import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 import { toError } from "@stackk-career/schemas/utils/to-error";
@@ -12,6 +13,8 @@ import {
 	K02_FAST_ANALYSIS_OBJECT_TYPE,
 	runK02FastAnalysisAgent,
 } from "../../agents/k02-fast-analysis.handler";
+import { validateEditCandidates } from "../../lib/resume-analysis/edit-candidate-validator";
+import { normalizeResumeAnalysis } from "../../lib/resume-analysis/normalize-resume-analysis";
 import { assertPdfHostAllowed } from "../../lib/utils";
 import { k02Queue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
@@ -52,10 +55,23 @@ export const k02FastAnalysisTask = schemaTask({
 		const result = await runK02FastAnalysisAgent({ pdfUrl: pdfUrlObj.toString(), userId, signal });
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
-		const object = await result.output;
+		const draft = await result.output;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
 		await waitUntilComplete();
+
+		// No block tree exists yet (PDF pre-parse): an empty snapshot downgrades every
+		// edit to informational and skips deterministic gates, while the normalizer still
+		// clamps sub-scores and recomputes the weighted overall.
+		const snapshot = buildResumeSnapshot([]);
+		const validated = validateEditCandidates(draft.edits, snapshot);
+		const { analysis: object } = normalizeResumeAnalysis({
+			scoreBreakdown: draft.scoreBreakdown,
+			edits: validated.edits,
+			userInputRequests: validated.userInputRequests,
+			qualityGates: [],
+			snapshot,
+		});
 
 		metadata.set("ai", {
 			model: K02_FAST_ANALYSIS_MODEL_SLUG,
@@ -77,7 +93,13 @@ export const k02FastAnalysisTask = schemaTask({
 		await db.batch([
 			db
 				.update(resumeAnalyses)
-				.set({ status: "ready", model: K02_FAST_ANALYSIS_MODEL, object, error: null })
+				.set({
+					status: "ready",
+					model: K02_FAST_ANALYSIS_MODEL,
+					object,
+					rubricVersion: object.rubricVersion,
+					error: null,
+				})
 				.where(eq(resumeAnalyses.id, analysisId)),
 			db.insert(messages).values({
 				generationId,

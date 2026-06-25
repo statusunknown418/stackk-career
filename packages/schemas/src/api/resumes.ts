@@ -160,6 +160,15 @@ export const ENTRY_NOUNS = {
 
 export const isTimelineSectionKind = (kind: SectionKind): boolean => kind === "experience" || kind === "education";
 
+/**
+ * Sections whose entries describe professional accomplishments with dated,
+ * bulleted content (work, projects, volunteering). Structural "experience"
+ * quality gates only evaluate these — education, certifications, skills,
+ * languages, summary, and custom sections have different expectations.
+ */
+export const isExperienceLikeSectionKind = (kind: SectionKind): boolean =>
+	kind === "experience" || kind === "projects" || kind === "volunteering";
+
 const DEFAULT_SECTION_KINDS: readonly DefinedSectionKind[] = ["summary", "experience", "education", "skills"];
 
 export const blankResumeSections = SECTION_DEFINITIONS.filter((definition) =>

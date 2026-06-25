@@ -376,6 +376,63 @@ export const hasBlockChanged = <T extends BlockWithContent>(currentBlock: T, sav
 export const replaceBlockById = <T extends BlockWithId>(blocks: T[], next: T) =>
 	blocks.map((block) => (block.id === next.id ? next : block));
 
+/** Replace the first verbatim occurrence of `before` with `after` in a string, or null when absent. */
+export const swapBlockText = (value: string | undefined, before: string, after: string): string | null => {
+	if (!value?.includes(before)) {
+		return null;
+	}
+	return value.replace(before, after);
+};
+
+/**
+ * Apply a Casey "rewrite" edit to a block: swap the first occurrence of `before`
+ * for `after` in whichever searchable text field carries it. Returns the new
+ * content, or null when `before` is not present verbatim (the edit is stale and
+ * must not be applied). Pure: callers persist the result and sanitize HTML.
+ */
+export function applyRewriteToBlockContent(block: Block, before: string, after: string): Block["content"] | null {
+	switch (block.blockType) {
+		case "bullet":
+		case "paragraph": {
+			const next = swapBlockText(block.content.text, before, after);
+			return next === null ? null : { ...block.content, text: next };
+		}
+		case "entry": {
+			const hit = (["descriptor", "title", "subtitle", "location"] as const)
+				.map((key) => ({ key, next: swapBlockText(block.content[key], before, after) }))
+				.find((candidate) => candidate.next !== null);
+			return hit ? { ...block.content, [hit.key]: hit.next } : null;
+		}
+		case "section": {
+			const next = swapBlockText(block.content.title, before, after);
+			return next === null ? null : { ...block.content, title: next };
+		}
+		case "skill_item": {
+			const next = swapBlockText(block.content.value, before, after);
+			return next === null ? null : { ...block.content, value: next };
+		}
+		case "skill_line": {
+			const next = swapBlockText(block.content.label, before, after);
+			return next === null ? null : { ...block.content, label: next };
+		}
+		case "contact": {
+			const idx = block.content.items.findIndex((item) => item.value.includes(before));
+			if (idx === -1) {
+				return null;
+			}
+			const item = block.content.items[idx];
+			if (!item) {
+				return null;
+			}
+			const items = [...block.content.items];
+			items[idx] = { ...item, value: item.value.replace(before, after) };
+			return { ...block.content, items };
+		}
+		default:
+			return null;
+	}
+}
+
 export function formatDateRange(startDate?: string, endDate?: string | null, isCurrent?: boolean): string | null {
 	if (!(startDate || endDate || isCurrent)) {
 		return null;
