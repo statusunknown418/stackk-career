@@ -297,6 +297,17 @@ ${banPhrases}.
 - \`body\`: 2-4 paragraphs. First sentence names the role. Then evidence from the CV (concrete result, concrete stack, concrete leadership beat). Last sentence: why this company / team specifically.
 - \`closing\`: One sentence with a soft CTA. Examples: ${blocks.closingExamples}.
 - \`signature\`: 2 or 3 short lines. Line 1: ${blocks.signatureLine1}. Line 2: full name from the CV's contact section. Line 3 (optional): email and/or phone from the CV, if present.
+- \`contactName\`: Candidate's full name (usually from getUserMetadata or CV).
+- \`contactTitle\`: Candidate's professional title/headline (e.g. "Software Engineer" or "Marketing Specialist") based on CV.
+- \`contactEmail\`: Candidate's email address.
+- \`contactPhone\`: Candidate's phone number from CV.
+- \`contactAddress\`: Candidate's address or location from CV.
+- \`contactLinkedin\`: Candidate's LinkedIn profile URL from CV.
+- \`contactWebsite\`: Candidate's website or portfolio URL from CV.
+- \`recipientName\`: Recruiter or hiring manager's name if mentioned in the JOB_DESCRIPTION, otherwise null.
+- \`recipientCompany\`: Target company name if mentioned in JOB_DESCRIPTION or target role, otherwise null.
+- \`recipientAddress\`: Target company address if mentioned in JOB_DESCRIPTION, otherwise null.
+- \`dateStr\`: Current date formatted nicely in the target language (e.g. "12 de junio, 2026" or "June 12, 2026").
 
 # Language
 ${blocks.languageDirective}

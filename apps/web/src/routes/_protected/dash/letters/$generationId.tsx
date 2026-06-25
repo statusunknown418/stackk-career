@@ -1,7 +1,7 @@
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterLanguage, CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -493,7 +493,17 @@ function LetterWorkspace() {
 	// fall back to the selected / latest persisted version.
 	const artifact = resolveDisplayedArtifact({ cachedArtifact, isGenerating, selectedArtifact, streamedArtifact });
 
-	const error = realtime.error;
+	// Auto-scroll to the artifact panel on mobile devices when generation is in progress,
+	// so the user gets instant visual feedback of the streaming or skeleton load.
+	const artifactPanelRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		if (isGenerating && typeof window !== "undefined" && window.innerWidth < 768) {
+			const timer = setTimeout(() => {
+				artifactPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [isGenerating]);
 
 	const tourReady = useAutoStartLetterTour(
 		Boolean(data),
@@ -526,20 +536,23 @@ function LetterWorkspace() {
 					selectedMessageId={selectedMessageId}
 				/>
 
-				<LettersArtifactPanel
-					letter={{
-						activeMessageId,
-						activeVersion: activeVersion > 0 ? activeVersion : 1,
-						artifact,
-						currentLanguage: data.generation.language,
-						generationCount,
-						hasContent: Boolean(artifact) || data.latestArtifact !== null,
-						maxVersions,
-					}}
-					onSaveArtifact={onSaveArtifact}
-					onTriggerAsync={onTriggerAsync}
-					run={{ error, isPending: isGenerating, isStreaming }}
-				/>
+				<div className="flex h-full min-h-0 flex-col" ref={artifactPanelRef}>
+					<LettersArtifactPanel
+						letter={{
+							activeMessageId,
+							activeVersion: activeVersion > 0 ? activeVersion : 1,
+							artifact,
+							currentLanguage: data.generation.language,
+							generationCount,
+							hasContent: Boolean(artifact) || data.latestArtifact !== null,
+							maxVersions,
+							template: data.generation.template as CoverLetterTemplate,
+						}}
+						onSaveArtifact={onSaveArtifact}
+						onTriggerAsync={onTriggerAsync}
+						run={{ error: realtimeError, isPending: isGenerating, isStreaming }}
+					/>
+				</div>
 			</section>
 
 			<AlertDialog onOpenChange={setShowLimitDialog} open={showLimitDialog}>

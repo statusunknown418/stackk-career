@@ -44,6 +44,7 @@ export const lettersRouter = {
 				// role but use different CVs). leftJoin: the CV may not exist.
 				resumeTitle: resumes.title,
 				language: generations.language,
+				template: generations.template,
 				createdAt: generations.createdAt,
 				updatedAt: generations.updatedAt,
 			})
@@ -116,6 +117,7 @@ export const lettersRouter = {
 					summary: input.jobDescription,
 					resumeId: input.resumeId,
 					language: input.language,
+					template: input.template,
 				})
 				.returning({ id: generations.id });
 
@@ -148,6 +150,7 @@ export const lettersRouter = {
 					summary: generations.summary,
 					resumeId: generations.resumeId,
 					language: generations.language,
+					template: generations.template,
 					createdAt: generations.createdAt,
 					updatedAt: generations.updatedAt,
 					resumeTitle: resumes.title,

@@ -17,6 +17,7 @@ import { orpc } from "@/utils/orpc";
 
 interface LettersCreateFormProps {
 	onClose: () => void;
+	template?: "centered" | "classic" | "minty" | "blue" | null;
 }
 
 const JOB_POSITION_MAX = 500;
@@ -58,7 +59,7 @@ function FieldErrorText({ errors }: { errors: readonly unknown[] }): React.React
  * is populated from `orpc.resumes.list` via Suspense (the parent dialog already
  * waits on the realtime token query so this Suspense boundary is harmless).
  */
-export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
+export function LettersCreateForm({ onClose, template }: LettersCreateFormProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const posthog = usePostHog();
@@ -93,11 +94,13 @@ export function LettersCreateForm({ onClose }: LettersCreateFormProps) {
 		jobDescription: string;
 		language: CoverLetterLanguage;
 		resumeId: string;
+		template: "centered" | "classic" | "minty" | "blue" | null;
 	} = {
 		jobPosition: "",
 		jobDescription: "",
 		language: "es",
 		resumeId: resumes[0]?.id ?? "",
+		template: template ?? null,
 	};
 
 	const form = useForm({

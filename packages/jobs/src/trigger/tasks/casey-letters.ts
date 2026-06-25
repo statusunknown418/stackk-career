@@ -1,8 +1,9 @@
+// biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: task contains durable background task orchestrating flow
 import { getTriggerDb } from "@stackk-career/db/http";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
+import { COVER_LETTER_OBJECT_TYPE, type CoverLetter, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
 import { caseyLettersInputSchema } from "@stackk-career/schemas/jobs/casey-letters";
 import { toError } from "@stackk-career/schemas/utils/to-error";
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
@@ -71,6 +72,10 @@ export const caseyLettersTask = schemaTask({
 		// without passing it, the model regenerates from scratch and manual edits are lost.
 		// A re-run without extraPrompt is an intentional from-scratch regeneration.
 		const previousLetter = extraPrompt ? await loadPreviousLetterPlaintext(db, generationId, messageId) : undefined;
+		const previousObject = (await loadPreviousLetterObject(db, generationId, messageId)) as
+			| Partial<CoverLetter>
+			| null
+			| undefined;
 
 		metadata.set("step", "generating");
 		const result = await runCaseyLettersAgent({
@@ -90,7 +95,7 @@ export const caseyLettersTask = schemaTask({
 		// the schema-enforced `output` is complete before we read it.
 		const { waitUntilComplete } = coverLetterArtifactStream.pipe(result.partialOutputStream);
 
-		const object = await result.output;
+		const object = (await result.output) as CoverLetter;
 		const toolCalls = await result.toolCalls;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
@@ -157,6 +162,26 @@ export const caseyLettersTask = schemaTask({
 			);
 		}
 
+		// Merge generated letter details with any custom contact/recipient overrides
+		const overrideKeys = [
+			"contactName",
+			"contactTitle",
+			"contactEmail",
+			"contactPhone",
+			"contactAddress",
+			"contactLinkedin",
+			"contactWebsite",
+			"recipientName",
+			"recipientCompany",
+			"recipientAddress",
+			"dateStr",
+		] as const;
+
+		const mergedObject: CoverLetter = { ...object };
+		for (const key of overrideKeys) {
+			mergedObject[key] = previousObject?.[key] ?? object[key] ?? null;
+		}
+
 		metadata.set("step", "persisting");
 		await db
 			.update(messages)
@@ -165,13 +190,20 @@ export const caseyLettersTask = schemaTask({
 				// attempt's error). Success ALWAYS clears it: object and error are exclusive.
 				error: null,
 				model: modelForAttempt,
-				object,
-				text: object.body,
+				object: mergedObject,
+				text: mergedObject.body,
 			})
 			.where(and(eq(messages.id, messageId), eq(messages.generationId, generationId)));
 
 		metadata.set("step", "complete");
-		return { generationId, messageId, model: modelSlug, object, toolCalls: toolCalls.map((c) => c.toolName), userId };
+		return {
+			generationId,
+			messageId,
+			model: modelSlug,
+			object: mergedObject,
+			toolCalls: toolCalls.map((c) => c.toolName),
+			userId,
+		};
 	},
 
 	onFailure: async ({ payload, error, ctx }) => {
@@ -245,6 +277,32 @@ async function loadPreviousLetterPlaintext(
 	}
 	const { greeting, body, closing, signature } = parsed.data;
 	return [greeting, body, closing, signature].map(htmlSectionToText).join("\n\n");
+}
+
+/**
+ * Load the previous letter object if it exists.
+ */
+async function loadPreviousLetterObject(
+	db: ReturnType<typeof getTriggerDb>,
+	generationId: string,
+	pendingMessageId: string
+): Promise<unknown> {
+	const [prev] = await db
+		.select({ object: messages.object })
+		.from(messages)
+		.where(
+			and(
+				eq(messages.generationId, generationId),
+				eq(messages.objectType, COVER_LETTER_OBJECT_TYPE),
+				isNull(messages.error),
+				isNotNull(messages.object),
+				ne(messages.id, pendingMessageId)
+			)
+		)
+		.orderBy(desc(messages.order), desc(messages.createdAt))
+		.limit(1);
+
+	return prev?.object;
 }
 
 /**

@@ -8,6 +8,16 @@ import { z } from "zod";
 export const coverLetterLanguageSchema = z.enum(["es", "en"]);
 export type CoverLetterLanguage = z.infer<typeof coverLetterLanguageSchema>;
 
+export const coverLetterTemplateSchema = z.enum(["centered", "classic", "minty", "blue"]).optional().nullable();
+export type CoverLetterTemplate = z.infer<typeof coverLetterTemplateSchema>;
+
+export const TEMPLATE_LABELS = {
+	centered: "Centrado",
+	classic: "Clásico",
+	minty: "Minty",
+	blue: "Azul",
+} as const;
+
 /**
  * Input for the dialog at /letters: pick the target job position, which CV to link,
  * and the output language. The API creates a `generation` of type "cover-letter"
@@ -19,6 +29,7 @@ export const createCoverLetterGenerationInputSchema = z.object({
 	jobDescription: z.string().trim().max(5000).optional(),
 	language: coverLetterLanguageSchema.default("es"),
 	resumeId: z.string().nonempty(),
+	template: coverLetterTemplateSchema,
 });
 export type CreateCoverLetterGenerationInput = z.infer<typeof createCoverLetterGenerationInputSchema>;
 

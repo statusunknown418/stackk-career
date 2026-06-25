@@ -98,7 +98,7 @@ export const InlineTextEditor = ({
 				codeBlock: false,
 				dropcursor: false,
 				gapcursor: false,
-				hardBreak: false,
+				hardBreak: isProse ? {} : false,
 				heading: false,
 				horizontalRule: false,
 				italic: isProse ? {} : false,
