@@ -71,12 +71,12 @@ function RouteComponent() {
 			<div className="pointer-events-none absolute inset-0 overflow-hidden">
 				{/* Glowing ambient blob 1 */}
 				<div
-					className="absolute -top-[30%] -left-[10%] h-[70%] w-[70%] animate-pulse rounded-full bg-primary/8 blur-[100px] dark:bg-primary/5"
+					className="absolute top-[-30%] left-[-10%] h-[70%] w-[70%] animate-pulse rounded-full bg-primary/8 blur-[100px] dark:bg-primary/5"
 					style={{ animationDuration: "8s" }}
 				/>
 				{/* Glowing ambient blob 2 */}
 				<div
-					className="absolute -right-[10%] -bottom-[30%] h-[70%] w-[70%] animate-pulse rounded-full bg-info/8 blur-[100px] dark:bg-info/5"
+					className="absolute right-[-10%] bottom-[-30%] h-[70%] w-[70%] animate-pulse rounded-full bg-info/8 blur-[100px] dark:bg-info/5"
 					style={{ animationDuration: "12s" }}
 				/>
 				{/* Fine dot grid overlay */}

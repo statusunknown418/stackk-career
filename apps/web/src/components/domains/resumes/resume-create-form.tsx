@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import Loader from "@/components/loader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -240,10 +239,10 @@ export function ResumeCreateForm({ onClose, onParseStart }: ResumeCreateFormProp
 					{({ canSubmit, isSubmitting }) => (
 						<Button
 							disabled={!canSubmit || isSubmitting || createBlankMutation.isPending || parseMutation.isPending}
+							loading={isSubmitting || createBlankMutation.isPending}
 							type="submit"
 							variant="outline"
 						>
-							{isSubmitting && <Loader />}
 							Crear CV en blanco
 						</Button>
 					)}

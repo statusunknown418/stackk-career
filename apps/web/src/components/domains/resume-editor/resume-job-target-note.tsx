@@ -1,6 +1,7 @@
 import { ArrowSquareOutIcon, CaretDownIcon, TargetIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
 import { useQuery } from "@tanstack/react-query";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DotmSquare6 } from "@/components/ui/dotm-square-6";
@@ -47,13 +48,23 @@ function ResumeJobTargetList({ label, items }: { label: string; items: string[] 
 
 function ResumeJobTargetNote({ jobTarget, resumeId }: { jobTarget: JobTargetData; resumeId: string }) {
 	if (!jobTarget) {
-		return null;
+		return (
+			<div className="flex flex-col gap-2.5 rounded-lg border bg-card px-3 py-2 text-sm">
+				<div className="mb-2 flex gap-2.5 text-muted-foreground">
+					<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+						<TargetIcon className="size-4" weight="duotone" />
+					</span>
+					<p>Personaliza tu CV a una oferta laboral real y Casey te ayudará!</p>
+				</div>
+				<ResumeJobTargetChangeDialog mode="add" resumeId={resumeId} />
+			</div>
+		);
 	}
 
 	if (jobTarget.status === "failed") {
 		return (
 			<div className="flex flex-col gap-2.5 rounded-lg border bg-card px-3 py-2 text-sm">
-				<div className="flex items-center gap-2.5 text-muted-foreground">
+				<div className="flex gap-2.5 text-muted-foreground">
 					<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive-foreground">
 						<WarningCircleIcon className="size-4" weight="duotone" />
 					</span>
@@ -66,10 +77,10 @@ function ResumeJobTargetNote({ jobTarget, resumeId }: { jobTarget: JobTargetData
 
 	if (jobTarget.status !== "ready" || !jobTarget.title) {
 		return (
-			<div className="flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2 text-muted-foreground text-sm">
+			<div className="flex gap-2.5 rounded-lg border bg-card px-3 py-2 text-muted-foreground text-sm">
 				<DotmSquare6 className="shrink-0" dotSize={3} size={24} />
 
-				<p className="leading-snug">Buscando los detalles del puesto para personalizar las sugerencias…</p>
+				<Shimmer>Buscando detalles del puesto…</Shimmer>
 			</div>
 		);
 	}
@@ -81,7 +92,7 @@ function ResumeJobTargetNote({ jobTarget, resumeId }: { jobTarget: JobTargetData
 
 	return (
 		<Collapsible className="rounded-lg border bg-card text-sm">
-			<CollapsibleTrigger className="group flex w-full items-center gap-2.5 px-3 py-2 text-left">
+			<CollapsibleTrigger className="group flex w-full gap-2.5 px-3 py-2 text-left">
 				<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-success/10 text-success-foreground">
 					<TargetIcon className="size-4" weight="duotone" />
 				</span>

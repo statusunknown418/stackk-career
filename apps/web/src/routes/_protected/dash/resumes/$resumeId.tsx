@@ -1,7 +1,7 @@
 import { CaretDownIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
-import { type Block, buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
+import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -13,10 +13,12 @@ import { exportResumeToPdf } from "@/components/domains/resume-document/export-p
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
 import { NewSectionSheet } from "@/components/domains/resume-editor/new-section-sheet";
-import { ResumeAnalysisSection } from "@/components/domains/resume-editor/resume-analysis-section";
+import {
+	type AppliedEditRewrites,
+	ResumeAnalysisSection,
+} from "@/components/domains/resume-editor/resume-analysis-section";
 import { ResumeJobTargetPanel } from "@/components/domains/resume-editor/resume-job-target-note";
 import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
-import { useDeleteBlock } from "@/components/domains/resume-editor/use-block-mutations";
 import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";
 import {
@@ -42,56 +44,6 @@ import {
 } from "@/lib/forms/resume-form";
 import { cn } from "@/lib/utils";
 import { orpc, queryClient } from "@/utils/orpc";
-
-const swapText = (value: string | undefined, before: string, after: string): string | null => {
-	if (!value?.includes(before)) {
-		return null;
-	}
-	return value.replace(before, after);
-};
-
-const applyRewriteToBlock = (block: Block, before: string, after: string): Block["content"] | null => {
-	switch (block.blockType) {
-		case "bullet":
-		case "paragraph": {
-			const next = swapText(block.content.text, before, after);
-			return next === null ? null : { ...block.content, text: next };
-		}
-		case "entry": {
-			const hit = (["descriptor", "title", "subtitle", "location"] as const)
-				.map((key) => ({ key, next: swapText(block.content[key], before, after) }))
-				.find((candidate) => candidate.next !== null);
-			return hit ? { ...block.content, [hit.key]: hit.next } : null;
-		}
-		case "section": {
-			const next = swapText(block.content.title, before, after);
-			return next === null ? null : { ...block.content, title: next };
-		}
-		case "skill_item": {
-			const next = swapText(block.content.value, before, after);
-			return next === null ? null : { ...block.content, value: next };
-		}
-		case "skill_line": {
-			const next = swapText(block.content.label, before, after);
-			return next === null ? null : { ...block.content, label: next };
-		}
-		case "contact": {
-			const idx = block.content.items.findIndex((item) => item.value.includes(before));
-			if (idx === -1) {
-				return null;
-			}
-			const item = block.content.items[idx];
-			if (!item) {
-				return null;
-			}
-			const items = [...block.content.items];
-			items[idx] = { ...item, value: item.value.replace(before, after) };
-			return { ...block.content, items };
-		}
-		default:
-			return null;
-	}
-};
 
 const resumeSearchSchema = z.object({
 	section: z.coerce.number().int().positive().optional().catch(undefined),
@@ -373,46 +325,20 @@ function RouteComponent() {
 		setHighlightedBlockVersion((version) => version + 1);
 	};
 
-	const deleteBlock = useDeleteBlock({ form });
-
-	const handleApplyEdit = (edit: ResumeEdit): boolean => {
-		if (!edit.targetBlockId) {
-			return false;
-		}
+	const handleEditsApplied = (rewrites: AppliedEditRewrites) => {
+		// The server applied the content change and recorded the status atomically.
+		// Mirror the authoritative block content into the live form so the user sees
+		// rewrites immediately; deletes are reflected once the invalidated resume
+		// query refetches and the hydration effect reconciles the smaller tree.
 		const blocks = form.state.values.blocks;
-		const index = blocks.findIndex((block) => block.id === edit.targetBlockId);
-		if (index === -1) {
-			toast.error("No se encontró el bloque a editar.");
-			return false;
-		}
-		const block = blocks[index];
-		if (!block) {
-			return false;
-		}
-
-		if (edit.action === "delete") {
-			if (block.blockType === "contact") {
-				toast.error("No se puede eliminar el bloque de contacto.");
-				return false;
+		for (const rewrite of rewrites) {
+			const index = blocks.findIndex((block) => block.id === rewrite.blockId);
+			const block = index === -1 ? undefined : blocks[index];
+			if (!block) {
+				continue;
 			}
-			deleteBlock.mutate({ id: block.id, resumeId: params.resumeId });
-			toast.success("Bloque eliminado");
-			return true;
+			form.setFieldValue(`blocks[${index}].content`, rewrite.content as typeof block.content);
 		}
-
-		if (!(edit.before && edit.after)) {
-			return false;
-		}
-		const replaced = applyRewriteToBlock(block as Block, edit.before, edit.after);
-		if (replaced === null) {
-			toast.error("No se encontró el texto exacto a reemplazar. Por favor editalo manualmente.");
-			return false;
-		}
-		form.setFieldValue(`blocks[${index}].content`, replaced as typeof block.content);
-		autosave.queueBlockSave(block.id);
-		autosave.flushBlockSave(block.id);
-		toast.success("Mejora aplicada");
-		return true;
 	};
 
 	const saveStatusLabel = SAVE_STATUS_LABELS[autosave.saveStatus];
@@ -474,7 +400,7 @@ function RouteComponent() {
 			</header>
 
 			<section className="relative flex flex-1 gap-2 overflow-hidden px-3 pt-3">
-				<aside className="flex h-full min-h-0 w-72 shrink-0 flex-col gap-2 pb-2">
+				<aside className="flex h-full min-h-0 w-64 shrink-0 flex-col gap-2 pb-2">
 					<Collapsible className="shrink-0 rounded-lg bg-card" onOpenChange={setAreSectionsOpen} open={areSectionsOpen}>
 						<CollapsibleTrigger className="w-full justify-between" render={<Button size="lg" variant="ghost-muted" />}>
 							Secciones
@@ -510,7 +436,7 @@ function RouteComponent() {
 					<div className="min-h-0 overflow-y-auto">
 						<ResumeAnalysisSection
 							hasJobExperience={hasJobExperience}
-							onApplyEdit={handleApplyEdit}
+							onEditsApplied={handleEditsApplied}
 							onViewSection={handleViewSection}
 							resumeId={params.resumeId}
 						/>

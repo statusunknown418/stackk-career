@@ -34,8 +34,31 @@ const validateJobUrl = (value: string): string | undefined => {
 		: "Pega el enlace de una oferta de LinkedIn (ej. linkedin.com/jobs/view/...).";
 };
 
+const COPY = {
+	add: {
+		trigger: "Agregar objetivo",
+		title: "Definir objetivo",
+		description: "Pega el enlace de una oferta de LinkedIn para enfocar tu CV en ese puesto.",
+		fieldLabel: "Oferta de LinkedIn",
+		submit: "Agregar objetivo",
+		success: "Objetivo agregado. Casey está leyendo la oferta…",
+		error: "No pudimos agregar el objetivo.",
+	},
+	change: {
+		trigger: "Cambiar objetivo",
+		title: "Cambiar objetivo",
+		description: "Pega el enlace de otra oferta de LinkedIn para re-enfocar tu CV en ese puesto.",
+		fieldLabel: "Nueva oferta de LinkedIn",
+		submit: "Cambiar objetivo",
+		success: "Objetivo actualizado. Casey está leyendo la nueva oferta…",
+		error: "No pudimos actualizar el objetivo.",
+	},
+} as const;
+
 interface ResumeJobTargetChangeDialogProps {
 	currentTitle?: string | null;
+	/** `add` for resumes with no target yet (no destructive warning); `change` re-points an existing one. */
+	mode?: "add" | "change";
 	resumeId: string;
 	triggerLabel?: string;
 	triggerSize?: ButtonProps["size"];
@@ -43,17 +66,21 @@ interface ResumeJobTargetChangeDialogProps {
 }
 
 /**
- * Self-contained "Cambiar objetivo" action: a trigger button that opens a modal to point the
- * resume at a different LinkedIn job posting. On success it invalidates the job-target query so
- * the editor panel flips to its "fetching" state and polls until the new posting is ready.
+ * Self-contained job-target action: a trigger button that opens a modal to point the resume at a
+ * LinkedIn job posting. `mode="add"` (no existing target) drops the destructive warning and uses
+ * "agregar" copy; `mode="change"` re-points an existing target and warns the analysis resets.
+ * On success it invalidates the job-target query so the editor panel flips to its "fetching" state
+ * and polls until the posting is ready.
  */
 export function ResumeJobTargetChangeDialog({
 	resumeId,
 	currentTitle,
-	triggerLabel = "Cambiar objetivo",
+	mode = "change",
+	triggerLabel,
 	triggerSize = "sm",
 	triggerVariant = "outline",
 }: ResumeJobTargetChangeDialogProps): React.ReactElement {
+	const copy = COPY[mode];
 	const queryClient = useQueryClient();
 	const [open, setOpen] = useState(false);
 
@@ -63,11 +90,11 @@ export function ResumeJobTargetChangeDialog({
 		orpc.resumes.changeJobTarget.mutationOptions({
 			onSuccess: async () => {
 				await queryClient.invalidateQueries({ queryKey: jobTargetQueryKey });
-				toast.success("Objetivo actualizado. Casey está leyendo la nueva oferta…");
+				toast.success(copy.success);
 				setOpen(false);
 			},
 			onError: (error) => {
-				toast.error(error.message || "No pudimos actualizar el objetivo.");
+				toast.error(error.message || copy.error);
 			},
 		})
 	);
@@ -95,15 +122,13 @@ export function ResumeJobTargetChangeDialog({
 		>
 			<DialogTrigger render={<Button className="w-full" size={triggerSize} variant={triggerVariant} />}>
 				<TargetIcon />
-				{triggerLabel}
+				{triggerLabel ?? copy.trigger}
 			</DialogTrigger>
 
 			<DialogPopup>
 				<DialogHeader>
-					<DialogTitle>Cambiar objetivo</DialogTitle>
-					<DialogDescription>
-						Pega el enlace de otra oferta de LinkedIn para re-enfocar tu CV en ese puesto.
-					</DialogDescription>
+					<DialogTitle>{copy.title}</DialogTitle>
+					<DialogDescription>{copy.description}</DialogDescription>
 				</DialogHeader>
 
 				<DialogPanel>
@@ -115,15 +140,17 @@ export function ResumeJobTargetChangeDialog({
 							form.handleSubmit();
 						}}
 					>
-						<Alert variant="warning">
-							<WarningCircleIcon />
-							<AlertTitle>Esto cambia por completo el análisis</AlertTitle>
-							<AlertDescription>
-								Casey reemplazará el puesto actual
-								{currentTitle ? ` (${currentTitle})` : ""} y volverá a leer la nueva oferta. Las próximas puntuaciones y
-								sugerencias se basarán únicamente en este nuevo objetivo.
-							</AlertDescription>
-						</Alert>
+						{mode === "change" && (
+							<Alert variant="warning">
+								<WarningCircleIcon />
+								<AlertTitle>Esto cambia por completo el análisis</AlertTitle>
+								<AlertDescription>
+									Casey reemplazará el puesto actual
+									{currentTitle ? ` (${currentTitle})` : ""} y volverá a leer la nueva oferta. Las próximas puntuaciones
+									y sugerencias se basarán únicamente en este nuevo objetivo.
+								</AlertDescription>
+							</Alert>
+						)}
 
 						<form.Field
 							name="targetJobUrl"
@@ -136,7 +163,7 @@ export function ResumeJobTargetChangeDialog({
 								const error = field.state.meta.errors[0];
 								return (
 									<Field>
-										<FieldLabel htmlFor="change-job-target-url">Nueva oferta de LinkedIn</FieldLabel>
+										<FieldLabel htmlFor="change-job-target-url">{copy.fieldLabel}</FieldLabel>
 										<Input
 											autoFocus
 											disabled={changeMutation.isPending}
@@ -175,7 +202,7 @@ export function ResumeJobTargetChangeDialog({
 								type="submit"
 							>
 								<TargetIcon />
-								Cambiar objetivo
+								{copy.submit}
 							</Button>
 						)}
 					</form.Subscribe>
