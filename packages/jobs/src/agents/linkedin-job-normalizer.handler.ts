@@ -18,8 +18,8 @@ Hard rules:
 - responsibilities / qualifications: short, deduplicated phrases — not full sentences or HTML.
 - skills: concrete tools, technologies, methodologies, and named soft skills the posting explicitly asks for.
 - keywords: the ATS terms a strong applicant resume should contain to match THIS posting. Lowercase noun phrases, deduplicated, no filler.
-- Output language: write ALL free-text fields in Spanish — title, summary, location, employmentType, seniority, responsibilities, qualifications, and the generic terms in skills/keywords — translating from the posting's original language when needed.
-- Do NOT translate proper nouns: keep the company name and established technology / tool / methodology names (e.g. React, AWS, Python, Scrum) verbatim, even inside Spanish text.
+- Output language: write ALL free-text fields in the SAME language as the job posting itself — title, summary, location, employmentType, seniority, responsibilities, qualifications, and the generic terms in skills/keywords. Preserve the posting's original language; do NOT translate. An English posting stays English, a Spanish posting stays Spanish.
+- Do NOT translate proper nouns: keep the company name and established technology / tool / methodology names (e.g. React, AWS, Python, Scrum) verbatim, regardless of the posting's language.
 
 Output ONLY the JSON object conforming to the provided schema. No prose, no markdown fences.
 `.trim();

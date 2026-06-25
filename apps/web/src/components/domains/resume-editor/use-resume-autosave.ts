@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { orpc, queryClient } from "@/utils/orpc";
+import { createQueueIdleBarrier } from "./queue-idle-barrier";
 
 export type SaveStatus = "error" | "idle" | "saved" | "saving";
 
@@ -50,6 +51,8 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 	const blockSaveDebouncersRef = useRef(new Map<number, AsyncDebouncer<BlockSaveFn>>());
 	const lastSavedRef = useRef<ResumeDocumentWrapperForm>(initialValues);
+	/** Coordinates `flushAndWait` callers with the save queue draining (see `queue-idle-barrier`). */
+	const idleBarrierRef = useRef(createQueueIdleBarrier());
 
 	const titleMutation = useMutation(orpc.resumes.updateTitle.mutationOptions());
 	const blockMutation = useMutation(orpc.blocks.update.mutationOptions());
@@ -238,10 +241,9 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 		{
 			concurrency: 1,
 			onSettled: (_job, queuer) => {
-				settleSaveStatus(
-					(queuer.store.state.lastResult as SaveJobOutcome | null) ?? "skipped",
-					queuer.store.state.activeItems.length + queuer.store.state.size
-				);
+				const pendingJobCount = queuer.store.state.activeItems.length + queuer.store.state.size;
+				settleSaveStatus((queuer.store.state.lastResult as SaveJobOutcome | null) ?? "skipped", pendingJobCount);
+				idleBarrierRef.current.settle(pendingJobCount);
 			},
 			onUnmount: () => {
 				// Do NOT stop/abort the queuer here. React StrictMode dev fires this
@@ -317,7 +319,24 @@ export function useResumeAutosave({ getValues, initialValues, resumeId, setTitle
 		pruneBlockSaveDebouncers(values.blocks);
 	};
 
-	return { flushBlockSave, hydrateSaved, queueBlockSave, saveStatus, saveTitle };
+	/** Resolve once the save queue holds no active or pending jobs. */
+	const waitForQueueIdle = () =>
+		idleBarrierRef.current.wait(saveQueue.store.state.activeItems.length + saveQueue.store.state.size);
+
+	/**
+	 * Force every debounced block edit into the save queue, then resolve once the
+	 * queue has fully drained. Callers (e.g. resume analysis) await this so the
+	 * server-side resume reflects the latest keystrokes before they read it.
+	 */
+	const flushAndWait = async () => {
+		const pendingDebouncers = [...blockSaveDebouncersRef.current.values()].filter(
+			(debouncer) => debouncer.store.state.isPending
+		);
+		await Promise.all(pendingDebouncers.map((debouncer) => debouncer.flush().catch(() => undefined)));
+		await waitForQueueIdle();
+	};
+
+	return { flushAndWait, flushBlockSave, hydrateSaved, queueBlockSave, saveStatus, saveTitle };
 }
 
 export type ResumeAutosave = ReturnType<typeof useResumeAutosave>;

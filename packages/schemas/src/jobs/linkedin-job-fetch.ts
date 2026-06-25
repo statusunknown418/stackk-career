@@ -14,21 +14,23 @@ export const jobPostingSchema = z.object({
 		.string()
 		.nullable()
 		.describe(
-			"The job title in Spanish, faithful to the posting (translate when needed; do not embellish), or null if not present."
+			"The job title in the posting's original language, faithful to the posting (do not translate or embellish), or null if not present."
 		),
 	company: z.string().nullable().describe("Hiring company / organization name, or null if not present."),
 	location: z
 		.string()
 		.nullable()
-		.describe("Primary location or work mode in Spanish (e.g. 'Remoto', 'Lima, Perú'), or null."),
+		.describe(
+			"Primary location or work mode in the posting's original language (e.g. 'Remote', 'Lima, Perú'), or null."
+		),
 	employmentType: z
 		.string()
 		.nullable()
-		.describe("Employment type in Spanish if stated (e.g. 'Tiempo completo', 'Contrato'), or null."),
+		.describe("Employment type in the posting's original language if stated (e.g. 'Full-time', 'Contract'), or null."),
 	seniority: z
 		.string()
 		.nullable()
-		.describe("Seniority level in Spanish if stated (e.g. 'Senior', 'Nivel inicial'), or null."),
+		.describe("Seniority level in the posting's original language if stated (e.g. 'Senior', 'Entry level'), or null."),
 	summary: z.string().nullable().describe("One or two sentence neutral summary of the role, grounded in the posting."),
 	responsibilities: z
 		.array(z.string())

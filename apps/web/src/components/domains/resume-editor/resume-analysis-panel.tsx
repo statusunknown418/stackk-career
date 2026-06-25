@@ -181,8 +181,8 @@ function DismissedEditItem({ edit, handlers }: { edit: ResumeEdit; handlers: Edi
 	const { onDismissEdit } = handlers;
 	return (
 		<Item className="gap-2 opacity-50 hover:opacity-100" size="sm" variant="outline">
-			<ItemContent>
-				<ItemTitle className="truncate text-xs leading-tight line-through">{edit.title}</ItemTitle>
+			<ItemContent className="min-w-0">
+				<ItemTitle className="block w-full truncate text-xs leading-tight line-through">{edit.title}</ItemTitle>
 			</ItemContent>
 
 			{onDismissEdit && edit.editId && (
@@ -505,7 +505,7 @@ function PanelHeader({
 	return (
 		<header className="flex items-start justify-between gap-2">
 			<hgroup>
-				<h3 className="font-medium text-sm">Análisis de tu CV</h3>
+				<h3 className="font-medium text-muted-foreground text-sm">Análisis de tu CV</h3>
 				<Badge variant="secondary">
 					{error && "Error"}
 					{!error && isStreaming && <Shimmer>Analizando…</Shimmer>}
