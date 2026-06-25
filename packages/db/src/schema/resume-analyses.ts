@@ -9,6 +9,26 @@ import { resumes } from "./resumes";
 export const resumeAnalysisStatusEnum = ["pending", "running", "ready", "failed"] as const;
 export type ResumeAnalysisStatus = (typeof resumeAnalysisStatusEnum)[number];
 
+/**
+ * Status of a single analysis edit, keyed by its stable `editId`.
+ * - `pending`: shown to the user, not acted on.
+ * - `applied`: applied to the resume.
+ * - `dismissed`: explicitly rejected by the user.
+ * - `failed`: an apply attempt failed.
+ * - `stale`: the edit no longer matches the current resume content.
+ */
+export type ResumeAnalysisEditStatus = "pending" | "applied" | "dismissed" | "failed" | "stale";
+
+export interface ResumeAnalysisEditStatusRecord {
+	appliedAt?: number;
+	dismissedAt?: number;
+	error?: string;
+	status: ResumeAnalysisEditStatus;
+}
+
+/** Edit ledger persisted on a `resume_analyses` row, keyed by `editId`. */
+export type ResumeAnalysisEditStatuses = Record<string, ResumeAnalysisEditStatusRecord>;
+
 export const resumeAnalyses = sqliteTable(
 	"resume_analyses",
 	(t) => ({
@@ -31,16 +51,12 @@ export const resumeAnalyses = sqliteTable(
 
 		model: t.text().$type<LanguageModel>(),
 		object: t.text({ mode: "json" }),
-		appliedEditIndices: t
+		rubricVersion: t.text(),
+		editStatuses: t
 			.text({ mode: "json" })
-			.$type<number[]>()
+			.$type<ResumeAnalysisEditStatuses>()
 			.notNull()
-			.$defaultFn(() => []),
-		dismissedEditIndices: t
-			.text({ mode: "json" })
-			.$type<number[]>()
-			.notNull()
-			.$defaultFn(() => []),
+			.$defaultFn(() => ({})),
 		error: t.text(),
 
 		createdAt: t

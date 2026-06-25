@@ -1,4 +1,4 @@
-import { resumeAnalysisSchema } from "@stackk-career/schemas/ai/resume-analysis";
+import { resumeAnalysisDraftSchema } from "@stackk-career/schemas/ai/resume-analysis";
 import { type LanguageModel, Output, streamText } from "ai";
 import { fetchPdfBytes, pdfUserMessage } from "../lib/ai/pdf-message";
 import { getUserMetadata, withTimeout } from "../lib/user-metadata";
@@ -79,7 +79,7 @@ export async function runK02FastAnalysisAgent({ pdfUrl, userId, signal }: RunK02
 
 	return streamText({
 		model: K02_FAST_ANALYSIS_MODEL,
-		output: Output.object({ schema: resumeAnalysisSchema }),
+		output: Output.object({ schema: resumeAnalysisDraftSchema }),
 		abortSignal: withTimeout(signal, K02_TIMEOUT_MS),
 		system: SYSTEM_PROMPT,
 		messages: [

@@ -10,7 +10,7 @@
     }
   },
   "scripts": {
-    "test": "node --test --experimental-strip-types src/*.test.mjs"
+    "test": "tsx --test src/*.test.mjs"
   },
   "dependencies": {
     "@orpc/ai-sdk": "catalog:",
@@ -32,10 +32,12 @@
     "drizzle-orm": "catalog:",
     "evlog": "catalog:",
     "mercadopago": "^3.1.0",
-    "posthog-node": "^5.38.2"
+    "posthog-node": "^5.38.2",
+    "resend": "catalog:"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
 }

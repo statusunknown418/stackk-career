@@ -46,6 +46,9 @@ export const env = createEnv({
 
 		RESEND_API_KEY: z.string().min(1),
 		EMAIL_FROM: z.string().min(1),
+		// Resend webhook signing secret (`whsec_…`) from the webhook's detail page.
+		// Verifies inbound delivery/bounce/complaint events before they reach PostHog.
+		RESEND_WEBHOOK_SECRET: z.string().min(1),
 
 		MERCADOPAGO_ACCESS_TOKEN: z.string().min(1),
 		MERCADOPAGO_PUBLIC_KEY: z.string().min(1),

@@ -160,6 +160,15 @@ export const ENTRY_NOUNS = {
 
 export const isTimelineSectionKind = (kind: SectionKind): boolean => kind === "experience" || kind === "education";
 
+/**
+ * Sections whose entries describe professional accomplishments with dated,
+ * bulleted content (work, projects, volunteering). Structural "experience"
+ * quality gates only evaluate these — education, certifications, skills,
+ * languages, summary, and custom sections have different expectations.
+ */
+export const isExperienceLikeSectionKind = (kind: SectionKind): boolean =>
+	kind === "experience" || kind === "projects" || kind === "volunteering";
+
 const DEFAULT_SECTION_KINDS: readonly DefinedSectionKind[] = ["summary", "experience", "education", "skills"];
 
 export const blankResumeSections = SECTION_DEFINITIONS.filter((definition) =>
@@ -236,6 +245,11 @@ export const createResumeInputSchema = z.object({
 	targetJobUrl: linkedinJobUrlSchema.optional(),
 });
 
+export const changeResumeJobTargetSchema = z.object({
+	resumeId: z.string().nonempty(),
+	targetJobUrl: linkedinJobUrlSchema,
+});
+
 export const getResumeAnalysisInputSchema = z.object({
 	resumeId: z.string().nonempty(),
 });
@@ -244,3 +258,4 @@ export type GetResumeAnalysisInput = z.infer<typeof getResumeAnalysisInputSchema
 export type ResumeDocumentWrapperForm = z.infer<typeof resumeDocumentWrapperFormSchema>;
 export type UpdateResumeTitleInput = z.infer<typeof updateResumeTitleSchema>;
 export type CreateResumeInput = z.infer<typeof createResumeInputSchema>;
+export type ChangeResumeJobTargetInput = z.infer<typeof changeResumeJobTargetSchema>;

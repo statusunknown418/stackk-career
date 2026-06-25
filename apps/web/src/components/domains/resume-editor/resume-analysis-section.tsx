@@ -1,35 +1,84 @@
 import { GpsSlashIcon, SparkleIcon } from "@phosphor-icons/react";
+import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
 import type { k02DetailedAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-detailed-analysis";
-import type { ResumeAnalysis, ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
+import type {
+	ResumeAnalysis,
+	ResumeAnalysisDraft,
+	ResumeAnalysisEditStatuses,
+	ResumeEdit,
+} from "@stackk-career/schemas/ai/resume-analysis";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
 import type { DeepPartial } from "ai";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ResumeEditorAnalysisPanel } from "@/components/domains/resume-editor/resume-analysis-panel";
 import { Button } from "@/components/ui/button";
 import { orpc } from "@/utils/orpc";
 
 interface ResumeStreams {
-	"resume-analysis": DeepPartial<ResumeAnalysis>;
+	"resume-analysis": DeepPartial<ResumeAnalysisDraft>;
 }
 
 type CachedAnalysis = {
 	id: string;
 	analysis: ResumeAnalysis;
-	appliedEditIndices: number[];
-	dismissedEditIndices: number[];
+	editStatuses: ResumeAnalysisEditStatuses;
 } | null;
+
+type ApplyEditsResult = AppRouterOutputs["resumeAnalyses"]["applyEdit"];
+/** Block content mutations the server applied, handed to the route to sync its live form. */
+export type AppliedEditRewrites = ApplyEditsResult["rewrites"];
+
+/** Surface per-edit apply outcomes to the user without pretending everything succeeded. */
+function notifyApplyResults(results: ApplyEditsResult["results"], options: { all: boolean }): void {
+	const applied = results.filter((entry) => entry.status === "applied").length;
+	const unresolved = results.filter((entry) => entry.status === "stale" || entry.status === "failed").length;
+
+	if (options.all) {
+		if (applied === 0 && unresolved === 0) {
+			toast.info("No hay mejoras de un clic para aplicar.");
+			return;
+		}
+		const parts = [applied > 0 ? `${applied} aplicada${applied === 1 ? "" : "s"}` : null];
+		if (unresolved > 0) {
+			parts.push(`${unresolved} sin aplicar`);
+		}
+		const message = parts.filter(Boolean).join(" · ");
+		if (unresolved > 0) {
+			toast.warning(message);
+		} else {
+			toast.success(message);
+		}
+		return;
+	}
+
+	const [single] = results;
+	if (!single) {
+		return;
+	}
+	if (single.status === "applied") {
+		toast.success("Mejora aplicada");
+		return;
+	}
+	if (single.status === "stale") {
+		toast.warning("El contenido del CV cambió; vuelve a analizarlo antes de aplicar.");
+		return;
+	}
+	if (single.status === "failed") {
+		toast.error("No se pudo aplicar la mejora.");
+	}
+}
 
 export function ResumeAnalysisSection({
 	resumeId,
 	hasJobExperience,
-	onApplyEdit,
+	onEditsApplied,
 	onViewSection,
 }: {
 	resumeId: string;
 	hasJobExperience: boolean;
-	onApplyEdit?: (edit: ResumeEdit) => boolean;
+	onEditsApplied?: (rewrites: AppliedEditRewrites) => void;
 	onViewSection?: (edit: ResumeEdit) => void;
 }) {
 	const queryClient = useQueryClient();
@@ -40,6 +89,11 @@ export function ResumeAnalysisSection({
 		staleTime: Number.POSITIVE_INFINITY,
 	});
 	const cachedAnalysis = useQuery(cachedAnalysisOptions);
+
+	const jobTarget = useQuery(orpc.resumes.getJobTarget.queryOptions({ input: { resumeId } }));
+	const hasJobTarget = jobTarget.data?.status === "ready";
+
+	const resumeQueryKey = orpc.resumes.get.queryOptions({ input: { id: resumeId } }).queryKey;
 
 	const initiateAnalysis = useMutation(
 		orpc.agents.triggerK02DetailedAnalysis.mutationOptions({
@@ -52,53 +106,53 @@ export function ResumeAnalysisSection({
 		})
 	);
 
-	const setEditApplied = useMutation(
-		orpc.resumeAnalyses.setEditApplied.mutationOptions({
-			onMutate: async ({ editIndex, applied }) => {
-				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
-				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
-				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
-					if (!prev) {
-						return prev;
-					}
-					const nextSet = new Set(prev.appliedEditIndices);
-					if (applied) {
-						nextSet.add(editIndex);
-					} else {
-						nextSet.delete(editIndex);
-					}
-					return { ...prev, appliedEditIndices: [...nextSet].sort((a, b) => a - b) };
-				});
-				return { previous };
+	const handleApplyResult = (result: ApplyEditsResult, options: { all: boolean }) => {
+		queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) =>
+			prev ? { ...prev, editStatuses: result.editStatuses } : prev
+		);
+		if (result.rewrites.length > 0) {
+			onEditsApplied?.(result.rewrites);
+		}
+		if (result.rewrites.length > 0 || result.deletedRootBlockIds.length > 0) {
+			queryClient.invalidateQueries({ queryKey: resumeQueryKey });
+		}
+		notifyApplyResults(result.results, options);
+	};
+
+	const applyEdit = useMutation(
+		orpc.resumeAnalyses.applyEdit.mutationOptions({
+			onSuccess: (result) => handleApplyResult(result, { all: false }),
+			onError: (mutationError) => {
+				toast.error(mutationError.message || "No se pudo aplicar la mejora.");
 			},
-			onError: (mutationError, _vars, ctx) => {
-				if (ctx?.previous !== undefined) {
-					queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, ctx.previous);
-				}
-				toast.error(mutationError.message || "No se pudo guardar el estado.");
-			},
-			onSettled: () => {
-				queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
+		})
+	);
+
+	const applyAllEdits = useMutation(
+		orpc.resumeAnalyses.applyAllEdits.mutationOptions({
+			onSuccess: (result) => handleApplyResult(result, { all: true }),
+			onError: (mutationError) => {
+				toast.error(mutationError.message || "No se pudieron aplicar las mejoras.");
 			},
 		})
 	);
 
 	const setEditDismissed = useMutation(
 		orpc.resumeAnalyses.setEditDismissed.mutationOptions({
-			onMutate: async ({ editIndex, dismissed }) => {
+			onMutate: async ({ editId, dismissed }) => {
 				await queryClient.cancelQueries({ queryKey: cachedAnalysisOptions.queryKey });
 				const previous = queryClient.getQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey);
 				queryClient.setQueryData<CachedAnalysis>(cachedAnalysisOptions.queryKey, (prev) => {
 					if (!prev) {
 						return prev;
 					}
-					const nextSet = new Set(prev.dismissedEditIndices);
+					const next = { ...prev.editStatuses };
 					if (dismissed) {
-						nextSet.add(editIndex);
-					} else {
-						nextSet.delete(editIndex);
+						next[editId] = { status: "dismissed", dismissedAt: Date.now() };
+					} else if (next[editId]?.status === "dismissed") {
+						delete next[editId];
 					}
-					return { ...prev, dismissedEditIndices: [...nextSet].sort((a, b) => a - b) };
+					return { ...prev, editStatuses: next };
 				});
 				return { previous };
 			},
@@ -131,15 +185,7 @@ export function ResumeAnalysisSection({
 
 	const activeAnalysisId = runHandle?.analysisId ?? cachedAnalysis.data?.id;
 
-	const appliedSlots = useMemo(
-		() => new Set(cachedAnalysis.data?.appliedEditIndices ?? []),
-		[cachedAnalysis.data?.appliedEditIndices]
-	);
-
-	const dismissedSlots = useMemo(
-		() => new Set(cachedAnalysis.data?.dismissedEditIndices ?? []),
-		[cachedAnalysis.data?.dismissedEditIndices]
-	);
+	const editStatuses = cachedAnalysis.data?.editStatuses;
 
 	const runStatus = run?.status;
 	const isFailed =
@@ -158,7 +204,7 @@ export function ResumeAnalysisSection({
 
 	const analysisData: DeepPartial<ResumeAnalysis> | undefined = isStreaming
 		? streamedAnalysis
-		: (streamedAnalysis ?? cachedData);
+		: (cachedData ?? streamedAnalysis);
 
 	const handleAnalyze = () => {
 		const parentAnalysisId = cachedAnalysis.data?.id;
@@ -167,22 +213,25 @@ export function ResumeAnalysisSection({
 		initiateAnalysis.mutate({ resumeId, parentAnalysisId });
 	};
 
-	const handleApply = (edit: ResumeEdit, slot: number) => {
-		if (!onApplyEdit) {
+	const handleApply = (edit: ResumeEdit) => {
+		if (!(activeAnalysisId && edit.editId)) {
 			return;
 		}
-		const ok = onApplyEdit(edit);
-		if (!(ok && activeAnalysisId)) {
-			return;
-		}
-		setEditApplied.mutate({ analysisId: activeAnalysisId, editIndex: slot, applied: true });
+		applyEdit.mutate({ analysisId: activeAnalysisId, editId: edit.editId });
 	};
 
-	const handleDismiss = (slot: number, dismissed: boolean) => {
+	const handleApplyAll = () => {
 		if (!activeAnalysisId) {
 			return;
 		}
-		setEditDismissed.mutate({ analysisId: activeAnalysisId, editIndex: slot, dismissed });
+		applyAllEdits.mutate({ analysisId: activeAnalysisId });
+	};
+
+	const handleDismiss = (editId: string, dismissed: boolean) => {
+		if (!activeAnalysisId) {
+			return;
+		}
+		setEditDismissed.mutate({ analysisId: activeAnalysisId, editId, dismissed });
 	};
 
 	if (cachedAnalysis.isLoading) {
@@ -216,14 +265,17 @@ export function ResumeAnalysisSection({
 	return (
 		<ResumeEditorAnalysisPanel
 			analysis={analysisData}
-			appliedSlots={appliedSlots}
-			dismissedSlots={dismissedSlots}
+			editStatuses={editStatuses}
 			error={error}
+			hasJobTarget={hasJobTarget}
+			isApplyingAll={applyAllEdits.isPending}
 			isStreaming={isStreaming}
-			onApplyEdit={onApplyEdit ? handleApply : undefined}
+			onApplyAll={activeAnalysisId ? handleApplyAll : undefined}
+			onApplyEdit={activeAnalysisId ? handleApply : undefined}
 			onDismissEdit={activeAnalysisId ? handleDismiss : undefined}
 			onRetry={handleAnalyze}
 			onViewSection={onViewSection}
+			pendingEditId={applyEdit.isPending ? applyEdit.variables?.editId : undefined}
 		/>
 	);
 }

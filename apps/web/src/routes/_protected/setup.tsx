@@ -1,4 +1,5 @@
 import { CaretCircleLeftIcon, CaretCircleRightIcon } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import type { k02FastAnalysisTask } from "@stackk-career/jobs/trigger/tasks/k02-fast-analysis";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import type { ResumeAnalysis } from "@stackk-career/schemas/ai/resume-analysis";
@@ -70,12 +71,12 @@ function RouteComponent() {
 			<div className="pointer-events-none absolute inset-0 overflow-hidden">
 				{/* Glowing ambient blob 1 */}
 				<div
-					className="absolute -top-[30%] -left-[10%] h-[70%] w-[70%] animate-pulse rounded-full bg-primary/8 blur-[100px] dark:bg-primary/5"
+					className="absolute top-[-30%] left-[-10%] h-[70%] w-[70%] animate-pulse rounded-full bg-primary/8 blur-[100px] dark:bg-primary/5"
 					style={{ animationDuration: "8s" }}
 				/>
 				{/* Glowing ambient blob 2 */}
 				<div
-					className="absolute -right-[10%] -bottom-[30%] h-[70%] w-[70%] animate-pulse rounded-full bg-info/8 blur-[100px] dark:bg-info/5"
+					className="absolute right-[-10%] bottom-[-30%] h-[70%] w-[70%] animate-pulse rounded-full bg-info/8 blur-[100px] dark:bg-info/5"
 					style={{ animationDuration: "12s" }}
 				/>
 				{/* Fine dot grid overlay */}
@@ -172,6 +173,7 @@ function useResumeAnalysis(generationId: string, fileId: string | undefined) {
 	const search = Route.useSearch();
 	const navigate = Route.useNavigate();
 	const queryClient = useQueryClient();
+	const posthog = usePostHog();
 	const hasStartedRef = useRef(false);
 	const [runHandle, setRunHandle] = useState<{ runId: string; accessToken: string } | null>(null);
 
@@ -219,6 +221,7 @@ function useResumeAnalysis(generationId: string, fileId: string | undefined) {
 		enabled: Boolean(runHandle),
 		onComplete: () => {
 			queryClient.invalidateQueries({ queryKey: cachedAnalysisOptions.queryKey });
+			posthog?.capture("resume_score_generated", { generationId });
 		},
 	});
 

@@ -1,9 +1,12 @@
-import { ArrowSquareOutIcon, CaretDownIcon, TargetIcon } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon, CaretDownIcon, TargetIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
 import { useQuery } from "@tanstack/react-query";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { DotmSquare6 } from "@/components/ui/dotm-square-6";
 import { orpc } from "@/utils/orpc";
+import { ResumeJobTargetChangeDialog } from "./resume-job-target-change-dialog";
 
 type JobTargetData = AppRouterOutputs["resumes"]["getJobTarget"] | undefined;
 
@@ -13,11 +16,11 @@ function ResumeJobTargetChips({ label, items }: { label: string; items: string[]
 	}
 	return (
 		<section className="flex flex-col gap-1.5">
-			<p className="text-foreground text-xs">{label}</p>
+			<p className="text-foreground text-sm">{label}</p>
 			<ul className="flex flex-wrap gap-1.5">
 				{items.map((item) => (
 					<li key={item}>
-						<Badge size="sm" variant="outline">
+						<Badge className="font-normal text-muted-foreground" variant="outline">
 							{item}
 						</Badge>
 					</li>
@@ -33,7 +36,7 @@ function ResumeJobTargetList({ label, items }: { label: string; items: string[] 
 	}
 	return (
 		<section className="flex flex-col gap-1.5">
-			<p className="text-foreground text-xs">{label}</p>
+			<p className="text-foreground text-sm">{label}</p>
 			<ul className="list-disc space-y-1 pl-4">
 				{items.map((item) => (
 					<li key={item}>{item}</li>
@@ -43,18 +46,41 @@ function ResumeJobTargetList({ label, items }: { label: string; items: string[] 
 	);
 }
 
-function ResumeJobTargetNote({ jobTarget }: { jobTarget: JobTargetData }) {
-	if (!jobTarget || jobTarget.status === "failed") {
-		return null;
+function ResumeJobTargetNote({ jobTarget, resumeId }: { jobTarget: JobTargetData; resumeId: string }) {
+	if (!jobTarget) {
+		return (
+			<div className="flex flex-col gap-2.5 rounded-lg border bg-card px-3 py-2 text-sm">
+				<div className="mb-2 flex gap-2.5 text-muted-foreground">
+					<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+						<TargetIcon className="size-4" weight="duotone" />
+					</span>
+					<p>Personaliza tu CV a una oferta laboral real y Casey te ayudará!</p>
+				</div>
+				<ResumeJobTargetChangeDialog mode="add" resumeId={resumeId} />
+			</div>
+		);
+	}
+
+	if (jobTarget.status === "failed") {
+		return (
+			<div className="flex flex-col gap-2.5 rounded-lg border bg-card px-3 py-2 text-sm">
+				<div className="flex gap-2.5 text-muted-foreground">
+					<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive-foreground">
+						<WarningCircleIcon className="size-4" weight="duotone" />
+					</span>
+					<p className="leading-snug">No pudimos leer esa oferta. Prueba con otro enlace de LinkedIn.</p>
+				</div>
+				<ResumeJobTargetChangeDialog currentTitle={jobTarget.title} resumeId={resumeId} />
+			</div>
+		);
 	}
 
 	if (jobTarget.status !== "ready" || !jobTarget.title) {
 		return (
-			<div className="flex items-center gap-2.5 rounded-lg border bg-card p-3 text-muted-foreground text-sm">
-				<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
-					<TargetIcon className="size-4 animate-pulse" weight="duotone" />
-				</span>
-				<p className="leading-snug">Buscando los detalles del puesto para personalizar las sugerencias…</p>
+			<div className="flex gap-2.5 rounded-lg border bg-card px-3 py-2 text-muted-foreground text-sm">
+				<DotmSquare6 className="shrink-0" dotSize={3} size={24} />
+
+				<Shimmer>Buscando detalles del puesto…</Shimmer>
 			</div>
 		);
 	}
@@ -66,7 +92,7 @@ function ResumeJobTargetNote({ jobTarget }: { jobTarget: JobTargetData }) {
 
 	return (
 		<Collapsible className="rounded-lg border bg-card text-sm">
-			<CollapsibleTrigger className="group flex w-full items-center gap-2.5 p-3 text-left">
+			<CollapsibleTrigger className="group flex w-full gap-2.5 px-3 py-2 text-left">
 				<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-success/10 text-success-foreground">
 					<TargetIcon className="size-4" weight="duotone" />
 				</span>
@@ -74,22 +100,25 @@ function ResumeJobTargetNote({ jobTarget }: { jobTarget: JobTargetData }) {
 					<span className="text-muted-foreground text-xs">Adaptado al puesto</span>
 					<span className="text-foreground leading-snug">
 						{jobTarget.title}
-						{jobTarget.company ? <span className="text-muted-foreground"> · {jobTarget.company}</span> : null}
+						{jobTarget.company ? <span className="text-muted-foreground"> @ {jobTarget.company}</span> : null}
 					</span>
 				</span>
 				<CaretDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-panel-open:rotate-180" />
 			</CollapsibleTrigger>
+			<div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-border/60 border-t px-3 py-2.5">
+				<ResumeJobTargetChangeDialog currentTitle={jobTarget.title} resumeId={resumeId} />
+				<a
+					className="inline-flex w-fit items-center gap-1.5 text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
+					href={jobTarget.sourceUrl}
+					rel="noopener noreferrer"
+					target="_blank"
+				>
+					<ArrowSquareOutIcon className="size-3.5 shrink-0" />
+					Ver oferta en LinkedIn
+				</a>
+			</div>
 			<CollapsibleContent>
 				<div className="flex flex-col gap-3 border-border/60 border-t px-3 pt-3 pb-3 text-muted-foreground">
-					<a
-						className="inline-flex w-fit items-center gap-1.5 text-foreground underline-offset-2 hover:underline"
-						href={jobTarget.sourceUrl}
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						<ArrowSquareOutIcon className="size-3.5 shrink-0" />
-						Ver oferta en LinkedIn
-					</a>
 					{meta.length > 0 && (
 						<ul className="flex flex-wrap gap-1.5">
 							{meta.map((value) => (
@@ -128,5 +157,5 @@ export function ResumeJobTargetPanel({ resumeId }: { resumeId: string }) {
 		})
 	);
 
-	return <ResumeJobTargetNote jobTarget={jobTarget.data} />;
+	return <ResumeJobTargetNote jobTarget={jobTarget.data} resumeId={resumeId} />;
 }

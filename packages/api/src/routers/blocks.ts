@@ -6,40 +6,12 @@ import {
 	deleteBlockApiMutationSchema,
 	updateBlockApiMutationSchema,
 } from "@stackk-career/schemas/api/blocks";
-import { parseBlock, sanitizeResumeRichTextHtml } from "@stackk-career/schemas/db/resume-blocks";
+import { parseBlock } from "@stackk-career/schemas/db/resume-blocks";
 import { generateLexoKeyBetween } from "@stackk-career/schemas/utils/lexographical";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { protectedProcedure } from "..";
 import { createStarterChildPayload } from "../lib/resume-block-starters";
-
-const sanitizeBlockContent = (input: { blockType: string; content: Record<string, unknown> }) => {
-	if (input.blockType === "paragraph" && input.content.format === "html" && typeof input.content.text === "string") {
-		return {
-			...input.content,
-			text: sanitizeResumeRichTextHtml(input.content.text),
-		};
-	}
-
-	if (input.blockType === "bullet" && input.content.format === "html" && typeof input.content.text === "string") {
-		return {
-			...input.content,
-			text: sanitizeResumeRichTextHtml(input.content.text),
-		};
-	}
-
-	if (
-		input.blockType === "entry" &&
-		input.content.descriptorFormat === "html" &&
-		typeof input.content.descriptor === "string"
-	) {
-		return {
-			...input.content,
-			descriptor: sanitizeResumeRichTextHtml(input.content.descriptor),
-		};
-	}
-
-	return input.content;
-};
+import { sanitizeBlockContentForWrite, softDeleteBlockSubtree } from "../lib/resume-block-write";
 
 export const blocksRouter = {
 	create: protectedProcedure.input(createBlockApiMutationSchema).handler(async ({ context, input }) => {
@@ -80,7 +52,7 @@ export const blocksRouter = {
 		}
 
 		const position = generateLexoKeyBetween(input.before, input.after);
-		const sanitizedContent = sanitizeBlockContent({
+		const sanitizedContent = sanitizeBlockContentForWrite({
 			blockType: input.blockType,
 			content: input.content as Record<string, unknown>,
 		});
@@ -172,7 +144,7 @@ export const blocksRouter = {
 			});
 		}
 
-		const sanitizedContent = sanitizeBlockContent({
+		const sanitizedContent = sanitizeBlockContentForWrite({
 			blockType: input.blockType,
 			content: input.content as Record<string, unknown>,
 		});
@@ -195,34 +167,13 @@ export const blocksRouter = {
 	}),
 
 	delete: protectedProcedure.input(deleteBlockApiMutationSchema).handler(async ({ context, input }) => {
-		const deletedAt = new Date();
-		const deleteResult = await context.db.run(sql`
-			WITH RECURSIVE subtree(id) AS (
-				SELECT block.id
-				FROM ${resumeBlocks} AS block
-				INNER JOIN ${resumes} AS resume
-					ON resume.id = block.resumeId
-				WHERE block.id = ${input.id}
-					AND block.resumeId = ${input.resumeId}
-					AND resume.userId = ${context.session.session.userId}
-					AND block.deletedAt IS NULL
+		const rowsAffected = await softDeleteBlockSubtree(context.db, {
+			blockId: input.id,
+			resumeId: input.resumeId,
+			userId: context.session.session.userId,
+		});
 
-				UNION ALL
-
-				SELECT child.id
-				FROM ${resumeBlocks} AS child
-				INNER JOIN subtree
-					ON child.parentBlockId = subtree.id
-				WHERE child.resumeId = ${input.resumeId}
-					AND child.deletedAt IS NULL
-			)
-			UPDATE ${resumeBlocks}
-			SET deletedAt = ${deletedAt}
-			WHERE resumeId = ${input.resumeId}
-				AND id IN (SELECT id FROM subtree)
-		`);
-
-		if ((deleteResult.rowsAffected ?? 0) === 0) {
+		if (rowsAffected === 0) {
 			context.log?.set({ outcome: "block_not_found" });
 			throw new ORPCError("NOT_FOUND", { message: "No se encontró bloque" });
 		}

@@ -4,12 +4,13 @@ import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import {
-	type EditCategory,
 	type PriorAnalysisContext,
 	type PriorEditStatus,
 	type ResumeAnalysis,
 	resumeAnalysisSchema,
 } from "@stackk-career/schemas/ai/resume-analysis";
+import { evaluateQualityGates } from "@stackk-career/schemas/ai/resume-quality-gates";
+import { buildResumeSnapshot, buildSnapshotJobTarget } from "@stackk-career/schemas/ai/resume-snapshot";
 import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
 import { k02DetailedAnalysisInputSchema } from "@stackk-career/schemas/jobs/k02-detailed-analysis";
 import { viewerUsageTag } from "@stackk-career/schemas/subscriptions";
@@ -21,6 +22,8 @@ import {
 	K02_DETAILED_ANALYSIS_OBJECT_TYPE,
 	runK02DetailedAnalysisAgent,
 } from "../../agents/k02-detailed-analysis.handler";
+import { validateEditCandidates } from "../../lib/resume-analysis/edit-candidate-validator";
+import { normalizeResumeAnalysis } from "../../lib/resume-analysis/normalize-resume-analysis";
 import { buildJobTargetContextText, getResumeJobTarget } from "../../lib/resume-job-target";
 import { k02DetailedQueue } from "../queues";
 import { resumeAnalysisStream } from "../streams";
@@ -76,6 +79,17 @@ export const k02DetailedAnalysisTask = schemaTask({
 			metadata.set("jobTarget", { title: jobTarget.title, company: jobTarget.company });
 		}
 
+		const snapshot = buildResumeSnapshot(tree, {
+			jobTarget: jobTarget ? buildSnapshotJobTarget(jobTarget.posting, jobTarget.title, jobTarget.company) : null,
+		});
+		const qualityGates = evaluateQualityGates(snapshot);
+		metadata.set("snapshot", {
+			entryCount: snapshot.entryCount,
+			experienceEntryCount: snapshot.experienceEntryCount,
+			hasJobTarget: snapshot.hasJobTarget,
+			gateCount: qualityGates.length,
+		});
+
 		if (parentAnalysisId && !priorAnalysis) {
 			logger.warn("k02-detailed-analysis = parent_unavailable", {
 				analysisId,
@@ -97,21 +111,50 @@ export const k02DetailedAnalysisTask = schemaTask({
 			});
 		}
 
-		const result = await runK02DetailedAnalysisAgent({ resumeContent, userId, signal, priorAnalysis, jobTargetText });
+		const result = await runK02DetailedAnalysisAgent({
+			resumeContent,
+			userId,
+			signal,
+			priorAnalysis,
+			jobTargetText,
+			snapshot,
+			qualityGates,
+		});
 		const { waitUntilComplete } = resumeAnalysisStream.pipe(result.partialOutputStream);
 
-		const rawObject = await result.output;
+		const draft = await result.output;
 		const usage = await result.totalUsage;
 		const finishReason = await result.finishReason;
 		await waitUntilComplete();
 
-		const object = clampEditDeltas(rawObject, (dropped) => {
-			logger.warn("k02-detailed-analysis = edits_clamped", {
+		const validated = validateEditCandidates(draft.edits, snapshot);
+		if (validated.rejected.length > 0) {
+			logger.info("k02-detailed-analysis = edits_rejected", {
 				analysisId,
-				droppedCount: dropped.length,
-				droppedDeltas: dropped.map((edit) => ({ category: edit.category, delta: edit.delta })),
+				rejectedCount: validated.rejected.length,
+				rejected: validated.rejected,
+				userInputRequests: validated.userInputRequests.length,
 			});
+		}
+
+		const { analysis: object, changes } = normalizeResumeAnalysis({
+			scoreBreakdown: draft.scoreBreakdown,
+			edits: validated.edits,
+			userInputRequests: validated.userInputRequests,
+			qualityGates,
+			snapshot,
+			priorAnalysis,
 		});
+
+		if (changes.length > 0) {
+			logger.info("k02-detailed-analysis = normalized", {
+				analysisId,
+				rubricVersion: object.rubricVersion,
+				scoreOverall: object.scoreOverall,
+				changeCount: changes.length,
+				changes,
+			});
+		}
 
 		metadata.set("ai", {
 			model: K02_DETAILED_ANALYSIS_MODEL_SLUG,
@@ -133,7 +176,14 @@ export const k02DetailedAnalysisTask = schemaTask({
 		await db.batch([
 			db
 				.update(resumeAnalyses)
-				.set({ status: "ready", model: K02_DETAILED_ANALYSIS_MODEL, object, error: null, resumeId })
+				.set({
+					status: "ready",
+					model: K02_DETAILED_ANALYSIS_MODEL,
+					object,
+					rubricVersion: object.rubricVersion,
+					error: null,
+					resumeId,
+				})
 				.where(eq(resumeAnalyses.id, analysisId)),
 			db.insert(messages).values({
 				generationId,
@@ -176,34 +226,6 @@ export const k02DetailedAnalysisTask = schemaTask({
 	},
 });
 
-function clampEditDeltas(analysis: ResumeAnalysis, onDrop: (dropped: ResumeAnalysis["edits"]) => void): ResumeAnalysis {
-	const perCategory: Record<EditCategory, number> = {
-		impact: 0,
-		keywords: 0,
-		clarity: 0,
-		formatting: 0,
-		length: 0,
-	};
-	const dropped: ResumeAnalysis["edits"] = [];
-
-	const keptEdits = analysis.edits.filter((edit) => {
-		const projected = analysis.scoreBreakdown[edit.category] + perCategory[edit.category] + edit.delta;
-		if (projected > 100) {
-			dropped.push(edit);
-			return false;
-		}
-		perCategory[edit.category] += edit.delta;
-		return true;
-	});
-
-	if (dropped.length === 0) {
-		return analysis;
-	}
-
-	onDrop(dropped);
-	return { ...analysis, edits: keptEdits };
-}
-
 async function loadPriorAnalysisContext(
 	db: TriggerDb,
 	parentAnalysisId: string,
@@ -214,8 +236,7 @@ async function loadPriorAnalysisContext(
 			id: resumeAnalyses.id,
 			status: resumeAnalyses.status,
 			object: resumeAnalyses.object,
-			appliedEditIndices: resumeAnalyses.appliedEditIndices,
-			dismissedEditIndices: resumeAnalyses.dismissedEditIndices,
+			editStatuses: resumeAnalyses.editStatuses,
 		})
 		.from(resumeAnalyses)
 		.where(and(eq(resumeAnalyses.id, parentAnalysisId), eq(resumeAnalyses.userId, userId)))
@@ -236,15 +257,15 @@ async function loadPriorAnalysisContext(
 	}
 
 	const analysis: ResumeAnalysis = parsed.data;
-	const applied = new Set(parent.appliedEditIndices);
-	const dismissed = new Set(parent.dismissedEditIndices);
+	const statuses = parent.editStatuses;
 
-	const edits = analysis.edits.map((edit, index) => {
+	const edits = analysis.edits.map((edit) => {
+		const record = statuses[edit.editId];
 		let status: PriorEditStatus;
 
-		if (applied.has(index)) {
+		if (record?.status === "applied") {
 			status = "applied";
-		} else if (dismissed.has(index)) {
+		} else if (record?.status === "dismissed") {
 			status = "dismissed";
 		} else {
 			status = "pending";

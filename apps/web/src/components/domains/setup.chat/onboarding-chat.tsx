@@ -8,6 +8,7 @@ import {
 	CircleDashedIcon,
 	PencilSimpleIcon,
 } from "@phosphor-icons/react";
+import { usePostHog } from "@posthog/react";
 import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -600,6 +601,7 @@ interface OnboardingSummaryViewProps {
 }
 
 function OnboardingSummaryView({ answers, generationId, setEditingIndex, navigate }: OnboardingSummaryViewProps) {
+	const posthog = usePostHog();
 	return (
 		<div className="flex min-h-125 w-full flex-1 flex-col overflow-y-auto p-2 sm:p-4">
 			{/* Header */}
@@ -682,6 +684,7 @@ function OnboardingSummaryView({ answers, generationId, setEditingIndex, navigat
 									return;
 								}
 								toast.success("CV subido");
+								posthog?.capture("resume_uploaded", { context: "setup", generationId });
 								navigate({ search: { step: "chat", generationId, storeId: storedId } });
 							}}
 							onDragReject={() => toast.error(INVALID_FILE_TOAST)}

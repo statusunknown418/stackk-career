@@ -21,6 +21,7 @@ import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-su
 import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
 import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
+import { Route as ApiWebhooksResendRouteImport } from './routes/api/webhooks/resend'
 import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -91,6 +92,11 @@ const ProtectedDashIndexRoute = ProtectedDashIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ApiWebhooksResendRoute = ApiWebhooksResendRouteImport.update({
+  id: '/api/webhooks/resend',
+  path: '/api/webhooks/resend',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
   id: '/api/webhooks/mercadopago',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/dash/': typeof ProtectedDashIndexRoute
   '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/dash': typeof ProtectedDashIndexRoute
   '/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/api/webhooks/mercadopago': typeof ApiWebhooksMercadopagoRoute
+  '/api/webhooks/resend': typeof ApiWebhooksResendRoute
   '/_protected/dash/': typeof ProtectedDashIndexRoute
   '/_protected/dash/letters/$generationId': typeof ProtectedDashLettersGenerationIdRoute
   '/_protected/dash/resumes/$resumeId': typeof ProtectedDashResumesResumeIdRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/api/webhooks/mercadopago'
+    | '/api/webhooks/resend'
     | '/dash/'
     | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/api/webhooks/mercadopago'
+    | '/api/webhooks/resend'
     | '/dash'
     | '/dash/letters/$generationId'
     | '/dash/resumes/$resumeId'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/api/webhooks/mercadopago'
+    | '/api/webhooks/resend'
     | '/_protected/dash/'
     | '/_protected/dash/letters/$generationId'
     | '/_protected/dash/resumes/$resumeId'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
   ApiWebhooksMercadopagoRoute: typeof ApiWebhooksMercadopagoRoute
+  ApiWebhooksResendRoute: typeof ApiWebhooksResendRoute
   ApiWebhooksCalSplatRoute: typeof ApiWebhooksCalSplatRoute
 }
 
@@ -401,6 +414,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dash/'
       preLoaderRoute: typeof ProtectedDashIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/api/webhooks/resend': {
+      id: '/api/webhooks/resend'
+      path: '/api/webhooks/resend'
+      fullPath: '/api/webhooks/resend'
+      preLoaderRoute: typeof ApiWebhooksResendRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/webhooks/mercadopago': {
       id: '/api/webhooks/mercadopago'
@@ -534,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
   ApiWebhooksMercadopagoRoute: ApiWebhooksMercadopagoRoute,
+  ApiWebhooksResendRoute: ApiWebhooksResendRoute,
   ApiWebhooksCalSplatRoute: ApiWebhooksCalSplatRoute,
 }
 export const routeTree = rootRouteImport

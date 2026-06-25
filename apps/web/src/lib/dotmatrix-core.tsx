@@ -90,6 +90,8 @@ export interface DotMatrixCommonProps {
 	className?: string;
 	color?: string;
 	colorPreset?: DotMatrixColorPreset;
+	/** Forwarded to the rendered root element so styling hooks (e.g. button loading indicator) can target it. */
+	"data-slot"?: string;
 	dotClassName?: string;
 	dotShape?: DotShape;
 	dotSize?: number;
@@ -724,6 +726,7 @@ export function DotMatrixBase({
 	cellPadding,
 	boxSize,
 	minSize,
+	"data-slot": dataSlot,
 }: DotMatrixBaseProps) {
 	const patternIndexes = new Set(getPatternIndexes(pattern));
 	const safeSpeed = speed > 0 ? speed : 1;
@@ -745,7 +748,10 @@ export function DotMatrixBase({
 		["--dmx-dot-size" as const]: `${dotSize}px`,
 		["--dmx-halo-level" as const]: halo,
 		["--dmx-dot-fill" as const]: dotFill,
-		color: resolvedColor,
+		// `color: currentColor` is a no-op (color already inherits) that would only out-specify
+		// class-based color overrides via inline style. Emit it only for a concrete color so hooks
+		// like the button loading indicator (`*:data-[slot=…]:text-…`) can recolor the dots.
+		...(resolvedColor === "currentColor" ? {} : { color: resolvedColor }),
 		...(ob !== undefined && { ["--dmx-opacity-base" as const]: ob }),
 		...(om !== undefined && { ["--dmx-opacity-mid" as const]: om }),
 		...(op !== undefined && { ["--dmx-opacity-peak" as const]: op }),
@@ -867,6 +873,7 @@ export function DotMatrixBase({
 				aria-label={ariaLabel}
 				aria-live="polite"
 				className={className}
+				data-slot={dataSlot}
 				onMouseEnter={onMouseEnter}
 				onMouseLeave={onMouseLeave}
 				role="status"
@@ -898,6 +905,7 @@ export function DotMatrixBase({
 				dmxBloomHaloSpreadClass(halo),
 				className
 			)}
+			data-slot={dataSlot}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
 			role="status"
