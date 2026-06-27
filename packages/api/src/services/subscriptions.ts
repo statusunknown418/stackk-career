@@ -14,6 +14,7 @@ import {
 	getEffectivePlanId,
 	hasQuotaRemaining,
 	isUnlimited,
+	LIMIT_KEY_LABELS,
 	type LimitKey,
 	type LimitValue,
 	PLAN_CATALOG,
@@ -147,6 +148,22 @@ async function readCachedUsageCounter(
 		return rows?.value ?? 0;
 	}
 
+	if (metric === "cover_letter_generations_per_cycle") {
+		const [rows] = await db
+			.select({ value: count() })
+			.from(generations)
+			.where(
+				and(
+					eq(generations.owner, userId),
+					eq(generations.type, "cover-letter"),
+					between(generations.createdAt, currentPeriodStart, currentPeriodEnd)
+				)
+			)
+			.$withCache(cacheConfig);
+
+		return rows?.value ?? 0;
+	}
+
 	if (metric === "resume_analyses_per_cycle") {
 		const [rows] = await db
 			.select({ value: count() })
@@ -211,10 +228,11 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 	const plan = PLAN_CATALOG[subscription.planId];
 	const effectivePlan = PLAN_CATALOG[getEffectivePlanId(subscription)];
 
-	const [resumeCreationGens, conversationGens, analyses, coaching, totalResumes, inlineSuggestions] =
+	const [resumeCreationGens, conversationGens, coverLetterGens, analyses, coaching, totalResumes, inlineSuggestions] =
 		await Promise.allSettled([
 			readCachedUsageCounter(db, userId, "resume_creation_generations_per_cycle", period),
 			readCachedUsageCounter(db, userId, "conversation_generations_per_cycle", period),
+			readCachedUsageCounter(db, userId, "cover_letter_generations_per_cycle", period),
 			readCachedUsageCounter(db, userId, "resume_analyses_per_cycle", period),
 			readCachedUsageCounter(db, userId, "coaching_sessions_per_cycle", period),
 			readCachedUsageCounter(db, userId, "resumes_total", period),
@@ -224,6 +242,7 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 	if (
 		resumeCreationGens.status === "rejected" ||
 		conversationGens.status === "rejected" ||
+		coverLetterGens.status === "rejected" ||
 		analyses.status === "rejected" ||
 		coaching.status === "rejected" ||
 		totalResumes.status === "rejected" ||
@@ -238,6 +257,7 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 		resumes_total: totalResumes.value,
 		resume_creation_generations_per_cycle: resumeCreationGens.value,
 		conversation_generations_per_cycle: conversationGens.value,
+		cover_letter_generations_per_cycle: coverLetterGens.value,
 		resume_analyses_per_cycle: analyses.value,
 		coaching_sessions_per_cycle: coaching.value,
 		resume_inline_ai_suggestions: inlineSuggestions.value,
@@ -252,6 +272,10 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
 		conversation_generations_per_cycle: remainingQuota(
 			entitlements.conversation_generations_per_cycle,
 			usage.conversation_generations_per_cycle
+		),
+		cover_letter_generations_per_cycle: remainingQuota(
+			entitlements.cover_letter_generations_per_cycle,
+			usage.cover_letter_generations_per_cycle
 		),
 		resume_analyses_per_cycle: remainingQuota(entitlements.resume_analyses_per_cycle, usage.resume_analyses_per_cycle),
 		coaching_sessions_per_cycle: remainingQuota(
@@ -293,7 +317,7 @@ export async function getUsageSnapshot(db: Database, userId: string): Promise<Us
  */
 export function buildQuotaError(payload: QuotaErrorPayload): ORPCError<"FORBIDDEN", QuotaErrorPayload> {
 	return new ORPCError("FORBIDDEN", {
-		message: `Has alcanzado el límite de tu plan para ${payload.limitKey}.`,
+		message: `Has alcanzado el límite de tu plan para ${LIMIT_KEY_LABELS[payload.limitKey]}.`,
 		data: payload,
 	});
 }

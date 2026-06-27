@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/client";
 import { generations } from "@stackk-career/db/schema/generations";
 import { messages } from "@stackk-career/db/schema/messages";
+import { resumeJobTargets } from "@stackk-career/db/schema/resume-job-targets";
 import { resumes } from "@stackk-career/db/schema/resumes";
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
@@ -8,13 +9,15 @@ import {
 	createCoverLetterGenerationInputSchema,
 	triggerCoverLetterInputSchema,
 } from "@stackk-career/schemas/api/letters";
+import { formatJobTargetContext } from "@stackk-career/schemas/jobs/job-target-context";
+import { jobPostingSchema } from "@stackk-career/schemas/jobs/linkedin-job-fetch";
 import { getEffectiveEntitlements, isUnlimited, type LimitValue } from "@stackk-career/schemas/subscriptions";
 import { idempotencyKeys, tasks } from "@trigger.dev/sdk";
 import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
-import { invalidateViewerLetters, viewerLettersTag } from "../lib/viewer-cache";
-import { getActiveSubscriptionForUser } from "../services/subscriptions";
+import { invalidateViewerLetters, invalidateViewerUsage, viewerLettersTag } from "../lib/viewer-cache";
+import { assertSingleQuota, getActiveSubscriptionForUser } from "../services/subscriptions";
 
 const PREVIEW_MAX_CHARS = 180;
 const WHITESPACE_RE = /\s+/g;
@@ -91,9 +94,13 @@ export const lettersRouter = {
 			const userId = context.session.user.id;
 			context.log?.set({
 				action: "create_cover_letter_generation",
+				source: input.source,
 				user: { id: userId },
 				resume: { id: input.resumeId },
 			});
+
+			// Free 2 / Pro 5 / Max 100 cover letters per billing cycle (mirrors resumes_total).
+			await assertSingleQuota(context.db, userId, "cover_letter_generations_per_cycle");
 
 			// Validate the user owns the selected CV. (resumeId is a plain text column on generations
 			// to avoid a circular import with the resumes schema; ownership is enforced here.)
@@ -108,16 +115,86 @@ export const lettersRouter = {
 				throw new ORPCError("NOT_FOUND", { message: "CV no encontrado" });
 			}
 
+			// Resolve the letter's job context. `resume-job-target` snapshots the resume's
+			// READY target into title/summary so the letter stays stable if the target later
+			// changes; `manual` uses the job position/description the user typed.
+			let title: string;
+			let summary: string | undefined;
+
+			if (input.source === "resume-job-target") {
+				const [target] = await context.db
+					.select({
+						status: resumeJobTargets.status,
+						title: resumeJobTargets.title,
+						company: resumeJobTargets.company,
+						location: resumeJobTargets.location,
+						employmentType: resumeJobTargets.employmentType,
+						seniority: resumeJobTargets.seniority,
+						structured: resumeJobTargets.structured,
+					})
+					.from(resumeJobTargets)
+					.where(and(eq(resumeJobTargets.resumeId, input.resumeId), eq(resumeJobTargets.userId, userId)))
+					.limit(1);
+
+				context.log?.set({ jobTargetStatus: target?.status ?? "missing" });
+
+				if (!target || target.status === "failed") {
+					context.log?.set({ outcome: "job_target_unavailable" });
+					throw new ORPCError("BAD_REQUEST", {
+						message: "Este CV no tiene una oferta lista. Cambia la oferta o escribe el puesto manualmente.",
+					});
+				}
+
+				if (target.status !== "ready") {
+					context.log?.set({ outcome: "job_target_not_ready" });
+					throw new ORPCError("BAD_REQUEST", {
+						message: "Aún estamos leyendo la oferta. Inténtalo de nuevo en unos segundos.",
+					});
+				}
+
+				const parsedPosting = jobPostingSchema.safeParse(target.structured);
+				const { roleLabel, contextText } = formatJobTargetContext(
+					{
+						title: target.title,
+						company: target.company,
+						location: target.location,
+						employmentType: target.employmentType,
+						seniority: target.seniority,
+						posting: parsedPosting.success ? parsedPosting.data : null,
+					},
+					{ maxChars: 5000 }
+				);
+
+				if (!roleLabel) {
+					context.log?.set({ outcome: "job_target_no_role_label" });
+					throw new ORPCError("BAD_REQUEST", {
+						message: "La oferta guardada no tiene un puesto definido. Escribe el puesto manualmente.",
+					});
+				}
+
+				title = roleLabel;
+				summary = contextText || undefined;
+				context.log?.set({ jobTargetStructuredParsed: parsedPosting.success });
+			} else {
+				if (!input.jobPosition) {
+					context.log?.set({ outcome: "missing_job_position" });
+					throw new ORPCError("BAD_REQUEST", { message: "Indica el puesto al que vas a postular." });
+				}
+				title = input.jobPosition;
+				summary = input.jobDescription;
+			}
+
 			const [created] = await context.db
 				.insert(generations)
 				.values({
 					owner: userId,
 					type: "cover-letter",
-					title: input.jobPosition,
-					summary: input.jobDescription,
+					title,
+					summary,
 					resumeId: input.resumeId,
 					language: input.language,
 					template: input.template,
+					jobContextSource: input.source,
 				})
 				.returning({ id: generations.id });
 
@@ -127,6 +204,7 @@ export const lettersRouter = {
 			}
 
 			await invalidateViewerLetters(context.db, userId);
+			await invalidateViewerUsage(context.db, userId, ["cover_letter_generations_per_cycle"]);
 			context.log?.set({ outcome: "created", generation: { id: created.id } });
 			return { generationId: created.id };
 		}),
@@ -151,6 +229,7 @@ export const lettersRouter = {
 					resumeId: generations.resumeId,
 					language: generations.language,
 					template: generations.template,
+					jobContextSource: generations.jobContextSource,
 					createdAt: generations.createdAt,
 					updatedAt: generations.updatedAt,
 					resumeTitle: resumes.title,
@@ -215,6 +294,52 @@ export const lettersRouter = {
 		}),
 
 	/**
+	 * Delete a cover-letter generation and its whole chat/version history.
+	 * Ownership is enforced (owner + type), children go first (no FK cascade), and the
+	 * viewer's cached reads + per-cycle counter are busted so the freed slot is reflected.
+	 */
+	delete: protectedProcedure
+		.input(z.object({ generationId: z.string().nonempty() }))
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+			context.log?.set({
+				action: "delete_cover_letter",
+				user: { id: userId },
+				generation: { id: input.generationId },
+			});
+
+			// Only a cover-letter generation owned by this user can be deleted.
+			const [owned] = await context.db
+				.select({ id: generations.id })
+				.from(generations)
+				.where(
+					and(
+						eq(generations.id, input.generationId),
+						eq(generations.owner, userId),
+						eq(generations.type, "cover-letter")
+					)
+				)
+				.limit(1);
+
+			if (!owned) {
+				context.log?.set({ outcome: "not_found" });
+				throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
+			}
+
+			// `messages.generationId` -> `generations.id` has no ON DELETE cascade, so the chat
+			// and artifact rows must be removed before the generation or the delete fails the FK.
+			await context.db.delete(messages).where(eq(messages.generationId, owned.id));
+			await context.db.delete(generations).where(and(eq(generations.id, owned.id), eq(generations.owner, userId)));
+
+			// `list`/`get` are cached per viewer; deleting also frees one per-cycle slot.
+			await invalidateViewerLetters(context.db, userId);
+			await invalidateViewerUsage(context.db, userId, ["cover_letter_generations_per_cycle"]);
+
+			context.log?.set({ outcome: "success" });
+			return { deleted: { id: owned.id } };
+		}),
+
+	/**
 	 * Dispatch a CASEY-Letters Trigger.dev run. The task picks up the candidate's CV
 	 * via `resumeId` and the target role via the generation's `title`. The pending
 	 * artifact message is inserted BEFORE the trigger so the UI can render its row
@@ -240,6 +365,7 @@ export const lettersRouter = {
 				resumeId: generations.resumeId,
 				title: generations.title,
 				summary: generations.summary,
+				jobContextSource: generations.jobContextSource,
 			})
 			.from(generations)
 			.where(
@@ -338,6 +464,7 @@ export const lettersRouter = {
 					generationId: gen.id,
 					jobPosition: gen.title,
 					jobDescription: gen.summary ?? undefined,
+					jobContextSource: gen.jobContextSource,
 					language: effectiveLanguage,
 					messageId,
 					resumeId: gen.resumeId,

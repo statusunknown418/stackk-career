@@ -14,6 +14,7 @@ export const limitKeyEnum = [
 	"resumes_total",
 	"resume_creation_generations_per_cycle",
 	"conversation_generations_per_cycle",
+	"cover_letter_generations_per_cycle",
 	"resume_analyses_per_cycle",
 	"resume_inline_ai_suggestions",
 	"messages_per_generation",
@@ -33,6 +34,7 @@ export type LimitKey = (typeof limitKeyEnum)[number];
  * - `resumes_total` → `resumes` (all-time count, not period-scoped)
  * - `resume_creation_generations_per_cycle` → `generations` WHERE `type = "resume-creation"` (per cycle; AI-from-source only, not manual)
  * - `conversation_generations_per_cycle` → `generations` WHERE `type = "conversation"` (per cycle)
+ * - `cover_letter_generations_per_cycle` → `generations` WHERE `type = "cover-letter"` (per cycle)
  * - `resume_analyses_per_cycle` → `resume_analyses` (per cycle)
  * - `resume_inline_ai_suggestions` → `messages` WHERE `objectType = "resume-suggestion"` AND `isAssistant = false`, owned via `generations.owner` (per cycle)
  * - `coaching_sessions_per_cycle` → `coaching_sessions` (per cycle)
@@ -60,6 +62,7 @@ export const entitlementMapSchema = z.object({
 	resumes_total: limitValueSchema,
 	resume_creation_generations_per_cycle: limitValueSchema,
 	conversation_generations_per_cycle: limitValueSchema,
+	cover_letter_generations_per_cycle: limitValueSchema,
 	resume_analyses_per_cycle: limitValueSchema,
 	resume_inline_ai_suggestions: limitValueSchema,
 	messages_per_generation: limitValueSchema,
@@ -72,6 +75,7 @@ export const usageSnapshotSchema = z.object({
 	resumes_total: z.number().int().nonnegative(),
 	resume_creation_generations_per_cycle: z.number().int().nonnegative(),
 	conversation_generations_per_cycle: z.number().int().nonnegative(),
+	cover_letter_generations_per_cycle: z.number().int().nonnegative(),
 	resume_analyses_per_cycle: z.number().int().nonnegative(),
 	resume_inline_ai_suggestions: z.number().int().nonnegative(),
 	coaching_sessions_per_cycle: z.number().int().nonnegative(),

@@ -1,5 +1,6 @@
 import { getTriggerDb } from "@stackk-career/db/http";
 import { resumeJobTargets } from "@stackk-career/db/schema/resume-job-targets";
+import { formatJobTargetContext } from "@stackk-career/schemas/jobs/job-target-context";
 import { type JobPosting, jobPostingSchema } from "@stackk-career/schemas/jobs/linkedin-job-fetch";
 import { and, eq } from "drizzle-orm";
 
@@ -51,48 +52,27 @@ export async function getResumeJobTarget(resumeId: string, userId: string): Prom
 	};
 }
 
+/** Framing line for the resume-analysis "Target job" block. Kept verbatim so prompt output is stable. */
+const RESUME_ANALYSIS_JOB_TARGET_INTRO =
+	"Target job the user is applying for. Tailor suggestions to maximize fit with THIS role and surface gaps versus it. Never invent experience the resume does not support.";
+
 /**
  * Render a compact, high-signal "Target job" block for the resume-analysis prompts so the
  * model tailors keyword/impact suggestions to the role the user is applying for. Returns null
  * when there is no usable job context (the prompt then omits the block entirely).
+ *
+ * Delegates rendering to the shared {@link formatJobTargetContext}; employment type is omitted
+ * to keep this prompt's historical text unchanged.
  */
 export function buildJobTargetContextText(jobTarget: ResumeJobTargetContext | null): string | null {
 	if (!jobTarget) {
 		return null;
 	}
 
-	const lines: string[] = [
-		"Target job the user is applying for. Tailor suggestions to maximize fit with THIS role and surface gaps versus it. Never invent experience the resume does not support.",
-	];
+	const { contextText } = formatJobTargetContext(jobTarget, {
+		intro: RESUME_ANALYSIS_JOB_TARGET_INTRO,
+		includeEmploymentType: false,
+	});
 
-	const heading = [jobTarget.title, jobTarget.company].filter(Boolean).join(" @ ");
-	if (heading) {
-		lines.push(`Role: ${heading}`);
-	}
-	if (jobTarget.seniority) {
-		lines.push(`Seniority: ${jobTarget.seniority}`);
-	}
-	if (jobTarget.location) {
-		lines.push(`Location: ${jobTarget.location}`);
-	}
-
-	const posting = jobTarget.posting;
-	if (posting?.summary) {
-		lines.push(`Summary: ${posting.summary}`);
-	}
-	if (posting && posting.responsibilities.length > 0) {
-		lines.push(`Responsibilities: ${posting.responsibilities.join("; ")}`);
-	}
-	if (posting && posting.qualifications.length > 0) {
-		lines.push(`Qualifications: ${posting.qualifications.join("; ")}`);
-	}
-	if (posting && posting.skills.length > 0) {
-		lines.push(`Skills sought: ${posting.skills.join(", ")}`);
-	}
-	if (posting && posting.keywords.length > 0) {
-		lines.push(`ATS keywords: ${posting.keywords.join(", ")}`);
-	}
-
-	// Only the instruction line means no job content was usable — skip the block entirely.
-	return lines.length > 1 ? lines.join("\n") : null;
+	return contextText === "" ? null : contextText;
 }

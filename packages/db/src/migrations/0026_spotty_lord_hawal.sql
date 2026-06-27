@@ -1,0 +1,1 @@
+ALTER TABLE `generations` ADD `jobContextSource` text DEFAULT 'manual' NOT NULL;

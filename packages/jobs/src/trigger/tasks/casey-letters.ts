@@ -44,7 +44,7 @@ export const caseyLettersTask = schemaTask({
 	},
 	schema: caseyLettersInputSchema,
 	run: async (
-		{ extraPrompt, generationId, jobPosition, jobDescription, language, messageId, resumeId, userId },
+		{ extraPrompt, generationId, jobContextSource, jobPosition, jobDescription, language, messageId, resumeId, userId },
 		{ ctx, signal }
 	) => {
 		const db = getTriggerDb();
@@ -78,8 +78,9 @@ export const caseyLettersTask = schemaTask({
 			| undefined;
 
 		metadata.set("step", "generating");
-		const result = await runCaseyLettersAgent({
+		const result = runCaseyLettersAgent({
 			extraPrompt,
+			jobContextSource,
 			jobPosition,
 			jobDescription,
 			language,

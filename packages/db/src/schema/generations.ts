@@ -45,9 +45,19 @@ export const generations = sqliteTable(
 		// Propagated end-to-end (create → trigger → task → agent system prompt + few-shot block).
 		language: t.text({ enum: generationLanguages }).default("es").notNull(),
 
-		// For type="cover-letter": user-selected visual template/style.
-		// Centered, classic, minty, blue, or null/blank.
-		template: t.text({ enum: ["centered", "classic", "minty", "blue"] }),
+		// For type="cover-letter": user-selected template (standard, modern, editorial, creative, vibrant).
+		// Type-only enum (SQLite text, no CHECK). Legacy rows may hold centered/classic/minty/blue;
+		// the UI normalizes any legacy/empty value on read via `normalizeTemplate`.
+		template: t.text({ enum: ["standard", "modern", "editorial", "creative", "vibrant"] }),
+
+		// For type="cover-letter": provenance of the letter's job context. `resume-job-target`
+		// snapshotted the resume's normalized LinkedIn target into title/summary; `manual` = the
+		// user-typed job position/description. Drives CASEY's prompt framing (<TARGET_JOB> vs
+		// <JOB_DESCRIPTION>) and the "used the saved listing" chip. Legacy rows default to `manual`.
+		jobContextSource: t
+			.text({ enum: ["manual", "resume-job-target"] })
+			.default("manual")
+			.notNull(),
 
 		createdAt: t
 			.integer({ mode: "timestamp" })

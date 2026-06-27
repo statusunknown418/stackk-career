@@ -1,4 +1,4 @@
-import type { EntitlementMap, PlanId } from "./types";
+import type { EntitlementMap, LimitKey, PlanId } from "./types";
 
 export interface PlanCatalogEntry {
 	displayName: string;
@@ -48,6 +48,10 @@ export interface PlanCatalogEntry {
  * - **`coaching_sessions_per_cycle`** — Coaching bookings per billing cycle, counted from `coaching_sessions`
  *   excluding `bookingStatus = "cancelled"`. Enforced at `coaching-bookings.captureBooking`.
  *
+ * - **`cover_letter_generations_per_cycle`** — Cover letters created per billing cycle, counted from
+ *   `generations` WHERE `type = "cover-letter"` within the period. Mirrors each plan's `resumes_total`.
+ *   Enforced at `letters.createGeneration`.
+ *
  * - **`cover_letter_versions`** — Cover-letter versions (regenerations) allowed within a SINGLE letter.
  *   Per-letter, NOT per-cycle: counted live from non-failed cover-letter artifacts on that generation.
  *   Enforced at `letters.trigger`.
@@ -65,7 +69,8 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_inline_ai_suggestions: 3,
 			messages_per_generation: 10,
 			coaching_sessions_per_cycle: 0,
-			cover_letter_versions: 5,
+			cover_letter_generations_per_cycle: 2,
+			cover_letter_versions: 3,
 		},
 	},
 	pro: {
@@ -73,14 +78,15 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 		displayName: "Pro",
 		priceMonthlyPen: 79,
 		entitlements: {
-			resumes_total: 3,
-			resume_creation_generations_per_cycle: 3,
+			resumes_total: 5,
+			resume_creation_generations_per_cycle: 5,
 			conversation_generations_per_cycle: 75,
 			resume_analyses_per_cycle: 50,
 			resume_inline_ai_suggestions: 150,
 			messages_per_generation: 50,
 			coaching_sessions_per_cycle: 1,
-			cover_letter_versions: 20,
+			cover_letter_generations_per_cycle: 5,
+			cover_letter_versions: 5,
 		},
 	},
 	max: {
@@ -95,7 +101,24 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_inline_ai_suggestions: 500,
 			messages_per_generation: 500,
 			coaching_sessions_per_cycle: 3,
-			cover_letter_versions: 50,
+			cover_letter_generations_per_cycle: 100,
+			cover_letter_versions: 5,
 		},
 	},
+};
+
+/**
+ * User-facing Spanish labels for each entitlement key. Single source of truth for the billing
+ * sheet rows and the `QUOTA_EXCEEDED` error copy — keeps raw snake_case keys out of the UI.
+ */
+export const LIMIT_KEY_LABELS: Record<LimitKey, string> = {
+	resumes_total: "Cantidad de CVs",
+	resume_creation_generations_per_cycle: "Creaciones de CV con AI",
+	conversation_generations_per_cycle: "Conversaciones",
+	cover_letter_generations_per_cycle: "Cartas de presentación",
+	resume_analyses_per_cycle: "Análisis de CV",
+	resume_inline_ai_suggestions: "Sugerencias con AI",
+	messages_per_generation: "Mensajes por conversación",
+	coaching_sessions_per_cycle: "Sesiones de coaching",
+	cover_letter_versions: "Versiones por carta",
 };
