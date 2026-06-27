@@ -816,13 +816,11 @@ function EditableLetter({
 	};
 
 	return (
-		<FramePanel className="flex flex-1 flex-col overflow-y-auto bg-muted/35">
-			<div className="mx-auto w-full max-w-3xl">
-				<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-sm md:p-12">
-					<LetterDocument {...props} template={template} />
-				</article>
-			</div>
-		</FramePanel>
+		<div className="mx-auto w-full max-w-3xl p-4">
+			<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-sm md:p-12">
+				<LetterDocument {...props} template={template} />
+			</article>
+		</div>
 	);
 }
 
@@ -1168,7 +1166,7 @@ export function LettersArtifactPanel({
 		body = (
 			<motion.div
 				animate={{ opacity: 1 }}
-				className="flex min-h-0 flex-1 flex-col"
+				className="flex min-h-0 flex-1 flex-col overscroll-y-none"
 				exit={{ opacity: 0 }}
 				initial={{ opacity: 0 }}
 				key="editable"
@@ -1193,7 +1191,7 @@ export function LettersArtifactPanel({
 		body = (
 			<motion.div
 				animate={{ opacity: 1 }}
-				className="flex min-h-0 flex-1 flex-col"
+				className="flex min-h-0 flex-1 flex-col overscroll-y-none"
 				exit={{ opacity: 0 }}
 				initial={{ opacity: 0 }}
 				key="readonly"

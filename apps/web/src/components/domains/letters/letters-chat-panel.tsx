@@ -156,7 +156,7 @@ export function LettersChatPanel({
 				)}
 			</FrameHeader>
 
-			<FramePanel className="p-0">
+			<FramePanel className="border-none p-0">
 				<button
 					aria-label={isTargetJob ? copy.viewTarget : copy.viewManualTarget}
 					className="group/ctx flex w-full items-start justify-between gap-3 rounded-[calc(var(--radius-xl)-1px)] px-3 py-2.5 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
@@ -186,7 +186,7 @@ export function LettersChatPanel({
 				</button>
 			</FramePanel>
 
-			<FramePanel className="flex min-h-0 flex-1 flex-col overflow-hidden p-0">
+			<FramePanel className="flex min-h-0 flex-1 flex-col overflow-hidden border-none p-0">
 				<Conversation className="min-h-0 flex-1 overflow-y-auto" data-tour-step-id="letter-versions">
 					<ConversationContent>
 						<Message from="assistant">

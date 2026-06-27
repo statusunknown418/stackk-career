@@ -596,7 +596,7 @@ function LetterWorkspace() {
 
 	return (
 		<>
-			<section className="grid h-[calc(100svh-4rem)] gap-4 p-4 md:grid-cols-[minmax(22rem,34%)_minmax(0,1fr)] md:grid-rows-1">
+			<section className="grid h-[calc(100svh-4rem)] gap-4 overscroll-y-none p-4 md:grid-cols-[minmax(22rem,34%)_minmax(0,1fr)] md:grid-rows-1">
 				<LettersChatPanel
 					isPending={isGenerating}
 					jobContextSource={data.generation.jobContextSource}

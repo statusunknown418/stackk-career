@@ -24,7 +24,7 @@ export default function UserMenu() {
 	const openProfileSheet = useProfileSheet((state) => state.openProfileSheet);
 
 	if (isPending) {
-		return <Skeleton className="h-8 w-full" />;
+		return <Skeleton className="h-8 w-30" />;
 	}
 
 	if (!session) {
