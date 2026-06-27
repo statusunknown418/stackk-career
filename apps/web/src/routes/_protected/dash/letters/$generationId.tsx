@@ -1,7 +1,10 @@
+import { createId } from "@paralleldrive/cuid2";
+import { TrashSimpleIcon } from "@phosphor-icons/react";
 import type { caseyLettersTask } from "@stackk-career/jobs/trigger/tasks/casey-letters";
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
 import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterLanguage, CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterLanguage } from "@stackk-career/schemas/api/letters";
+import { normalizeTemplate } from "@stackk-career/schemas/api/letters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
@@ -10,6 +13,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LettersArtifactPanel } from "@/components/domains/letters/letters-artifact-panel";
 import { LettersChatPanel } from "@/components/domains/letters/letters-chat-panel";
+import { LettersJobContextSheet } from "@/components/domains/letters/letters-job-context-sheet";
+import Loader from "@/components/loader";
 import {
 	AlertDialog,
 	AlertDialogClose,
@@ -23,7 +28,6 @@ import { Button } from "@/components/ui/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Tour, TourProvider, useTour } from "@/components/ui/tour";
-import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
 interface LetterStreams {
@@ -68,35 +72,16 @@ function resolveDisplayedArtifact(input: {
 	return input.streamedArtifact ?? input.selectedArtifact ?? input.cachedArtifact;
 }
 
-// Skeleton shape mirrors a real letter (short greeting, long body, medium closing, short
-// signature) and the final layout, so the skeleton → letter transition doesn't jump.
-const PENDING_LETTER_SECTIONS = [
-	{ bars: ["w-2/5"], key: "greeting", label: "w-16", primary: false },
-	{ bars: ["w-full", "w-11/12", "w-5/6", "w-4/5", "w-3/4", "w-2/3"], key: "body", label: "w-20", primary: true },
-	{ bars: ["w-3/4", "w-1/2"], key: "closing", label: "w-16", primary: false },
-	{ bars: ["w-1/3"], key: "signature", label: "w-14", primary: false },
-] as const;
-
-function PendingLetterSection({ bars, label, primary }: { bars: readonly string[]; label: string; primary: boolean }) {
-	return (
-		<div className={cn("rounded-2xl border bg-card px-4 pt-3.5 pb-4", primary && "min-h-44 flex-1")}>
-			<Skeleton className={`mb-3 h-3 rounded-full ${label}`} />
-			<div className="flex flex-col gap-2">
-				{bars.map((w) => (
-					<Skeleton className={`h-3 rounded-full ${w}`} key={w} />
-				))}
-			</div>
-		</div>
-	);
-}
-
-/** Two-column skeleton while the loader fetches the letter — avoids blank page + spinner. */
+// The pending skeleton mirrors the workspace's real layout — a chat sidebar plus a single
+// letter-document card with the same container (max-w-3xl, bordered card) and section order
+// (letterhead → date → greeting → body → closing → signature) the streaming view renders, so
+// the hand-off from loader to generation has no layout shift.
 function LetterPagePending() {
 	return (
-		<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr] md:grid-rows-1">
+		<section className="grid h-[calc(100svh-4rem)] gap-4 p-4 md:grid-cols-[minmax(22rem,34%)_minmax(0,1fr)] md:grid-rows-1">
 			<Frame>
 				<FrameHeader>
-					<Skeleton className="h-4 w-2/3 rounded-full" />
+					<Skeleton className="h-4 w-28 rounded-full" />
 				</FrameHeader>
 				<FramePanel className="flex flex-1 flex-col gap-3">
 					<Skeleton className="h-3 w-full rounded-full" />
@@ -110,16 +95,42 @@ function LetterPagePending() {
 				<FrameHeader>
 					<Skeleton className="h-5 w-24 rounded-full" />
 				</FrameHeader>
-				<FramePanel className="flex flex-1 flex-col overflow-y-auto">
-					<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-3">
-						{PENDING_LETTER_SECTIONS.map((section) => (
-							<PendingLetterSection
-								bars={section.bars}
-								key={section.key}
-								label={section.label}
-								primary={section.primary}
-							/>
-						))}
+				<FramePanel className="flex flex-1 flex-col overflow-y-auto bg-muted/35 p-6">
+					<div className="mx-auto w-full max-w-3xl">
+						<article className="relative flex w-full flex-col gap-6 rounded-xl border bg-card p-6 text-card-foreground shadow-sm md:p-10">
+							<div className="flex flex-col gap-2">
+								<Skeleton className="h-7 w-1/2 rounded-full" />
+								<Skeleton className="h-3 w-1/3 rounded-full" />
+								<div className="mt-1 flex flex-wrap gap-2">
+									<Skeleton className="h-3 w-28 rounded-full" />
+									<Skeleton className="h-3 w-20 rounded-full" />
+									<Skeleton className="h-3 w-24 rounded-full" />
+								</div>
+								<div className="mt-2 w-full border-border border-b" />
+							</div>
+
+							<div className="flex justify-end">
+								<Skeleton className="h-3 w-24 rounded-full" />
+							</div>
+
+							<Skeleton className="h-4 w-40 rounded-full" />
+
+							<div className="flex flex-col gap-2">
+								<Skeleton className="h-3 w-full rounded-full" />
+								<Skeleton className="h-3 w-11/12 rounded-full" />
+								<Skeleton className="h-3 w-full rounded-full" />
+								<Skeleton className="h-3 w-5/6 rounded-full" />
+								<Skeleton className="h-3 w-4/5 rounded-full" />
+								<Skeleton className="h-3 w-2/3 rounded-full" />
+							</div>
+
+							<div className="flex flex-col gap-2">
+								<Skeleton className="h-3 w-3/4 rounded-full" />
+								<Skeleton className="h-3 w-1/2 rounded-full" />
+							</div>
+
+							<Skeleton className="mt-6 h-4 w-32 rounded-full" />
+						</article>
 					</div>
 				</FramePanel>
 			</Frame>
@@ -218,6 +229,71 @@ function RouteComponent() {
 	);
 }
 
+/** Delete-confirm state + the `letters.delete` mutation, lifted out of the workspace component
+ *  to keep its cognitive complexity within budget. */
+function useLetterDeletion(generationId: string) {
+	const queryClient = useQueryClient();
+	const navigate = Route.useNavigate();
+	const [isOpen, setIsOpen] = useState(false);
+
+	const mutation = useMutation(
+		orpc.letters.delete.mutationOptions({
+			onError: (error) => {
+				toast.error(error.message || "No se pudo borrar la carta");
+			},
+			onSuccess: async () => {
+				toast.success("Carta borrada");
+				setIsOpen(false);
+				await queryClient.invalidateQueries({ queryKey: orpc.letters.list.queryOptions().queryKey });
+				navigate({ to: "/dash/letters" });
+			},
+		})
+	);
+
+	const { mutateAsync } = mutation;
+	const open = useCallback(() => setIsOpen(true), []);
+	const confirm = useCallback(async () => {
+		await mutateAsync({ generationId });
+	}, [generationId, mutateAsync]);
+
+	return { confirm, isOpen, isPending: mutation.isPending, open, setIsOpen };
+}
+
+/** Confirmation dialog for deleting a cover letter (mirrors the resume delete flow). */
+function DeleteLetterDialog({
+	isPending,
+	onConfirm,
+	onOpenChange,
+	open,
+}: {
+	isPending: boolean;
+	onConfirm: () => void;
+	onOpenChange: (open: boolean) => void;
+	open: boolean;
+}) {
+	return (
+		<AlertDialog onOpenChange={onOpenChange} open={open}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>¿Estás seguro que quieres borrar esta carta?</AlertDialogTitle>
+					<AlertDialogDescription>
+						Esta acción no se puede deshacer. Se eliminará la carta junto con todas sus versiones.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<Button disabled={isPending} render={<AlertDialogClose />} variant="outline">
+						No, retrocede porfa
+					</Button>
+					<Button disabled={isPending} onClick={onConfirm} variant="destructive">
+						{isPending ? <Loader /> : <TrashSimpleIcon />}
+						Borrar
+					</Button>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	);
+}
+
 function LetterWorkspace() {
 	const { generationId } = Route.useParams();
 	const queryClient = useQueryClient();
@@ -225,11 +301,9 @@ function LetterWorkspace() {
 	const lettersGetKey = orpc.letters.get.queryKey({ input: { generationId } });
 	const { start: startTour } = useTour();
 
-	// The route owns the trigger mutation so both panels can fire it (chat from
-	// the textarea, artifact from the "Regenerar" presets) and the realtime
-	// subscription stays attached at this level through the panel re-renders.
 	const [runHandle, setRunHandle] = useState<RunHandle | null>(null);
 	const [showLimitDialog, setShowLimitDialog] = useState(false);
+	const [showJobContext, setShowJobContext] = useState(false);
 
 	// Selected version lives in the URL (?v=<messageId>). No `v` = latest version.
 	const navigate = Route.useNavigate();
@@ -243,12 +317,10 @@ function LetterWorkspace() {
 	const clearSelectedVersion = useCallback(() => {
 		navigate({ replace: true, search: (prev) => ({ ...prev, v: undefined }) });
 	}, [navigate]);
-	// Immediate feedback when firing a run: true from click until the mutation settles (then
-	// realtime/isStreaming takes over). Tied to the mutation lifecycle, so it can't hang.
+
 	const [triggering, setTriggering] = useState(false);
 	const autoTriggeredRef = useRef(false);
-	// Prevents two parallel runs (double-click, auto-trigger + manual). Realtime tracks a
-	// single runHandle, so simultaneous triggers would lose one.
+
 	const inFlightRef = useRef(false);
 
 	// Valid versions = non-failed artifacts. Numbering, quota and cards all derive from this
@@ -262,9 +334,6 @@ function LetterWorkspace() {
 
 	const selectedMessageId = resolveValidVersionId(rawSelectedVersionId, coverLetterMessages);
 
-	// Optimistic: reflect the user's instruction bubble + the pending version placeholder in
-	// the chat immediately, without waiting for the round-trip. The refetch replaces these
-	// rows with the real ones; onError rolls back.
 	const triggerMutation = useMutation(
 		orpc.letters.trigger.mutationOptions({
 			onMutate: async ({ extraPrompt }) => {
@@ -293,7 +362,7 @@ function LetterWorkspace() {
 					if (trimmed) {
 						rows.push({
 							...base,
-							id: `optimistic_${crypto.randomUUID()}`,
+							id: `optimistic_${createId()}`,
 							isAssistant: false,
 							objectType: null,
 							order: maxOrder + 1,
@@ -302,7 +371,7 @@ function LetterWorkspace() {
 					}
 					rows.push({
 						...base,
-						id: `optimistic_${crypto.randomUUID()}`,
+						id: `optimistic_${createId()}`,
 						isAssistant: true,
 						objectType: COVER_LETTER_OBJECT_TYPE,
 						order: maxOrder + rows.length + 1,
@@ -370,6 +439,8 @@ function LetterWorkspace() {
 			updateArtifactMutateAsync({ artifact: edited, generationId, messageId }),
 		[generationId, updateArtifactMutateAsync]
 	);
+
+	const deletion = useLetterDeletion(generationId);
 
 	const triggerMutateAsync = triggerMutation.mutateAsync;
 	const onTriggerAsync = useCallback(
@@ -520,19 +591,23 @@ function LetterWorkspace() {
 	const activeMessageId = selectedMessageId || (coverLetterMessages.at(-1)?.id ?? null);
 	const activeVersion = coverLetterMessages.findIndex((m) => m.id === activeMessageId) + 1;
 	const dialogCopy = limitDialogCopy(maxVersions);
+	const jobPositionLabel = data.generation.title ?? "el puesto";
+	const linkedResumeTitle = data.resume?.title ?? null;
 
 	return (
 		<>
-			<section className="grid h-[calc(100svh-8rem)] gap-4 p-4 md:grid-cols-[40%_1fr] md:grid-rows-1">
+			<section className="grid h-[calc(100svh-4rem)] gap-4 p-4 md:grid-cols-[minmax(22rem,34%)_minmax(0,1fr)] md:grid-rows-1">
 				<LettersChatPanel
 					isPending={isGenerating}
-					jobPosition={data.generation.title ?? "el puesto"}
+					jobContextSource={data.generation.jobContextSource}
+					jobPosition={jobPositionLabel}
 					maxVersions={maxVersions}
 					messages={data.messages}
+					onOpenJobContext={() => setShowJobContext(true)}
 					onSelectVersion={selectVersion}
 					onStartTour={tourReady ? () => startTour("letter-detail") : undefined}
 					onTriggerAsync={onTriggerAsync}
-					resumeTitle={data.resume?.title ?? null}
+					resumeTitle={linkedResumeTitle}
 					selectedMessageId={selectedMessageId}
 				/>
 
@@ -546,8 +621,9 @@ function LetterWorkspace() {
 							generationCount,
 							hasContent: Boolean(artifact) || data.latestArtifact !== null,
 							maxVersions,
-							template: data.generation.template as CoverLetterTemplate,
+							template: normalizeTemplate(data.generation.template),
 						}}
+						onRequestDelete={deletion.open}
 						onSaveArtifact={onSaveArtifact}
 						onTriggerAsync={onTriggerAsync}
 						run={{ error: realtimeError, isPending: isGenerating, isStreaming }}
@@ -568,6 +644,22 @@ function LetterWorkspace() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			<DeleteLetterDialog
+				isPending={deletion.isPending}
+				onConfirm={deletion.confirm}
+				onOpenChange={deletion.setIsOpen}
+				open={deletion.isOpen}
+			/>
+
+			<LettersJobContextSheet
+				jobContextSource={data.generation.jobContextSource}
+				jobPosition={jobPositionLabel}
+				jobSummary={data.generation.summary}
+				onOpenChange={setShowJobContext}
+				open={showJobContext}
+				resumeTitle={linkedResumeTitle}
+			/>
 		</>
 	);
 }

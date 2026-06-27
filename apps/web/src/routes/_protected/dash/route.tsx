@@ -1,10 +1,4 @@
-import {
-	ArrowCircleLeftIcon,
-	ArrowCircleRightIcon,
-	GearIcon,
-	SidebarSimpleIcon,
-	SparkleIcon,
-} from "@phosphor-icons/react";
+import { ArrowCircleLeftIcon, ArrowCircleRightIcon, SidebarSimpleIcon, SparkleIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useLocation, useRouter } from "@tanstack/react-router";
 import { BillingSheet } from "@/components/domains/billing/billing-sheet";
@@ -58,7 +52,8 @@ function DashLayout() {
 			<Sidebar className="py-1 pl-0.5" collapsible="icon" variant="inset">
 				<SidebarHeader>
 					<SidebarMenuButton>
-						<span className="text-nowrap">Assendia</span>
+						<img alt="logo" className="rounded-md" height={32} src="/assendia-logo.png" width={32} />
+						Assendia
 					</SidebarMenuButton>
 				</SidebarHeader>
 
@@ -87,15 +82,7 @@ function DashLayout() {
 
 				<SidebarFooter>
 					<SidebarMenu>
-						<SidebarGroupLabel>Extras</SidebarGroupLabel>
-						<SidebarMenuItem>
-							<SidebarMenuButton onClick={() => openBillingSheet()}>
-								<GearIcon />
-								Configuración
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-
-						<UserMenu />
+						<SidebarGroupLabel>Configuración</SidebarGroupLabel>
 					</SidebarMenu>
 				</SidebarFooter>
 
@@ -151,6 +138,8 @@ function DashLayout() {
 							{planLabel}
 						</span>
 					</Button>
+
+					<UserMenu />
 				</nav>
 
 				<div className="min-h-0 overflow-y-auto">

@@ -11,7 +11,12 @@ import {
 import { usePostHog } from "@posthog/react";
 import type { PaidPlanIdInput } from "@stackk-career/schemas/api/billing";
 import type { CachedUsageLimitKey, LimitValue, SubscriptionStatus } from "@stackk-career/schemas/subscriptions";
-import { hasActiveSubscriptionAccess, isUnlimited, PLAN_CATALOG } from "@stackk-career/schemas/subscriptions";
+import {
+	hasActiveSubscriptionAccess,
+	isUnlimited,
+	LIMIT_KEY_LABELS,
+	PLAN_CATALOG,
+} from "@stackk-career/schemas/subscriptions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -61,12 +66,13 @@ const PAID_PLAN_IDS = ["pro", "max"] as const satisfies readonly PaidPlanIdInput
 const NEAR_LIMIT_RATIO = 0.8;
 
 const USAGE_METRICS: { key: CachedUsageLimitKey; label: string }[] = [
-	{ key: "resumes_total", label: "CVs" },
-	{ key: "resume_creation_generations_per_cycle", label: "Creaciones de CV con AI" },
-	{ key: "conversation_generations_per_cycle", label: "Conversaciones" },
-	{ key: "resume_analyses_per_cycle", label: "Análisis de CV" },
-	{ key: "resume_inline_ai_suggestions", label: "Sugerencias con AI" },
-	{ key: "coaching_sessions_per_cycle", label: "Sesiones de coaching" },
+	{ key: "resumes_total", label: LIMIT_KEY_LABELS.resumes_total },
+	{ key: "resume_creation_generations_per_cycle", label: LIMIT_KEY_LABELS.resume_creation_generations_per_cycle },
+	// { key: "conversation_generations_per_cycle", label: LIMIT_KEY_LABELS.conversation_generations_per_cycle },
+	{ key: "cover_letter_generations_per_cycle", label: LIMIT_KEY_LABELS.cover_letter_generations_per_cycle },
+	{ key: "resume_analyses_per_cycle", label: LIMIT_KEY_LABELS.resume_analyses_per_cycle },
+	{ key: "resume_inline_ai_suggestions", label: LIMIT_KEY_LABELS.resume_inline_ai_suggestions },
+	{ key: "coaching_sessions_per_cycle", label: LIMIT_KEY_LABELS.coaching_sessions_per_cycle },
 ];
 
 const STATUS_BADGE: Record<SubscriptionStatus, { label: string; variant: BadgeProps["variant"] }> = {

@@ -9,6 +9,7 @@ import { formatDate } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ResumeJobTargetPanel } from "@/components/domains/billing/resume-job-target-note";
 import { exportResumeToPdf } from "@/components/domains/resume-document/export-pdf";
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
@@ -17,7 +18,6 @@ import {
 	type AppliedEditRewrites,
 	ResumeAnalysisSection,
 } from "@/components/domains/resume-editor/resume-analysis-section";
-import { ResumeJobTargetPanel } from "@/components/domains/resume-editor/resume-job-target-note";
 import { SectionRail, type SectionRailItem } from "@/components/domains/resume-editor/section-rail";
 import { type ResumeAutosave, useResumeAutosave } from "@/components/domains/resume-editor/use-resume-autosave";
 import Loader from "@/components/loader";

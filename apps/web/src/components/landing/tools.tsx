@@ -47,7 +47,7 @@ const TOOLS: readonly Tool[] = [
 	{
 		index: "03",
 		name: "Cartas de presentación",
-		plan: "Pro y Premium",
+		plan: "Todos los planes",
 		body: "Una carta distinta por cada oferta, en segundos.",
 		icon: EnvelopeSimpleIcon,
 		kind: "ia",

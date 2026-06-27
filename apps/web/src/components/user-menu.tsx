@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { useBillingSheet } from "./domains/billing/use-billing-sheet";
 import { useProfileSheet } from "./domains/profile/use-profile-sheet";
 import { Avatar } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,7 +14,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "./ui/menu";
-import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "./ui/sidebar";
+import { SidebarMenuSkeleton } from "./ui/sidebar";
 import { Skeleton } from "./ui/skeleton";
 
 export default function UserMenu() {
@@ -28,59 +29,55 @@ export default function UserMenu() {
 
 	if (!session) {
 		return (
-			<SidebarMenuItem>
-				<SidebarMenuButton>
-					<SidebarMenuSkeleton />
-				</SidebarMenuButton>
-			</SidebarMenuItem>
+			<Button variant="ghost">
+				<SidebarMenuSkeleton />
+			</Button>
 		);
 	}
 
 	const image = session.user.image;
 
 	return (
-		<SidebarMenuItem>
-			<DropdownMenu>
-				<DropdownMenuTrigger render={<SidebarMenuButton />}>
-					{image && (
-						<Avatar className="size-4">
-							<img alt={session.user.name} height={24} src={image} width={24} />
-						</Avatar>
-					)}
-					{session.user.name}
-				</DropdownMenuTrigger>
+		<DropdownMenu>
+			<DropdownMenuTrigger render={<Button size="sm" variant="ghost" />}>
+				{image && (
+					<Avatar className="size-5">
+						<img alt={session.user.name} height={24} src={image} width={24} />
+					</Avatar>
+				)}
+				{session.user.name}
+			</DropdownMenuTrigger>
 
-				<DropdownMenuContent align="end" className="w-50" side="right">
-					<DropdownMenuGroup>
-						<DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => openProfileSheet()}>
-							<UserCircleIcon />
-							Mi perfil
-						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => openBillingSheet()}>
-							<CreditCardIcon />
-							Suscripción
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							onClick={() => {
-								authClient.signOut({
-									fetchOptions: {
-										onSuccess: () => {
-											navigate({ to: "/" });
-										},
+			<DropdownMenuContent align="end" className="w-50" side="bottom">
+				<DropdownMenuGroup>
+					<DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem onClick={() => openProfileSheet()}>
+						<UserCircleIcon />
+						Mi perfil
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={() => openBillingSheet()}>
+						<CreditCardIcon />
+						Suscripción
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						onClick={() => {
+							authClient.signOut({
+								fetchOptions: {
+									onSuccess: () => {
+										navigate({ to: "/" });
 									},
-								});
-							}}
-							variant="destructive"
-						>
-							<SignOutIcon />
-							Cerrar sesión
-						</DropdownMenuItem>
-					</DropdownMenuGroup>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</SidebarMenuItem>
+								},
+							});
+						}}
+						variant="destructive"
+					>
+						<SignOutIcon />
+						Cerrar sesión
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }

@@ -179,7 +179,7 @@ export const PLANS: readonly Plan[] = [
 			"Score CV ilimitado, con comparación directa contra cada oferta",
 			"La IA reescribe automáticamente las secciones débiles",
 			"CVs ilimitados, una versión distinta por cada puesto",
-			"Cartas de presentación ilimitadas",
+			"5 cartas de presentación al mes",
 			"Optimizador completo para tu LinkedIn",
 		],
 		cta: "Empezar Pro",
@@ -206,8 +206,8 @@ export const PLANS: readonly Plan[] = [
 ];
 
 export const SINGLE_SESSION = {
-	priceSoles: 40,
-	priceUsd: 11,
+	priceSoles: 50,
+	priceUsd: 15,
 	duration: "45 min",
 	tagline: "Prueba el coaching sin suscribirte.",
 	body: "Sesión 1:1 con cualquier coach del equipo, sobre tu caso real. Sin compromiso.",

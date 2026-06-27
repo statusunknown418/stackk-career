@@ -1,4 +1,4 @@
-import { ArrowRightIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, MagnifyingGlassIcon, StarIcon } from "@phosphor-icons/react";
 import type { ResumeListItem } from "@stackk-career/schemas/api/resumes";
 import type { ResumeStatus } from "@stackk-career/schemas/db/resumes";
 import { Link } from "@tanstack/react-router";
@@ -52,7 +52,7 @@ function ResumeSheetPreview({
 
 export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const updatedLabel = formatDistanceToNow(resume.updatedAt, { addSuffix: true, locale: es });
-	const agentCreated = resume.aiMetadata?.agentCreated ?? false;
+
 	const candidateName =
 		[resume.contact?.firstName, resume.contact?.lastName]
 			.map((part) => part?.trim())
@@ -68,14 +68,14 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 		<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
 			<Frame
 				aria-labelledby={`resume-${resume.id}-title`}
-				className="group h-full gap-3 p-3 transition-colors hover:bg-muted"
+				className="group h-full gap-2 p-3 transition-colors hover:bg-muted"
 			>
 				<ResumeSheetPreview detail={contactDetail} name={candidateName} status={resume.status} subtitle={subtitle} />
 
 				<div className="flex items-center justify-between gap-2">
-					<ul aria-label="Etiquetas del CV" className="flex list-none items-center gap-1">
+					<ul aria-label="Etiquetas del CV" className="flex min-w-0 list-none flex-wrap items-center gap-1">
 						{resume.isPrimary && (
-							<li>
+							<li className="flex min-w-0">
 								<Badge size="sm" variant="info">
 									<StarIcon weight="fill" />
 									Principal
@@ -83,17 +83,8 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 							</li>
 						)}
 
-						{agentCreated && (
-							<li>
-								<Badge size="sm" variant="secondary">
-									<SparkleIcon weight="fill" />
-									IA
-								</Badge>
-							</li>
-						)}
-
 						{(resume.jobTargetStatus === "pending" || resume.jobTargetStatus === "fetching") && (
-							<li>
+							<li className="flex min-w-0">
 								<Badge size="sm" variant="secondary">
 									<MagnifyingGlassIcon />
 									Buscando puesto…

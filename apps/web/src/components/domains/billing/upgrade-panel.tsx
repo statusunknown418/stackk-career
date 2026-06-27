@@ -19,7 +19,7 @@ const PREMIUM_FEATURES = [
 	"Análisis detallado de CV",
 	"Más CVs y versiones",
 	"Sugerencias con AI ampliadas",
-	"Cartas de presentación",
+	"Más cartas de presentación",
 ] as const;
 
 interface UpgradePanelProps {

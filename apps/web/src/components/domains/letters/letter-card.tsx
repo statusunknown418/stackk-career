@@ -1,4 +1,6 @@
 import { ArrowRightIcon, ReadCvLogoIcon } from "@phosphor-icons/react";
+import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
+import { normalizeTemplate, TEMPLATE_LABELS } from "@stackk-career/schemas/api/letters";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -7,10 +9,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { Frame, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import type { client } from "@/utils/orpc";
 
-/** Cover-letter row exactly as the oRPC client deserializes it from `letters.list`. */
-type LetterListItem = Awaited<ReturnType<typeof client.letters.list>>[number];
+/** Cover-letter row as returned by the `letters.list` procedure. */
+type LetterListItem = AppRouterOutputs["letters"]["list"][number];
 
 /** Faux letter sheet: a letterhead accent plus the real body preview, reading like a page. */
 function LetterSheetPreview({ preview }: { preview: string | null }) {
@@ -48,16 +49,22 @@ export function LetterCard({ letter }: { letter: LetterListItem }) {
 				<LetterSheetPreview preview={letter.preview} />
 
 				<div className="flex items-center justify-between gap-2">
-					<ul aria-label="Etiquetas de la carta" className="flex min-w-0 list-none items-center gap-1">
-						<li>
+					<ul aria-label="Etiquetas de la carta" className="flex min-w-0 list-none flex-wrap items-center gap-1">
+						<li className="flex min-w-0">
 							<Badge size="sm" variant="secondary">
+								{TEMPLATE_LABELS[normalizeTemplate(letter.template)]}
+							</Badge>
+						</li>
+
+						<li className="flex min-w-0">
+							<Badge className="font-mono" size="sm" variant="outline">
 								{letter.language === "en" ? "EN" : "ES"}
 							</Badge>
 						</li>
 
 						{letter.resumeTitle && (
-							<li className="min-w-0">
-								<Badge className="max-w-full" size="sm" variant="outline">
+							<li className="flex min-w-0">
+								<Badge className="min-w-0 shrink" size="sm" variant="outline">
 									<ReadCvLogoIcon weight="fill" />
 									<span className="min-w-0 truncate">{letter.resumeTitle}</span>
 								</Badge>
@@ -79,7 +86,7 @@ export function LetterCard({ letter }: { letter: LetterListItem }) {
 					</time>
 
 					<span aria-hidden="true" className={cn(buttonVariants({ variant: "secondary" }), "w-full justify-between")}>
-						Ver carta
+						Editar carta
 						<ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" weight="bold" />
 					</span>
 				</div>

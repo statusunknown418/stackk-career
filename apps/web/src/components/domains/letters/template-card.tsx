@@ -1,247 +1,203 @@
-export interface TemplateCardProps {
-	author: string;
-	onClick: () => void;
-	subtitle: string;
-	title: string;
-	type: "centered" | "classic" | "minty" | "blue";
+"use client";
+
+import { CheckIcon } from "@phosphor-icons/react";
+import {
+	type CoverLetterTemplateName,
+	coverLetterTemplateNames,
+	TEMPLATE_OPTIONS,
+} from "@stackk-career/schemas/api/letters";
+import { RadioGroupPrimitive, RadioPrimitive } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
+import { type LetterAccent, TEMPLATE_ACCENTS } from "./letter-accents";
+
+const SAMPLE_NAME = "Brian Wayne";
+const SAMPLE_ROLE = "Product Manager";
+const SAMPLE_GREETING = "Estimado equipo:";
+const BODY_BARS = [
+	{ id: "l1", width: "w-full" },
+	{ id: "l2", width: "w-11/12" },
+	{ id: "l3", width: "w-full" },
+	{ id: "l4", width: "w-3/4" },
+] as const;
+
+/** Faint paragraph placeholder lines, neutral so they read in light and dark. */
+function BodyLines() {
+	return (
+		<div className="flex flex-col gap-1">
+			{BODY_BARS.map(({ id, width }) => (
+				<span className={cn("h-1 rounded-full bg-foreground/10", width)} key={id} />
+			))}
+		</div>
+	);
 }
 
-export function TemplateCard({ title, subtitle, author, type, onClick }: TemplateCardProps) {
-	const isFormal = type === "centered" || type === "classic";
-	const isMinty = type === "minty";
-	const isBlue = type === "blue";
+/** Small "Atentamente, + name" sign-off used by the left-aligned typographic minis. */
+function SignOff() {
+	return (
+		<div className="mt-auto flex flex-col gap-0.5">
+			<span className="text-[5px] text-muted-foreground leading-none">Atentamente,</span>
+			<span className="text-[6px] text-foreground leading-none">{SAMPLE_NAME}</span>
+		</div>
+	);
+}
 
-	let hoverBorderClass = "group-hover:border-primary/45";
-	let glowBgClass = "bg-primary";
-	let bgHoverClass = "";
+const PAGE_BASE = "flex aspect-3/4 w-full flex-col overflow-hidden rounded-md border bg-card text-card-foreground";
 
-	if (isFormal) {
-		hoverBorderClass = "group-hover:border-indigo-500/50";
-		glowBgClass = "bg-indigo-500";
-		bgHoverClass = "group-hover:bg-indigo-500/5";
-	} else if (isMinty) {
-		hoverBorderClass = "group-hover:border-emerald-500/50";
-		glowBgClass = "bg-emerald-500";
-		bgHoverClass = "group-hover:bg-emerald-500/5";
-	} else if (isBlue) {
-		hoverBorderClass = "group-hover:border-blue-500/50";
-		glowBgClass = "bg-blue-500";
-		bgHoverClass = "group-hover:bg-blue-500/5";
+function StandardThumb() {
+	return (
+		<div aria-hidden="true" className={cn(PAGE_BASE, "gap-1.5 p-2.5")}>
+			<span className="text-[7px] text-foreground leading-none">{SAMPLE_NAME}</span>
+			<span className="text-[5px] text-muted-foreground leading-none">{SAMPLE_ROLE}</span>
+			<span className="mt-0.5 h-px w-full bg-border" />
+			<span className="ml-auto text-[5px] text-muted-foreground leading-none">12 jun 2026</span>
+			<span className="text-[5.5px] text-foreground leading-none">{SAMPLE_GREETING}</span>
+			<BodyLines />
+			<SignOff />
+		</div>
+	);
+}
+
+function ModernThumb() {
+	return (
+		<div aria-hidden="true" className={cn(PAGE_BASE, "gap-1.5 p-2.5")}>
+			<div className="flex flex-col gap-0.5">
+				<span className="text-[11px] text-foreground leading-none tracking-tight">{SAMPLE_NAME}</span>
+				<span className="text-[5px] text-muted-foreground uppercase leading-none tracking-wider">{SAMPLE_ROLE}</span>
+			</div>
+			<span className="h-0.5 w-6 rounded-full bg-foreground/30" />
+			<span className="mt-0.5 text-[5.5px] text-foreground leading-none">{SAMPLE_GREETING}</span>
+			<BodyLines />
+			<SignOff />
+		</div>
+	);
+}
+
+function EditorialThumb() {
+	return (
+		<div aria-hidden="true" className={cn(PAGE_BASE, "items-center gap-1.5 p-2.5")}>
+			<span className="mt-1 font-serif text-[12px] text-foreground leading-none">{SAMPLE_NAME}</span>
+			<span className="text-[5px] text-muted-foreground uppercase leading-none tracking-[0.18em]">{SAMPLE_ROLE}</span>
+			<span className="h-px w-5 bg-border" />
+			<span className="mt-0.5 w-full text-center text-[5.5px] text-foreground leading-none">{SAMPLE_GREETING}</span>
+			<BodyLines />
+			<span className="mt-auto font-serif text-[8px] text-foreground leading-none">{SAMPLE_NAME}</span>
+		</div>
+	);
+}
+
+function CreativeThumb({ accent }: { accent: LetterAccent }) {
+	return (
+		<div aria-hidden="true" className={PAGE_BASE}>
+			<div className={cn("flex flex-col gap-0.5 px-2.5 py-2", accent.band, accent.bandText)}>
+				<span className="text-[8px] leading-none">{SAMPLE_NAME}</span>
+				<span className={cn("text-[4.5px] uppercase leading-none tracking-wider", accent.bandTextMuted)}>
+					{SAMPLE_ROLE}
+				</span>
+			</div>
+			<div className="flex flex-1 flex-col gap-1.5 p-2.5">
+				<span className="text-[5.5px] text-foreground leading-none">{SAMPLE_GREETING}</span>
+				<BodyLines />
+				<span className="mt-auto text-[6px] text-foreground leading-none">{SAMPLE_NAME}</span>
+			</div>
+		</div>
+	);
+}
+
+function VibrantThumb({ accent }: { accent: LetterAccent }) {
+	return (
+		<div aria-hidden="true" className={cn(PAGE_BASE, "gap-1.5 p-2.5")}>
+			<div className="flex items-center gap-1.5">
+				<span
+					className={cn(
+						"flex size-6 shrink-0 items-center justify-center rounded-md text-[7px] leading-none",
+						accent.band,
+						accent.bandText
+					)}
+				>
+					BW
+				</span>
+				<div className="flex flex-col gap-0.5">
+					<span className="text-[8px] text-foreground leading-none">{SAMPLE_NAME}</span>
+					<span className={cn("text-[4.5px] uppercase leading-none tracking-wider", accent.text)}>{SAMPLE_ROLE}</span>
+				</div>
+			</div>
+			<span className="mt-0.5 text-[5.5px] text-foreground leading-none">{SAMPLE_GREETING}</span>
+			<BodyLines />
+			<span className={cn("mt-auto text-[6px] leading-none", accent.text)}>{SAMPLE_NAME}</span>
+		</div>
+	);
+}
+
+/**
+ * Miniature letter preview that conveys a template's identity (alignment, type family,
+ * hierarchy and — for the playful templates — accent color) at thumbnail scale, using
+ * semantic tokens so it renders correctly in dark mode with no hardcoded paper colors.
+ */
+function TemplateThumbnail({ template }: { template: CoverLetterTemplateName }) {
+	if (template === "modern") {
+		return <ModernThumb />;
 	}
+	if (template === "editorial") {
+		return <EditorialThumb />;
+	}
+	const accent = TEMPLATE_ACCENTS[template];
+	if (template === "creative" && accent) {
+		return <CreativeThumb accent={accent} />;
+	}
+	if (template === "vibrant" && accent) {
+		return <VibrantThumb accent={accent} />;
+	}
+	return <StandardThumb />;
+}
+
+interface TemplatePickerProps {
+	disabled?: boolean;
+	id?: string;
+	onValueChange: (value: CoverLetterTemplateName) => void;
+	value: CoverLetterTemplateName;
+}
+
+/**
+ * Card-selector (accessible radio group) for the letter's template. Each option shows a live,
+ * token-driven thumbnail; the selected option's description sits below the grid.
+ */
+export function TemplatePicker({ disabled, id, onValueChange, value }: TemplatePickerProps) {
+	const selected = TEMPLATE_OPTIONS.find((option) => option.value === value);
 
 	return (
-		<button
-			className="group flex w-full cursor-pointer flex-col gap-2.5 border-none bg-transparent p-0 text-left outline-none"
-			onClick={onClick}
-			type="button"
-		>
-			{/* Mock Page Preview */}
-			<div
-				className={`relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white p-0 shadow-sm transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-lg ${hoverBorderClass} ${bgHoverClass}`}
+		<div className="flex flex-col gap-2.5">
+			<RadioGroupPrimitive
+				className="grid grid-cols-4 gap-2.5"
+				disabled={disabled}
+				id={id}
+				onValueChange={(next) => {
+					if (typeof next === "string" && (coverLetterTemplateNames as readonly string[]).includes(next)) {
+						onValueChange(next as CoverLetterTemplateName);
+					}
+				}}
+				value={value}
 			>
-				{/* Glow on hover */}
-				<span
-					className={`absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${glowBgClass}`}
-				/>
-
-				{type === "centered" && (
-					<div className="flex h-full flex-col gap-2.5 p-4 text-neutral-600">
-						{/* Centered Name */}
-						<div className="mt-1 text-center font-semibold text-neutral-800 text-xs">{author}</div>
-						<div className="-mt-1.5 text-center text-neutral-500" style={{ fontSize: "7px" }}>
-							Consultor de Desarrollo de Negocios
-						</div>
-						<div className="border-b pb-2 text-center text-neutral-400 leading-relaxed" style={{ fontSize: "6px" }}>
-							correo@ejemplo.com | +51 987 654 | linkedin.com/in/usuario
+				{TEMPLATE_OPTIONS.map((option) => (
+					<RadioPrimitive.Root
+						aria-label={option.label}
+						className="group/tpl flex shrink-0 cursor-pointer flex-col gap-2 rounded-xl border bg-transparent p-2 text-left outline-none transition-colors hover:border-foreground/20 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-disabled:cursor-not-allowed data-checked:border-primary data-checked:bg-accent/50 data-disabled:opacity-64"
+						key={option.value}
+						value={option.value}
+					>
+						<div className="relative">
+							<TemplateThumbnail template={option.value} />
+							<span className="absolute top-1 right-1 hidden size-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm group-data-checked/tpl:flex">
+								<CheckIcon className="size-2.5" weight="bold" />
+							</span>
 						</div>
 
-						{/* Letter recipient */}
-						<div className="mt-2 font-medium text-neutral-700 leading-tight" style={{ fontSize: "8px" }}>
-							Sofía Rodríguez
-						</div>
-						<div className="-mt-1 text-neutral-500" style={{ fontSize: "7px" }}>
-							Meta Platforms Inc.
-						</div>
-
-						{/* Letter lines */}
-						<div className="mt-2 flex flex-col gap-1.5">
-							<div className="mx-auto h-1.5 w-full rounded-full bg-neutral-200/70" />
-							<div className="mx-auto h-1.5 w-11/12 rounded-full bg-neutral-200/70" />
-							<div className="mx-auto h-1.5 w-5/6 rounded-full bg-neutral-200/70" />
-							<div className="mx-auto h-1.5 w-4/5 rounded-full bg-neutral-200/70" />
-						</div>
-
-						{/* Signature */}
-						<div className="mt-auto text-center text-neutral-700" style={{ fontSize: "8px" }}>
-							Atentamente,
-						</div>
-						<div className="text-center font-semibold text-neutral-800" style={{ fontSize: "8px" }}>
-							{author}
-						</div>
-					</div>
-				)}
-
-				{type === "classic" && (
-					<div className="flex h-full flex-col gap-2.5 p-4 text-neutral-500">
-						{/* Left-aligned name with border */}
-						<div className="mt-1 font-semibold text-neutral-800 text-xs">{author}</div>
-						<div className="-mt-1 text-neutral-500" style={{ fontSize: "7px" }}>
-							Industrias Kings S.A. | andres@ejemplo.com
-						</div>
-						<div className="w-full border-neutral-200 border-b" />
-
-						{/* Date */}
-						<div className="mt-1 text-right text-neutral-400" style={{ fontSize: "6px" }}>
-							13 de junio, 2026
-						</div>
-
-						{/* Recipient */}
-						<div className="font-medium text-neutral-700 leading-tight" style={{ fontSize: "8px" }}>
-							Sr. Bermúdez
-						</div>
-
-						{/* Body */}
-						<div className="mt-1 flex flex-col gap-1.5">
-							<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-							<div className="h-1.5 w-11/12 rounded-full bg-neutral-200/70" />
-							<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-							<div className="h-1.5 w-4/5 rounded-full bg-neutral-200/70" />
-						</div>
-
-						{/* Signature */}
-						<div className="mt-auto text-neutral-700" style={{ fontSize: "8px" }}>
-							Atentamente,
-						</div>
-						<div className="font-semibold text-neutral-800" style={{ fontSize: "8px" }}>
-							{author}
-						</div>
-					</div>
-				)}
-
-				{type === "minty" && (
-					<div className="flex h-full w-full bg-white">
-						{/* Left Sidebar */}
-						<div
-							className="flex shrink-0 flex-col gap-2.5 border-emerald-100/80 border-r bg-emerald-50/60 p-2"
-							style={{ width: "32%" }}
-						>
-							<div
-								className="flex size-6 items-center justify-center rounded-full bg-emerald-500 font-bold text-white shadow-xs"
-								style={{ fontSize: "8px" }}
-							>
-								{author.charAt(0)}
-							</div>
-							<div className="flex flex-col gap-0.5">
-								<div className="truncate font-bold text-emerald-800 leading-tight" style={{ fontSize: "7px" }}>
-									{author}
-								</div>
-								<div className="truncate text-emerald-600 leading-none" style={{ fontSize: "5px" }}>
-									Project Manager
-								</div>
-							</div>
-
-							{/* Mini contact detail blocks */}
-							<div className="mt-2 flex flex-col gap-1">
-								<div className="h-1 w-full rounded-full bg-emerald-600/15" />
-								<div className="h-1 w-4/5 rounded-full bg-emerald-600/15" />
-								<div className="h-1 w-5/6 rounded-full bg-emerald-600/15" />
-							</div>
-						</div>
-
-						{/* Right Content */}
-						<div className="flex flex-1 flex-col gap-2 p-2.5">
-							{/* Header / Date */}
-							<div className="text-right text-neutral-400" style={{ fontSize: "5px" }}>
-								14 de junio, 2026
-							</div>
-
-							<div className="mt-1 font-bold text-neutral-800 leading-tight" style={{ fontSize: "7px" }}>
-								Estimado equipo:
-							</div>
-
-							{/* Body lines */}
-							<div className="mt-1 flex flex-col gap-1.5">
-								<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-11/12 rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-4/5 rounded-full bg-neutral-200/70" />
-							</div>
-
-							{/* Signature */}
-							<div className="mt-auto flex flex-col gap-0.5">
-								<div className="text-neutral-500" style={{ fontSize: "6px" }}>
-									Un cordial saludo,
-								</div>
-								<div className="font-bold text-emerald-700 leading-none" style={{ fontSize: "7.5px" }}>
-									{author}
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{type === "blue" && (
-					<div className="flex h-full w-full flex-col bg-white">
-						{/* Top Banner */}
-						<div className="relative flex shrink-0 flex-col gap-0.5 bg-blue-600 p-2.5 pb-4 text-white">
-							<div className="truncate font-bold uppercase leading-tight tracking-wide" style={{ fontSize: "9px" }}>
-								{author}
-							</div>
-							<div className="truncate text-blue-100/90 leading-none" style={{ fontSize: "5.5px" }}>
-								Asistente de Marketing
-							</div>
-
-							{/* Floating round initials icon */}
-							<div
-								className="absolute right-3 -bottom-3 flex size-6 items-center justify-center rounded-full border-2 border-white bg-blue-50 font-bold text-blue-600 shadow-sm"
-								style={{ fontSize: "8px" }}
-							>
-								{author
-									.split(" ")
-									.map((n) => n[0])
-									.join("")}
-							</div>
-						</div>
-
-						{/* Main Area */}
-						<div className="flex flex-1 flex-col gap-2 p-2.5 pt-3.5">
-							{/* Recipient */}
-							<div className="mt-1 font-semibold text-blue-800 leading-tight" style={{ fontSize: "7px" }}>
-								Atención al Equipo de Reclutamiento
-							</div>
-							<div className="-mt-1 text-neutral-400" style={{ fontSize: "5.5px" }}>
-								Tech Solutions S.A.
-							</div>
-
-							{/* Body lines */}
-							<div className="mt-1 flex flex-col gap-1.5">
-								<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-11/12 rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-full rounded-full bg-neutral-200/70" />
-								<div className="h-1.5 w-4/5 rounded-full bg-neutral-200/70" />
-							</div>
-
-							{/* Signature */}
-							<div className="mt-auto flex flex-col gap-0.5">
-								<div className="font-semibold text-blue-600" style={{ fontSize: "6px" }}>
-									Atentamente,
-								</div>
-								<div className="font-bold text-neutral-800 leading-none" style={{ fontSize: "7.5px" }}>
-									{author}
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-			</div>
-
-			{/* Card Details */}
-			<div className="flex flex-col gap-0.5">
-				<h4 className="truncate font-medium text-foreground text-xs transition-colors group-hover:text-primary">
-					{title}
-				</h4>
-				<p className="truncate text-muted-foreground text-xs">{subtitle}</p>
-			</div>
-		</button>
+						<span className="text-center text-muted-foreground text-xs leading-none group-data-checked/tpl:text-foreground">
+							{option.label}
+						</span>
+					</RadioPrimitive.Root>
+				))}
+			</RadioGroupPrimitive>
+			{selected ? <p className="text-muted-foreground text-xs leading-snug">{selected.description}</p> : null}
+		</div>
 	);
 }

@@ -1,9 +1,11 @@
 import type { CoverLetter } from "@stackk-career/schemas/ai/cover-letter";
-import type { CoverLetterTemplate } from "@stackk-career/schemas/api/letters";
+import type { CoverLetterTemplate, CoverLetterTemplateName } from "@stackk-career/schemas/api/letters";
+import { normalizeTemplate } from "@stackk-career/schemas/api/letters";
 import type { DeepPartial } from "ai";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { jsPDF } from "jspdf";
+import { type LetterAccent, TEMPLATE_ACCENTS } from "./letter-accents";
 
 export const EMPTY_SECTION_MESSAGE = "Ninguna sección puede quedar vacía.";
 
@@ -73,11 +75,166 @@ export function toCompleteCoverLetter(artifact: DeepPartial<CoverLetter> | undef
 	} as CoverLetter;
 }
 
+type Rgb = readonly [number, number, number];
+
+interface LetterheadParams {
+	accent: Rgb;
+	buildContacts: (sep: string) => string;
+	doc: jsPDF;
+	faint: Rgb;
+	family: string;
+	margin: number;
+	muted: Rgb;
+	name: string;
+	startY: number;
+	t: CoverLetterTemplateName;
+	title: string;
+	tplAccent: LetterAccent | undefined;
+}
+
+/** Creative letterhead: a full-width brand-color band with the name reversed out. */
+function drawBandHead(params: LetterheadParams, tpl: LetterAccent): number {
+	const { buildContacts, doc, family, margin, muted, name, title } = params;
+	const bandHeight = title ? 30 : 24;
+	doc.setFillColor(tpl.pdfFill[0], tpl.pdfFill[1], tpl.pdfFill[2]);
+	doc.rect(0, 0, 210, bandHeight, "F");
+	doc.setTextColor(tpl.pdfInk[0], tpl.pdfInk[1], tpl.pdfInk[2]);
+	doc.setFont(family, "bold");
+	doc.setFontSize(20);
+	doc.text(name, margin, 15);
+	if (title) {
+		doc.setFont(family, "normal");
+		doc.setFontSize(10);
+		doc.text(title.toUpperCase(), margin, 22);
+	}
+	let cursorY = bandHeight + 6;
+	doc.setFont(family, "normal");
+	doc.setFontSize(9);
+	doc.setTextColor(muted[0], muted[1], muted[2]);
+	doc.text(buildContacts("   ·   "), margin, cursorY);
+	cursorY += 8;
+	return cursorY;
+}
+
+/** Vibrant letterhead: a colored monogram tile of the candidate's initials beside the name. */
+function drawMonogramHead(params: LetterheadParams, tpl: LetterAccent): number {
+	const { accent, buildContacts, doc, family, margin, muted, name, startY, title } = params;
+	const initials =
+		name
+			.split(" ")
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((word) => word[0]?.toUpperCase() ?? "")
+			.join("") || "·";
+	const tileSize = 14;
+	const tileTop = startY - 5;
+	const textX = margin + tileSize + 5;
+	let cursorY = startY;
+
+	doc.setFillColor(tpl.pdfFill[0], tpl.pdfFill[1], tpl.pdfFill[2]);
+	doc.roundedRect(margin, tileTop, tileSize, tileSize, 2.5, 2.5, "F");
+	doc.setTextColor(tpl.pdfInk[0], tpl.pdfInk[1], tpl.pdfInk[2]);
+	doc.setFont(family, "bold");
+	doc.setFontSize(11);
+	doc.text(initials, margin + tileSize / 2, tileTop + tileSize / 2 + 2, { align: "center" });
+
+	doc.setFont(family, "bold");
+	doc.setFontSize(18);
+	doc.setTextColor(accent[0], accent[1], accent[2]);
+	doc.text(name, textX, cursorY);
+	cursorY += 6;
+
+	if (title) {
+		doc.setFont(family, "normal");
+		doc.setFontSize(9.5);
+		doc.setTextColor(tpl.pdfText[0], tpl.pdfText[1], tpl.pdfText[2]);
+		doc.text(title.toUpperCase(), textX, cursorY);
+		cursorY += 5;
+	}
+
+	cursorY = Math.max(cursorY, tileTop + tileSize + 5);
+	doc.setFont(family, "normal");
+	doc.setFontSize(9);
+	doc.setTextColor(muted[0], muted[1], muted[2]);
+	doc.text(buildContacts("   ·   "), margin, cursorY);
+	cursorY += 8;
+	return cursorY;
+}
+
+/** Draws the template-specific letterhead starting at `startY`; returns the cursor Y below it. */
+function drawLetterhead(params: LetterheadParams): number {
+	const { accent, buildContacts, doc, faint, family, margin, muted, name, startY, t, title, tplAccent } = params;
+	if (t === "creative" && tplAccent) {
+		return drawBandHead(params, tplAccent);
+	}
+	if (t === "vibrant" && tplAccent) {
+		return drawMonogramHead(params, tplAccent);
+	}
+	let cursorY = startY;
+	if (t === "editorial") {
+		doc.setFont(family, "bold");
+		doc.setFontSize(22);
+		doc.setTextColor(...accent);
+		doc.text(name, 105, cursorY, { align: "center" });
+		cursorY += 8;
+
+		if (title) {
+			doc.setFont(family, "normal");
+			doc.setFontSize(9.5);
+			doc.setTextColor(...muted);
+			doc.text(title.toUpperCase(), 105, cursorY, { align: "center" });
+			cursorY += 5;
+		}
+
+		doc.setFont(family, "normal");
+		doc.setFontSize(9);
+		doc.setTextColor(...faint);
+		doc.text(buildContacts("   |   "), 105, cursorY, { align: "center" });
+		cursorY += 5;
+
+		doc.setDrawColor(210, 210, 210);
+		doc.setLineWidth(0.3);
+		doc.line(95, cursorY, 115, cursorY);
+		cursorY += 8;
+	} else {
+		doc.setFont(family, "bold");
+		doc.setFontSize(20);
+		doc.setTextColor(...accent);
+		doc.text(name, margin, cursorY);
+		cursorY += 7;
+
+		if (title) {
+			doc.setFont(family, "normal");
+			doc.setFontSize(10);
+			doc.setTextColor(...muted);
+			doc.text(t === "modern" ? title.toUpperCase() : title, margin, cursorY);
+			cursorY += 5;
+		}
+
+		doc.setFont(family, "normal");
+		doc.setFontSize(9);
+		doc.setTextColor(...muted);
+		doc.text(buildContacts("   ·   "), margin, cursorY);
+		cursorY += 4;
+
+		doc.setDrawColor(205, 205, 205);
+		if (t === "modern") {
+			doc.setLineWidth(0.6);
+			doc.line(margin, cursorY, margin + 18, cursorY);
+		} else {
+			doc.setLineWidth(0.4);
+			doc.line(margin, cursorY, 210 - margin, cursorY);
+		}
+		cursorY += 8;
+	}
+	return cursorY;
+}
+
 /**
- * Build and download the letter PDF, paginating line by line, styled according to the
- * selected visual template (centered, classic, minty, blue).
+ * Build and download the letter PDF, paginating line by line, styled to match the selected
+ * typography template: `standard` and `modern` use a left-aligned sans letterhead, `editorial`
+ * a centered serif one. Print output stays on white paper with neutral ink.
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: PDF generation template orchestration has high complexity
 export function downloadCoverLetterPdf(
 	letter: CoverLetter,
 	template?: CoverLetterTemplate,
@@ -106,10 +263,15 @@ export function downloadCoverLetterPdf(
 
 	// Resolve date
 	const todayDateStr = letter.dateStr || format(new Date(), "PPP", { locale: es });
+	const t = normalizeTemplate(template);
+	const tplAccent = TEMPLATE_ACCENTS[t];
+	const family = t === "editorial" ? "times" : "helvetica";
+	const centered = t === "editorial";
+	const buildContacts = (sep: string) => [email, phone, linkedin, address, website].filter(Boolean).join(sep);
 
 	let cursorY = margin;
-	let contentWidth = 210 - margin * 2;
-	let startX = margin;
+	const contentWidth = 210 - margin * 2;
+	const startX = margin;
 
 	const writeBlockAtX = (
 		value: string,
@@ -163,244 +325,41 @@ export function downloadCoverLetterPdf(
 		cursorY += 2;
 	};
 
-	if (template === "centered") {
-		// --- Centered Header ---
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(18);
-		doc.setTextColor(30, 30, 30);
-		doc.text(name, 105, cursorY, { align: "center" });
-		cursorY += 6;
+	const accent: [number, number, number] = [40, 40, 40];
+	const muted: [number, number, number] = [110, 110, 110];
+	const faint: [number, number, number] = [150, 150, 150];
 
-		if (title) {
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10);
-			doc.setTextColor(100, 100, 100);
-			doc.text(title, 105, cursorY, { align: "center" });
-			cursorY += 5;
-		}
+	cursorY = drawLetterhead({
+		accent,
+		buildContacts,
+		doc,
+		faint,
+		family,
+		margin,
+		muted,
+		name,
+		startY: cursorY,
+		t,
+		title,
+		tplAccent,
+	});
 
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(8.5);
-		doc.setTextColor(120, 120, 120);
-		const contactParts = [email, phone, linkedin];
-		if (address) {
-			contactParts.push(address);
-		}
-		if (website) {
-			contactParts.push(website);
-		}
-		doc.text(contactParts.join("   |   "), 105, cursorY, { align: "center" });
-		cursorY += 5;
+	doc.setFont(family, "normal");
+	doc.setFontSize(9);
+	doc.setTextColor(...faint);
+	doc.text(todayDateStr, 210 - margin, cursorY, { align: "right" });
+	cursorY += 4;
 
-		doc.setDrawColor(220, 220, 220);
-		doc.setLineWidth(0.3);
-		doc.line(margin, cursorY, 210 - margin, cursorY);
-		cursorY += 8;
+	writeRecipientBlock("left");
+	cursorY += 4;
 
-		// Date (right aligned)
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(9);
-		doc.setTextColor(120, 120, 120);
-		doc.text(todayDateStr, 210 - margin, cursorY, { align: "right" });
-		cursorY += 4;
+	doc.setTextColor(...accent);
+	doc.setFontSize(11);
 
-		// Recipient (left aligned)
-		writeRecipientBlock("left");
-		cursorY += 4;
-
-		doc.setTextColor(40, 40, 40);
-		doc.setFontSize(11);
-	} else if (template === "classic") {
-		// --- Classic Header ---
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(20);
-		doc.setTextColor(30, 30, 30);
-		doc.text(name, margin, cursorY);
-		cursorY += 7;
-
-		if (title) {
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10.5);
-			doc.setTextColor(100, 100, 100);
-			doc.text(title, margin, cursorY);
-			cursorY += 5;
-		}
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(9);
-		doc.setTextColor(100, 100, 100);
-		const contactParts = [email, phone, linkedin];
-		if (address) {
-			contactParts.push(address);
-		}
-		if (website) {
-			contactParts.push(website);
-		}
-		doc.text(contactParts.join("   ·   "), margin, cursorY);
-		cursorY += 4;
-
-		doc.setDrawColor(200, 200, 200);
-		doc.setLineWidth(0.5);
-		doc.line(margin, cursorY, 210 - margin, cursorY);
-		cursorY += 8;
-
-		// Date (right aligned)
-		doc.setFontSize(9);
-		doc.setTextColor(120, 120, 120);
-		doc.text(todayDateStr, 210 - margin, cursorY, { align: "right" });
-		cursorY += 4;
-
-		// Recipient (left aligned)
-		writeRecipientBlock("left");
-		cursorY += 4;
-
-		doc.setTextColor(40, 40, 40);
-		doc.setFontSize(11);
-	} else if (template === "minty") {
-		// --- Minty Header Banner ---
-		doc.setFillColor(235, 247, 240);
-		doc.rect(0, 0, 210, 45, "F");
-
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(20);
-		doc.setTextColor(16, 120, 75);
-		doc.text(name, margin, 20);
-
-		if (title) {
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(10);
-			doc.setTextColor(60, 140, 100);
-			doc.text(title, margin, 26);
-		}
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(10);
-		doc.setTextColor(60, 140, 100);
-		doc.text("CARTA DE PRESENTACIÓN", 210 - margin, 20, { align: "right" });
-
-		cursorY = 55;
-		startX = 70;
-		contentWidth = 210 - margin - startX;
-
-		let leftY = cursorY;
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(9);
-		doc.setTextColor(16, 120, 75);
-		doc.text("CONTACTO", margin, leftY);
-		leftY += 6;
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(8);
-		doc.setTextColor(80, 80, 80);
-
-		doc.text("Email:", margin, leftY);
-		leftY += 4;
-		doc.text(email, margin, leftY);
-		leftY += 6;
-
-		doc.text("Teléfono:", margin, leftY);
-		leftY += 4;
-		doc.text(phone, margin, leftY);
-		leftY += 6;
-
-		doc.text("LinkedIn:", margin, leftY);
-		leftY += 4;
-		doc.text(linkedin, margin, leftY);
-		leftY += 6;
-
-		if (address) {
-			doc.text("Dirección:", margin, leftY);
-			leftY += 4;
-			doc.text(address, margin, leftY);
-			leftY += 6;
-		}
-
-		if (website) {
-			doc.text("Web:", margin, leftY);
-			leftY += 4;
-			doc.text(website, margin, leftY);
-			leftY += 8;
-		}
-
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(9);
-		doc.setTextColor(16, 120, 75);
-		doc.text("FECHA", margin, leftY);
-		leftY += 6;
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(8);
-		doc.setTextColor(80, 80, 80);
-		doc.text(todayDateStr, margin, leftY);
-
-		// Print recipient at start of content on the right column
-		writeRecipientBlock("left");
-		cursorY = Math.max(cursorY, leftY);
-
-		doc.setTextColor(40, 40, 40);
-		doc.setFontSize(10.5);
-	} else if (template === "blue") {
-		// --- Blue Header ---
-		doc.setFont("helvetica", "bold");
-		doc.setFontSize(22);
-		doc.setTextColor(30, 100, 200);
-		doc.text(name, 105, cursorY, { align: "center" });
-		cursorY += 7;
-
-		if (title) {
-			doc.setFont("helvetica", "normal");
-			doc.setFontSize(11);
-			doc.setTextColor(100, 100, 100);
-			doc.text(title, 105, cursorY, { align: "center" });
-			cursorY += 5;
-		}
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(9.5);
-		doc.setTextColor(100, 100, 100);
-		doc.text("CARTA DE PRESENTACIÓN", 105, cursorY, { align: "center" });
-		cursorY += 6;
-
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(8.5);
-		doc.setTextColor(120, 120, 120);
-		const contactParts = [email, phone, linkedin];
-		if (address) {
-			contactParts.push(address);
-		}
-		if (website) {
-			contactParts.push(website);
-		}
-		doc.text(contactParts.join("   |   "), 105, cursorY, { align: "center" });
-		cursorY += 4;
-
-		doc.setDrawColor(30, 100, 200);
-		doc.setLineWidth(1);
-		doc.line(margin, cursorY, 210 - margin, cursorY);
-		cursorY += 10;
-
-		// Date (right aligned)
-		doc.setFontSize(9);
-		doc.setTextColor(120, 120, 120);
-		doc.text(todayDateStr, 210 - margin, cursorY, { align: "right" });
-		cursorY += 4;
-
-		// Recipient (left aligned)
-		writeRecipientBlock("left");
-		cursorY += 4;
-
-		doc.setTextColor(40, 40, 40);
-		doc.setFontSize(11);
-	} else {
-		// Default
-		doc.setFont("helvetica", "normal");
-		doc.setFontSize(11);
-	}
-
-	doc.setFont(doc.getFont().fontName, "bold");
+	doc.setFont(family, "bold");
 	writeBlockAtX(htmlToText(letter.greeting), startX, contentWidth, 8);
 
-	doc.setFont(doc.getFont().fontName, "normal");
+	doc.setFont(family, "normal");
 	for (const p of htmlToText(letter.body).split("\n\n")) {
 		const trimmed = p.trim();
 		if (trimmed) {
@@ -411,21 +370,13 @@ export function downloadCoverLetterPdf(
 	cursorY += 4;
 	writeBlockAtX(htmlToText(letter.closing), startX, contentWidth, 8);
 
-	if (template === "centered") {
-		doc.setFont(doc.getFont().fontName, "bold");
-		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0, "center");
-	} else if (template === "blue") {
-		doc.setFont(doc.getFont().fontName, "bold");
-		doc.setTextColor(30, 100, 200);
-		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0);
-	} else if (template === "minty") {
-		doc.setFont(doc.getFont().fontName, "bold");
-		doc.setTextColor(16, 120, 75);
-		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0);
+	doc.setFont(family, "bold");
+	if (tplAccent) {
+		doc.setTextColor(tplAccent.pdfText[0], tplAccent.pdfText[1], tplAccent.pdfText[2]);
 	} else {
-		doc.setFont(doc.getFont().fontName, "bold");
-		writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0);
+		doc.setTextColor(...accent);
 	}
+	writeBlockAtX(htmlToText(letter.signature), startX, contentWidth, 0, centered ? "center" : "left");
 
 	doc.save("carta-de-presentacion.pdf");
 }
