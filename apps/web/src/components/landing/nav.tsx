@@ -70,7 +70,7 @@ export function LandingNav() {
 				<div className="ml-auto flex items-center gap-1.5 md:ml-0">
 					<Link
 						className="hidden rounded-full px-3 py-1.5 font-medium text-foreground/65 text-sm transition-colors hover:text-foreground md:inline-flex"
-						to="/waitlist"
+						to="/login"
 					>
 						Iniciar sesión
 					</Link>
@@ -84,7 +84,7 @@ export function LandingNav() {
 								initial={{ opacity: 0, scale: 0.85, width: 0 }}
 								transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
 							>
-								<Link className={buttonVariants({ size: "sm" })} to="/waitlist">
+								<Link className={buttonVariants({ size: "sm" })} to="/login">
 									Analiza mi CV gratis
 									<ArrowRightIcon weight="bold" />
 								</Link>
@@ -144,7 +144,7 @@ function MobileMenu() {
 							render={
 								<Link
 									className="rounded-lg px-3 py-2 font-medium text-foreground/75 text-sm transition-colors hover:bg-muted hover:text-foreground"
-									to="/waitlist"
+									to="/login"
 								>
 									Iniciar sesión
 								</Link>
@@ -152,7 +152,7 @@ function MobileMenu() {
 						/>
 						<SheetClose
 							render={
-								<Link className={cn(buttonVariants({ size: "default" }), "w-full justify-center")} to="/waitlist">
+								<Link className={cn(buttonVariants({ size: "default" }), "w-full justify-center")} to="/login">
 									Analiza mi CV gratis
 									<ArrowRightIcon weight="bold" />
 								</Link>

@@ -135,7 +135,7 @@ function PlanCard({ plan, idx }: { plan: Plan; idx: number }) {
 			<Magnetic block className="mt-8" strength={0.22}>
 				<Link
 					className={cn(buttonVariants({ size: "lg", variant: featured ? "default" : "outline" }), "w-full")}
-					to="/waitlist"
+					to="/login"
 				>
 					{plan.cta}
 					<ArrowRightIcon weight="bold" />
@@ -198,7 +198,7 @@ function SingleSessionStrip() {
 							</p>
 						</div>
 						<Magnetic className="w-full shrink-0 sm:w-auto" strength={0.25}>
-							<Link className={cn(buttonVariants({ size: "default", variant: "outline" }))} to="/waitlist">
+							<Link className={cn(buttonVariants({ size: "default", variant: "outline" }))} to="/login">
 								{SINGLE_SESSION.cta}
 								<ArrowRightIcon weight="bold" />
 							</Link>

@@ -15,9 +15,5 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
-	return (
-		<section className="grid grid-cols-1 place-items-center">
-			<LoginForm />
-		</section>
-	);
+	return <LoginForm />;
 }
