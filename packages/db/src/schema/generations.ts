@@ -32,6 +32,13 @@ export const generations = sqliteTable(
 		owner: t.text().references(() => user.id),
 
 		title: t.text(),
+
+		// For type="cover-letter": a short, human label CASEY generates for the letter
+		// (e.g. "Desarrollador Frontend · Google"), shown on the list card. Kept separate
+		// from `title` — which stays the raw job position and is fed back to the agent as
+		// input on re-trigger. Null until the first successful generation; the card then
+		// falls back to `title`, then a generic label.
+		documentTitle: t.text(),
 		summary: t.text(),
 		model: t.text(),
 		type: t.text({ enum: generationTypes }),

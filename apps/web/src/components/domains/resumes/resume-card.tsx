@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Frame, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, firstMeaningful } from "@/lib/utils";
 
 /** Accent bar colour for the faux CV sheet, mirroring the status badge tone. */
 const STATUS_ACCENT: Record<ResumeStatus, string> = {
@@ -16,6 +16,9 @@ const STATUS_ACCENT: Record<ResumeStatus, string> = {
 	ready: "bg-success/60",
 	archived: "bg-muted-foreground/30",
 };
+
+/** DB default for unnamed CVs; treated as "no title" when deriving display text. */
+const PLACEHOLDER_RESUME_TITLE = "CV sin título";
 
 /** CV-sheet preview rendering the holder's identity so the card reads like a real document. */
 function ResumeSheetPreview({
@@ -53,16 +56,23 @@ function ResumeSheetPreview({
 export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const updatedLabel = formatDistanceToNow(resume.updatedAt, { addSuffix: true, locale: es });
 
-	const candidateName =
-		[resume.contact?.firstName, resume.contact?.lastName]
-			.map((part) => part?.trim())
-			.filter(Boolean)
-			.join(" ") || resume.title;
+	const fullName = [resume.contact?.firstName, resume.contact?.lastName]
+		.map((part) => part?.trim())
+		.filter(Boolean)
+		.join(" ");
 	const subtitle = [resume.targetRole, resume.targetedCompanyIdentifier]
 		.map((part) => part?.trim())
 		.filter(Boolean)
 		.join(" · ");
 	const contactDetail = resume.contact?.detail ?? null;
+
+	// Faux sheet reads like the real document: holder's name first, then any
+	// meaningful title or the target role — never the bare placeholder default.
+	const sheetName =
+		firstMeaningful([fullName, resume.title, subtitle], [PLACEHOLDER_RESUME_TITLE]) ?? PLACEHOLDER_RESUME_TITLE;
+	// Card heading: the user's title when set, else the target role/company, else the holder.
+	const cardTitle =
+		firstMeaningful([resume.title, subtitle, fullName], [PLACEHOLDER_RESUME_TITLE]) ?? PLACEHOLDER_RESUME_TITLE;
 
 	return (
 		<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
@@ -70,7 +80,7 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 				aria-labelledby={`resume-${resume.id}-title`}
 				className="group h-full gap-2 p-3 transition-colors hover:bg-muted"
 			>
-				<ResumeSheetPreview detail={contactDetail} name={candidateName} status={resume.status} subtitle={subtitle} />
+				<ResumeSheetPreview detail={contactDetail} name={sheetName} status={resume.status} subtitle={subtitle} />
 
 				<div className="flex items-center justify-between gap-2">
 					<ul aria-label="Etiquetas del CV" className="flex min-w-0 list-none flex-wrap items-center gap-1">
@@ -98,7 +108,7 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 					className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
 					id={`resume-${resume.id}-title`}
 				>
-					{resume.title}
+					{cardTitle}
 				</FrameTitle>
 
 				<div className="flex flex-col gap-2">

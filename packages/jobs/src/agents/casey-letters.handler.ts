@@ -39,6 +39,7 @@ Example A — Backend engineer postulando a fintech:
 
 \`\`\`json
 {
+  "documentTitle": "Senior Backend Engineer · Yape",
   "greeting": "Estimada/o equipo de Yape:",
   "body": "Postulo al rol de Senior Backend Engineer en su equipo de Pagos. Los últimos cuatro años en Belcorp diseñé y operé los servicios de cobranza que mueven US$ 12M mensuales — Node.js + PostgreSQL, p99 bajo 80ms, despliegues con feature flags y cero downtime. Antes, en Joinnus, redujimos el tiempo de checkout 40% migrando a una arquitectura de eventos con Kafka.\\n\\nLos pagos a escala masiva son un problema que respeto, y Yape lo resolvió antes que cualquier otro en la región. Me interesa entrar al equipo justo en el momento en que están construyendo el rail B2B — exactamente la curva donde mi experiencia con conciliaciones se vuelve útil.",
   "closing": "Me encantaría coordinar 20 minutos para discutir cómo encaja mi experiencia con lo que están construyendo.",
@@ -50,6 +51,7 @@ Example B — Product designer postulando a SaaS de educación:
 
 \`\`\`json
 {
+  "documentTitle": "Senior Product Designer · Platzi",
   "greeting": "Hola equipo de Platzi:",
   "body": "Postulo a Senior Product Designer en su equipo de Aprendizaje. En Crehana lideré el rediseño del flujo de onboarding de estudiantes — DAU pasó de 28k a 41k en tres meses y la activación a la primera clase subió 18 puntos. Antes, en Globant, manejé el rediseño de la app móvil de Backus, atendiendo 2.4M de usuarios activos sin un regression crítico en producción.\\n\\nMe enfoco en flujos críticos donde un pixel cambia el comportamiento — onboarding, paywalls, primera tarea. Platzi me llama porque están en el momento donde la experiencia de aprendizaje a escala se vuelve diferenciador, no la cantidad de cursos.",
   "closing": "Quedo atenta a conversar sobre los retos del equipo de Aprendizaje.",
@@ -61,6 +63,7 @@ Example C — CV SPARSE / estudiante postulando a primera práctica. The CV only
 
 \`\`\`json
 {
+  "documentTitle": "Practicante de Data Science · Yape",
   "greeting": "Estimada/o equipo de Yape:",
   "body": "Postulo al rol de Practicante de Data Science. Soy estudiante de pregrado en la Pontificia Universidad Católica del Perú; los cursos de la carrera me están dando las bases de estadística, programación y análisis de datos que necesito para empezar a trabajar.\\n\\nMe interesa Yape porque es uno de los pocos productos peruanos que opera a escala masiva, y quiero entrar al mundo de data science aplicado a un problema real de pagos en vez de a un dataset académico. Busco una pasantía donde aportar lo que vengo aprendiendo y crecer con un equipo que ya está resolviendo cosas difíciles.",
   "closing": "Quedo atento a coordinar una conversación cuando puedan.",
@@ -90,6 +93,7 @@ Example A — Backend engineer applying to a payments company:
 
 \`\`\`json
 {
+  "documentTitle": "Senior Backend Engineer · Stripe",
   "greeting": "Hi Stripe team:",
   "body": "I'm applying for the Senior Backend Engineer role on your Payments Reliability team. Over the last four years at Mercado Libre I designed and operated the dispute resolution services that processed US$ 8M monthly — Go + PostgreSQL, p99 under 60ms, zero-downtime feature-flag rollouts. Before that at Rappi I cut checkout latency 35% by rebuilding the payment intent pipeline on top of Kafka.\\n\\nPayments at planet scale is a problem I respect, and Stripe set the bar for the industry. I'd love to join right as you're expanding the LATAM rail — exactly the curve where my hands-on experience with reconciliations and BIN-level routing becomes useful.",
   "closing": "I'd love to grab 20 minutes to discuss how my experience could fit what you're building.",
@@ -101,6 +105,7 @@ Example B — Product designer applying to a productivity SaaS:
 
 \`\`\`json
 {
+  "documentTitle": "Senior Product Designer · Notion",
   "greeting": "Hi Notion team:",
   "body": "I'm applying for the Senior Product Designer role on your AI Workflows team. At Linear I led the redesign of the issue triage flow — weekly active issues rose from 28k to 41k in three months and the time-to-first-triage dropped 18 percent. Before that at Figma I shipped the comments system rebuild that handles 2.4M daily threads with no major regression in production.\\n\\nI care about the surfaces that change actual behavior — search, command palette, the empty state. Notion calls me because you're at the moment where the AI surface becomes the product, not the wrapper around documents.",
   "closing": "Happy to chat about what your team is shipping next.",
@@ -112,6 +117,7 @@ Example C — SPARSE CV / student applying to their first internship. The CV onl
 
 \`\`\`json
 {
+  "documentTitle": "Software Engineering Intern · Cursor",
   "greeting": "Hi Cursor team:",
   "body": "I'm applying for the Software Engineering Intern role. I'm an undergraduate student at Pontificia Universidad Católica del Perú; my coursework is giving me the foundations in algorithms, systems programming, and clean code that I need to start contributing.\\n\\nCursor catches my attention because it's one of the few products genuinely re-thinking what an IDE can be once a model is in the loop, instead of bolting AI onto an existing editor. I'd like an internship where I can ship to production and learn from a team operating at this end of the curve.",
   "closing": "I'd love to set up a short call when it works for you.",
@@ -319,6 +325,7 @@ ${banPhrases}.
 - \`recipientCompany\`: Target company name if mentioned in the <${jobBlockTag}> block or target role, otherwise null.
 - \`recipientAddress\`: Target company address if mentioned in the <${jobBlockTag}> block, otherwise null.
 - \`dateStr\`: Current date formatted nicely in the target language (e.g. "12 de junio, 2026" or "June 12, 2026").
+- \`documentTitle\`: A short label to identify this letter in the user's list (it is NEVER shown inside the letter). Format "Role · Company" when the company is known (e.g. "Senior Backend Engineer · Stripe"); when no company is identifiable, just the clean role (e.g. "Data Science Intern"). Derive the role from the job position / <${jobBlockTag}> block — NEVER a raw URL or pasted listing text. Keep it under ~8 words, in the letter's language.
 
 # Language
 ${blocks.languageDirective}

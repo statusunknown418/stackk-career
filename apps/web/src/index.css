@@ -529,15 +529,15 @@
 }
 
 .dark {
-	/* ASSENDIA dark — vibrant Platzi green accent on near-black, white logo. */
+	/* ASSENDIA dark — neutral matte charcoal; green lives in accents/glow only. */
 	--ink: oklch(0.96 0.01 150);
-	--paper: oklch(0 0 0);
+	--paper: oklch(0.18 0.004 120);
 	--oxblood: oklch(0.84 0.21 142);
 	--marigold: oklch(0.84 0.21 142);
 	--rule: oklch(0.96 0.01 150 / 12%);
-	--aurora-1: oklch(0.82 0.2 142);
-	--aurora-2: oklch(0.7 0.18 150);
-	--aurora-3: oklch(0.78 0.16 135);
+	--aurora-1: oklch(0.42 0.055 142);
+	--aurora-2: oklch(0.27 0.012 128);
+	--aurora-3: oklch(0.36 0.035 118);
 
 	--shadow-card-soft: 0 1px 0 var(--rule), 0 18px 40px -20px oklch(0 0 0 / 0.5);
 	--shadow-card-hover: 0 24px 48px -16px oklch(0 0 0 / 0.55);
@@ -558,9 +558,9 @@
 
 .dark {
 	--landing-color: color-mix(
-		in srgb,
-		var(--color-neutral-950) 99%,
-		var(--color-white)
+		in oklch,
+		oklch(0.17 0.003 120) 86%,
+		oklch(0.28 0.04 142) 14%
 	);
 	--destructive-foreground: var(--color-red-400);
 	--info: var(--color-blue-500);

@@ -816,11 +816,13 @@ function EditableLetter({
 	};
 
 	return (
-		<div className="mx-auto w-full max-w-3xl p-4">
-			<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-sm md:p-12">
-				<LetterDocument {...props} template={template} />
-			</article>
-		</div>
+		<section className="overflow-y-auto p-4">
+			<div className="mx-auto w-full max-w-3xl">
+				<article className="relative flex w-full flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-sm md:p-12">
+					<LetterDocument {...props} template={template} />
+				</article>
+			</div>
+		</section>
 	);
 }
 

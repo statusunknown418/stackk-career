@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Frame, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, firstMeaningful } from "@/lib/utils";
 
 /** Cover-letter row as returned by the `letters.list` procedure. */
 type LetterListItem = AppRouterOutputs["letters"]["list"][number];
@@ -39,6 +39,9 @@ function LetterSheetPreview({ preview }: { preview: string | null }) {
 
 export function LetterCard({ letter }: { letter: LetterListItem }) {
 	const updatedLabel = formatDistanceToNow(letter.updatedAt, { addSuffix: true, locale: es });
+	// CASEY writes a clean "Rol · Empresa" label (`documentTitle`); fall back to the raw
+	// job position, then a generic. Skips blanks/whitespace via `firstMeaningful`.
+	const cardTitle = firstMeaningful([letter.documentTitle, letter.title]) ?? "Carta sin título";
 
 	return (
 		<Link className="block h-full" params={{ generationId: letter.id }} to="/dash/letters/$generationId">
@@ -77,7 +80,7 @@ export function LetterCard({ letter }: { letter: LetterListItem }) {
 					className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
 					id={`letter-${letter.id}-title`}
 				>
-					{letter.title ?? "Sin título"}
+					{cardTitle}
 				</FrameTitle>
 
 				<div className="flex flex-col gap-2">

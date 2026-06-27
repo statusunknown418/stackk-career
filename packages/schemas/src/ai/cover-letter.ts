@@ -37,6 +37,18 @@ export const coverLetterSchema = z.object({
 		.max(500)
 		.describe("Firma con nombre del usuario. Ej: 'Atentamente, María González' o 'Saludos, Joseph'."),
 
+	// Card label only — never rendered inside the letter. Stored on the generation row
+	// so it survives section edits; kept clean (role · company) instead of the raw job
+	// position, which can be a pasted URL.
+	documentTitle: z
+		.string()
+		.max(120)
+		.optional()
+		.nullable()
+		.describe(
+			"Título corto y humano para identificar la carta en listados; NO aparece dentro de la carta. Formato «Rol · Empresa» cuando se conoce la empresa (ej. «Desarrollador Frontend · Google»); si no hay empresa, solo el rol (ej. «Analista de Datos»). Nunca una URL, enlace ni el texto crudo de la oferta. En el idioma de la carta."
+		),
+
 	// Custom editable candidate contact info
 	contactName: z.string().optional().nullable().describe("Nombre completo del candidato"),
 	contactTitle: z.string().optional().nullable().describe("Título profesional del candidato"),

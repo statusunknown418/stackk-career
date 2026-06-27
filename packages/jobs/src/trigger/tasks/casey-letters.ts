@@ -1,5 +1,6 @@
 // biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: task contains durable background task orchestrating flow
 import { getTriggerDb } from "@stackk-career/db/http";
+import { generations } from "@stackk-career/db/schema/generations";
 import { messages } from "@stackk-career/db/schema/messages";
 import { resumeBlocks } from "@stackk-career/db/schema/resume-blocks";
 import { resumes } from "@stackk-career/db/schema/resumes";
@@ -195,6 +196,14 @@ export const caseyLettersTask = schemaTask({
 				text: mergedObject.body,
 			})
 			.where(and(eq(messages.id, messageId), eq(messages.generationId, generationId)));
+
+		// Surface a clean, human title on the list card. `generation.title` stays the raw
+		// job position (the agent's input on re-trigger); this is a separate display label.
+		// Guarded so a re-run where the model omits it never clobbers a prior good title.
+		const documentTitle = mergedObject.documentTitle?.trim();
+		if (documentTitle) {
+			await db.update(generations).set({ documentTitle }).where(eq(generations.id, generationId));
+		}
 
 		metadata.set("step", "complete");
 		return {

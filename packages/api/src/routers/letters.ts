@@ -42,6 +42,9 @@ export const lettersRouter = {
 			.select({
 				id: generations.id,
 				title: generations.title,
+				// CASEY's clean "Role · Company" label; null until first generation. The card
+				// prefers it over the raw `title` (which may be a pasted job-posting URL).
+				documentTitle: generations.documentTitle,
 				resumeId: generations.resumeId,
 				// Base CV of the letter — differentiates list entries (several letters can share a
 				// role but use different CVs). leftJoin: the CV may not exist.
