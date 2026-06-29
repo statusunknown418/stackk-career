@@ -46,7 +46,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"main">)
 			{/* A single, static green glow ties the auth surface to the landing's
 			    mesh hero without decorative motion the product register bans. */}
 			<div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-				<div className="absolute top-1/2 left-1/2 size-[42rem] -translate-x-1/2 -translate-y-[58%] rounded-full bg-oxblood/8 blur-[150px] dark:bg-oxblood/10" />
+				<div className="absolute top-1/2 left-1/2 size-168 -translate-x-1/2 translate-y-[-60%] rounded-full bg-oxblood/8 blur-[150px] dark:bg-oxblood/10" />
 			</div>
 
 			<motion.div
@@ -82,9 +82,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"main">)
 							</span>
 
 							<div className="flex flex-col gap-1.5">
-								<h1 className="text-xl tracking-tight">Entra a ASSENDIA</h1>
+								<h1 className="text-xl tracking-tight">Bienvenido a ASSENDIA</h1>
 								<p className="text-balance text-muted-foreground text-sm leading-relaxed">
-									IA que potencia tu CV y un coach senior real, hasta tu próxima entrevista.
+									Potencia tu CV y accede a un coach senior real, hasta tu próxima entrevista.
 								</p>
 							</div>
 						</div>

@@ -23,15 +23,25 @@ export interface Testimonial {
 	role: string;
 }
 
+export interface PlanHighlight {
+	label: string;
+	value: string;
+}
+
 export interface Plan {
+	chip?: string;
 	cta: string;
 	featured?: boolean;
 	features: readonly string[];
+	highlight: PlanHighlight;
 	id: "gratuito" | "pro" | "premium";
 	name: string;
+	note?: string;
 	per: string;
 	priceSoles: number;
 	priceUsd: number;
+	summary: string;
+	tagLabel: string;
 	tagline: string;
 }
 
@@ -156,10 +166,14 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "gratuito",
 		name: "Gratuito",
+		tagLabel: "Punto de partida",
 		tagline: "Tu score, gratis para siempre.",
+		summary:
+			"Para quien quiere saber exactamente dónde está parado. Tu Score CV de 0 a 100 por rol, una vez al mes, con la lista clara de qué corregir. Sin tarjeta y sin caducidad.",
 		priceSoles: 0,
 		priceUsd: 0,
 		per: "Gratis, sin tarjeta",
+		highlight: { value: "1", label: "Score CV al mes, gratis para siempre" },
 		features: [
 			"Score CV de 0 a 100 por rol, una vez al mes",
 			"Lista detallada de qué tienes que mejorar",
@@ -170,10 +184,15 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "pro",
 		name: "Pro",
+		chip: "Más popular",
+		tagLabel: "Todo incluido",
 		tagline: "1 sesión de coaching y todas las herramientas de IA, sin límite.",
+		summary:
+			"El equilibrio entre IA y un coach real. Una sesión 1:1 de 45 min más todas las herramientas de IA sin límite: Score, reescritura, un CV por cada puesto y cartas. Cancelas cuando quieras.",
 		priceSoles: 79,
 		priceUsd: 23,
 		per: "al mes, cancelas cuando quieras",
+		highlight: { value: "∞", label: "herramientas de IA, sin límite" },
 		features: [
 			"1 sesión de coaching 1:1 (45 min)",
 			"Score CV ilimitado, con comparación directa contra cada oferta",
@@ -188,10 +207,14 @@ export const PLANS: readonly Plan[] = [
 	{
 		id: "premium",
 		name: "Premium",
+		tagLabel: "Camino completo",
 		tagline: "El camino completo: tres sesiones estructuradas y WhatsApp directo con tu coach.",
+		summary:
+			"El acompañamiento completo hasta tu próxima entrevista. Tres sesiones estructuradas, revisión humana de tu CV y LinkedIn, y WhatsApp directo con tu coach. Con garantía de entrevista en 90 días.",
 		priceSoles: 179,
 		priceUsd: 51,
 		per: "al mes, camino completo",
+		highlight: { value: "3", label: "sesiones de coaching + WhatsApp directo" },
 		features: [
 			"Sesión 1: Mapeo del próximo puesto (45 min)",
 			"Sesión 2: Dominas la entrevista (45 min)",
@@ -213,6 +236,26 @@ export const SINGLE_SESSION = {
 	body: "Sesión 1:1 con cualquier coach del equipo, sobre tu caso real. Sin compromiso.",
 	cta: "Empezar sesión única",
 } as const;
+
+export interface ComparisonRow {
+	label: string;
+	/** One cell per plan, aligned to `PLANS` order (gratuito, pro, premium). */
+	values: readonly (string | boolean)[];
+}
+
+/** Feature-by-feature breakdown rendered as a table on the dedicated pricing page. */
+export const PLAN_COMPARISON: readonly ComparisonRow[] = [
+	{ label: "Score CV por rol", values: ["1 / mes", "Ilimitado", "Ilimitado"] },
+	{ label: "Comparación directa contra cada oferta", values: [false, true, true] },
+	{ label: "Reescritura automática con IA", values: [false, true, true] },
+	{ label: "CVs distintos por puesto", values: [false, "Ilimitados", "Ilimitados"] },
+	{ label: "Cartas de presentación", values: [false, "5 / mes", "Ilimitadas"] },
+	{ label: "Optimizador de LinkedIn", values: ["Básico", "Completo", "Completo + revisión humana"] },
+	{ label: "Sesiones de coaching 1:1", values: [false, "1 (45 min)", "3 estructuradas"] },
+	{ label: "WhatsApp directo con tu coach", values: [false, false, true] },
+	{ label: "Revisión humana de CV y LinkedIn", values: [false, false, true] },
+	{ label: "Garantía de entrevista en 90 días", values: [false, false, true] },
+];
 
 export const TESTIMONIALS: readonly Testimonial[] = [
 	{
@@ -464,19 +507,20 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
 	{
 		heading: "Producto",
 		links: [
-			{ label: "Score CV", href: "#features" },
-			{ label: "Constructor de CV", href: "#features" },
-			{ label: "Carta de presentación", href: "#features" },
-			{ label: "Optimizador LinkedIn", href: "#features" },
-			{ label: "Coaching 1:1", href: "#planes" },
+			{ label: "Score CV", href: "/#features" },
+			{ label: "Constructor de CV", href: "/#features" },
+			{ label: "Carta de presentación", href: "/#features" },
+			{ label: "Optimizador LinkedIn", href: "/#features" },
+			{ label: "Coaching 1:1", href: "/#planes" },
+			{ label: "Planes y precios", href: "/pricing" },
 		],
 	},
 	{
 		heading: "Empresa",
 		links: [
-			{ label: "Cómo funciona", href: "#camino" },
-			{ label: "Resultados", href: "#casos" },
-			{ label: "FAQ", href: "#faq" },
+			{ label: "Cómo funciona", href: "/#camino" },
+			{ label: "Resultados", href: "/#casos" },
+			{ label: "FAQ", href: "/#faq" },
 		],
 	},
 	{
@@ -484,8 +528,8 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
 		links: [
 			{ label: "Iniciar sesión", href: "/login" },
 			{ label: "Crear cuenta", href: "/login" },
-			{ label: "Score gratis", href: "#planes" },
-			{ label: "Sesión única", href: "#sesion-unica" },
+			{ label: "Planes y precios", href: "/pricing" },
+			{ label: "Sesión única", href: "/#sesion-unica" },
 		],
 	},
 ];

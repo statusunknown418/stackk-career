@@ -84,7 +84,13 @@ export function LandingNav() {
 								initial={{ opacity: 0, scale: 0.85, width: 0 }}
 								transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
 							>
-								<Link className={buttonVariants({ size: "sm" })} to="/login">
+								<Link
+									className={buttonVariants({
+										size: "sm",
+										className: "rounded-full!",
+									})}
+									to="/login"
+								>
 									Analiza mi CV gratis
 									<ArrowRightIcon weight="bold" />
 								</Link>

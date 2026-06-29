@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatusRouteImport } from './routes/status'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
@@ -41,6 +42,11 @@ const TermsRoute = TermsRouteImport.update({
 const StatusRoute = StatusRouteImport.update({
   id: '/status',
   path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PolicyRoute = PolicyRouteImport.update({
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/policy': typeof PolicyRoute
+  '/pricing': typeof PricingRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/policy': typeof PolicyRoute
+  '/pricing': typeof PricingRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/setup': typeof ProtectedSetupRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
   '/policy': typeof PolicyRoute
+  '/pricing': typeof PricingRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/policy'
+    | '/pricing'
     | '/status'
     | '/terms'
     | '/dash'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/policy'
+    | '/pricing'
     | '/status'
     | '/terms'
     | '/setup'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/login'
     | '/policy'
+    | '/pricing'
     | '/status'
     | '/terms'
     | '/_protected/dash'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
   PolicyRoute: typeof PolicyRoute
+  PricingRoute: typeof PricingRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/status'
       fullPath: '/status'
       preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/policy': {
@@ -526,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
   PolicyRoute: PolicyRoute,
+  PricingRoute: PricingRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,

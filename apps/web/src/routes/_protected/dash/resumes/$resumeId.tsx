@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ResumeJobTargetPanel } from "@/components/domains/billing/resume-job-target-note";
+import { ResumeCoverLetterButton } from "@/components/domains/letters/resume-cover-letter-button";
 import { exportResumeToPdf } from "@/components/domains/resume-document/export-pdf";
 import { InlineTextEditor } from "@/components/domains/resume-document/inline-text-editor";
 import { ResumeDocument } from "@/components/domains/resume-document/resume-document";
@@ -391,6 +392,8 @@ function RouteComponent() {
 							Exportar
 						</Button>
 					</Group>
+
+					<ResumeCoverLetterButton resumeId={params.resumeId} />
 
 					<Button onClick={() => setIsDeleteOpen(true)} size="sm" variant="destructive-outline">
 						<TrashSimpleIcon />

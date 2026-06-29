@@ -22,6 +22,7 @@ interface ThemeProviderState {
  */
 const FORCED_ROUTE_THEMES: Record<string, Theme> = {
 	"/": "dark",
+	"/pricing": "dark",
 };
 
 function getThemeScript(storageKey: string, defaultTheme: Theme) {

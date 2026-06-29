@@ -2,7 +2,6 @@
 
 import { ListBulletsIcon, ListNumbersIcon, TextBolderIcon, TextItalicIcon } from "@phosphor-icons/react";
 import type { SuggestResumeBlockInput } from "@stackk-career/schemas/api/suggestions";
-import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { AnimatePresence, motion } from "motion/react";
@@ -60,6 +59,19 @@ export const InlineTextEditor = ({
 	const [isFocused, setIsFocused] = useState(false);
 	const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
 	const isProse = variant === "prose";
+	const [isEmpty, setIsEmpty] = useState(() => value.trim().length === 0);
+	const editorClassName = cn(
+		"rounded-sm px-1 py-0.5 outline-none transition-colors hover:bg-accent/60 focus:bg-accent/60",
+		variant === "prose" && "min-h-6 whitespace-pre-wrap text-sm leading-relaxed",
+		variant === "heading" && "text-xl leading-tight",
+		variant === "subtitle" && "text-base leading-snug",
+		variant === "plain" && "text-sm leading-snug",
+		className
+	);
+	const placeholderClassName = cn(
+		editorClassName,
+		"pointer-events-none absolute inset-x-0 top-0 z-20 text-muted-foreground/60 hover:bg-transparent focus:bg-transparent"
+	);
 
 	const editor = useEditor({
 		autofocus: autoFocus ? "end" : false,
@@ -67,14 +79,8 @@ export const InlineTextEditor = ({
 		editable: !readOnly,
 		editorProps: {
 			attributes: {
-				class: cn(
-					"rounded-sm px-1 py-0.5 outline-none transition-colors hover:bg-accent/60 focus:bg-accent/60",
-					variant === "prose" && "min-h-6 whitespace-pre-wrap text-sm leading-relaxed",
-					variant === "heading" && "text-xl leading-tight",
-					variant === "subtitle" && "text-base leading-snug",
-					variant === "plain" && "text-sm leading-snug",
-					className
-				),
+				class: editorClassName,
+				"aria-placeholder": placeholder ?? "",
 			},
 			handleKeyDown: (_view, event) => {
 				if (event.key !== "Enter" || isProse) {
@@ -106,12 +112,6 @@ export const InlineTextEditor = ({
 				strike: false,
 				undoRedo: false,
 			}),
-			Placeholder.configure({
-				placeholder: placeholder ?? "",
-				showOnlyWhenEditable: true,
-				showOnlyCurrent: false,
-				includeChildren: false,
-			}),
 		],
 		immediatelyRender: false,
 		onBlur: () => {
@@ -120,6 +120,7 @@ export const InlineTextEditor = ({
 		},
 		onFocus: () => setIsFocused(true),
 		onUpdate: ({ editor: currentEditor }) => {
+			setIsEmpty(currentEditor.isEmpty);
 			onChange(readEditorValue(currentEditor, isProse));
 		},
 	});
@@ -128,32 +129,44 @@ export const InlineTextEditor = ({
 	// Skip while focused so we never clobber active typing; compare against the
 	// variant's emission shape so we don't ping-pong setContent.
 	useEffect(() => {
-		if (!editor || editor.isFocused) {
+		if (!editor) {
+			return;
+		}
+		setIsEmpty(editor.isEmpty);
+		if (editor.isFocused) {
 			return;
 		}
 		if (readEditorValue(editor, isProse) === value) {
 			return;
 		}
 		editor.commands.setContent(value || "", { emitUpdate: false });
+		setIsEmpty(editor.isEmpty);
 	}, [editor, isProse, value]);
 
 	if (!editor) {
 		return null;
 	}
 
+	const showPlaceholder = !readOnly && isEmpty && !!placeholder;
 	const showToolbar = isProse && !readOnly && (isFocused || isSuggestionOpen);
 
 	return (
 		<div className="relative">
 			<EditorContent
 				className={cn(
-					"[&_.ProseMirror_.is-editor-empty]:before:pointer-events-none [&_.ProseMirror_.is-editor-empty]:before:float-left [&_.ProseMirror_.is-editor-empty]:before:h-0 [&_.ProseMirror_.is-editor-empty]:before:text-muted-foreground/60 [&_.ProseMirror_.is-editor-empty]:before:content-[attr(data-placeholder)]",
+					"relative z-10",
 					isProse &&
 						"[&_.ProseMirror_li_p]:my-0 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5",
 					readOnly && "pointer-events-none"
 				)}
 				editor={editor}
 			/>
+
+			{showPlaceholder && (
+				<span aria-hidden="true" className={placeholderClassName}>
+					{placeholder}
+				</span>
+			)}
 
 			<AnimatePresence>
 				{showToolbar && (

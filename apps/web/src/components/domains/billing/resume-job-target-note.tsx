@@ -1,54 +1,14 @@
 import { ArrowSquareOutIcon, CaretDownIcon, TargetIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { usePostHog } from "@posthog/react";
 import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import Loader from "@/components/loader";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DotmSquare6 } from "@/components/ui/dotm-square-6";
 import { orpc } from "@/utils/orpc";
 import { ResumeJobTargetChangeDialog } from "../resume-editor/resume-job-target-change-dialog";
 
 type JobTargetData = AppRouterOutputs["resumes"]["getJobTarget"] | undefined;
-
-/**
- * Primary CTA for a READY job target: creates a cover-letter generation sourced
- * from the resume's stored target (no manual job text), then navigates to the
- * letter workspace where the detail route auto-triggers the first draft.
- */
-function CreateLetterFromTargetButton({ resumeId }: { resumeId: string }) {
-	const navigate = useNavigate();
-	const queryClient = useQueryClient();
-	const posthog = usePostHog();
-
-	const createMutation = useMutation(
-		orpc.letters.createGeneration.mutationOptions({
-			onSuccess: ({ generationId }) => {
-				queryClient.invalidateQueries({ queryKey: orpc.letters.list.queryKey() });
-				posthog?.capture("cover_letter_created", { generationId, source: "resume-job-target" });
-				navigate({ params: { generationId }, to: "/dash/letters/$generationId" });
-			},
-			onError: (err) => toast.error(err.message),
-		})
-	);
-
-	return (
-		<Button
-			className="w-full"
-			disabled={createMutation.isPending}
-			onClick={() => createMutation.mutate({ language: "es", resumeId, source: "resume-job-target", template: null })}
-			size="sm"
-			type="button"
-		>
-			{createMutation.isPending && <Loader />}
-			Crear carta para este puesto
-		</Button>
-	);
-}
 
 function ResumeJobTargetChips({ label, items }: { label: string; items: string[] | undefined }) {
 	if (!items || items.length === 0) {
@@ -147,21 +107,19 @@ function ResumeJobTargetNote({ jobTarget, resumeId }: { jobTarget: JobTargetData
 				</span>
 				<CaretDownIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-data-panel-open:rotate-180" />
 			</CollapsibleTrigger>
-			<div className="flex flex-col gap-2.5 border-border/60 border-t px-3 py-2.5">
-				<CreateLetterFromTargetButton resumeId={resumeId} />
-				<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-					<ResumeJobTargetChangeDialog currentTitle={jobTarget.title} resumeId={resumeId} />
-					<a
-						className="inline-flex w-fit items-center gap-1.5 text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
-						href={jobTarget.sourceUrl}
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						<ArrowSquareOutIcon className="size-3.5 shrink-0" />
-						Ver oferta en LinkedIn
-					</a>
-				</div>
+			<div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-border/60 border-t px-3 py-2.5">
+				<ResumeJobTargetChangeDialog currentTitle={jobTarget.title} resumeId={resumeId} />
+				<a
+					className="inline-flex w-fit items-center gap-1.5 text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
+					href={jobTarget.sourceUrl}
+					rel="noopener noreferrer"
+					target="_blank"
+				>
+					<ArrowSquareOutIcon className="size-3.5 shrink-0" />
+					Ver oferta en LinkedIn
+				</a>
 			</div>
+
 			<CollapsibleContent>
 				<div className="flex flex-col gap-3 border-border/60 border-t px-3 pt-3 pb-3 text-muted-foreground">
 					{meta.length > 0 && (

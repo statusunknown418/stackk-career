@@ -1,13 +1,11 @@
-import { InfoIcon, SparkleIcon } from "@phosphor-icons/react";
+import { SparkleIcon } from "@phosphor-icons/react";
 import type { ResumeParserEvent } from "@stackk-career/jobs/agents/resume-parser.handler";
 import type { resumeParserTask } from "@stackk-career/jobs/trigger/tasks/resume-parser";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeRun, useRealtimeRunsWithTag } from "@trigger.dev/react-hooks";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Frame, FrameFooter, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
-import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
+import { Frame, FrameHeader, FramePanel, FrameTitle } from "@/components/ui/frame";
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
 import { invalidateBillingQueries } from "@/lib/billing-cache";
 import { cn } from "@/lib/utils";
@@ -100,7 +98,6 @@ export function ResumePendingCards({
 
 export function ResumePendingCard({
 	card,
-	detail,
 	variant,
 }: {
 	card: ResumePendingCardModel;
@@ -133,27 +130,6 @@ export function ResumePendingCard({
 
 				<ResumeParserTimeline density="compact" events={card.events} />
 			</FramePanel>
-
-			<FrameFooter className="px-2 pt-1 pb-2">
-				<Popover>
-					<PopoverTrigger
-						render={
-							<Button
-								aria-label="Ver detalle del parser"
-								className="w-full justify-center"
-								size="sm"
-								variant="ghost-muted"
-							>
-								<InfoIcon />
-								Ver detalle
-							</Button>
-						}
-					/>
-					<PopoverPopup align="end" className="w-90">
-						{detail}
-					</PopoverPopup>
-				</Popover>
-			</FrameFooter>
 		</Frame>
 	);
 }
