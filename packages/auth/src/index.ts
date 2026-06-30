@@ -70,7 +70,13 @@ export function createAuth() {
 								event: "signed_up",
 								properties: {
 									source: "server",
-									$set: { email: createdUser.email, name: createdUser.name },
+									$set: {
+										email: createdUser.email,
+										name: createdUser.name,
+										plan: "free",
+										subscription_status: "active",
+										is_paid: false,
+									},
 								},
 							});
 						} catch (err) {

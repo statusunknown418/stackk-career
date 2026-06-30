@@ -46,6 +46,9 @@ export const env = createEnv({
 
 		RESEND_API_KEY: z.string().min(1),
 		EMAIL_FROM: z.string().min(1),
+		// Optional inbox that receives the daily CSV of new-user feedback drafts.
+		// Falls back to the bare `EMAIL_FROM` address when unset.
+		FEEDBACK_EXPORT_RECIPIENT_EMAIL: z.email().optional(),
 		// Resend webhook signing secret (`whsec_…`) from the webhook's detail page.
 		// Verifies inbound delivery/bounce/complaint events before they reach PostHog.
 		RESEND_WEBHOOK_SECRET: z.string().min(1),

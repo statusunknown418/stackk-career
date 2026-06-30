@@ -28,6 +28,7 @@ import {
 	viewerUsageTag,
 } from "@stackk-career/schemas/subscriptions";
 import { and, between, count, eq, ne } from "drizzle-orm";
+import { getServerPostHog } from "../lib/posthog";
 import { invalidateViewerSubscription, viewerSubscriptionTag } from "../lib/viewer-cache";
 
 const CACHE_TTL_SECONDS = 300;
@@ -479,5 +480,27 @@ export async function applyProviderSubscriptionState(
 	}
 
 	await invalidateViewerSubscription(db, input.userId);
+
+	/**
+	 * Mirror the new tier/status onto the PostHog person profile so user-base
+	 * breakdowns (free vs paid, by tier) read the *current* plan directly. This is
+	 * the single chokepoint for every transition — upgrade, downgrade, cancel,
+	 * expire — so the property never drifts. Best-effort: a PostHog hiccup must
+	 * never fail the subscription write.
+	 */
+	try {
+		getServerPostHog()?.identify({
+			distinctId: input.userId,
+			properties: {
+				$set: {
+					plan: row.planId,
+					subscription_status: row.status,
+					is_paid: row.planId !== "free",
+				},
+			},
+		});
+	} catch {
+		// Analytics is non-critical; never surface a capture error to the caller.
+	}
 	return row;
 }
