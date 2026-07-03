@@ -186,15 +186,15 @@ export const PLANS: readonly Plan[] = [
 		name: "Pro",
 		chip: "Más popular",
 		tagLabel: "Todo incluido",
-		tagline: "1 sesión de coaching y todas las herramientas de IA, sin límite.",
+		tagline: "2 sesiones de coaching y todas las herramientas de IA, sin límite.",
 		summary:
-			"El equilibrio entre IA y un coach real. Una sesión 1:1 de 45 min más todas las herramientas de IA sin límite: Score, reescritura, un CV por cada puesto y cartas. Cancelas cuando quieras.",
+			"El equilibrio entre IA y un coach real. Dos sesiones 1:1 de 45 min más todas las herramientas de IA sin límite: Score, reescritura, un CV por cada puesto y cartas. Cancelas cuando quieras.",
 		priceSoles: 79,
 		priceUsd: 23,
 		per: "al mes, cancelas cuando quieras",
 		highlight: { value: "∞", label: "herramientas de IA, sin límite" },
 		features: [
-			"1 sesión de coaching 1:1 (45 min)",
+			"2 sesiones de coaching 1:1 (45 min)",
 			"Score CV ilimitado, con comparación directa contra cada oferta",
 			"La IA reescribe automáticamente las secciones débiles",
 			"CVs ilimitados, una versión distinta por cada puesto",
@@ -251,7 +251,7 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
 	{ label: "CVs distintos por puesto", values: [false, "Ilimitados", "Ilimitados"] },
 	{ label: "Cartas de presentación", values: [false, "5 / mes", "Ilimitadas"] },
 	{ label: "Optimizador de LinkedIn", values: ["Básico", "Completo", "Completo + revisión humana"] },
-	{ label: "Sesiones de coaching 1:1", values: [false, "1 (45 min)", "3 estructuradas"] },
+	{ label: "Sesiones de coaching 1:1", values: [false, "2 (45 min)", "3 estructuradas"] },
 	{ label: "WhatsApp directo con tu coach", values: [false, false, true] },
 	{ label: "Revisión humana de CV y LinkedIn", values: [false, false, true] },
 	{ label: "Garantía de entrevista en 90 días", values: [false, false, true] },
@@ -467,7 +467,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Cuál es la diferencia con otras plataformas?",
-		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, el plan Pro te da 1 sesión de coaching 1:1 y todas las herramientas de IA sin límite por S/79. Premium te da el camino completo de tres sesiones estructuradas y WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
+		a: "Otras plataformas cobran el coaching humano por separado, alrededor de S/250 por sesión. En ASSENDIA, el plan Pro te da 2 sesiones de coaching 1:1 y todas las herramientas de IA sin límite por S/79. Premium te da el camino completo de tres sesiones estructuradas y WhatsApp directo con tu coach por S/179. No hay sobrecargos ni paquetes adicionales.",
 	},
 	{
 		q: "¿Y si no consigo entrevistas?",
