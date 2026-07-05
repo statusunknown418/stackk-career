@@ -1214,7 +1214,7 @@ export function LettersArtifactPanel({
 
 	return (
 		<Frame className={className ?? "h-full min-h-0"} data-tour-step-id="letter-artifact">
-			<FrameHeader className="flex-row items-start justify-between gap-3">
+			<FrameHeader className="flex-row items-start justify-between gap-3 py-1!">
 				<div className="flex flex-col gap-1.5">
 					<FrameDescription>
 						{error && <Badge variant="secondary">Error</Badge>}

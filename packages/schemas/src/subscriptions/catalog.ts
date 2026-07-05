@@ -1,4 +1,4 @@
-import type { EntitlementMap, LimitKey, PlanId } from "./types";
+import type { EntitlementMap, JobSuggestionCadence, LimitKey, PlanId } from "./types";
 
 export interface PlanCatalogEntry {
 	displayName: string;
@@ -71,6 +71,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			coaching_sessions_per_cycle: 0,
 			cover_letter_generations_per_cycle: 2,
 			cover_letter_versions: 3,
+			suggested_jobs_per_run: 20,
 		},
 	},
 	pro: {
@@ -84,9 +85,10 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			resume_analyses_per_cycle: 50,
 			resume_inline_ai_suggestions: 150,
 			messages_per_generation: 50,
-			coaching_sessions_per_cycle: 1,
+			coaching_sessions_per_cycle: 2,
 			cover_letter_generations_per_cycle: 5,
 			cover_letter_versions: 5,
+			suggested_jobs_per_run: 40,
 		},
 	},
 	max: {
@@ -103,6 +105,7 @@ export const PLAN_CATALOG: Record<PlanId, PlanCatalogEntry> = {
 			coaching_sessions_per_cycle: 3,
 			cover_letter_generations_per_cycle: 100,
 			cover_letter_versions: 5,
+			suggested_jobs_per_run: 50,
 		},
 	},
 };
@@ -121,4 +124,14 @@ export const LIMIT_KEY_LABELS: Record<LimitKey, string> = {
 	messages_per_generation: "Mensajes por conversación",
 	coaching_sessions_per_cycle: "Sesiones de coaching",
 	cover_letter_versions: "Versiones por carta",
+	suggested_jobs_per_run: "Vacantes sugeridas",
 };
+
+/**
+ * Suggested-jobs refresh cadence for a plan. Free refreshes monthly; paid plans
+ * (pro/max) refresh daily. Single source of truth for the dispatcher schedule
+ * and the UI's "next update" hint.
+ */
+export function jobSuggestionCadenceForPlan(planId: PlanId): JobSuggestionCadence {
+	return planId === "free" ? "monthly" : "daily";
+}

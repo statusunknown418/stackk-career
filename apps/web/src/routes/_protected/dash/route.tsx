@@ -68,7 +68,12 @@ function DashLayout() {
 
 									return (
 										<SidebarMenuItem key={item.id}>
-											<SidebarMenuButton isActive={isActive} render={<Link to={item.to} />} tooltip={item.label}>
+											<SidebarMenuButton
+												className="data-[active=true]:bg-oxblood/10 data-[active=true]:font-normal data-[active=true]:hover:bg-oxblood/15 data-[active=true]:[&>svg]:text-oxblood"
+												isActive={isActive}
+												render={<Link to={item.to} />}
+												tooltip={item.label}
+											>
 												<item.icon weight="fill" />
 												<span>{item.label}</span>
 											</SidebarMenuButton>

@@ -1,14 +1,16 @@
 import { ChatCircleTextIcon, PlusCircleIcon } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { isUnlimited } from "@stackk-career/schemas/subscriptions";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CircleHelpIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { LetterCard } from "@/components/domains/letters/letter-card";
+import { LetterCard, LetterCardSkeleton } from "@/components/domains/letters/letter-card";
 import { LettersCreateSheet } from "@/components/domains/letters/letters-create-sheet";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { FrameDescription } from "@/components/ui/frame";
+import { Meter, MeterIndicator, MeterLabel, MeterTrack, MeterValue } from "@/components/ui/meter";
 import { type Tour, TourProvider, useTour } from "@/components/ui/tour";
 import { orpc } from "@/utils/orpc";
 
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/_protected/dash/letters/")({
 			context.queryClient.ensureQueryData(orpc.letters.list.queryOptions()),
 			context.queryClient.ensureQueryData(orpc.resumes.list.queryOptions()),
 		]),
+	pendingComponent: LettersIndexPending,
 });
 
 const TOUR_STORAGE_KEY = "stackk:letters-tour-seen";
@@ -34,6 +37,13 @@ const lettersTours: Tour[] = [
 				id: "letters-create",
 				side: "bottom",
 				title: "Crea tu primera carta",
+			},
+			{
+				align: "end",
+				content: "Aquí ves cuántas cartas has generado este ciclo y el máximo que incluye tu plan.",
+				id: "letters-quota",
+				side: "bottom",
+				title: "Tu límite de cartas",
 			},
 			{
 				content: "Aquí aparecen tus cartas. Ábrelas cuando quieras para revisarlas, editarlas o copiarlas.",
@@ -53,8 +63,35 @@ function RouteComponent() {
 	);
 }
 
+function LettersIndexPending() {
+	return (
+		<section className="space-y-4">
+			<section className="flex items-start justify-between gap-4 px-4 py-6 lg:gap-10">
+				<article className="grid gap-1">
+					<h1 className="font-light text-2xl">Cartas de presentación</h1>
+					<FrameDescription>
+						<Shimmer>CASEY</Shimmer> redacta cartas a partir de tu CV y del puesto al que postulas.
+					</FrameDescription>
+				</article>
+			</section>
+
+			<section className="px-4 py-2">
+				<ul className="grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{Array.from({ length: 6 }).map((_, i) => (
+						<LetterCardSkeleton key={i.toString()} />
+					))}
+				</ul>
+			</section>
+		</section>
+	);
+}
+
 function LettersView() {
 	const { data } = useSuspenseQuery(orpc.letters.list.queryOptions());
+	const snapshot = useQuery(orpc.billing.getSnapshot.queryOptions()).data;
+	const lettersUsed = snapshot?.usage.cover_letter_generations_per_cycle ?? 0;
+	const letterLimit = snapshot?.entitlements.cover_letter_generations_per_cycle;
+	const maxLetters = letterLimit != null && !isUnlimited(letterLimit) ? letterLimit : lettersUsed;
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
 	const { start: startTour } = useTour();
@@ -74,7 +111,7 @@ function LettersView() {
 
 	return (
 		<section className="space-y-4">
-			<section className="flex items-start justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
+			<section className="flex items-start justify-between gap-4 px-4 py-6 lg:gap-10">
 				<article className="grid gap-1">
 					<h1 className="font-light text-2xl">Cartas de presentación</h1>
 					<FrameDescription>
@@ -99,11 +136,19 @@ function LettersView() {
 					</div>
 				</article>
 
-				{data.length > 0 && (
-					<p className="shrink-0 text-muted-foreground text-sm">
-						{data.length} {data.length === 1 ? "carta" : "cartas"}
-					</p>
-				)}
+				<Meter className="max-w-sm" data-tour-step-id="letters-quota" max={maxLetters} min={0} value={lettersUsed}>
+					<div className="flex justify-between">
+						<MeterLabel className="inline-flex items-center gap-1.5">
+							<ChatCircleTextIcon className="text-oxblood" />
+							Cartas este ciclo
+						</MeterLabel>
+						<MeterValue>{(_formatted, value) => `${value} / ${maxLetters}`}</MeterValue>
+					</div>
+
+					<MeterTrack className="rounded-lg">
+						<MeterIndicator className="bg-oxblood" />
+					</MeterTrack>
+				</Meter>
 			</section>
 
 			<section className="px-4 py-2" data-tour-step-id="letters-list">
@@ -117,7 +162,7 @@ function LettersView() {
 					<Empty className="rounded-xl border">
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
-								<ChatCircleTextIcon />
+								<ChatCircleTextIcon className="text-oxblood" />
 							</EmptyMedia>
 							<EmptyTitle>Aún no hay cartas</EmptyTitle>
 							<EmptyDescription>

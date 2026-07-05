@@ -136,7 +136,7 @@ function ResumesView() {
 
 	return (
 		<section className="space-y-4">
-			<section className="flex justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
+			<section className="flex justify-between gap-4 px-4 py-6 lg:gap-10">
 				<article className="grid gap-1">
 					<h1 className="font-light text-2xl">Curriculums</h1>
 
@@ -165,14 +165,14 @@ function ResumesView() {
 				<Meter className="max-w-sm" data-tour-step-id="resumes-quota" max={maxResumes} min={0} value={data.length}>
 					<div className="flex justify-between">
 						<MeterLabel className="inline-flex items-center gap-1.5">
-							<FileMdIcon />
+							<FileMdIcon className="text-oxblood" />
 							CVs creados
 						</MeterLabel>
 						<MeterValue>{(_formatted, value) => `${value} / ${maxResumes}`}</MeterValue>
 					</div>
 
 					<MeterTrack className="rounded-lg">
-						<MeterIndicator />
+						<MeterIndicator className="bg-oxblood" />
 					</MeterTrack>
 				</Meter>
 			</section>
@@ -192,7 +192,7 @@ function ResumesView() {
 					<Empty className="rounded-xl border">
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
-								<RouteIcon />
+								<RouteIcon className="text-oxblood" />
 							</EmptyMedia>
 
 							<EmptyTitle>Nada por aquí</EmptyTitle>

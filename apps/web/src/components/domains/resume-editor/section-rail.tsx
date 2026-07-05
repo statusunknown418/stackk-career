@@ -28,7 +28,9 @@ export const SectionRail = ({ activeId, contactId, onSelect, sections }: Section
 		<SidebarMenu>
 			<SidebarMenuItem>
 				<SidebarMenuButton
-					className={"text-muted-foreground data-[active=true]:text-foreground"}
+					className={
+						"text-muted-foreground data-[active=true]:bg-oxblood/10 data-[active=true]:font-normal data-[active=true]:text-foreground data-[active=true]:[&>svg]:text-oxblood"
+					}
 					isActive={allActive}
 					onClick={() => onSelect(null)}
 				>
@@ -40,7 +42,9 @@ export const SectionRail = ({ activeId, contactId, onSelect, sections }: Section
 			{contactId ? (
 				<SidebarMenuItem>
 					<SidebarMenuButton
-						className={"text-muted-foreground data-[active=true]:text-foreground"}
+						className={
+							"text-muted-foreground data-[active=true]:bg-oxblood/10 data-[active=true]:font-normal data-[active=true]:text-foreground data-[active=true]:[&>svg]:text-oxblood"
+						}
 						isActive={activeId === contactId}
 						onClick={() => onSelect(activeId === contactId ? null : contactId)}
 						tooltip="Contacto"
@@ -58,7 +62,9 @@ export const SectionRail = ({ activeId, contactId, onSelect, sections }: Section
 				return (
 					<SidebarMenuItem key={getBlockKey(section.id)}>
 						<SidebarMenuButton
-							className={"text-muted-foreground data-[active=true]:text-foreground"}
+							className={
+								"text-muted-foreground data-[active=true]:bg-oxblood/10 data-[active=true]:font-normal data-[active=true]:text-foreground data-[active=true]:[&>svg]:text-oxblood"
+							}
 							isActive={isActive}
 							onClick={() => onSelect(isActive ? null : section.id)}
 							tooltip={section.title}

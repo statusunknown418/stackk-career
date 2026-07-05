@@ -141,12 +141,15 @@ export function CoachingTimeline() {
 				{steps.map(({ step, title }) => (
 					<StepperItem className="flex-1" key={step} step={step}>
 						<StepperTrigger className="w-full flex-col items-start gap-2 rounded">
-							<StepperIndicator asChild className="h-1 w-full bg-border">
+							<StepperIndicator
+								asChild
+								className="h-1 w-full bg-border data-[state=active]:bg-oxblood data-[state=completed]:bg-oxblood"
+							>
 								<span className="sr-only">{step}</span>
 							</StepperIndicator>
 
 							<div className="flex items-center gap-2">
-								<span className="flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted font-medium text-[10px] text-muted-foreground group-data-[state=active]/step:border-transparent group-data-[state=completed]/step:border-transparent group-data-[state=active]/step:bg-primary group-data-[state=completed]/step:bg-primary group-data-[state=active]/step:text-primary-foreground group-data-[state=completed]/step:text-primary-foreground">
+								<span className="flex size-5 shrink-0 items-center justify-center rounded-full border bg-muted font-medium text-[10px] text-muted-foreground group-data-[state=active]/step:border-transparent group-data-[state=completed]/step:border-transparent group-data-[state=active]/step:bg-oxblood group-data-[state=completed]/step:bg-oxblood group-data-[state=active]/step:text-neutral-950 group-data-[state=completed]/step:text-neutral-950">
 									{step}
 								</span>
 								<StepperTitle>{title}</StepperTitle>

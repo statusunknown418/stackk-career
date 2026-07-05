@@ -8,6 +8,7 @@ import { COVER_LETTER_OBJECT_TYPE, coverLetterSchema } from "@stackk-career/sche
 import {
 	createCoverLetterGenerationInputSchema,
 	triggerCoverLetterInputSchema,
+	updateCoverLetterTitleSchema,
 } from "@stackk-career/schemas/api/letters";
 import { formatJobTargetContext } from "@stackk-career/schemas/jobs/job-target-context";
 import { jobPostingSchema } from "@stackk-career/schemas/jobs/linkedin-job-fetch";
@@ -574,4 +575,35 @@ export const lettersRouter = {
 			context.log?.set({ outcome: "updated" });
 			return { messageId: input.messageId, ok: true };
 		}),
+
+	/**
+	 * Rename a cover letter from the workspace. `generations.title` doubles as the target job
+	 * position CASEY reads on each re-trigger, so the schema keeps it non-empty. Ownership +
+	 * type are guarded; the viewer's cached `list`/`get` reads are busted so the new title shows.
+	 */
+	updateTitle: protectedProcedure.input(updateCoverLetterTitleSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+		context.log?.set({
+			action: "update_cover_letter_title",
+			generation: { id: input.generationId },
+			user: { id: userId },
+		});
+
+		const [updated] = await context.db
+			.update(generations)
+			.set({ title: input.title })
+			.where(
+				and(eq(generations.id, input.generationId), eq(generations.owner, userId), eq(generations.type, "cover-letter"))
+			)
+			.returning({ id: generations.id, title: generations.title });
+
+		if (!updated) {
+			context.log?.set({ outcome: "not_found" });
+			throw new ORPCError("NOT_FOUND", { message: "Carta no encontrada" });
+		}
+
+		await invalidateViewerLetters(context.db, userId);
+		context.log?.set({ outcome: "updated" });
+		return updated;
+	}),
 };

@@ -440,6 +440,46 @@ function LetterWorkspace() {
 		[generationId, updateArtifactMutateAsync]
 	);
 
+	// Inline rename of the letter's title (= job position). Optimistic: mirror the new title in
+	// the cache immediately (rollback on failure) so the edit feels instant, then invalidate to
+	// confirm against the server.
+	const updateTitleMutation = useMutation(
+		orpc.letters.updateTitle.mutationOptions({
+			onMutate: async ({ title }) => {
+				await queryClient.cancelQueries({ queryKey: lettersGetKey });
+				const previous = queryClient.getQueryData<typeof data>(lettersGetKey);
+				queryClient.setQueryData<typeof data>(lettersGetKey, (old) =>
+					old ? { ...old, generation: { ...old.generation, title } } : old
+				);
+				return { previous };
+			},
+			onError: (err, _vars, context) => {
+				if (context?.previous) {
+					queryClient.setQueryData(lettersGetKey, context.previous);
+				}
+				toast.error(err.message);
+			},
+			onSettled: () => {
+				queryClient.invalidateQueries({ queryKey: lettersGetKey });
+			},
+		})
+	);
+	const updateTitleMutateAsync = updateTitleMutation.mutateAsync;
+	const onSaveTitle = useCallback(
+		(title: string) => {
+			const trimmed = title.trim();
+			// The title feeds CASEY's job context on every re-trigger, so it must stay non-empty;
+			// also skip no-op saves when the value is unchanged.
+			if (!trimmed || trimmed === data?.generation.title) {
+				return;
+			}
+			updateTitleMutateAsync({ generationId, title: trimmed }).catch(() => {
+				// Toast already emitted by onError.
+			});
+		},
+		[generationId, data?.generation.title, updateTitleMutateAsync]
+	);
+
 	const deletion = useLetterDeletion(generationId);
 
 	const triggerMutateAsync = triggerMutation.mutateAsync;
@@ -604,6 +644,7 @@ function LetterWorkspace() {
 					maxVersions={maxVersions}
 					messages={data.messages}
 					onOpenJobContext={() => setShowJobContext(true)}
+					onSaveTitle={onSaveTitle}
 					onSelectVersion={selectVersion}
 					onStartTour={tourReady ? () => startTour("letter-detail") : undefined}
 					onTriggerAsync={onTriggerAsync}

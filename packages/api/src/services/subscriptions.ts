@@ -433,6 +433,13 @@ async function readCurrentUsage(
 		});
 	}
 
+	// `suggested_jobs_per_run` is a per-run cap enforced by the suggested-jobs task, not via assertQuota.
+	if (limitKey === "suggested_jobs_per_run") {
+		throw new ORPCError("INTERNAL_SERVER_ERROR", {
+			message: "suggested_jobs_per_run se valida en el task de sugerencias, no por assertQuota",
+		});
+	}
+
 	return readCachedUsageCounter(db, userId, limitKey, periodFromSubscription(subscription));
 }
 

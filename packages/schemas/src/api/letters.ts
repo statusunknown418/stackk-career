@@ -126,3 +126,14 @@ export const triggerCoverLetterInputSchema = z.object({
 	language: coverLetterLanguageSchema.optional(),
 });
 export type TriggerCoverLetterInput = z.infer<typeof triggerCoverLetterInputSchema>;
+
+/**
+ * Input for renaming a cover letter from the workspace header. The title doubles as the
+ * letter's target job position (`generations.title`), which CASEY reads on every re-trigger,
+ * so it must stay non-empty — mirrors the resume title's `min(1)` constraint.
+ */
+export const updateCoverLetterTitleSchema = z.object({
+	generationId: z.string().nonempty(),
+	title: z.string().trim().min(1),
+});
+export type UpdateCoverLetterTitleInput = z.infer<typeof updateCoverLetterTitleSchema>;
