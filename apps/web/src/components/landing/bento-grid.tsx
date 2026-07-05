@@ -39,13 +39,13 @@ function ReasonsStrip() {
 			{/* Section intro — same paper, no green chrome yet, just the editorial frame */}
 			<div className="px-6 pt-16 pb-4 md:pt-24 md:pb-6">
 				<Reveal>
-					<header className="mx-auto max-w-6xl">
+					<header className="mx-auto max-w-7xl">
 						<div className="flex items-center gap-2 font-mono text-foreground text-xs uppercase">
 							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
 							<span>El producto</span>
 						</div>
 
-						<h2 className="mt-3 max-w-215 font-display text-4xl text-foreground leading-none tracking-tight">
+						<h2 className="mt-3 max-w-200 font-display text-4xl text-foreground leading-none tracking-tight">
 							<WordReveal>Una suscripción que reúne las herramientas para asegurar tu próxima entrevista.</WordReveal>
 						</h2>
 						<p className="mt-4 text-balance text-foreground/60 text-xl leading-relaxed">
@@ -89,8 +89,8 @@ function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) 
 	// Static fallback — normal flow, no sticky, no transforms.
 	if (!sticky) {
 		return (
-			<div className="px-6 pt-12 pb-20 md:pt-16 md:pb-28">
-				<div className="mx-auto flex max-w-6xl flex-col gap-6">
+			<div className="pt-12 pb-20 md:pt-16 md:pb-28">
+				<div className="mx-auto flex max-w-7xl flex-col gap-6">
 					{reasons.map((reason, i) => (
 						<Reveal delay={i * 0.06} key={reason.title}>
 							<StaticReasonCard displayNumber={formatStackNumber(i)} reason={reason} />
@@ -105,7 +105,7 @@ function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) 
 		<div className="px-6 pt-8 pb-20 md:pb-28">
 			{/* Wrapper height = one card screen per reason. Extra room at the end
 			    lets the final card settle before the section releases. */}
-			<div className="relative mx-auto w-full max-w-6xl">
+			<div className="relative mx-auto w-full max-w-7xl">
 				{reasons.map((reason, i) => (
 					<StackReasonCard displayNumber={formatStackNumber(i)} index={i} key={reason.title} reason={reason} />
 				))}
@@ -148,7 +148,7 @@ function StackReasonCard({
 	return (
 		<motion.article
 			className={
-				"relative mb-[5vh] flex min-h-[35vh] flex-col overflow-hidden rounded-xl border bg-card p-8 text-right shadow-xl"
+				"relative mb-[5vh] flex min-h-[35vh] min-w-full flex-col overflow-hidden rounded-xl border bg-card p-8 text-right shadow-xl"
 			}
 			ref={cardRef}
 			style={{

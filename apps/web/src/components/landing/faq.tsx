@@ -40,22 +40,8 @@ export function Faq() {
 				{/* LEFT — sticky scroll-driven header */}
 				<div className="md:col-span-5">
 					<div className="md:sticky md:top-28">
-						<motion.div
-							className="flex items-center gap-2.5"
-							initial={reduced ? false : { opacity: 0, y: 12 }}
-							transition={{ duration: 0.6, ease: EASE_OUT_QUINT }}
-							viewport={{ once: false, margin: "-20% 0px" }}
-							whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-						>
-							<span aria-hidden="true" className="relative grid size-2 place-items-center">
-								<span className="absolute inset-0 animate-[live-pulse_2.4s_ease-in-out_infinite] rounded-full bg-oxblood" />
-								<span className="relative size-2 rounded-full bg-oxblood" />
-							</span>
-							<span className="font-mono text-foreground/70 text-xs uppercase">FAQ · Respuestas humanas</span>
-						</motion.div>
-
 						<motion.h2
-							className="mt-4 font-display text-5xl text-foreground leading-none tracking-tight"
+							className="font-display text-5xl text-foreground leading-none tracking-tight"
 							style={reduced ? undefined : { y: titleY, transformOrigin: "left top" }}
 						>
 							Preguntas <br className="hidden sm:block" />

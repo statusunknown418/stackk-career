@@ -83,10 +83,7 @@ function PricingPageHero() {
 	return (
 		<section className="px-6 pt-24">
 			<div className="mx-auto max-w-7xl">
-				<Reveal>
-					<span className="block font-mono text-oxblood text-xs uppercase">Planes y precios</span>
-				</Reveal>
-				<h1 className="mt-4 max-w-[16ch] font-display text-6xl text-foreground leading-[0.92] tracking-tighter sm:text-7xl">
+				<h1 className="max-w-[16ch] font-display text-6xl text-foreground leading-[0.92] tracking-tighter sm:text-7xl">
 					<WordReveal>Elige el plan que te lleva a la entrevista.</WordReveal>
 				</h1>
 				<Reveal delay={0.2}>

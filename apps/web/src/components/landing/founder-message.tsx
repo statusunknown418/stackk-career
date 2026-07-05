@@ -199,18 +199,6 @@ export function FounderMessage() {
 				className="relative mx-auto grid w-full max-w-295 grid-cols-12 gap-6 px-6 py-12 md:px-12 md:py-16"
 				style={animate ? { y: innerY } : undefined}
 			>
-				{/* Eyebrow — small editorial marker */}
-				<motion.div
-					className="col-span-12 col-start-1 flex items-center gap-3 font-mono text-neutral-950/70 text-xs uppercase md:col-span-10 md:col-start-2"
-					initial={reduced ? false : { opacity: 0, y: 8 }}
-					transition={{ duration: 0.6, ease: EASE_OUT_QUINT }}
-					viewport={{ margin: "-15% 0px", once: true }}
-					whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-				>
-					<span aria-hidden="true" className="h-px w-10 bg-foreground/40" />
-					<span>Carta abierta · Equipo ASSENDIA</span>
-				</motion.div>
-
 				{/* Opening quote mark — drops in first, sets the editorial register */}
 				<motion.div
 					aria-hidden="true"

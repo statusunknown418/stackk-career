@@ -122,11 +122,6 @@ export function LandingFooter() {
 function SignatureMark() {
 	return (
 		<div className="relative">
-			<div className="flex items-center justify-between gap-4">
-				<span className="font-mono text-foreground/55 text-xs uppercase">Tu carrera, en serio.</span>
-				<span className="font-mono text-foreground/55 text-xs uppercase tabular-nums">Est. 2026 · Perú</span>
-			</div>
-
 			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"

@@ -122,7 +122,7 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
 	return (
-		<div className="relative isolate overflow-x-clip bg-background">
+		<div className="relative isolate overflow-x-clip">
 			<LandingNav />
 			<main>
 				<Hero />
