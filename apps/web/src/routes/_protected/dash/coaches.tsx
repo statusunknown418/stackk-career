@@ -23,7 +23,7 @@ function RouteComponent() {
 				</FrameDescription>
 			</header>
 
-			<FeatureGate limitKey="coaching_sessions_per_cycle">
+			<FeatureGate limitKey="coaching_sessions_per_cycle" renderLockedContent={false}>
 				<CoachingTimeline />
 			</FeatureGate>
 		</section>

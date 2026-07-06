@@ -12,6 +12,7 @@ import { messagesRouter } from "./messages";
 import { onboardingProfileRouter } from "./onboarding-profile";
 import { resumeAnalysesRouter } from "./resume-analyses";
 import { resumesRouter } from "./resumes";
+import { suggestedJobsRouter } from "./suggested-jobs";
 import { suggestionsRouter } from "./suggestions";
 import { viewerRouter } from "./viewer";
 import { waitlistRouter } from "./waitlist";
@@ -37,6 +38,7 @@ export const appRouter = {
 	resumeAnalyses: resumeAnalysesRouter,
 	blocks: blocksRouter,
 	suggestions: suggestionsRouter,
+	suggestedJobs: suggestedJobsRouter,
 	waitlist: waitlistRouter,
 };
 export type AppRouter = typeof appRouter;

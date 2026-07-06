@@ -1,23 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FeatureGate } from "@/components/domains/billing/feature-gate";
-import { ComingSoon } from "@/components/domains/dashboard/coming-soon";
+import { SuggestedList, SuggestedListSkeleton } from "@/components/domains/suggested/suggested-list";
 import { FrameDescription } from "@/components/ui/frame";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_protected/dash/suggested")({
 	component: RouteComponent,
+	loader: ({ context }) =>
+		Promise.allSettled([context.queryClient.ensureQueryData(orpc.suggestedJobs.list.queryOptions())]),
+	pendingComponent: PendingRoute,
 });
+
+function SuggestedHeader() {
+	return (
+		<header className="px-4 py-6">
+			<h1 className="font-light text-2xl">Puestos recomendados</h1>
+			<FrameDescription>Vacantes recomendadas según tu perfil y CV principal.</FrameDescription>
+		</header>
+	);
+}
 
 function RouteComponent() {
 	return (
-		<section className="flex flex-col gap-4 px-4 py-6">
-			<header>
-				<h1 className="font-light text-2xl">Targets</h1>
-				<FrameDescription>Descubre vacantes recomendadas según tu perfil.</FrameDescription>
-			</header>
+		<section className="space-y-4">
+			<SuggestedHeader />
+			<SuggestedList />
+		</section>
+	);
+}
 
-			<FeatureGate placeholder requiresPaid>
-				<ComingSoon description="Pronto verás vacantes recomendadas aquí." />
-			</FeatureGate>
+function PendingRoute() {
+	return (
+		<section className="space-y-4">
+			<SuggestedHeader />
+			<SuggestedListSkeleton />
 		</section>
 	);
 }

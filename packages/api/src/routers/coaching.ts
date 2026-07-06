@@ -3,10 +3,24 @@ import { user } from "@stackk-career/db/schema/auth";
 import { type CoachingStage, coachingSessions, coachingStageEnum } from "@stackk-career/db/schema/coaching-sessions";
 import { resumeAnalyses } from "@stackk-career/db/schema/resume-analyses";
 import { resumes } from "@stackk-career/db/schema/resumes";
-import { type CoachingStepSummary, coachingDashboardSchema } from "@stackk-career/schemas/api/coaching";
+import {
+	type BookableCoachingStage,
+	type CoachingStepSummary,
+	coachingBookingAccessInputSchema,
+	coachingBookingAccessSchema,
+	coachingDashboardSchema,
+} from "@stackk-career/schemas/api/coaching";
 import { count, desc, eq } from "drizzle-orm";
 import type { RequestLogger } from "evlog";
 import { protectedProcedure } from "..";
+import { assertSingleQuota } from "../services/subscriptions";
+
+const BOOKING_EVENT_SLUGS: Record<BookableCoachingStage, string> = {
+	"general-coaching": "impulsa-coaching-fp",
+	"pre-interview-training": "impulsa-coaching-pi",
+	"mock-interview": "impulsa-coaching-mock",
+	"follow-up": "impulsa-coaching-follow",
+};
 
 const STEP_CONTENT: Record<CoachingStage, { description: string; label: string }> = {
 	"cv-analysis": {
@@ -128,4 +142,22 @@ export const coachingRouter = {
 			viewer,
 		};
 	}),
+	bookingAccess: protectedProcedure
+		.input(coachingBookingAccessInputSchema)
+		.output(coachingBookingAccessSchema)
+		.handler(async ({ context, input }) => {
+			const userId = context.session.user.id;
+
+			await assertSingleQuota(db, userId, "coaching_sessions_per_cycle");
+
+			context.log?.set({
+				coaching: {
+					action: "booking_access",
+					stage: input.stage,
+					userId,
+				},
+			});
+
+			return { eventSlug: BOOKING_EVENT_SLUGS[input.stage] };
+		}),
 };

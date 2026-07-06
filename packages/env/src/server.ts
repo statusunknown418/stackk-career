@@ -29,10 +29,12 @@ export const env = createEnv({
 		AI_GATEWAY_API_KEY: z.string().min(1),
 		UPLOADTHING_TOKEN: z.string().min(1),
 
-		// LinkedIn job fetch (Apify). Optional: when unset, the background fetch records a
-		// `failed` job target and the resume stays fully usable without job context.
+		// LinkedIn job providers (Apify). All optional: when the token is unset the
+		// single-job fetch records a `failed` target, and the suggested-jobs search
+		// simply produces no feed for that cycle. The resume stays fully usable.
 		APIFY_TOKEN: z.string().optional(),
 		APIFY_LINKEDIN_JOB_ACTOR: z.string().optional(),
+		APIFY_LINKEDIN_JOB_SEARCH_ACTOR: z.string().optional(),
 
 		TRIGGER_SECRET_KEY: z.string().min(1),
 		TRIGGER_PROJECT_ID: z.string().min(1),

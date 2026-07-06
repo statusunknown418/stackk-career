@@ -12,6 +12,8 @@ interface FeatureGateProps {
 	limitKey?: LimitKey;
 	/** Placeholder mode for surfaces with no real content to blur (e.g. unbuilt routes). */
 	placeholder?: boolean;
+	/** When false, locked gates never mount their children, useful for sensitive embeds and links. */
+	renderLockedContent?: boolean;
 	/** Plan-tier lock for premium-only surfaces without a dedicated entitlement key. */
 	requiresPaid?: boolean;
 	title?: string;
@@ -22,18 +24,25 @@ export function FeatureGate({
 	description,
 	limitKey,
 	placeholder = false,
+	renderLockedContent = true,
 	requiresPaid = false,
 	title,
 }: FeatureGateProps): React.ReactElement {
 	const { data: snapshot } = useQuery(orpc.billing.getSnapshot.queryOptions());
 	const reduceMotion = useReducedMotion();
 
+	const isAccessControlled = Boolean(limitKey || requiresPaid);
+	const isResolvingAccess = isAccessControlled && snapshot == null;
 	let locked = false;
 
-	if (limitKey) {
-		locked = snapshot != null && !hasFeatureAccess(snapshot.entitlements[limitKey]);
-	} else if (requiresPaid) {
-		locked = snapshot != null && snapshot.effectivePlan.id === "free";
+	if (snapshot && limitKey) {
+		locked = !hasFeatureAccess(snapshot.entitlements[limitKey]);
+	} else if (snapshot && requiresPaid) {
+		locked = snapshot.effectivePlan.id === "free";
+	}
+
+	if (isResolvingAccess) {
+		return <div aria-busy className="min-h-[60svh]" />;
 	}
 
 	if (!locked) {
@@ -51,7 +60,7 @@ export function FeatureGate({
 		</motion.div>
 	);
 
-	if (placeholder) {
+	if (placeholder || !renderLockedContent) {
 		return <div className="grid min-h-[60svh] place-items-center p-4">{panel}</div>;
 	}
 

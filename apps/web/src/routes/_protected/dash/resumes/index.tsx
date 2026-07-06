@@ -67,9 +67,7 @@ function ResumesIndexPending() {
 			<section className="flex justify-between gap-4 bg-card px-4 py-6 lg:gap-10">
 				<article className="grid gap-1">
 					<h1 className="font-light text-2xl">Curriculums</h1>
-					<FrameDescription>
-						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
-					</FrameDescription>
+					<FrameDescription>Crea y mejora CVs utilizando un agente especialmente diseñado para ATS</FrameDescription>
 				</article>
 			</section>
 
@@ -140,9 +138,7 @@ function ResumesView() {
 				<article className="grid gap-1">
 					<h1 className="font-light text-2xl">Curriculums</h1>
 
-					<FrameDescription>
-						Crea y mejora CVs utilizando un agente especialemnte diseñado para los ATS mas comunes
-					</FrameDescription>
+					<FrameDescription>Crea y mejora CVs utilizando un agente especialemnte diseñado para ATS</FrameDescription>
 
 					<div className="mt-4 flex flex-wrap items-center gap-2">
 						<Button className="max-w-max" data-tour-step-id="resumes-create" onClick={handleCreate}>

@@ -1,4 +1,4 @@
-import { CaretDownIcon, ExportIcon, TrashSimpleIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, ExportIcon, StarIcon, TrashSimpleIcon } from "@phosphor-icons/react";
 import type { ResumeEdit } from "@stackk-career/schemas/ai/resume-analysis";
 import { getSectionKind } from "@stackk-career/schemas/api/resumes";
 import { buildBlockTree } from "@stackk-career/schemas/db/resume-blocks";
@@ -31,6 +31,7 @@ import {
 	AlertDialogPopup,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Group, GroupSeparator } from "@/components/ui/group";
@@ -290,6 +291,30 @@ function RouteComponent() {
 		})
 	);
 
+	const setPrimary = useMutation(
+		orpc.resumes.setPrimary.mutationOptions({
+			onMutate: async () => {
+				await queryClient.cancelQueries({ queryKey: resumeQuery.queryKey });
+				const previous = queryClient.getQueryData<typeof data>(resumeQuery.queryKey);
+				queryClient.setQueryData<typeof data>(resumeQuery.queryKey, (prev) =>
+					prev ? { ...prev, isPrimary: true } : prev
+				);
+				return { previous };
+			},
+			onError: (_error, _input, ctx) => {
+				if (ctx?.previous) {
+					queryClient.setQueryData(resumeQuery.queryKey, ctx.previous);
+				}
+				toast.error("No pudimos marcar este CV como principal.");
+			},
+			onSettled: () =>
+				Promise.all([
+					queryClient.invalidateQueries({ queryKey: resumeQuery.queryKey }),
+					queryClient.invalidateQueries({ queryKey: orpc.resumes.list.queryOptions().queryKey }),
+				]),
+		})
+	);
+
 	const handleDelete = async () => {
 		await deleteMutation.mutateAsync({ id: params.resumeId });
 	};
@@ -394,6 +419,23 @@ function RouteComponent() {
 					</Group>
 
 					<ResumeCoverLetterButton resumeId={params.resumeId} />
+
+					{data.isPrimary ? (
+						<Badge size="sm" variant="info">
+							<StarIcon weight="fill" />
+							Principal
+						</Badge>
+					) : (
+						<Button
+							loading={setPrimary.isPending}
+							onClick={() => setPrimary.mutate({ id: params.resumeId })}
+							size="sm"
+							variant="outline"
+						>
+							<StarIcon />
+							Hacer principal
+						</Button>
+					)}
 
 					<Button onClick={() => setIsDeleteOpen(true)} size="sm" variant="destructive-outline">
 						<TrashSimpleIcon />

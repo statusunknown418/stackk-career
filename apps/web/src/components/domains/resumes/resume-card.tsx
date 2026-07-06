@@ -1,14 +1,20 @@
 import { ArrowRightIcon, MagnifyingGlassIcon, StarIcon } from "@phosphor-icons/react";
+import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
 import type { ResumeListItem } from "@stackk-career/schemas/api/resumes";
 import type { ResumeStatus } from "@stackk-career/schemas/db/resumes";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Frame, FrameTitle } from "@/components/ui/frame";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, firstMeaningful } from "@/lib/utils";
+import { orpc } from "@/utils/orpc";
+
+type ResumeListData = AppRouterOutputs["resumes"]["list"];
 
 /** Accent bar colour for the faux CV sheet, mirroring the status badge tone. */
 const STATUS_ACCENT: Record<ResumeStatus, string> = {
@@ -74,55 +80,92 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const cardTitle =
 		firstMeaningful([resume.title, subtitle, fullName], [PLACEHOLDER_RESUME_TITLE]) ?? PLACEHOLDER_RESUME_TITLE;
 
+	const queryClient = useQueryClient();
+	const listKey = orpc.resumes.list.queryKey();
+	const setPrimary = useMutation(
+		orpc.resumes.setPrimary.mutationOptions({
+			onMutate: async () => {
+				await queryClient.cancelQueries({ queryKey: listKey });
+				const previous = queryClient.getQueryData<ResumeListData>(listKey);
+				queryClient.setQueryData<ResumeListData>(listKey, (items) =>
+					items?.map((item) => ({ ...item, isPrimary: item.id === resume.id }))
+				);
+				return { previous };
+			},
+			onError: (_error, _input, ctx) => {
+				if (ctx?.previous) {
+					queryClient.setQueryData(listKey, ctx.previous);
+				}
+				toast.error("No pudimos marcar este CV como principal.");
+			},
+			onSettled: () => queryClient.invalidateQueries({ queryKey: listKey }),
+		})
+	);
+
 	return (
-		<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
-			<Frame
-				aria-labelledby={`resume-${resume.id}-title`}
-				className="group h-full gap-2 p-3 transition-colors hover:bg-muted"
-			>
-				<ResumeSheetPreview detail={contactDetail} name={sheetName} status={resume.status} subtitle={subtitle} />
-
-				<div className="flex items-center justify-between gap-2">
-					<ul aria-label="Etiquetas del CV" className="flex min-w-0 list-none flex-wrap items-center gap-1">
-						{resume.isPrimary && (
-							<li className="flex min-w-0">
-								<Badge size="sm" variant="info">
-									<StarIcon weight="fill" />
-									Principal
-								</Badge>
-							</li>
-						)}
-
-						{(resume.jobTargetStatus === "pending" || resume.jobTargetStatus === "fetching") && (
-							<li className="flex min-w-0">
-								<Badge size="sm" variant="secondary">
-									<MagnifyingGlassIcon />
-									Buscando puesto…
-								</Badge>
-							</li>
-						)}
-					</ul>
-				</div>
-
-				<FrameTitle
-					className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
-					id={`resume-${resume.id}-title`}
+		<li className="relative h-full">
+			<Link className="block h-full" params={{ resumeId: resume.id }} to="/dash/resumes/$resumeId">
+				<Frame
+					aria-labelledby={`resume-${resume.id}-title`}
+					className="group h-full gap-2 p-3 transition-colors hover:bg-muted"
 				>
-					{cardTitle}
-				</FrameTitle>
+					<ResumeSheetPreview detail={contactDetail} name={sheetName} status={resume.status} subtitle={subtitle} />
 
-				<div className="flex flex-col gap-2">
-					<time className="text-muted-foreground text-xs" dateTime={formatISO(resume.updatedAt)}>
-						Actualizado {updatedLabel}
-					</time>
+					<div className="flex items-center justify-between gap-2">
+						<ul aria-label="Etiquetas del CV" className="flex min-w-0 list-none flex-wrap items-center gap-1">
+							{resume.isPrimary && (
+								<li className="flex min-w-0">
+									<Badge size="sm" variant="info">
+										<StarIcon weight="fill" />
+										Principal
+									</Badge>
+								</li>
+							)}
 
-					<span aria-hidden="true" className={cn(buttonVariants({ variant: "secondary" }), "w-full justify-between")}>
-						Editar CV
-						<ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" weight="bold" />
-					</span>
-				</div>
-			</Frame>
-		</Link>
+							{(resume.jobTargetStatus === "pending" || resume.jobTargetStatus === "fetching") && (
+								<li className="flex min-w-0">
+									<Badge size="sm" variant="secondary">
+										<MagnifyingGlassIcon />
+										Buscando puesto…
+									</Badge>
+								</li>
+							)}
+						</ul>
+					</div>
+
+					<FrameTitle
+						className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
+						id={`resume-${resume.id}-title`}
+					>
+						{cardTitle}
+					</FrameTitle>
+
+					<div className="flex flex-col gap-2">
+						<time className="text-muted-foreground text-xs" dateTime={formatISO(resume.updatedAt)}>
+							Actualizado {updatedLabel}
+						</time>
+
+						<span aria-hidden="true" className={cn(buttonVariants({ variant: "secondary" }), "w-full justify-between")}>
+							Editar CV
+							<ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" weight="bold" />
+						</span>
+					</div>
+				</Frame>
+			</Link>
+			{!resume.isPrimary && (
+				<Button
+					aria-label="Marcar como principal"
+					className="absolute top-2 right-2 z-10 shadow-sm"
+					loading={setPrimary.isPending}
+					onClick={() => setPrimary.mutate({ id: resume.id })}
+					size="icon-sm"
+					title="Marcar como principal"
+					variant="secondary"
+				>
+					<StarIcon />
+				</Button>
+			)}
+		</li>
 	);
 }
 

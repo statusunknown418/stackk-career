@@ -1,7 +1,8 @@
 import type { db } from "@stackk-career/db";
+import { suggestedJobsTag } from "@stackk-career/schemas/jobs/job-discovery";
 import { type CachedUsageLimitKey, cachedUsageLimitKeys, viewerUsageTag } from "@stackk-career/schemas/subscriptions";
 
-export { viewerUsageTag };
+export { suggestedJobsTag, viewerUsageTag };
 
 /**
  * Build the Drizzle cache tag for a specific user's subscription row.
@@ -25,6 +26,11 @@ export function viewerLettersTag(userId: string): string {
 /** Bust the user's cover-letter read cache after a letters write. */
 export async function invalidateViewerLetters(dbClient: typeof db, userId: string): Promise<void> {
 	await dbClient.$cache.invalidate({ tags: [viewerLettersTag(userId)] });
+}
+
+/** Bust the user's suggested-jobs feed cache after a dismiss / refresh mutation or a compute run. */
+export async function invalidateSuggestedJobs(dbClient: typeof db, userId: string): Promise<void> {
+	await dbClient.$cache.invalidate({ tags: [suggestedJobsTag(userId)] });
 }
 
 /**

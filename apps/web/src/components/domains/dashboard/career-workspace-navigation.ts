@@ -39,7 +39,7 @@ export const careerWorkspaceNavigation = [
 		disabled: true,
 		icon: BriefcaseIcon,
 		id: "puestos-sugeridos",
-		label: "Targets",
+		label: "Puestos sugeridos",
 		to: "/dash/suggested",
 	},
 ] as const satisfies readonly CareerWorkspaceNavigationItem[];

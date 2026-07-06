@@ -197,6 +197,11 @@ export const updateResumeTitleSchema = z.object({
 	title: z.string().min(1),
 });
 
+export const setPrimaryResumeSchema = z.object({
+	id: z.string(),
+});
+export type SetPrimaryResumeInput = z.infer<typeof setPrimaryResumeSchema>;
+
 const LINKEDIN_HOST = /(^|\.)linkedin\.com$/i;
 const NUMERIC_JOB_ID = /^\d+$/;
 const JOBS_VIEW_JOB_ID = /\/jobs\/view\/(?:[\w-]*?-)?(\d{4,})/i;

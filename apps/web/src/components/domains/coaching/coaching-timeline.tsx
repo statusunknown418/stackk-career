@@ -1,5 +1,5 @@
 import type { coachingBookingChangedTask } from "@stackk-career/jobs/trigger/tasks/coaching-booking-changed";
-import type { CoachingBookingSummary, CoachingStage } from "@stackk-career/schemas/api/coaching";
+import type { BookableCoachingStage, CoachingBookingSummary } from "@stackk-career/schemas/api/coaching";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { useRealtimeRunsWithTag } from "@trigger.dev/react-hooks";
@@ -16,8 +16,7 @@ import { ScheduledEventCard } from "./scheduled-event-card";
 
 interface StepDef {
 	body: string;
-	calLink: string;
-	stage: CoachingStage;
+	stage: BookableCoachingStage;
 	step: number;
 	title: string;
 }
@@ -32,35 +31,31 @@ const steps: readonly StepDef[] = [
 		step: 1,
 		title: "Coaching general",
 		body: "Sesiones base con tu mentor. Define objetivos y prioridades.",
-		calLink: "impulsa-coaching-fp",
 		stage: "general-coaching",
 	},
 	{
 		step: 2,
 		title: "Prep pre-entrevista",
 		body: "Estrategia, materiales y revisión de CV.",
-		calLink: "impulsa-coaching-pi",
 		stage: "pre-interview-training",
 	},
 	{
 		step: 3,
 		title: "Mock interview",
 		body: "Simulacro en vivo con feedback inmediato.",
-		calLink: "impulsa-coaching-mock",
 		stage: "mock-interview",
 	},
 	{
 		step: 4,
 		title: "Follow up",
 		body: "Retro, ajustes y próximos pasos.",
-		calLink: "impulsa-coaching-follow",
 		stage: "follow-up",
 	},
 ];
 
 function pickStageBooking(
 	bookings: readonly CoachingBookingSummary[] | undefined,
-	stage: CoachingStage
+	stage: BookableCoachingStage
 ): CoachingBookingSummary | null {
 	if (!bookings) {
 		return null;
@@ -118,6 +113,13 @@ export function CoachingTimeline() {
 	}, [runs.length, queryClient]);
 
 	const stageBooking = current ? pickStageBooking(dashboard?.bookings, current.stage) : null;
+	const bookingAccess = useQuery(
+		orpc.coaching.bookingAccess.queryOptions({
+			enabled: Boolean(userId && current && !stageBooking),
+			input: { stage: current?.stage ?? "general-coaching" },
+			retry: false,
+		})
+	);
 
 	const firstStep = steps[0]?.step ?? DEFAULT_STEP;
 	const lastStep = steps.at(-1)?.step ?? DEFAULT_STEP;
@@ -168,17 +170,25 @@ export function CoachingTimeline() {
 					</FrameHeader>
 
 					<FramePanel className="h-135 overflow-y-scroll">
-						<Suspense fallback={<Loader />}>
-							{current?.calLink && userId && session?.user && (
-								<Booker
-									email={session.user.email}
-									eventSlug={current.calLink}
-									key={current.calLink}
-									name={session.user.name ?? ""}
-									userId={userId}
-								/>
-							)}
-						</Suspense>
+						{!(session?.user && userId) || bookingAccess.isFetching ? (
+							<Loader />
+						) : (
+							<Suspense fallback={<Loader />}>
+								{bookingAccess.data?.eventSlug ? (
+									<Booker
+										email={session.user.email}
+										eventSlug={bookingAccess.data.eventSlug}
+										key={bookingAccess.data.eventSlug}
+										name={session.user.name ?? ""}
+										userId={userId}
+									/>
+								) : (
+									<div className="grid h-full place-items-center p-6 text-center text-muted-foreground text-sm">
+										Actualiza tu plan o libera una sesión para agendar otra asesoría.
+									</div>
+								)}
+							</Suspense>
+						)}
 					</FramePanel>
 				</Frame>
 			)}

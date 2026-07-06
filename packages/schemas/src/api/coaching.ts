@@ -3,6 +3,20 @@ import { z } from "zod";
 import { insertCoachingSessionSchema, selectCoachingSessionSchema } from "../db/coaching-sessions";
 
 export const coachingStageSchema = z.enum(coachingStageEnum);
+export const bookableCoachingStageSchema = z.enum([
+	"general-coaching",
+	"pre-interview-training",
+	"mock-interview",
+	"follow-up",
+] as const);
+
+export const coachingBookingAccessInputSchema = z.object({
+	stage: bookableCoachingStageSchema,
+});
+
+export const coachingBookingAccessSchema = z.object({
+	eventSlug: z.string().min(1),
+});
 
 export const coachingStepSummarySchema = z.object({
 	completed: z.boolean(),
@@ -58,6 +72,9 @@ export const captureCoachingBookingInputSchema = insertCoachingSessionSchema
 	});
 
 export type CaptureCoachingBookingInput = z.infer<typeof captureCoachingBookingInputSchema>;
+export type BookableCoachingStage = z.infer<typeof bookableCoachingStageSchema>;
+export type CoachingBookingAccess = z.infer<typeof coachingBookingAccessSchema>;
+export type CoachingBookingAccessInput = z.infer<typeof coachingBookingAccessInputSchema>;
 export type CoachingBookingSummary = z.infer<typeof coachingBookingSummarySchema>;
 export type CoachingDashboard = z.infer<typeof coachingDashboardSchema>;
 export type CoachingStage = z.infer<typeof coachingStageSchema>;

@@ -9,5 +9,6 @@ export * from "./resume-blocks";
 export * from "./resume-job-targets";
 export * from "./resumes";
 export * from "./subscriptions";
+export * from "./suggested-jobs";
 export * from "./transactional-emails";
 export * from "./waitlist";

@@ -59,8 +59,6 @@ function DashLayout() {
 
 				<SidebarContent>
 					<SidebarGroup>
-						<SidebarGroupLabel>Navegación</SidebarGroupLabel>
-
 						<SidebarGroupContent>
 							<SidebarMenu className="gap-1.5">
 								{careerWorkspaceNavigation.map((item) => {

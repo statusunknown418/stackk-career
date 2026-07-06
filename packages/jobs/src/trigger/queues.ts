@@ -44,3 +44,12 @@ export const linkedinJobQueue = queue({
 	name: "linkedin-job-fetch",
 	concurrencyLimit: Number(process.env.LINKEDIN_JOB_QUEUE_CONCURRENCY ?? 5),
 });
+
+/**
+ * Suggested-jobs compute runs one provider scrape (slow, synchronous) plus an optional
+ * ranker LLM call per user. Same conservative posture as `linkedinJobQueue`.
+ */
+export const suggestedJobsQueue = queue({
+	name: "suggested-jobs",
+	concurrencyLimit: Number(process.env.SUGGESTED_JOBS_QUEUE_CONCURRENCY ?? 5),
+});

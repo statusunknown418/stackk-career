@@ -10,10 +10,11 @@ import {
 	createResumeInputSchema,
 	getResumeAnalysisInputSchema,
 	listResumesInputSchema,
+	setPrimaryResumeSchema,
 	updateResumeTitleSchema,
 } from "@stackk-career/schemas/api/resumes";
 import { jobPostingSchema } from "@stackk-career/schemas/jobs/linkedin-job-fetch";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "..";
 import { buildResumeRootSeed, buildStarterChildBlocks } from "../lib/resume-block-starters";
@@ -319,6 +320,32 @@ export const resumesRouter = {
 		}
 
 		return updatedResume;
+	}),
+
+	setPrimary: protectedProcedure.input(setPrimaryResumeSchema).handler(async ({ context, input }) => {
+		const userId = context.session.user.id;
+		context.log?.set({ action: "set_primary_resume", user: { id: userId }, resume: { id: input.id } });
+
+		const [target] = await context.db
+			.select({ id: resumes.id })
+			.from(resumes)
+			.where(and(eq(resumes.id, input.id), eq(resumes.userId, userId)))
+			.limit(1);
+
+		if (!target) {
+			context.log?.set({ outcome: "not_found" });
+			throw new ORPCError("NOT_FOUND", { message: "CV no encontrado" });
+		}
+
+		// Exactly one primary per user: flip the current primary off and the target on in a single
+		// atomic statement, scoped to only the affected rows so unrelated CVs keep their updatedAt.
+		await context.db
+			.update(resumes)
+			.set({ isPrimary: sql`${resumes.id} = ${input.id}` })
+			.where(and(eq(resumes.userId, userId), or(eq(resumes.isPrimary, true), eq(resumes.id, input.id))));
+
+		context.log?.set({ outcome: "success" });
+		return { id: target.id };
 	}),
 
 	getJobTarget: protectedProcedure.input(z.object({ resumeId: z.string() })).handler(async ({ context, input }) => {
