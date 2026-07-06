@@ -6,6 +6,7 @@ import { useStore } from "@tanstack/react-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { formatDate } from "date-fns";
+import { MenuIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -35,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Group, GroupSeparator } from "@/components/ui/group";
+import { Menu, MenuItem, MenuPopup, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	blockIdFromFieldName,
@@ -389,6 +391,13 @@ function RouteComponent() {
 								{saveStatusLabel}
 							</span>
 						)}
+
+						{data.isPrimary && (
+							<Badge size="sm" variant="info">
+								<StarIcon weight="fill" />
+								Principal
+							</Badge>
+						)}
 					</div>
 
 					<form.AppField name="title">
@@ -420,27 +429,26 @@ function RouteComponent() {
 
 					<ResumeCoverLetterButton resumeId={params.resumeId} />
 
-					{data.isPrimary ? (
-						<Badge size="sm" variant="info">
-							<StarIcon weight="fill" />
-							Principal
-						</Badge>
-					) : (
-						<Button
-							loading={setPrimary.isPending}
-							onClick={() => setPrimary.mutate({ id: params.resumeId })}
-							size="sm"
-							variant="outline"
-						>
-							<StarIcon />
-							Hacer principal
-						</Button>
-					)}
-
-					<Button onClick={() => setIsDeleteOpen(true)} size="sm" variant="destructive-outline">
-						<TrashSimpleIcon />
-						Borrar
-					</Button>
+					<Menu>
+						<MenuTrigger render={<Button aria-label="Más acciones" size="icon-sm" variant="ghost" />}>
+							<MenuIcon />
+						</MenuTrigger>
+						<MenuPopup align="end">
+							{!data.isPrimary && (
+								<>
+									<MenuItem closeOnClick onClick={() => setPrimary.mutate({ id: params.resumeId })}>
+										<StarIcon />
+										Hacer principal
+									</MenuItem>
+									<MenuSeparator />
+								</>
+							)}
+							<MenuItem closeOnClick onClick={() => setIsDeleteOpen(true)} variant="destructive">
+								<TrashSimpleIcon />
+								Borrar
+							</MenuItem>
+						</MenuPopup>
+					</Menu>
 				</article>
 			</header>
 
