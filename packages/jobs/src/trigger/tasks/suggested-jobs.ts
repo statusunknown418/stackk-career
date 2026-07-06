@@ -168,6 +168,7 @@ async function refineScores(
 			signal,
 			userId,
 		});
+
 		for (const verdict of verdicts) {
 			verdictByJobId.set(verdict.sourceJobId, verdict);
 		}

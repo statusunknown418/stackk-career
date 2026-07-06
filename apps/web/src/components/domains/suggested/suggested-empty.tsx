@@ -10,7 +10,7 @@ function nextRefreshHint(nextRefreshAt: Date | null): string {
 }
 
 /** No `ready` suggestions and no run in flight — the resting empty state. */
-export function SuggestedEmpty({ nextRefreshAt }: { nextRefreshAt: Date | null }) {
+export function SuggestedEmpty() {
 	return (
 		<Empty className="rounded-xl border">
 			<EmptyHeader>
@@ -18,9 +18,7 @@ export function SuggestedEmpty({ nextRefreshAt }: { nextRefreshAt: Date | null }
 					<TargetIcon className="text-oxblood" />
 				</EmptyMedia>
 				<EmptyTitle>Aún no hay vacantes</EmptyTitle>
-				<EmptyDescription>
-					Buscamos oportunidades según tu perfil y CV principal. Vuelve {nextRefreshHint(nextRefreshAt)}.
-				</EmptyDescription>
+				<EmptyDescription>Buscamos oportunidades según tu perfil y CV principal</EmptyDescription>
 			</EmptyHeader>
 		</Empty>
 	);

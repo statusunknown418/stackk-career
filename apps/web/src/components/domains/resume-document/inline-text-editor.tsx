@@ -70,7 +70,7 @@ export const InlineTextEditor = ({
 	);
 	const placeholderClassName = cn(
 		editorClassName,
-		"pointer-events-none absolute inset-x-0 top-0 z-20 text-muted-foreground/60 hover:bg-transparent focus:bg-transparent"
+		"pointer-events-none z-20 self-start text-muted-foreground/60 [grid-area:1/1] hover:bg-transparent focus:bg-transparent"
 	);
 
 	const editor = useEditor({
@@ -151,10 +151,10 @@ export const InlineTextEditor = ({
 	const showToolbar = isProse && !readOnly && (isFocused || isSuggestionOpen);
 
 	return (
-		<div className="relative">
+		<div className="relative grid">
 			<EditorContent
 				className={cn(
-					"relative z-10",
+					"relative z-10 [grid-area:1/1]",
 					isProse &&
 						"[&_.ProseMirror_li_p]:my-0 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-5 [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-5",
 					readOnly && "pointer-events-none"

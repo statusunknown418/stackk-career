@@ -74,10 +74,7 @@ export function ResumeImportProgress({
 
 	return (
 		<section className="flex flex-col gap-4">
-			<header className="flex flex-col gap-1">
-				<h3 className="font-medium text-lg">{phase.displayName ?? "Importando CV"}</h3>
-				<p className="text-muted-foreground text-sm">{phase.currentLabel ?? phase.label}</p>
-			</header>
+			<p className="text-muted-foreground text-sm">{phase.currentLabel ?? phase.label}</p>
 
 			<Progress max={100} value={progressPct}>
 				<ProgressTrack>

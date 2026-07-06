@@ -24,9 +24,17 @@ const MAX_RESUME_KEYWORDS = 40;
 const DEFAULT_LANGUAGE = "Español";
 /** Added to the applicable languages when the user speaks English (see {@link userSpeaksEnglish}). */
 const DEFAULT_ENGLISH = "Inglés";
+/**
+ * LATAM fallback location for the provider search. Onboarding never captures a city, so when the
+ * resume carries no usable place we search this market — the LinkedIn actor needs a location to
+ * build a valid search at all, and an empty location returns zero results (plan §fetch).
+ */
+const DEFAULT_SEARCH_LOCATION = "Perú";
 
 const REMOTE_TOKENS = /(remoto|remote)/i;
 const ONSITE_TOKENS = /(presencial|oficina|on[-\s]?site|onsite)/i;
+/** Separators stripped when testing whether a location string is only a work-modality word. */
+const LOCATION_NOISE = /[\s,()-]/g;
 
 /**
  * Controlled onboarding answers -> provider-neutral seniority band. Keyed on the exact
@@ -95,6 +103,20 @@ function deriveRemote(location: string | null): boolean | null {
 }
 
 /**
+ * The resume-derived location as a geo search term, or null when it is blank or a bare work-modality
+ * word (e.g. "Remoto") that LinkedIn can't resolve to a place. A string that also carries a real place
+ * (e.g. "Lima, Perú (Remoto)") is kept — the resolver ignores the modality tail.
+ */
+function geographicLocation(value: string | null | undefined): string | null {
+	const trimmed = value?.trim();
+	if (!trimmed) {
+		return null;
+	}
+	const withoutModality = trimmed.replace(REMOTE_TOKENS, "").replace(ONSITE_TOKENS, "").replace(LOCATION_NOISE, "");
+	return withoutModality.length > 0 ? trimmed : null;
+}
+
+/**
  * Whether the user can apply to English-language postings. Read from the onboarding
  * `languages` answer, a controlled list ("Solo español", or "Inglés (Nivel), …"). Unanswered
  * or skipped is persisted as null -> DEFAULT TO YES so English roles aren't hidden from users
@@ -119,8 +141,9 @@ function applicableLanguages(speaksEnglish: boolean): string[] {
  * same inputs always yield the same query (and it's cheap to unit-test).
  *
  * Notes on the onboarding model this reads:
- * - `profile.location` is a work modality, not a city -> feeds `remote`, and `JobQuery.location`
- *   stays null (we never captured a city, and a resume address would be PII we don't send).
+ * - `profile.location` is a work modality, not a city -> feeds `remote`, never the search location.
+ * - The search location comes from the resume (contact address, else an experience location); when the
+ *   resume has none, fall back to {@link DEFAULT_SEARCH_LOCATION} — the provider needs a place to search.
  * - `profile.targetRole` / `profile.experience` are seniority hints -> passed as a `seniority`
  *   string that each adapter fuzzy-maps to its own enum.
  */
@@ -146,7 +169,7 @@ export function buildJobQuery({ profile, resume, letters, cadence }: BuildJobQue
 
 	return {
 		keywords,
-		location: null,
+		location: geographicLocation(resume?.location) ?? DEFAULT_SEARCH_LOCATION,
 		remote: deriveRemote(profile?.location ?? null),
 		seniority: mapSeniority(profile?.targetRole ?? null, profile?.experience ?? null),
 		languages: applicableLanguages(speaksEnglish),

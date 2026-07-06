@@ -85,11 +85,15 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 	const setPrimary = useMutation(
 		orpc.resumes.setPrimary.mutationOptions({
 			onMutate: async () => {
-				await queryClient.cancelQueries({ queryKey: listKey });
+				// Flip on the click frame: the optimistic write runs before any await, so it
+				// batches with React Query's `pending` dispatch and the badge/button move with
+				// no loading-spinner flash. Then abort any in-flight list refetch so a late
+				// response can't clobber the optimistic state before the mutation settles.
 				const previous = queryClient.getQueryData<ResumeListData>(listKey);
 				queryClient.setQueryData<ResumeListData>(listKey, (items) =>
 					items?.map((item) => ({ ...item, isPrimary: item.id === resume.id }))
 				);
+				await queryClient.cancelQueries({ queryKey: listKey });
 				return { previous };
 			},
 			onError: (_error, _input, ctx) => {
@@ -134,7 +138,7 @@ export function ResumeCard({ resume }: { resume: ResumeListItem }) {
 					</div>
 
 					<FrameTitle
-						className="min-w-0 truncate text-base underline-offset-4 group-hover:underline"
+						className="mt-auto min-w-0 truncate text-base underline-offset-4 group-hover:underline"
 						id={`resume-${resume.id}-title`}
 					>
 						{cardTitle}

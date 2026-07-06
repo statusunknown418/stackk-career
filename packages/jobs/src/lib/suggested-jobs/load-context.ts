@@ -35,6 +35,8 @@ export interface PrimaryResumeContext
 	extends Pick<ResumeRow, "displayName" | "id" | "targetedCompanyIdentifier" | "targetRole" | "title"> {
 	/** Latest READY analysis object, or null when none exists / it failed to parse. */
 	analysis: ResumeAnalysis | null;
+	/** Candidate's own location for the search — contact address, else the first entry location; null when absent. */
+	location: string | null;
 	/** Entry titles from experience-like sections (experience / projects / volunteering), in resume order. */
 	roleTitles: string[];
 	/** Concrete skills (skill_item values, or a skill_line label when the line has no items), deduped in resume order. */
@@ -54,6 +56,10 @@ const MAX_SKILLS = 60;
 const MAX_ROLE_TITLES = 8;
 
 interface ResumeSignals {
+	/** Candidate's location from the resume contact block's address item; the preferred search location. */
+	contactLocation: string | null;
+	/** Entry `location` values in resume order; the fallback search location when there's no contact address. */
+	entryLocations: string[];
 	roleTitles: string[];
 	skills: string[];
 }
@@ -81,7 +87,19 @@ function collectResumeSignals(nodes: BlockNode[], acc: ResumeSignals, sectionKin
 				if (sectionKind && isExperienceLikeSectionKind(sectionKind)) {
 					pushTrimmed(acc.roleTitles, node.content.title);
 				}
+				if (node.content.location) {
+					pushTrimmed(acc.entryLocations, node.content.location);
+				}
 				collectResumeSignals(node.children, acc, sectionKind);
+				break;
+			}
+			case "contact": {
+				if (!acc.contactLocation) {
+					const address = node.content.items.find((item) => item.kind === "address" && item.value.trim().length > 0);
+					if (address) {
+						acc.contactLocation = address.value.trim();
+					}
+				}
 				break;
 			}
 			case "skill_line": {
@@ -186,7 +204,7 @@ export async function loadSuggestedJobsContext(userId: string): Promise<Suggeste
 			.limit(1),
 	]);
 
-	const signals: ResumeSignals = { skills: [], roleTitles: [] };
+	const signals: ResumeSignals = { skills: [], roleTitles: [], contactLocation: null, entryLocations: [] };
 	collectResumeSignals(buildBlockTree(blockRows), signals, null);
 
 	const parsedAnalysis = resumeAnalysisSchema.safeParse(analysisRows.at(0)?.object);
@@ -202,6 +220,7 @@ export async function loadSuggestedJobsContext(userId: string): Promise<Suggeste
 			skills: dedupeOrdered(signals.skills, MAX_SKILLS),
 			roleTitles: dedupeOrdered(signals.roleTitles, MAX_ROLE_TITLES),
 			analysis: parsedAnalysis.success ? parsedAnalysis.data : null,
+			location: signals.contactLocation ?? signals.entryLocations.at(0) ?? null,
 		},
 		letters,
 	};

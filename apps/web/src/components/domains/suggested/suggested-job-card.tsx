@@ -1,8 +1,11 @@
 import {
 	ArrowSquareOutIcon,
+	BuildingOfficeIcon,
 	CalendarBlankIcon,
 	ChatCircleTextIcon,
 	CheckIcon,
+	GraduationCapIcon,
+	type Icon,
 	LinkedinLogoIcon,
 	MapPinIcon,
 	SuitcaseSimpleIcon,
@@ -13,6 +16,7 @@ import type { AppRouterOutputs } from "@stackk-career/api/routers/index";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { Fragment } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Frame, FrameTitle } from "@/components/ui/frame";
@@ -26,6 +30,40 @@ type SuggestedJob = AppRouterOutputs["suggestedJobs"]["list"]["jobs"][number];
 /** Show at most this many match reasons per card — the rest is noise on a feed card. */
 const MAX_REASONS = 3;
 const SOURCE_LABELS: Record<string, string> = { linkedin: "LinkedIn" };
+
+/** One labeled fact shown in the card's detail list. */
+interface Detail {
+	icon: Icon;
+	label: string;
+	value: string | null;
+}
+
+/**
+ * Color + words for the match meter, banded by score so the bar reads at a glance:
+ * red ≤20 · orange ≤40 · yellow ≤60 · teal ≤80 · green ≤100. `indicator` fills the
+ * bar; `accent` tints the icon + value; `label` is the plain-language equivalent so
+ * the number is understandable without decoding a percentage.
+ */
+interface MatchBand {
+	accent: string;
+	indicator: string;
+}
+
+function matchBand(score: number): MatchBand {
+	if (score <= 20) {
+		return { indicator: "bg-red-500", accent: "text-red-600 dark:text-red-400" };
+	}
+	if (score <= 40) {
+		return { indicator: "bg-orange-500", accent: "text-orange-600 dark:text-orange-400" };
+	}
+	if (score <= 60) {
+		return { indicator: "bg-yellow-500", accent: "text-yellow-700 dark:text-yellow-400" };
+	}
+	if (score <= 80) {
+		return { indicator: "bg-teal-500", accent: "text-teal-600 dark:text-teal-400" };
+	}
+	return { indicator: "bg-green-500", accent: "text-green-600 dark:text-green-400" };
+}
 
 function SourceBadge({ source }: { source: string }) {
 	return (
@@ -46,35 +84,22 @@ export function SuggestedJobCard({
 	isDismissing: boolean;
 }) {
 	const title = firstMeaningful([job.title]) ?? "Vacante";
-	const subtitle = [job.company, job.location].filter(Boolean).join(" · ");
 	const reasons = (job.matchReasons ?? []).slice(0, MAX_REASONS);
+	const band = matchBand(job.matchScore);
+
+	// Labeled so "Full-time" / "Senior" read as what they are, not as opaque chips.
+	const details: Detail[] = [
+		{ icon: BuildingOfficeIcon, label: "Empresa", value: job.company },
+		{ icon: MapPinIcon, label: "Ubicación", value: job.location },
+		{ icon: SuitcaseSimpleIcon, label: "Tipo de empleo", value: job.employmentType },
+		{ icon: GraduationCapIcon, label: "Nivel", value: job.seniority },
+	].filter((detail) => detail.value);
 
 	return (
 		<li className="flex min-w-0">
 			<Frame aria-labelledby={`sjob-${job.id}-title`} className="group h-full w-full gap-3 p-3">
 				<div className="flex items-start justify-between gap-2">
-					<ul aria-label="Etiquetas de la vacante" className="flex min-w-0 list-none flex-wrap items-center gap-1">
-						<li className="flex min-w-0">
-							<SourceBadge source={job.source} />
-						</li>
-
-						{job.employmentType && (
-							<li className="flex min-w-0">
-								<Badge className="min-w-0 shrink" size="sm" variant="outline">
-									<SuitcaseSimpleIcon />
-									<span className="min-w-0 truncate">{job.employmentType}</span>
-								</Badge>
-							</li>
-						)}
-
-						{job.seniority && (
-							<li className="flex min-w-0">
-								<Badge className="min-w-0 shrink" size="sm" variant="outline">
-									<span className="min-w-0 truncate">{job.seniority}</span>
-								</Badge>
-							</li>
-						)}
-					</ul>
+					<SourceBadge source={job.source} />
 
 					<Button
 						aria-label={`Descartar ${title}`}
@@ -91,24 +116,33 @@ export function SuggestedJobCard({
 					{title}
 				</FrameTitle>
 
-				{subtitle && (
-					<p className="flex items-center gap-1.5 text-muted-foreground text-sm">
-						<MapPinIcon className="shrink-0" />
-						<span className="min-w-0 truncate">{subtitle}</span>
-					</p>
+				{details.length > 0 && (
+					<dl className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 text-xs">
+						{details.map(({ icon: DetailIcon, label, value }) => (
+							<Fragment key={label}>
+								<dt className="flex items-center gap-1.5 text-muted-foreground">
+									<DetailIcon className="shrink-0" />
+									{label}
+								</dt>
+								<dd className="min-w-0 truncate text-foreground">{value}</dd>
+							</Fragment>
+						))}
+					</dl>
 				)}
 
 				<Meter className="gap-1.5" max={100} min={0} value={job.matchScore}>
 					<div className="flex items-center justify-between">
 						<MeterLabel className="inline-flex items-center gap-1.5 font-normal text-muted-foreground text-xs">
-							<TargetIcon className="text-oxblood" />
+							<TargetIcon className={band.accent} />
 							Coincidencia
 						</MeterLabel>
-						<MeterValue className="text-xs">{(_formatted, value) => `${value}%`}</MeterValue>
+						<MeterValue className={cn("text-xs tabular-nums", band.accent)}>
+							{(_formatted, value) => `${value}%`}
+						</MeterValue>
 					</div>
 
 					<MeterTrack className="rounded-lg">
-						<MeterIndicator className="bg-oxblood" />
+						<MeterIndicator className={band.indicator} />
 					</MeterTrack>
 				</Meter>
 
@@ -158,16 +192,22 @@ export function SuggestedJobCardSkeleton() {
 	return (
 		<li aria-hidden="true" className="flex min-w-0">
 			<Frame className="h-full w-full gap-3 p-3">
-				<div className="flex items-center gap-1">
+				<div className="flex items-center justify-between">
 					<Skeleton className="h-5 w-20 rounded-md" />
-					<Skeleton className="h-5 w-16 rounded-md" />
+					<Skeleton className="size-7 rounded-md" />
 				</div>
 
 				<Skeleton className="h-5 w-48 rounded-md" />
-				<Skeleton className="h-4 w-36 rounded-md" />
+
+				<div className="flex flex-col gap-1.5">
+					<Skeleton className="h-3.5 w-40 rounded" />
+					<Skeleton className="h-3.5 w-36 rounded" />
+					<Skeleton className="h-3.5 w-32 rounded" />
+				</div>
+
 				<Skeleton className="h-2 w-full rounded-lg" />
 
-				<div className="flex flex-col gap-2 pt-2">
+				<div className="mt-auto flex flex-col gap-2 pt-1">
 					<Skeleton className="h-8 w-full rounded-lg" />
 					<Skeleton className="h-8 w-full rounded-lg" />
 				</div>

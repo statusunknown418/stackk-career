@@ -125,6 +125,7 @@ export const suggestedJobsRouter = {
 			.from(resumes)
 			.where(and(eq(resumes.userId, userId), eq(resumes.isPrimary, true)))
 			.limit(1);
+
 		if (!primary) {
 			context.log?.set({ outcome: "missing_primary_resume" });
 			throw new ORPCError("BAD_REQUEST", { message: "Necesitas un CV principal para buscar vacantes." });
@@ -141,6 +142,7 @@ export const suggestedJobsRouter = {
 			context.log?.set({ outcome: "already_running" });
 			throw new ORPCError("BAD_REQUEST", { message: "Ya hay una actualización en curso." });
 		}
+
 		if (latestRun && Date.now() - latestRun.createdAt.getTime() < REFRESH_COOLDOWN_MS) {
 			context.log?.set({ outcome: "cooldown" });
 			throw new ORPCError("BAD_REQUEST", { message: "Podrás actualizar de nuevo en un rato." });
@@ -155,10 +157,12 @@ export const suggestedJobsRouter = {
 				.where(and(eq(jobSuggestionRuns.userId, userId), eq(jobSuggestionRuns.status, "ready")))
 				.orderBy(desc(jobSuggestionRuns.completedAt))
 				.limit(1);
+
 			const nextRefreshAt = computeNextRefreshAt(
 				lastReadyRun?.completedAt ?? null,
 				JOB_SUGGESTION_CADENCE_DAYS[cadence]
 			);
+
 			if (nextRefreshAt && Date.now() < nextRefreshAt.getTime()) {
 				context.log?.set({ outcome: "not_due" });
 				throw new ORPCError("BAD_REQUEST", {

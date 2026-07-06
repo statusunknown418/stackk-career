@@ -13,8 +13,8 @@ import { SuggestedJobCard, SuggestedJobCardSkeleton } from "./suggested-job-card
 /** The `suggestedJobs.list` payload — the module that owns the value is the API router. */
 type SuggestedJobsList = AppRouterOutputs["suggestedJobs"]["list"];
 
-/** Feed grid — responsive columns, matching the letters list. */
-const GRID_CLASS = "grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3";
+/** Feed grid — one column on phones, two on larger screens (the richer cards need the width). */
+const GRID_CLASS = "grid list-none gap-4 md:grid-cols-2";
 /** Stable keys for the fixed-length skeleton grid (no array-index keys). */
 const SKELETON_KEYS = ["s1", "s2", "s3", "s4", "s5", "s6"] as const;
 
@@ -57,7 +57,7 @@ function SuggestedBody({
 		return <SuggestedFailed nextRefreshAt={data.nextRefreshAt} />;
 	}
 
-	return <SuggestedEmpty nextRefreshAt={data.nextRefreshAt} />;
+	return <SuggestedEmpty />;
 }
 
 export function SuggestedList() {

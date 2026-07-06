@@ -78,7 +78,7 @@ export function LandingFooter() {
 							<Button
 								// biome-ignore lint/a11y/useAnchorContent: external nav
 								render={<a href="https://stackkstudios.com" rel="noopener" target="_blank" />}
-								size="sm"
+								size="xs"
 								variant="link"
 							>
 								Stackk Studios
