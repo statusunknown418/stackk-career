@@ -79,7 +79,7 @@ export function SuggestedList() {
 				if (context?.previous) {
 					queryClient.setQueryData<SuggestedJobsList>(listQueryKey, context.previous);
 				}
-				toast.error(mutationError.message || "No se pudo descartar la vacante.");
+				toast.error(mutationError.message || "No se pudo descartar esta vacante.");
 			},
 			onSettled: () => {
 				queryClient.invalidateQueries({ queryKey: listQueryKey });
