@@ -15,6 +15,10 @@ export default defineConfig({
 					path: "/",
 					prerender: { enabled: true },
 				},
+				{
+					path: "/pricing",
+					prerender: { enabled: true },
+				},
 			],
 		}),
 		viteReact(),
