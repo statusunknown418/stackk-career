@@ -128,13 +128,13 @@ const EXPERIENCE: readonly ExperienceEntry[] = [
 		],
 		company: "Nubank",
 		current: true,
-		period: "2022 — Presente",
+		period: "2022 - Presente",
 		role: "Senior Product Designer",
 	},
 	{
 		bullets: ["Diseñé el flujo de checkout para 12M de usuarios activos."],
 		company: "Rappi",
-		period: "2019 — 2022",
+		period: "2019 - 2022",
 		role: "Product Designer",
 	},
 ] as const;
@@ -225,7 +225,7 @@ function EditorHeader() {
 						Guardado
 					</span>
 				</div>
-				<p className="mt-0.5 text-[15px] text-foreground">CV — Product Designer</p>
+				<p className="mt-0.5 text-[15px] text-foreground">CV - Product Designer</p>
 			</div>
 
 			<div className="flex items-center gap-2">
@@ -501,7 +501,7 @@ function MobileEditorPreview({ className }: { className?: string }) {
 						<CheckIcon className="size-3" />
 						Guardado
 					</p>
-					<p className="text-foreground text-sm">CV — Product Designer</p>
+					<p className="text-foreground text-sm">CV - Product Designer</p>
 				</div>
 				<span className="inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] text-foreground/70">
 					<ExportIcon className="size-3.5" />

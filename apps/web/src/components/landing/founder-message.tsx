@@ -79,7 +79,7 @@ const CHUNKS: readonly Stanza[] = [
 		fragments: [
 			{
 				id: "intro-body",
-				text: "Llevamos años ayudando a talento de LATAM a conseguir trabajo, y siempre topamos con el mismo muro: gente brillante peleando sola contra los filtros automáticos que descartan su CV antes de que un humano lo lea. CVs que no pasan. Entrevistas que no llegan. Y plataformas extranjeras que cobran en dólares sin entender cómo se contrata acá.",
+				text: "Ayudamos a talento de LATAM que sigue chocando con el mismo muro: filtros automáticos descartan su CV antes de que una persona lo lea. La entrevista nunca llega.",
 			},
 		],
 	},
@@ -123,7 +123,8 @@ export function FounderMessage() {
 	// only runs on desktop and never under reduced-motion. Mobile renders the
 	// static composition instead — that's where Core Web Vitals are tightest, so
 	// we don't pay for per-frame scroll transforms or a scroll subscription there.
-	const animate = !reduced && isDesktop;
+	const motionDisabled = Boolean(reduced) || !isDesktop;
+	const animate = !motionDisabled;
 
 	// Flattened per-stanza word tokens — precomputed once. Drives the staggered
 	// whileInView word reveal below (stagger resets per stanza).
@@ -161,7 +162,7 @@ export function FounderMessage() {
 	return (
 		<section
 			aria-labelledby="founder-message-heading"
-			className="relative px-4 py-14 md:py-20"
+			className="relative scroll-mt-24 px-3 py-12 sm:px-4 sm:py-14 md:py-20"
 			id="carta"
 			ref={sectionRef}
 		>
@@ -169,7 +170,7 @@ export function FounderMessage() {
 			    that owns full-bleed Platzi green. */}
 			<motion.div
 				aria-hidden="true"
-				className="absolute inset-y-6 left-1/2 -z-10 w-[calc(100%-2rem)] max-w-320 border-6 border-black bg-oxblood md:inset-y-8 md:w-[calc(100%-3rem)] md:border-[12px]"
+				className="absolute inset-y-6 left-1/2 -z-10 w-[calc(100%-1.5rem)] max-w-320 border-6 border-neutral-950 bg-oxblood sm:w-[calc(100%-2rem)] md:inset-y-8 md:w-[calc(100%-3rem)] md:border-[12px]"
 				style={
 					animate
 						? { rotate: cardRotate, scale: bgScale, borderRadius: bgRadius, transformOrigin: "50% 50%", x: "-50%" }
@@ -196,17 +197,17 @@ export function FounderMessage() {
 			</motion.div>
 
 			<motion.div
-				className="relative mx-auto grid w-full max-w-295 grid-cols-12 gap-6 px-6 py-12 md:px-12 md:py-16"
+				className="relative mx-auto grid w-full max-w-295 grid-cols-12 gap-5 px-5 py-10 sm:gap-6 sm:px-6 sm:py-12 md:px-12 md:py-16"
 				style={animate ? { y: innerY } : undefined}
 			>
 				{/* Opening quote mark — drops in first, sets the editorial register */}
 				<motion.div
 					aria-hidden="true"
 					className="col-span-12 col-start-1 mt-6 md:col-span-10 md:col-start-2"
-					initial={reduced ? false : { opacity: 0, scale: 0.85, rotate: -3 }}
+					initial={motionDisabled ? false : { opacity: 0, scale: 0.85, rotate: -3 }}
 					transition={{ delay: 0.15, duration: 0.8, ease: EASE_OUT_QUINT }}
 					viewport={{ margin: "-15% 0px", once: true }}
-					whileInView={reduced ? undefined : { opacity: 1, scale: 1, rotate: 0 }}
+					whileInView={motionDisabled ? undefined : { opacity: 1, scale: 1, rotate: 0 }}
 				>
 					<QuotesIcon className="-ml-1 text-neutral-950/85" size={56} weight="fill" />
 				</motion.div>
@@ -217,11 +218,11 @@ export function FounderMessage() {
 					Carta abierta del equipo ASSENDIA
 				</h2>
 
-				<div className="col-span-12 col-start-1 mt-6 flex flex-col gap-6 font-display font-medium text-[clamp(1.4rem,3vw,2.4rem)] text-neutral-950 leading-tight tracking-tight md:col-span-9 md:col-start-2 md:mt-8 md:gap-7">
+				<div className="col-span-12 col-start-1 mt-5 flex flex-col gap-5 font-display font-medium text-neutral-950 text-xl leading-[1.28] tracking-tight sm:mt-6 sm:gap-6 sm:text-[1.4rem] md:col-span-9 md:col-start-2 md:mt-8 md:gap-7 md:text-[clamp(1.4rem,3vw,2.4rem)] md:leading-tight">
 					{stanzas.map((stanza) => (
 						<p className="text-balance" key={stanza.id}>
 							{stanza.words.map((word) => (
-								<Word key={word.id} reduced={reduced ?? false} word={word} />
+								<Word key={word.id} reduced={motionDisabled} word={word} />
 							))}
 						</p>
 					))}
@@ -231,12 +232,12 @@ export function FounderMessage() {
 				{/* attribution, location. */}
 				<motion.footer
 					className="col-span-12 col-start-1 mt-10 flex items-center gap-4 md:col-span-10 md:col-start-2 md:mt-12"
-					initial={reduced ? false : { opacity: 0, y: 16 }}
+					initial={motionDisabled ? false : { opacity: 0, y: 16 }}
 					transition={{ delay: 0.95, duration: 0.7, ease: EASE_OUT_QUINT }}
 					viewport={{ margin: "-15% 0px", once: true }}
-					whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+					whileInView={motionDisabled ? undefined : { opacity: 1, y: 0 }}
 				>
-					<SignatureMark />
+					<SignatureMark reduced={motionDisabled} />
 					<div className="flex flex-col gap-1">
 						<span className="font-display-italic font-light text-base text-neutral-950 leading-tight md:text-xl">
 							Equipo ASSENDIA
@@ -259,7 +260,7 @@ export function FounderMessage() {
 
 function Word({ word, reduced }: { reduced: boolean; word: WordToken }) {
 	const className = word.emphasis
-		? "relative inline-block font-bold [-webkit-box-decoration-break:clone] [box-decoration-break:clone]"
+		? "relative inline-block font-medium [-webkit-box-decoration-break:clone] [box-decoration-break:clone]"
 		: "inline-block";
 
 	// Reading-order delay within the stanza, capped so a long stanza's tail
@@ -301,8 +302,7 @@ function Word({ word, reduced }: { reduced: boolean; word: WordToken }) {
 /* geometric mark that reads as "team", not "person". Pure CSS / SVG.        */
 /* -------------------------------------------------------------------------- */
 
-function SignatureMark() {
-	const reduced = useReducedMotion();
+function SignatureMark({ reduced }: { reduced: boolean }) {
 	return (
 		<motion.span
 			aria-hidden="true"

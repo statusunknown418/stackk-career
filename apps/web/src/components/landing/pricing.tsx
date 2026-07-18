@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { PLANS, type Plan, SINGLE_SESSION } from "./data";
 
@@ -66,7 +67,7 @@ function cardTone(featured: boolean): CardTone {
 
 export function Pricing() {
 	return (
-		<section className="relative bg-background" id="planes">
+		<section className="relative scroll-mt-24 bg-background" id="planes">
 			<PricingHeader />
 			<PlanGrid />
 			<SingleSessionStrip />
@@ -77,19 +78,18 @@ export function Pricing() {
 
 function PricingHeader() {
 	return (
-		<div className="px-6 pt-20 pb-12 sm:pt-28 sm:pb-16">
+		<div className="px-4 pt-16 pb-10 sm:px-6 sm:pt-28 sm:pb-16">
 			<div className="mx-auto max-w-7xl">
 				<Reveal>
 					<span className="block font-mono text-foreground/60 text-xs uppercase">Planes · precios en soles</span>
 				</Reveal>
-				<h2 className="mt-3 max-w-[18ch] font-display text-5xl text-foreground leading-none tracking-tighter">
+				<h2 className="mt-3 max-w-[18ch] font-display text-[clamp(2.5rem,12vw,3rem)] text-foreground leading-[0.96] tracking-tighter sm:text-5xl sm:leading-none">
 					<WordReveal>Mensual. Sin permanencia. Sin sorpresas.</WordReveal>
 				</h2>
 				<Reveal delay={0.2}>
 					<p className="mt-4 text-balance text-base text-foreground/65 leading-relaxed">
-						Empieza gratis con tu Score CV. Pasa a Pro para 2 sesiones de coaching y todas las herramientas de IA sin
-						límite. Premium suma el camino completo de 3 sesiones y WhatsApp directo con garantía de entrevista en 90
-						días.
+						Empieza gratis con Score CV. Pro incluye 2 sesiones y herramientas de IA. Premium suma 3 sesiones, WhatsApp
+						y garantía de entrevista.
 					</p>
 				</Reveal>
 			</div>
@@ -103,8 +103,8 @@ function PricingHeader() {
 // ---------------------------------------------------------------------------
 function PlanGrid() {
 	return (
-		<div className="px-6 pb-12">
-			<div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-5">
+		<div className="pb-10 sm:px-6 sm:pb-12">
+			<div className="mx-auto grid max-w-7xl snap-x snap-mandatory scroll-px-4 auto-cols-[min(86vw,22rem)] grid-flow-col items-stretch gap-3 overflow-x-auto px-4 pb-4 sm:scroll-px-6 sm:px-6 lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0">
 				{PLANS.map((plan, idx) => (
 					<PlanCard idx={idx} key={plan.id} location="section" plan={plan} />
 				))}
@@ -117,9 +117,12 @@ function PlanGrid() {
 function ViewAllPlans() {
 	const posthog = usePostHog();
 	return (
-		<div className="mx-auto mt-10 flex max-w-7xl justify-center">
+		<div className="mx-auto mt-8 flex max-w-7xl justify-center px-4 sm:mt-10 sm:px-0">
 			<Link
-				className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full")}
+				className={cn(
+					buttonVariants({ size: "lg", variant: "outline" }),
+					"w-full justify-center rounded-full sm:w-auto"
+				)}
 				onClick={() => posthog?.capture("pricing_view_all_clicked", { location: "section" })}
 				to="/pricing"
 			>
@@ -140,27 +143,29 @@ interface PlanCardProps {
 
 export function PlanCard({ plan, idx, location, expanded = false }: PlanCardProps) {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	const posthog = usePostHog();
 	const featured = plan.featured ?? false;
 	const isFree = plan.priceSoles === 0;
 	const tone = cardTone(featured);
 
 	return (
-		<div className={cn("h-full", featured && "lg:-translate-y-3")}>
+		<div className={cn("h-full snap-start", featured && "lg:-translate-y-3")}>
 			<motion.article
 				className={cn(
-					"group/price relative flex h-full flex-col overflow-hidden rounded-3xl p-7 transition-colors duration-300 sm:p-8",
+					"group/price relative flex h-full flex-col overflow-hidden rounded-2xl p-6 transition-colors duration-300 sm:rounded-3xl sm:p-8",
 					featured
 						? "bg-oxblood shadow-[0_30px_80px_-32px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
 						: "border border-white/10 bg-white/2.5 hover:border-white/20",
 					location === "page" && "scroll-mt-28"
 				)}
 				id={location === "page" ? plan.id : undefined}
-				initial={reduced ? false : { opacity: 0, y: 24 }}
+				initial={motionDisabled ? false : { opacity: 0, y: 24 }}
 				transition={{ duration: 0.7, delay: idx * 0.08, ease: EASE_OUT_QUINT }}
 				viewport={{ margin: "-10% 0px", once: true }}
-				whileHover={reduced ? undefined : { y: featured ? -6 : -4 }}
-				whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+				whileHover={motionDisabled ? undefined : { y: featured ? -6 : -4 }}
+				whileInView={motionDisabled ? undefined : { opacity: 1, y: 0 }}
 			>
 				{plan.chip && (
 					<span
@@ -173,7 +178,9 @@ export function PlanCard({ plan, idx, location, expanded = false }: PlanCardProp
 					</span>
 				)}
 
-				<h3 className={cn("mt-8 font-display text-4xl leading-none tracking-tight", tone.heading)}>{plan.name}</h3>
+				<h3 className={cn("mt-6 font-display text-4xl leading-none tracking-tight sm:mt-8", tone.heading)}>
+					{plan.name}
+				</h3>
 
 				<div className="mt-5 min-h-18">
 					{isFree ? (
@@ -270,13 +277,15 @@ export function PlanCard({ plan, idx, location, expanded = false }: PlanCardProp
 
 function FeatureItem({ feature, tone, delay = 0 }: { delay?: number; feature: string; tone: CardTone }) {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	return (
 		<motion.li
 			className="flex items-start gap-3 text-sm leading-normal"
-			initial={reduced ? false : { opacity: 0, x: -6 }}
+			initial={motionDisabled ? false : { opacity: 0, x: -6 }}
 			transition={{ duration: 0.5, delay, ease: EASE_OUT_QUINT }}
 			viewport={{ margin: "-10% 0px", once: true }}
-			whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+			whileInView={motionDisabled ? undefined : { opacity: 1, x: 0 }}
 		>
 			<span
 				aria-hidden="true"
@@ -295,12 +304,12 @@ function FeatureItem({ feature, tone, delay = 0 }: { delay?: number; feature: st
 export function SingleSessionStrip({ location = "section" }: { location?: PricingLocation }) {
 	const posthog = usePostHog();
 	return (
-		<div className="px-6 pb-16 sm:pb-24">
+		<div className="px-4 pb-14 sm:px-6 sm:pb-24">
 			<aside
 				className="mx-auto max-w-7xl overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025] transition-colors duration-300 hover:border-white/20"
 				id="sesion-unica"
 			>
-				<div className="grid items-center gap-6 p-7 sm:gap-8 sm:p-9 md:grid-cols-12">
+				<div className="grid items-center gap-6 p-6 sm:gap-8 sm:p-9 md:grid-cols-12">
 					<div className="md:col-span-7">
 						<span className="font-mono text-foreground/60 text-xs uppercase">Sin suscripción</span>
 						<h3 className="mt-2 font-display text-2xl text-foreground leading-tight tracking-tight">
@@ -342,7 +351,8 @@ export function SingleSessionStrip({ location = "section" }: { location?: Pricin
 function ClosingMoment() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const reduced = useReducedMotion();
-
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	const { scrollYProgress } = useScroll({
 		target: containerRef,
 		offset: ["start end", "end start"],
@@ -362,22 +372,22 @@ function ClosingMoment() {
 	const bodyY = useTransform(progress, [0.35, 0.7], [20, 0]);
 
 	return (
-		<div className="relative px-6 pt-10 pb-28 sm:pt-16 sm:pb-36" ref={containerRef}>
-			<div className="mx-auto max-w-205 border-border border-t pt-20 text-center sm:pt-28">
+		<div className="relative px-4 pt-8 pb-20 sm:px-6 sm:pt-16 sm:pb-36" ref={containerRef}>
+			<div className="mx-auto max-w-205 border-border border-t pt-16 text-center sm:pt-28">
 				<motion.span
 					aria-hidden="true"
 					className="inline-block size-1.5 rounded-full bg-oxblood shadow-[0_0_16px_oklch(from_var(--oxblood)_l_c_h/0.6)]"
-					style={reduced ? undefined : { opacity: dotOpacity, scale: dotScale }}
+					style={motionDisabled ? undefined : { opacity: dotOpacity, scale: dotScale }}
 				/>
 				<motion.p
 					className="mt-6 font-display-italic font-light text-[clamp(2rem,5vw,3.4rem)] text-foreground leading-none tracking-tight"
-					style={reduced ? undefined : { opacity: lineOpacity, y: lineY, scale: lineScale }}
+					style={motionDisabled ? undefined : { opacity: lineOpacity, y: lineY, scale: lineScale }}
 				>
 					¿Cumpliste tu objetivo?
 				</motion.p>
 				<motion.p
 					className="mx-auto mt-6 max-w-150 text-balance text-base text-foreground/70 leading-relaxed"
-					style={reduced ? undefined : { opacity: bodyOpacity, y: bodyY }}
+					style={motionDisabled ? undefined : { opacity: bodyOpacity, y: bodyY }}
 				>
 					Cancelas en un clic, sin retención agresiva. <span className="text-foreground/90">Aquí te esperamos</span>{" "}
 					cuando vuelvas.

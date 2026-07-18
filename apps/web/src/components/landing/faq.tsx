@@ -3,6 +3,7 @@
 import { CaretDownIcon, PlusIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, useState } from "react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { FAQ_ITEMS } from "./data";
 
 const VISIBLE_FAQ_COUNT = 6;
@@ -13,6 +14,8 @@ export function Faq() {
 	const [showAll, setShowAll] = useState(false);
 	const [openValue, setOpenValue] = useState<string | null>(null);
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 
 	const hasExtras = FAQ_ITEMS.length > VISIBLE_FAQ_COUNT;
 	const items = showAll ? FAQ_ITEMS : FAQ_ITEMS.slice(0, VISIBLE_FAQ_COUNT);
@@ -32,7 +35,7 @@ export function Faq() {
 
 	return (
 		<section
-			className="relative border-border border-y bg-foreground/[0.025] px-6 py-20 md:py-28"
+			className="relative scroll-mt-24 border-border border-y bg-foreground/[0.025] px-4 py-16 sm:px-6 sm:py-20 md:py-28"
 			id="faq"
 			ref={sectionRef}
 		>
@@ -41,8 +44,8 @@ export function Faq() {
 				<div className="md:col-span-5">
 					<div className="md:sticky md:top-28">
 						<motion.h2
-							className="font-display text-5xl text-foreground leading-none tracking-tight"
-							style={reduced ? undefined : { y: titleY, transformOrigin: "left top" }}
+							className="font-display text-[clamp(2.5rem,12vw,3rem)] text-foreground leading-[0.96] tracking-tight sm:text-5xl sm:leading-none"
+							style={motionDisabled ? undefined : { y: titleY, transformOrigin: "left top" }}
 						>
 							Preguntas <br className="hidden sm:block" />
 							<span className="relative inline-block">
@@ -55,15 +58,15 @@ export function Faq() {
 									viewBox="0 0 240 8"
 								>
 									<motion.path
-										animate={reduced ? undefined : { pathLength: 1 }}
+										animate={motionDisabled ? undefined : { pathLength: 1 }}
 										d="M2 5 C 60 1, 120 7, 238 3"
-										initial={reduced ? false : { pathLength: 0 }}
+										initial={motionDisabled ? false : { pathLength: 0 }}
 										stroke="currentColor"
 										strokeLinecap="round"
 										strokeWidth="2.5"
 										transition={{ duration: 1.2, delay: 0.3, ease: EASE_OUT_QUINT }}
 										viewport={{ once: true, margin: "-25% 0px" }}
-										whileInView={reduced ? undefined : { pathLength: 1 }}
+										whileInView={motionDisabled ? undefined : { pathLength: 1 }}
 									/>
 								</svg>
 							</span>
@@ -72,7 +75,7 @@ export function Faq() {
 
 						<motion.p
 							className="mt-6 max-w-105 text-base text-foreground/70 leading-relaxed"
-							style={reduced ? undefined : { opacity: introOpacity }}
+							style={motionDisabled ? undefined : { opacity: introOpacity }}
 						>
 							Si tu duda no está acá, te responde una persona del equipo en menos de 24 horas. Nunca un bot.
 						</motion.p>
@@ -85,7 +88,7 @@ export function Faq() {
 					<motion.span
 						aria-hidden="true"
 						className="absolute top-2 -left-3 hidden h-[calc(100%-4rem)] w-px origin-top bg-oxblood/50 md:block"
-						style={reduced ? undefined : { scaleY: railScaleY }}
+						style={motionDisabled ? undefined : { scaleY: railScaleY }}
 					/>
 
 					<ul className="flex flex-col">
@@ -96,7 +99,7 @@ export function Faq() {
 								item={item}
 								key={item.q}
 								onToggle={() => setOpenValue((cur) => (cur === `faq-${idx}` ? null : `faq-${idx}`))}
-								reduced={reduced}
+								reduced={motionDisabled}
 							/>
 						))}
 					</ul>
@@ -104,12 +107,12 @@ export function Faq() {
 					{hasExtras && (
 						<motion.button
 							className="group/more mt-7 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 font-medium text-foreground/80 text-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-foreground/40 hover:text-foreground"
-							initial={reduced ? false : { opacity: 0, y: 8 }}
+							initial={motionDisabled ? false : { opacity: 0, y: 8 }}
 							onClick={() => setShowAll((v) => !v)}
 							transition={{ duration: 0.5, ease: EASE_OUT_QUINT }}
 							type="button"
 							viewport={{ once: true }}
-							whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+							whileInView={motionDisabled ? undefined : { opacity: 1, y: 0 }}
 						>
 							<CaretDownIcon
 								className={`transition-transform duration-300 ${showAll ? "rotate-180" : ""}`}
@@ -130,7 +133,7 @@ interface FaqRowProps {
 	isOpen: boolean;
 	item: { q: string; a: string };
 	onToggle: () => void;
-	reduced: boolean | null;
+	reduced: boolean;
 }
 
 function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
@@ -148,7 +151,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 			<button
 				aria-controls={panelId}
 				aria-expanded={isOpen}
-				className="flex w-full cursor-pointer items-start gap-6 py-6 text-left transition-transform duration-300 ease-out hover:-translate-y-px"
+				className="flex w-full cursor-pointer items-start gap-4 py-6 text-left transition-transform duration-300 ease-out hover:-translate-y-px sm:gap-6"
 				id={triggerId}
 				onClick={onToggle}
 				type="button"
@@ -156,7 +159,7 @@ function FaqRow({ idx, isOpen, item, onToggle, reduced }: FaqRowProps) {
 				<span className="mt-1 font-mono text-foreground/55 text-xs tabular-nums">
 					{(idx + 1).toString().padStart(2, "0")}
 				</span>
-				<span className="flex-1 font-display font-medium text-foreground text-lg leading-snug tracking-tight transition-colors duration-200 group-hover/row:text-foreground">
+				<span className="flex-1 font-display font-medium text-base text-foreground leading-snug tracking-tight transition-colors duration-200 group-hover/row:text-foreground sm:text-lg">
 					{item.q}
 				</span>
 				<span

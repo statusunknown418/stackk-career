@@ -30,7 +30,7 @@ export function LandingNav() {
 
 	return (
 		<header className="sticky top-2 z-50 mx-auto w-full max-w-7xl px-4">
-			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/60 py-1.5 pr-1 pl-2 backdrop-blur-md">
+			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/90 py-1.5 pr-1 pl-2 shadow-background/20 shadow-lg backdrop-blur-xl">
 				<a className="flex shrink-0 items-center gap-2 pr-3 text-foreground tracking-tight" href="#top">
 					<img
 						alt="ASSENDIA"

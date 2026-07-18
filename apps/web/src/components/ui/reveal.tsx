@@ -1,6 +1,7 @@
 "use client";
 
 import { type HTMLMotionProps, motion, useReducedMotion } from "motion/react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface RevealProps extends HTMLMotionProps<"div"> {
 	blur?: number;
@@ -20,12 +21,14 @@ export function Reveal({
 	...props
 }: RevealProps) {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	return (
 		<motion.div
-			initial={reduced ? false : { opacity: 0, y, filter: `blur(${blur}px)` }}
-			transition={reduced ? { duration: 0 } : { duration, delay, ease: [0.16, 1, 0.3, 1] }}
+			initial={motionDisabled ? false : { opacity: 0, y, filter: `blur(${blur}px)` }}
+			transition={motionDisabled ? { duration: 0 } : { duration, delay, ease: [0.16, 1, 0.3, 1] }}
 			viewport={{ once, margin: "-10% 0px -10% 0px" }}
-			whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+			whileInView={motionDisabled ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
 			{...props}
 		>
 			{children}

@@ -13,9 +13,9 @@ import { Tools } from "@/components/landing/tools";
 const SITE_URL = "https://assendia.com";
 const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const SITE_NAME = "ASSENDIA";
-const TITLE = "ASSENDIA · Garantizamos tu próxima entrevista en menos de 3 meses";
+const TITLE = "Assendia | Mejora tu CV con IA y coaching laboral";
 const DESCRIPTION =
-	"CV reescrito por IA en 1 minuto. Coach senior real hasta tu próxima entrevista. Garantía Premium: 90 días o te devolvemos lo que pagaste. Score gratis, sin tarjeta. Hecho para LATAM.";
+	"Mejora tu CV con IA, recibe un score en minutos y prepárate con coaching laboral 1:1. Gratis para empezar, creado para profesionales de LATAM.";
 
 const structuredData = {
 	"@context": "https://schema.org",
@@ -36,23 +36,16 @@ const structuredData = {
 			url: SITE_URL,
 			name: SITE_NAME,
 			description: DESCRIPTION,
-			inLanguage: "es",
+			inLanguage: "es-419",
 			publisher: { "@id": `${SITE_URL}#organization` },
 		},
 		{
 			"@type": "Service",
 			"@id": `${SITE_URL}#service`,
-			name: "ASSENDIA · Coaching de carrera con IA",
+			name: "Assendia | Coaching laboral y CV con IA",
 			provider: { "@id": `${SITE_URL}#organization` },
-			areaServed: "LATAM",
-			serviceType: "Career coaching, CV optimization, LinkedIn optimization, interview preparation",
-			aggregateRating: {
-				"@type": "AggregateRating",
-				ratingValue: "4.9",
-				reviewCount: "90",
-				bestRating: "5",
-				worstRating: "1",
-			},
+			areaServed: "Latinoamérica",
+			serviceType: "Coaching laboral, optimización de CV, LinkedIn y preparación para entrevistas",
 			offers: PLANS.map((plan) => ({
 				"@type": "Offer",
 				name: `ASSENDIA ${plan.name}`,

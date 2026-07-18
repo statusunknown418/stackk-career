@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function WordReveal({
 	children,
@@ -12,7 +13,9 @@ export function WordReveal({
 	stagger?: number;
 }) {
 	const reduced = useReducedMotion();
-	if (reduced) {
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
+	if (motionDisabled) {
 		return <>{children}</>;
 	}
 
@@ -27,7 +30,7 @@ export function WordReveal({
 					// biome-ignore lint/suspicious/noArrayIndexKey: words derived from stable split — order never changes
 					key={`${word}-${i}`}
 					transition={{ duration: 0.55, delay: delayStart + i * stagger, ease: [0.16, 1, 0.3, 1] }}
-					viewport={{ once: false, margin: "-15% 0px" }}
+					viewport={{ once: true, margin: "-15% 0px" }}
 					whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
 				>
 					{word}

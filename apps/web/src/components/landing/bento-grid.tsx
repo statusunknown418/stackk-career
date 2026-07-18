@@ -25,7 +25,7 @@ function splitLeadingNumber(value: string): { number: number; rest: string } | n
 
 export function BentoGrid() {
 	return (
-		<div id="features">
+		<div className="scroll-mt-24" id="features">
 			<ReasonsStrip />
 		</div>
 	);
@@ -37,18 +37,18 @@ function ReasonsStrip() {
 	return (
 		<section className="bg-background">
 			{/* Section intro — same paper, no green chrome yet, just the editorial frame */}
-			<div className="px-6 pt-16 pb-4 md:pt-24 md:pb-6">
+			<div className="px-4 pt-14 pb-4 sm:px-6 sm:pt-16 md:pt-24 md:pb-6">
 				<Reveal>
 					<header className="mx-auto max-w-7xl">
 						<div className="flex items-center gap-2 font-mono text-foreground text-xs uppercase">
-							<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
+							<span aria-hidden="true" className="h-px w-6 bg-oxblood" />
 							<span>El producto</span>
 						</div>
 
-						<h2 className="mt-3 max-w-200 font-display text-4xl text-foreground leading-none tracking-tight">
+						<h2 className="mt-3 max-w-200 font-display text-[clamp(2.5rem,12vw,3rem)] text-foreground leading-[0.96] tracking-tight sm:text-4xl sm:leading-none">
 							<WordReveal>Una suscripción que reúne las herramientas para asegurar tu próxima entrevista.</WordReveal>
 						</h2>
-						<p className="mt-4 text-balance text-foreground/60 text-xl leading-relaxed">
+						<p className="mt-4 text-balance text-base text-foreground/60 leading-relaxed sm:text-xl">
 							Un Agente especializado de IA y un coach senior, juntos para potenciarte.
 						</p>
 					</header>
@@ -89,8 +89,8 @@ function ReasonsStack({ reasons }: { reasons: (typeof WHY_REASONS)[number][] }) 
 	// Static fallback — normal flow, no sticky, no transforms.
 	if (!sticky) {
 		return (
-			<div className="pt-12 pb-20 md:pt-16 md:pb-28">
-				<div className="mx-auto flex max-w-7xl flex-col gap-6">
+			<div className="px-4 pt-10 pb-16 sm:px-6 sm:pt-12 sm:pb-20 md:pt-16 md:pb-28">
+				<div className="mx-auto flex max-w-7xl flex-col gap-8 sm:gap-10">
 					{reasons.map((reason, i) => (
 						<Reveal delay={i * 0.06} key={reason.title}>
 							<StaticReasonCard displayNumber={formatStackNumber(i)} reason={reason} />
@@ -199,27 +199,29 @@ function StackReasonCard({
 function StaticReasonCard({ reason, displayNumber }: { reason: (typeof WHY_REASONS)[number]; displayNumber: string }) {
 	const leading = splitLeadingNumber(reason.receipt.value);
 	return (
-		<article className="w-full">
+		<article className="relative w-full overflow-hidden border-border border-b pb-8 last:border-b-0 last:pb-0">
 			{/* Big ghost number — the editorial anchor for each reason */}
 			<span
 				aria-hidden="true"
-				className="pointer-events-none absolute -top-4 right-2 select-none font-bold font-display text-[clamp(11rem,22vw,15rem)] text-muted-foreground/10 tabular-nums leading-none tracking-tighter"
+				className="pointer-events-none absolute -top-2 right-0 select-none font-display text-[7.5rem] text-muted-foreground/8 tabular-nums leading-none tracking-tighter sm:text-[9rem]"
 			>
 				{displayNumber}
 			</span>
 
 			<header className="relative flex items-center gap-2">
-				<span aria-hidden="true" className="size-1.5 rounded-full bg-oxblood" />
+				<span aria-hidden="true" className="h-px w-5 bg-oxblood" />
 				<span className="font-medium font-mono text-oxblood text-xs uppercase">Razón {displayNumber}</span>
 			</header>
 
-			<h3 className="relative mt-6 max-w-[18ch] font-display font-medium text-3xl text-foreground leading-none tracking-tight">
+			<h3 className="relative mt-5 max-w-[18ch] font-display font-medium text-2xl text-foreground leading-[1.02] tracking-tight sm:text-3xl">
 				{reason.title} <span className="font-display-italic font-extralight">{reason.emphasis}</span>
 			</h3>
 
-			<p className="relative mt-5 max-w-[52ch] text-muted-foreground text-xl leading-tight">{reason.body}</p>
+			<p className="relative mt-4 max-w-[52ch] text-base text-muted-foreground leading-relaxed sm:mt-5 sm:text-xl sm:leading-tight">
+				{reason.body}
+			</p>
 
-			<footer className="relative mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-6">
+			<footer className="relative mt-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-border border-t pt-5">
 				<span className="font-mono text-foreground/55 text-xs uppercase">{reason.receipt.label}</span>
 				<span className="font-display text-[clamp(0.95rem,1.4vw,1.2rem)] text-foreground tracking-tight">
 					{leading ? (

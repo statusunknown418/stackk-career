@@ -2,6 +2,7 @@
 
 import { ArrowUpRightIcon, InstagramLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "../ui/button";
 import { FOOTER_COLUMNS } from "./data";
 
@@ -20,34 +21,36 @@ const EASE_OUT_QUINT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export function LandingFooter() {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 
 	return (
 		<footer className="relative mt-16 overflow-hidden">
 			{/* Hairline accent above the signature, like a printer's mark */}
 			<div aria-hidden="true" className="absolute top-0 left-1/2 h-px w-24 -translate-x-1/2 bg-oxblood/60" />
 
-			<div className="mx-auto max-w-7xl px-6 pt-16 pb-10 md:pt-20">
+			<div className="mx-auto max-w-7xl px-4 pt-14 pb-10 sm:px-6 sm:pt-16 md:pt-20">
 				{/* SIGNATURE — giant ASSENDIA wordmark, static */}
 				<SignatureMark />
 
 				{/* Editorial tagline above the columns */}
 				<motion.p
 					className="mt-4 font-display-italic font-light text-[clamp(1.25rem,2.2vw,1.75rem)] text-muted-foreground leading-tight tracking-tight"
-					initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
+					initial={motionDisabled ? false : { opacity: 0, y: 14, filter: "blur(8px)" }}
 					transition={{ duration: 0.8, ease: EASE_OUT_QUINT, delay: 0.15 }}
 					viewport={{ once: true, margin: "-10% 0px" }}
-					whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+					whileInView={motionDisabled ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
 				>
 					<span className="block text-center text-foreground">De donde estás, a donde quieres llegar.</span>
 				</motion.p>
 
 				{/* COLUMNS */}
 				<motion.div
-					className="mt-12 grid grid-cols-2 gap-x-8 gap-y-12 border-border border-t pt-12 md:mt-16 md:grid-cols-[1.6fr_1fr_1fr_1fr] md:pt-14"
-					initial={reduced ? false : { opacity: 0, y: 24 }}
+					className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 border-border border-t pt-10 sm:mt-12 sm:gap-x-8 sm:gap-y-12 sm:pt-12 md:mt-16 md:grid-cols-[1.6fr_1fr_1fr_1fr] md:pt-14"
+					initial={motionDisabled ? false : { opacity: 0, y: 24 }}
 					transition={{ duration: 0.7, ease: EASE_OUT_QUINT, delay: 0.2 }}
 					viewport={{ once: true, margin: "-5% 0px" }}
-					whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+					whileInView={motionDisabled ? undefined : { opacity: 1, y: 0 }}
 				>
 					<div className="col-span-2 md:col-span-1">
 						<a className="group/brand inline-flex items-center gap-2" href="#top">
@@ -58,7 +61,7 @@ export function LandingFooter() {
 								src="/assendia-logo.png"
 								width={36}
 							/>
-							<span className="font-bold font-display text-2xl text-foreground tracking-tight">ASSENDIA</span>
+							<span className="font-display font-medium text-2xl text-foreground tracking-tight">ASSENDIA</span>
 						</a>
 						<p className="mt-4 max-w-75 text-foreground/70 text-sm leading-relaxed">
 							Score CV, IA y coaching humano en una sola suscripción. Hecho en Perú para LATAM.
@@ -125,7 +128,7 @@ function SignatureMark() {
 			<div className="relative mt-2 flex w-full items-end justify-center leading-none">
 				<span
 					aria-hidden="true"
-					className="block w-full bg-linear-to-t from-primary bg-clip-text text-center font-bold font-display text-[clamp(3.5rem,18vw,15rem)] text-foreground text-transparent leading-none tracking-tighter"
+					className="block w-full bg-linear-to-t from-primary bg-clip-text text-center font-display font-medium text-[clamp(3.5rem,18vw,15rem)] text-foreground text-transparent leading-none tracking-tighter"
 				>
 					ASSENDIA
 				</span>
@@ -141,12 +144,14 @@ interface FooterColumnProps {
 
 function FooterColumn({ col, colIdx }: FooterColumnProps) {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	return (
 		<motion.div
-			initial={reduced ? false : { opacity: 0, y: 16 }}
+			initial={motionDisabled ? false : { opacity: 0, y: 16 }}
 			transition={{ duration: 0.6, ease: EASE_OUT_QUINT, delay: 0.25 + colIdx * 0.06 }}
 			viewport={{ once: true, margin: "-5% 0px" }}
-			whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+			whileInView={motionDisabled ? undefined : { opacity: 1, y: 0 }}
 		>
 			<h2 className="mb-5 font-mono text-foreground/75 text-xs uppercase">{col.heading}</h2>
 			<ul className="flex flex-col gap-2.5">
@@ -186,12 +191,14 @@ interface SocialIconProps {
 
 function SocialIcon({ delay, social }: SocialIconProps) {
 	const reduced = useReducedMotion();
+	const isDesktop = useMediaQuery("md");
+	const motionDisabled = Boolean(reduced) || !isDesktop;
 	return (
 		<motion.li
-			initial={reduced ? false : { opacity: 0, scale: 0.85 }}
+			initial={motionDisabled ? false : { opacity: 0, scale: 0.85 }}
 			transition={{ duration: 0.5, ease: EASE_OUT_QUINT, delay }}
 			viewport={{ once: true }}
-			whileInView={reduced ? undefined : { opacity: 1, scale: 1 }}
+			whileInView={motionDisabled ? undefined : { opacity: 1, scale: 1 }}
 		>
 			<a
 				aria-label={social.label}

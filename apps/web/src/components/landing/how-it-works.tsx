@@ -669,7 +669,11 @@ function ScrubRail({ activeIdx, fill, progress }: ScrubRailProps) {
 
 function HowItWorksStatic() {
 	return (
-		<section aria-labelledby="how-heading-static" className="relative bg-background px-6 py-20 md:py-28" id="camino">
+		<section
+			aria-labelledby="how-heading-static"
+			className="relative scroll-mt-24 bg-background px-4 py-16 sm:px-6 sm:py-20 md:py-28"
+			id="camino"
+		>
 			<Reveal>
 				<header className="mx-auto mb-12 max-w-7xl">
 					<div className="mb-6 flex items-center gap-3 font-mono text-foreground/55 text-xs uppercase">
@@ -677,7 +681,7 @@ function HowItWorksStatic() {
 						<span>El camino</span>
 					</div>
 					<h2
-						className="flex flex-wrap items-baseline gap-x-2 gap-y-2 font-bold font-display text-[clamp(3rem,10vw,7rem)] text-foreground leading-[0.9] tracking-tighter"
+						className="flex flex-wrap items-baseline gap-x-2 gap-y-2 font-display font-medium text-[clamp(3rem,10vw,7rem)] text-foreground leading-[0.9] tracking-tighter"
 						id="how-heading-static"
 					>
 						<span className="tabular-nums">0</span>
@@ -715,7 +719,7 @@ function HowItWorksStatic() {
 										<span className="font-mono text-foreground/40 text-xs uppercase tabular-nums">{step.index}</span>
 										<span className="flex items-baseline gap-1.5">
 											<span className="font-mono text-foreground/40 text-xs uppercase">Día</span>
-											<span className="font-bold font-display text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-tighter">
+											<span className="font-display font-medium text-[clamp(2.5rem,7vw,5rem)] text-foreground tabular-nums leading-none tracking-tighter">
 												{step.day}
 											</span>
 										</span>
@@ -726,7 +730,7 @@ function HowItWorksStatic() {
 								</div>
 								<div className="flex max-w-[52ch] flex-1 flex-col">
 									{step.tag && <span className="mb-2 font-mono text-foreground/55 text-xs uppercase">{step.tag}</span>}
-									<h3 className="font-bold font-display text-[clamp(1.4rem,3vw,2rem)] text-foreground leading-[1.1] tracking-tight">
+									<h3 className="font-display font-medium text-[clamp(1.4rem,3vw,2rem)] text-foreground leading-[1.1] tracking-tight">
 										{titleParts ? (
 											<>
 												{titleParts.head}{" "}
