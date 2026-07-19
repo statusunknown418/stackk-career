@@ -11,9 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StatusRouteImport } from './routes/status'
+import { Route as ScoreCvRouteImport } from './routes/score-cv'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PolicyRouteImport } from './routes/policy'
+import { Route as OptimizadorLinkedinRouteImport } from './routes/optimizador-linkedin'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CrearCvRouteImport } from './routes/crear-cv'
+import { Route as CoachingRouteImport } from './routes/coaching'
+import { Route as CartaDePresentacionRouteImport } from './routes/carta-de-presentacion'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
@@ -44,6 +49,11 @@ const StatusRoute = StatusRouteImport.update({
   path: '/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScoreCvRoute = ScoreCvRouteImport.update({
+  id: '/score-cv',
+  path: '/score-cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -54,9 +64,29 @@ const PolicyRoute = PolicyRouteImport.update({
   path: '/policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OptimizadorLinkedinRoute = OptimizadorLinkedinRouteImport.update({
+  id: '/optimizador-linkedin',
+  path: '/optimizador-linkedin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrearCvRoute = CrearCvRouteImport.update({
+  id: '/crear-cv',
+  path: '/crear-cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachingRoute = CoachingRouteImport.update({
+  id: '/coaching',
+  path: '/coaching',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartaDePresentacionRoute = CartaDePresentacionRouteImport.update({
+  id: '/carta-de-presentacion',
+  path: '/carta-de-presentacion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -160,9 +190,14 @@ const ProtectedDashLettersGenerationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/carta-de-presentacion': typeof CartaDePresentacionRoute
+  '/coaching': typeof CoachingRoute
+  '/crear-cv': typeof CrearCvRoute
   '/login': typeof LoginRoute
+  '/optimizador-linkedin': typeof OptimizadorLinkedinRoute
   '/policy': typeof PolicyRoute
   '/pricing': typeof PricingRoute
+  '/score-cv': typeof ScoreCvRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/dash': typeof ProtectedDashRouteRouteWithChildren
@@ -185,9 +220,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/carta-de-presentacion': typeof CartaDePresentacionRoute
+  '/coaching': typeof CoachingRoute
+  '/crear-cv': typeof CrearCvRoute
   '/login': typeof LoginRoute
+  '/optimizador-linkedin': typeof OptimizadorLinkedinRoute
   '/policy': typeof PolicyRoute
   '/pricing': typeof PricingRoute
+  '/score-cv': typeof ScoreCvRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/setup': typeof ProtectedSetupRoute
@@ -211,9 +251,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
+  '/carta-de-presentacion': typeof CartaDePresentacionRoute
+  '/coaching': typeof CoachingRoute
+  '/crear-cv': typeof CrearCvRoute
   '/login': typeof LoginRoute
+  '/optimizador-linkedin': typeof OptimizadorLinkedinRoute
   '/policy': typeof PolicyRoute
   '/pricing': typeof PricingRoute
+  '/score-cv': typeof ScoreCvRoute
   '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/_protected/dash': typeof ProtectedDashRouteRouteWithChildren
@@ -238,9 +283,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/carta-de-presentacion'
+    | '/coaching'
+    | '/crear-cv'
     | '/login'
+    | '/optimizador-linkedin'
     | '/policy'
     | '/pricing'
+    | '/score-cv'
     | '/status'
     | '/terms'
     | '/dash'
@@ -263,9 +313,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/carta-de-presentacion'
+    | '/coaching'
+    | '/crear-cv'
     | '/login'
+    | '/optimizador-linkedin'
     | '/policy'
     | '/pricing'
+    | '/score-cv'
     | '/status'
     | '/terms'
     | '/setup'
@@ -288,9 +343,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
+    | '/carta-de-presentacion'
+    | '/coaching'
+    | '/crear-cv'
     | '/login'
+    | '/optimizador-linkedin'
     | '/policy'
     | '/pricing'
+    | '/score-cv'
     | '/status'
     | '/terms'
     | '/_protected/dash'
@@ -315,9 +375,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  CartaDePresentacionRoute: typeof CartaDePresentacionRoute
+  CoachingRoute: typeof CoachingRoute
+  CrearCvRoute: typeof CrearCvRoute
   LoginRoute: typeof LoginRoute
+  OptimizadorLinkedinRoute: typeof OptimizadorLinkedinRoute
   PolicyRoute: typeof PolicyRoute
   PricingRoute: typeof PricingRoute
+  ScoreCvRoute: typeof ScoreCvRoute
   StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   ApiResumeSuggestionsRoute: typeof ApiResumeSuggestionsRoute
@@ -345,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/score-cv': {
+      id: '/score-cv'
+      path: '/score-cv'
+      fullPath: '/score-cv'
+      preLoaderRoute: typeof ScoreCvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -359,11 +431,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/optimizador-linkedin': {
+      id: '/optimizador-linkedin'
+      path: '/optimizador-linkedin'
+      fullPath: '/optimizador-linkedin'
+      preLoaderRoute: typeof OptimizadorLinkedinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crear-cv': {
+      id: '/crear-cv'
+      path: '/crear-cv'
+      fullPath: '/crear-cv'
+      preLoaderRoute: typeof CrearCvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coaching': {
+      id: '/coaching'
+      path: '/coaching'
+      fullPath: '/coaching'
+      preLoaderRoute: typeof CoachingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carta-de-presentacion': {
+      id: '/carta-de-presentacion'
+      path: '/carta-de-presentacion'
+      fullPath: '/carta-de-presentacion'
+      preLoaderRoute: typeof CartaDePresentacionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected': {
@@ -544,9 +644,14 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
+  CartaDePresentacionRoute: CartaDePresentacionRoute,
+  CoachingRoute: CoachingRoute,
+  CrearCvRoute: CrearCvRoute,
   LoginRoute: LoginRoute,
+  OptimizadorLinkedinRoute: OptimizadorLinkedinRoute,
   PolicyRoute: PolicyRoute,
   PricingRoute: PricingRoute,
+  ScoreCvRoute: ScoreCvRoute,
   StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   ApiResumeSuggestionsRoute: ApiResumeSuggestionsRoute,

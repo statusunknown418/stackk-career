@@ -9,10 +9,8 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingNav } from "@/components/landing/nav";
 import { Pricing } from "@/components/landing/pricing";
 import { Tools } from "@/components/landing/tools";
+import { SITE_NAME, SITE_URL, seoHead } from "@/lib/seo";
 
-const SITE_URL = "https://assendia.com";
-const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
-const SITE_NAME = "ASSENDIA";
 const TITLE = "Assendia | Mejora tu CV con IA y coaching laboral";
 const DESCRIPTION =
 	"Mejora tu CV con IA, recibe un score en minutos y prepárate con coaching laboral 1:1. Gratis para empezar, creado para profesionales de LATAM.";
@@ -71,39 +69,22 @@ const structuredData = {
 	],
 };
 
+const seo = seoHead({ title: TITLE, description: DESCRIPTION, path: "/" });
+
 export const Route = createFileRoute("/")({
 	component: LandingPage,
 	head: () => ({
 		meta: [
-			{ title: TITLE },
-			{ name: "description", content: DESCRIPTION },
-			{ name: "robots", content: "index, follow" },
+			...seo.meta,
 			{ name: "author", content: SITE_NAME },
-			{ property: "og:type", content: "website" },
-			{ property: "og:site_name", content: SITE_NAME },
-			{ property: "og:title", content: TITLE },
-			{ property: "og:description", content: DESCRIPTION },
-			{ property: "og:url", content: SITE_URL },
-			{ property: "og:image", content: OG_IMAGE_URL },
-			{ property: "og:image:width", content: "1200" },
-			{ property: "og:image:height", content: "630" },
-			{ property: "og:image:alt", content: TITLE },
-			{ property: "og:locale", content: "es_PE" },
 			{ property: "og:locale:alternate", content: "es_MX" },
 			{ property: "og:locale:alternate", content: "es_AR" },
 			{ property: "og:locale:alternate", content: "es_CO" },
-			{ name: "twitter:card", content: "summary_large_image" },
-			{ name: "twitter:title", content: TITLE },
-			{ name: "twitter:description", content: DESCRIPTION },
-			{ name: "twitter:image", content: OG_IMAGE_URL },
-			{ name: "twitter:image:alt", content: TITLE },
 			{ name: "theme-color", content: "#0a0a0a" },
 		],
-		links: [
-			// Fonts are self-hosted via @fontsource (see index.css) — no external
-			// Google Fonts request, so no render-blocking stylesheet or preconnects.
-			{ rel: "canonical", href: SITE_URL },
-		],
+		// Fonts are self-hosted via @fontsource (see index.css) — no external
+		// Google Fonts request, so no render-blocking stylesheet or preconnects.
+		links: seo.links,
 		scripts: [
 			{
 				type: "application/ld+json",

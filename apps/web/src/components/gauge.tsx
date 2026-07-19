@@ -442,8 +442,10 @@ export function useNumberCounter({
 	delay?: number;
 	decimalPlaces?: number;
 }) {
-	const [displayValue, setDisplayValue] = useState(direction === "down" ? value : 0);
-	const [rawValue, setRawValue] = useState(direction === "down" ? value : 0);
+	// Initialize at the real value so SSR/prerendered HTML never shows "0";
+	// the mount effect below resets to the animation start on the client.
+	const [displayValue, setDisplayValue] = useState(value);
+	const [rawValue, setRawValue] = useState(value);
 	const [isInView, setIsInView] = useState(false);
 
 	const motionValue = useMotionValue(direction === "down" ? value : 0);

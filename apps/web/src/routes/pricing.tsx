@@ -1,32 +1,59 @@
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, MinusIcon } from "@phosphor-icons/react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { CheckIcon, MinusIcon } from "@phosphor-icons/react";
+import { createFileRoute } from "@tanstack/react-router";
 import { type ComparisonRow, PLAN_COMPARISON, PLANS } from "@/components/landing/data";
 import { Faq } from "@/components/landing/faq";
 import { LandingFooter } from "@/components/landing/footer";
 import { SingleSessionStrip } from "@/components/landing/pricing";
-import { buttonVariants } from "@/components/ui/button";
+import { SubpageTopBar } from "@/components/landing/subpage-top-bar";
 import { Reveal } from "@/components/ui/reveal";
 import { WordReveal } from "@/components/ui/word-reveal";
+import { breadcrumbJsonLd, SITE_URL, seoHead } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+
+const PATH = "/pricing";
+const TITLE = "Planes y precios en soles · ASSENDIA";
+const DESCRIPTION =
+	"Planes de ASSENDIA en soles: Gratuito, Pro (S/79) y Premium (S/179). Coaching 1:1, herramientas de IA sin límite y garantía de entrevista en 90 días. Sin permanencia.";
+
+const seo = seoHead({ title: TITLE, description: DESCRIPTION, path: PATH });
+
+const structuredData = {
+	"@context": "https://schema.org",
+	"@graph": [
+		{
+			"@type": "Service",
+			"@id": `${SITE_URL}${PATH}#service`,
+			name: "Assendia | Coaching laboral y CV con IA",
+			provider: { "@id": `${SITE_URL}#organization` },
+			areaServed: "Latinoamérica",
+			serviceType: "Coaching laboral, optimización de CV, LinkedIn y preparación para entrevistas",
+			offers: PLANS.map((plan) => ({
+				"@type": "Offer",
+				name: `ASSENDIA ${plan.name}`,
+				description: plan.tagline,
+				price: plan.priceSoles.toFixed(2),
+				priceCurrency: "PEN",
+				availability: "https://schema.org/InStock",
+				url: `${SITE_URL}${PATH}`,
+			})),
+		},
+		breadcrumbJsonLd("Planes y precios", PATH),
+	],
+};
 
 export const Route = createFileRoute("/pricing")({
 	component: PricingPage,
 	head: () => ({
-		meta: [
-			{ title: "Planes y precios · ASSENDIA" },
-			{
-				name: "description",
-				content:
-					"Planes de ASSENDIA en soles: Gratuito, Pro y Premium. Coaching 1:1, herramientas de IA sin límite y garantía de entrevista en 90 días. Sin permanencia, cancelas cuando quieras.",
-			},
-		],
+		meta: seo.meta,
+		links: seo.links,
+		scripts: [{ type: "application/ld+json", children: JSON.stringify(structuredData) }],
 	}),
 });
 
 function PricingPage() {
 	return (
 		<div className="relative isolate overflow-x-clip bg-background">
-			<PricingTopBar />
+			<SubpageTopBar />
 			<main>
 				<PricingPageHero />
 
@@ -36,46 +63,6 @@ function PricingPage() {
 			</main>
 			<LandingFooter />
 		</div>
-	);
-}
-
-function PricingTopBar() {
-	return (
-		<header className="sticky top-2 z-50 mx-auto w-full max-w-7xl px-4">
-			<nav className="flex items-center gap-2 rounded-full border border-border bg-card/60 py-1.5 pr-1 pl-2 backdrop-blur-md">
-				<Link className="flex shrink-0 items-center gap-2 pr-3 text-foreground tracking-tight" to="/">
-					<img
-						alt="ASSENDIA"
-						className="size-8 rounded-lg object-cover"
-						height={32}
-						src="/assendia-logo.png"
-						width={32}
-					/>
-					<span className="font-display text-base leading-none tracking-tight">ASSENDIA</span>
-				</Link>
-
-				<Link
-					className="group ml-1 hidden items-center gap-1.5 rounded-full px-3 py-1.5 font-medium text-foreground/60 text-sm transition-colors hover:text-foreground sm:inline-flex"
-					to="/"
-				>
-					<ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-0.5" weight="bold" />
-					Volver al inicio
-				</Link>
-
-				<div className="ml-auto flex items-center gap-1.5">
-					<Link
-						className="hidden rounded-full px-3 py-1.5 font-medium text-foreground/65 text-sm transition-colors hover:text-foreground sm:inline-flex"
-						to="/login"
-					>
-						Iniciar sesión
-					</Link>
-					<Link className={buttonVariants({ size: "sm", className: "rounded-full!" })} to="/login">
-						Empezar gratis
-						<ArrowRightIcon weight="bold" />
-					</Link>
-				</div>
-			</nav>
-		</header>
 	);
 }
 

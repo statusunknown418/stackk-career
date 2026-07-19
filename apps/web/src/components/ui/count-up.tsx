@@ -26,7 +26,10 @@ export function CountUp({
 }: CountUpProps) {
 	const ref = useRef<HTMLSpanElement>(null);
 	const inView = useInView(ref, { once, margin: "-15% 0px -15% 0px" });
-	const motionValue = useMotionValue(0);
+	// Start at the target value so prerendered/SSR HTML (and crawlers) show the
+	// real number instead of "0"; the count-up runs only once the element is in
+	// view on the client.
+	const motionValue = useMotionValue(to);
 	const formatter = new Intl.NumberFormat(locale, {
 		minimumFractionDigits: decimals,
 		maximumFractionDigits: decimals,
@@ -37,14 +40,15 @@ export function CountUp({
 		const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		if (!inView) {
 			if (!once) {
-				motionValue.set(0);
+				motionValue.jump(to);
 			}
 			return;
 		}
 		if (reduced) {
-			motionValue.set(to);
+			motionValue.jump(to);
 			return;
 		}
+		motionValue.jump(0);
 		const controls = animate(motionValue, to, { duration, ease: [0.16, 1, 0.3, 1] });
 		return () => controls.stop();
 	}, [inView, to, duration, motionValue, once]);

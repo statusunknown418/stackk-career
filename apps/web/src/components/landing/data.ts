@@ -499,7 +499,7 @@ export const FAQ_ITEMS: readonly FaqItem[] = [
 	},
 	{
 		q: "¿Mis datos están seguros?",
-		a: "Tu CV no entrena modelos abiertos. Procesamos tus datos con proveedores que firmaron contratos de confidencialidad y puedes borrar todo desde tu panel cuando quieras. Cumplimos con la ley peruana de protección de datos personales (Ley 29733).",
+		a: "Tu CV no se usa para entrenar modelos abiertos. Procesamos tus datos con proveedores bajo acuerdos de confidencialidad, y puedes borrar tu información desde tu panel cuando quieras.",
 	},
 ];
 
@@ -507,11 +507,11 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
 	{
 		heading: "Producto",
 		links: [
-			{ label: "Score CV", href: "/#features" },
-			{ label: "Constructor de CV", href: "/#features" },
-			{ label: "Carta de presentación", href: "/#features" },
-			{ label: "Optimizador LinkedIn", href: "/#features" },
-			{ label: "Coaching 1:1", href: "/#planes" },
+			{ label: "Score CV", href: "/score-cv" },
+			{ label: "Constructor de CV", href: "/crear-cv" },
+			{ label: "Carta de presentación", href: "/carta-de-presentacion" },
+			{ label: "Optimizador LinkedIn", href: "/optimizador-linkedin" },
+			{ label: "Coaching 1:1", href: "/coaching" },
 			{ label: "Planes y precios", href: "/pricing" },
 		],
 	},
