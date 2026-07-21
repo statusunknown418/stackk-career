@@ -25,7 +25,7 @@ catalog:
   "@types/node": ^25.9.4
   "@types/react": ^19.2.17
   "@types/react-dom": ^19.2.3
-  better-auth: 1.6.11
+  better-auth: 1.6.13
   better-call: ^2.0.4
   dotenv: ^17.4.2
   libsql: 0.5.22
