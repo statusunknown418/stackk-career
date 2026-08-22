@@ -25,19 +25,19 @@
     "@stackk-career/jobs": "workspace:*",
     "@stackk-career/schemas": "workspace:*",
     "@trigger.dev/sdk": "catalog:",
-    "@upstash/redis": "^1.38.0",
+    "@upstash/redis": "^1.38.2",
     "ai": "catalog:",
     "date-fns": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "evlog": "catalog:",
-    "mercadopago": "^3.1.0",
-    "posthog-node": "^5.38.4",
+    "mercadopago": "^3.4.0",
+    "posthog-node": "^5.49.2",
     "resend": "catalog:"
   },
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3"
   }
 }

@@ -20,7 +20,7 @@
     "better-call": "catalog:",
     "dotenv": "catalog:",
     "evlog": "catalog:",
-    "posthog-node": "^5.38.4",
+    "posthog-node": "^5.49.2",
     "zod": "catalog:"
   },
   "devDependencies": {

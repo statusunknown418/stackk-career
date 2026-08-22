@@ -5,8 +5,10 @@ import { config } from "dotenv";
 import { z } from "zod";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const rootEnv = path.resolve(here, "../../../.env");
-config({ path: rootEnv, quiet: true });
+const sourceEnv = path.resolve(here, "../../../.env");
+const cwdEnv = path.resolve(process.cwd(), ".env");
+const workspaceEnv = path.resolve(process.cwd(), "../../.env");
+config({ path: [sourceEnv, cwdEnv, workspaceEnv], quiet: true });
 
 const skipValidation =
 	process.env.NODE_ENV !== "production" &&

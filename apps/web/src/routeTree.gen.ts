@@ -9,79 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as StatusRouteImport } from './routes/status'
-import { Route as ScoreCvRouteImport } from './routes/score-cv'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as PolicyRouteImport } from './routes/policy'
-import { Route as OptimizadorLinkedinRouteImport } from './routes/optimizador-linkedin'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as CrearCvRouteImport } from './routes/crear-cv'
-import { Route as CoachingRouteImport } from './routes/coaching'
-import { Route as CartaDePresentacionRouteImport } from './routes/carta-de-presentacion'
-import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
-import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-suggestions'
-import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
+import { Route as ProtectedRouteImport } from './routes/_protected'
+import { Route as CartaDePresentacionRouteImport } from './routes/carta-de-presentacion'
+import { Route as CoachingRouteImport } from './routes/coaching'
+import { Route as CrearCvRouteImport } from './routes/crear-cv'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OptimizadorLinkedinRouteImport } from './routes/optimizador-linkedin'
+import { Route as PolicyRouteImport } from './routes/policy'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as ScoreCvRouteImport } from './routes/score-cv'
+import { Route as StatusRouteImport } from './routes/status'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ProtectedDashRouteRouteImport } from './routes/_protected/dash/route'
+import { Route as ProtectedSetupRouteImport } from './routes/_protected/setup'
+import { Route as ApiResumeSuggestionsRouteImport } from './routes/api/resume-suggestions'
+import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ProtectedDashIndexRouteImport } from './routes/_protected/dash/index'
-import { Route as ApiWebhooksResendRouteImport } from './routes/api/webhooks/resend'
-import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
-import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
-import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
 import { Route as ProtectedDashAgentsRouteImport } from './routes/_protected/dash/agents'
-import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
+import { Route as ProtectedDashCoachesRouteImport } from './routes/_protected/dash/coaches'
+import { Route as ProtectedDashSuggestedRouteImport } from './routes/_protected/dash/suggested'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
+import { Route as ApiWebhooksMercadopagoRouteImport } from './routes/api/webhooks/mercadopago'
+import { Route as ApiWebhooksResendRouteImport } from './routes/api/webhooks/resend'
 import { Route as ProtectedDashLettersIndexRouteImport } from './routes/_protected/dash/letters/index'
-import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
-import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
 import { Route as ProtectedDashLettersGenerationIdRouteImport } from './routes/_protected/dash/letters/$generationId'
+import { Route as ProtectedDashResumesIndexRouteImport } from './routes/_protected/dash/resumes/index'
+import { Route as ProtectedDashResumesResumeIdRouteImport } from './routes/_protected/dash/resumes/$resumeId'
+import { Route as ApiWebhooksCalSplatRouteImport } from './routes/api/webhooks/cal/$'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatusRoute = StatusRouteImport.update({
-  id: '/status',
-  path: '/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScoreCvRoute = ScoreCvRouteImport.update({
-  id: '/score-cv',
-  path: '/score-cv',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PolicyRoute = PolicyRouteImport.update({
-  id: '/policy',
-  path: '/policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OptimizadorLinkedinRoute = OptimizadorLinkedinRouteImport.update({
-  id: '/optimizador-linkedin',
-  path: '/optimizador-linkedin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CrearCvRoute = CrearCvRouteImport.update({
-  id: '/crear-cv',
-  path: '/crear-cv',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachingRoute = CoachingRouteImport.update({
-  id: '/coaching',
-  path: '/coaching',
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartaDePresentacionRoute = CartaDePresentacionRouteImport.update({
@@ -89,13 +53,64 @@ const CartaDePresentacionRoute = CartaDePresentacionRouteImport.update({
   path: '/carta-de-presentacion',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProtectedRoute = ProtectedRouteImport.update({
-  id: '/_protected',
+const CoachingRoute = CoachingRouteImport.update({
+  id: '/coaching',
+  path: '/coaching',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CrearCvRoute = CrearCvRouteImport.update({
+  id: '/crear-cv',
+  path: '/crear-cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OptimizadorLinkedinRoute = OptimizadorLinkedinRouteImport.update({
+  id: '/optimizador-linkedin',
+  path: '/optimizador-linkedin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicyRoute = PolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScoreCvRoute = ScoreCvRouteImport.update({
+  id: '/score-cv',
+  path: '/score-cv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedDashRouteRoute = ProtectedDashRouteRouteImport.update({
+  id: '/dash',
+  path: '/dash',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedSetupRoute = ProtectedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ApiResumeSuggestionsRoute = ApiResumeSuggestionsRouteImport.update({
+  id: '/api/resume-suggestions',
+  path: '/api/resume-suggestions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
@@ -103,54 +118,9 @@ const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   path: '/api/uploadthing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiResumeSuggestionsRoute = ApiResumeSuggestionsRouteImport.update({
-  id: '/api/resume-suggestions',
-  path: '/api/resume-suggestions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedSetupRoute = ProtectedSetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
-  getParentRoute: () => ProtectedRoute,
-} as any)
-const ProtectedDashRouteRoute = ProtectedDashRouteRouteImport.update({
-  id: '/dash',
-  path: '/dash',
-  getParentRoute: () => ProtectedRoute,
-} as any)
 const ProtectedDashIndexRoute = ProtectedDashIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => ProtectedDashRouteRoute,
-} as any)
-const ApiWebhooksResendRoute = ApiWebhooksResendRouteImport.update({
-  id: '/api/webhooks/resend',
-  path: '/api/webhooks/resend',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
-  id: '/api/webhooks/mercadopago',
-  path: '/api/webhooks/mercadopago',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
-  id: '/api/rpc/$',
-  path: '/api/rpc/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
-  id: '/suggested',
-  path: '/suggested',
-  getParentRoute: () => ProtectedDashRouteRoute,
-} as any)
-const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
-  id: '/coaches',
-  path: '/coaches',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
 const ProtectedDashAgentsRoute = ProtectedDashAgentsRouteImport.update({
@@ -158,27 +128,40 @@ const ProtectedDashAgentsRoute = ProtectedDashAgentsRouteImport.update({
   path: '/agents',
   getParentRoute: () => ProtectedDashRouteRoute,
 } as any)
-const ProtectedDashResumesIndexRoute =
-  ProtectedDashResumesIndexRouteImport.update({
-    id: '/resumes/',
-    path: '/resumes/',
-    getParentRoute: () => ProtectedDashRouteRoute,
-  } as any)
+const ProtectedDashCoachesRoute = ProtectedDashCoachesRouteImport.update({
+  id: '/coaches',
+  path: '/coaches',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ProtectedDashSuggestedRoute = ProtectedDashSuggestedRouteImport.update({
+  id: '/suggested',
+  path: '/suggested',
+  getParentRoute: () => ProtectedDashRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
+  id: '/api/rpc/$',
+  path: '/api/rpc/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksMercadopagoRoute = ApiWebhooksMercadopagoRouteImport.update({
+  id: '/api/webhooks/mercadopago',
+  path: '/api/webhooks/mercadopago',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksResendRoute = ApiWebhooksResendRouteImport.update({
+  id: '/api/webhooks/resend',
+  path: '/api/webhooks/resend',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedDashLettersIndexRoute =
   ProtectedDashLettersIndexRouteImport.update({
     id: '/letters/',
     path: '/letters/',
-    getParentRoute: () => ProtectedDashRouteRoute,
-  } as any)
-const ApiWebhooksCalSplatRoute = ApiWebhooksCalSplatRouteImport.update({
-  id: '/api/webhooks/cal/$',
-  path: '/api/webhooks/cal/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedDashResumesResumeIdRoute =
-  ProtectedDashResumesResumeIdRouteImport.update({
-    id: '/resumes/$resumeId',
-    path: '/resumes/$resumeId',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
 const ProtectedDashLettersGenerationIdRoute =
@@ -187,6 +170,23 @@ const ProtectedDashLettersGenerationIdRoute =
     path: '/letters/$generationId',
     getParentRoute: () => ProtectedDashRouteRoute,
   } as any)
+const ProtectedDashResumesIndexRoute =
+  ProtectedDashResumesIndexRouteImport.update({
+    id: '/resumes/',
+    path: '/resumes/',
+    getParentRoute: () => ProtectedDashRouteRoute,
+  } as any)
+const ProtectedDashResumesResumeIdRoute =
+  ProtectedDashResumesResumeIdRouteImport.update({
+    id: '/resumes/$resumeId',
+    path: '/resumes/$resumeId',
+    getParentRoute: () => ProtectedDashRouteRoute,
+  } as any)
+const ApiWebhooksCalSplatRoute = ApiWebhooksCalSplatRouteImport.update({
+  id: '/api/webhooks/cal/$',
+  path: '/api/webhooks/cal/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -396,74 +396,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/status': {
-      id: '/status'
-      path: '/status'
-      fullPath: '/status'
-      preLoaderRoute: typeof StatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/score-cv': {
-      id: '/score-cv'
-      path: '/score-cv'
-      fullPath: '/score-cv'
-      preLoaderRoute: typeof ScoreCvRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/policy': {
-      id: '/policy'
-      path: '/policy'
-      fullPath: '/policy'
-      preLoaderRoute: typeof PolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/optimizador-linkedin': {
-      id: '/optimizador-linkedin'
-      path: '/optimizador-linkedin'
-      fullPath: '/optimizador-linkedin'
-      preLoaderRoute: typeof OptimizadorLinkedinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/crear-cv': {
-      id: '/crear-cv'
-      path: '/crear-cv'
-      fullPath: '/crear-cv'
-      preLoaderRoute: typeof CrearCvRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coaching': {
-      id: '/coaching'
-      path: '/coaching'
-      fullPath: '/coaching'
-      preLoaderRoute: typeof CoachingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carta-de-presentacion': {
-      id: '/carta-de-presentacion'
-      path: '/carta-de-presentacion'
-      fullPath: '/carta-de-presentacion'
-      preLoaderRoute: typeof CartaDePresentacionRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected': {
@@ -473,11 +410,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/carta-de-presentacion': {
+      id: '/carta-de-presentacion'
+      path: '/carta-de-presentacion'
+      fullPath: '/carta-de-presentacion'
+      preLoaderRoute: typeof CartaDePresentacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coaching': {
+      id: '/coaching'
+      path: '/coaching'
+      fullPath: '/coaching'
+      preLoaderRoute: typeof CoachingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crear-cv': {
+      id: '/crear-cv'
+      path: '/crear-cv'
+      fullPath: '/crear-cv'
+      preLoaderRoute: typeof CrearCvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/optimizador-linkedin': {
+      id: '/optimizador-linkedin'
+      path: '/optimizador-linkedin'
+      fullPath: '/optimizador-linkedin'
+      preLoaderRoute: typeof OptimizadorLinkedinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policy': {
+      id: '/policy'
+      path: '/policy'
+      fullPath: '/policy'
+      preLoaderRoute: typeof PolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/score-cv': {
+      id: '/score-cv'
+      path: '/score-cv'
+      fullPath: '/score-cv'
+      preLoaderRoute: typeof ScoreCvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_protected/dash': {
+      id: '/_protected/dash'
+      path: '/dash'
+      fullPath: '/dash'
+      preLoaderRoute: typeof ProtectedDashRouteRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/setup': {
+      id: '/_protected/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof ProtectedSetupRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/api/resume-suggestions': {
+      id: '/api/resume-suggestions'
+      path: '/api/resume-suggestions'
+      fullPath: '/api/resume-suggestions'
+      preLoaderRoute: typeof ApiResumeSuggestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/uploadthing': {
@@ -487,74 +508,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadthingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/resume-suggestions': {
-      id: '/api/resume-suggestions'
-      path: '/api/resume-suggestions'
-      fullPath: '/api/resume-suggestions'
-      preLoaderRoute: typeof ApiResumeSuggestionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/setup': {
-      id: '/_protected/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof ProtectedSetupRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/dash': {
-      id: '/_protected/dash'
-      path: '/dash'
-      fullPath: '/dash'
-      preLoaderRoute: typeof ProtectedDashRouteRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/_protected/dash/': {
       id: '/_protected/dash/'
       path: '/'
       fullPath: '/dash/'
       preLoaderRoute: typeof ProtectedDashIndexRouteImport
-      parentRoute: typeof ProtectedDashRouteRoute
-    }
-    '/api/webhooks/resend': {
-      id: '/api/webhooks/resend'
-      path: '/api/webhooks/resend'
-      fullPath: '/api/webhooks/resend'
-      preLoaderRoute: typeof ApiWebhooksResendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/webhooks/mercadopago': {
-      id: '/api/webhooks/mercadopago'
-      path: '/api/webhooks/mercadopago'
-      fullPath: '/api/webhooks/mercadopago'
-      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/$': {
-      id: '/api/rpc/$'
-      path: '/api/rpc/$'
-      fullPath: '/api/rpc/$'
-      preLoaderRoute: typeof ApiRpcSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected/dash/suggested': {
-      id: '/_protected/dash/suggested'
-      path: '/suggested'
-      fullPath: '/dash/suggested'
-      preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
-      parentRoute: typeof ProtectedDashRouteRoute
-    }
-    '/_protected/dash/coaches': {
-      id: '/_protected/dash/coaches'
-      path: '/coaches'
-      fullPath: '/dash/coaches'
-      preLoaderRoute: typeof ProtectedDashCoachesRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
     '/_protected/dash/agents': {
@@ -564,12 +522,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashAgentsRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
-    '/_protected/dash/resumes/': {
-      id: '/_protected/dash/resumes/'
-      path: '/resumes'
-      fullPath: '/dash/resumes/'
-      preLoaderRoute: typeof ProtectedDashResumesIndexRouteImport
+    '/_protected/dash/coaches': {
+      id: '/_protected/dash/coaches'
+      path: '/coaches'
+      fullPath: '/dash/coaches'
+      preLoaderRoute: typeof ProtectedDashCoachesRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/_protected/dash/suggested': {
+      id: '/_protected/dash/suggested'
+      path: '/suggested'
+      fullPath: '/dash/suggested'
+      preLoaderRoute: typeof ProtectedDashSuggestedRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rpc/$': {
+      id: '/api/rpc/$'
+      path: '/api/rpc/$'
+      fullPath: '/api/rpc/$'
+      preLoaderRoute: typeof ApiRpcSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/mercadopago': {
+      id: '/api/webhooks/mercadopago'
+      path: '/api/webhooks/mercadopago'
+      fullPath: '/api/webhooks/mercadopago'
+      preLoaderRoute: typeof ApiWebhooksMercadopagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/resend': {
+      id: '/api/webhooks/resend'
+      path: '/api/webhooks/resend'
+      fullPath: '/api/webhooks/resend'
+      preLoaderRoute: typeof ApiWebhooksResendRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_protected/dash/letters/': {
       id: '/_protected/dash/letters/'
@@ -578,12 +571,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashLettersIndexRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
-    '/api/webhooks/cal/$': {
-      id: '/api/webhooks/cal/$'
-      path: '/api/webhooks/cal/$'
-      fullPath: '/api/webhooks/cal/$'
-      preLoaderRoute: typeof ApiWebhooksCalSplatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_protected/dash/letters/$generationId': {
+      id: '/_protected/dash/letters/$generationId'
+      path: '/letters/$generationId'
+      fullPath: '/dash/letters/$generationId'
+      preLoaderRoute: typeof ProtectedDashLettersGenerationIdRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
+    }
+    '/_protected/dash/resumes/': {
+      id: '/_protected/dash/resumes/'
+      path: '/resumes'
+      fullPath: '/dash/resumes/'
+      preLoaderRoute: typeof ProtectedDashResumesIndexRouteImport
+      parentRoute: typeof ProtectedDashRouteRoute
     }
     '/_protected/dash/resumes/$resumeId': {
       id: '/_protected/dash/resumes/$resumeId'
@@ -592,12 +592,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashResumesResumeIdRouteImport
       parentRoute: typeof ProtectedDashRouteRoute
     }
-    '/_protected/dash/letters/$generationId': {
-      id: '/_protected/dash/letters/$generationId'
-      path: '/letters/$generationId'
-      fullPath: '/dash/letters/$generationId'
-      preLoaderRoute: typeof ProtectedDashLettersGenerationIdRouteImport
-      parentRoute: typeof ProtectedDashRouteRoute
+    '/api/webhooks/cal/$': {
+      id: '/api/webhooks/cal/$'
+      path: '/api/webhooks/cal/$'
+      fullPath: '/api/webhooks/cal/$'
+      preLoaderRoute: typeof ApiWebhooksCalSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

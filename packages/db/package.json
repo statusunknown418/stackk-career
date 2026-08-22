@@ -21,7 +21,7 @@
     "@libsql/client": "catalog:",
     "@paralleldrive/cuid2": "^3.3.0",
     "@stackk-career/env": "workspace:*",
-    "@upstash/redis": "^1.38.0",
+    "@upstash/redis": "^1.38.2",
     "ai": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@stackk-career/config": "workspace:*",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3"
   }
 }
