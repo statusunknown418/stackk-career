@@ -251,7 +251,7 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
 	{ label: "CVs distintos por puesto", values: [false, "Ilimitados", "Ilimitados"] },
 	{ label: "Cartas de presentación", values: [false, "5 / mes", "Ilimitadas"] },
 	{ label: "Optimizador de LinkedIn", values: ["Básico", "Completo", "Completo + revisión humana"] },
-	{ label: "Sesiones de coaching 1:1", values: [false, "2 (45 min)", "3 estructuradas"] },
+	{ label: "Sesiones de coaching 1:1", values: [false, "2 (45 min)", "3 (60 min)"] },
 	{ label: "WhatsApp directo con tu coach", values: [false, false, true] },
 	{ label: "Revisión humana de CV y LinkedIn", values: [false, false, true] },
 	{ label: "Garantía de entrevista en 90 días", values: [false, false, true] },
